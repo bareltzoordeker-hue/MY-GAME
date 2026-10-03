@@ -183,6 +183,15 @@ export const useGame = create<Store>((set, get) => ({
   },
 }));
 
+// The autosave normally runs at turn end, but a career can also end mid-turn (resignation, a primaries
+// challenge in the inbox, …). Save the game-over state the moment it appears, whatever caused it,
+// so a refresh can't bring the finished game back.
+useGame.subscribe((st, prev) => {
+  if (st.game?.gameOver && !prev.game?.gameOver && st.game !== prev.game) {
+    useGame.setState({ saveStatus: persist(st.game) });
+  }
+});
+
 export const debugActions = {
   triggerCrisis: (s: GameState) => { const d = CRISES[Math.floor(Math.random() * CRISES.length)]; startCrisis(s, d.id); },
 };
