@@ -1,0 +1,13 @@
+/* Design tokens shared by the game and the site (landing + info pages).
+   Only values that are identical in both live here; each side adds its own on top. */
+:root {
+  --bg: #f1eeff;
+  --ink: #1d1b3a;
+  --muted: #5d5a85;
+  --line: rgba(60, 50, 140, 0.12);
+  --violet: #6c4dff;
+  --violet-d: #4b2fd6;
+  --pink: #ff4fa3;
+  --font: 'Rubik', system-ui, -apple-system, 'Segoe UI', Arial, sans-serif;
+  color-scheme: light;
+}

@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+*.tsbuildinfo
+.vite/
+coverage/
+
+# Environment and secrets (never commit real keys)
+.env
+.env.*
+!.env.example
+*.local
+secrets/
+secret/
+credentials/
+*credentials*.json
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Netlify local state
+.netlify/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Temporary and cache files
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.swp
+.cache/
+.eslintcache
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
