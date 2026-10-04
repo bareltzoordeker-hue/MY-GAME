@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://memsheletismael.netlify.app/sitemap.xml
