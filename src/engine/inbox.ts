@@ -7,6 +7,8 @@ import { applyDecision, performAction } from './decisions';
 import { addNews, applyEffects, logEvent, remember } from './effects';
 import { assignMinister, getMinistry, partyLeavesCoalition } from './government';
 import { proposeBill } from './parliament';
+import { resolveRotation } from './coalitionDeals';
+import { mergeParties } from './relations';
 
 const R = (title: string, status: Reaction['status'], quip?: string, people: Reaction['people'] = []): Reaction => ({ title, status, stats: [], groups: [], people, quip });
 
@@ -174,21 +176,40 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
     case 'merger_offer': {
       if (opt === 'accept') {
         const other = s.parties[String(it.payload.partyId)];
-        const mine = s.parties[s.player.partyId];
-        mine.seats += other.seats;
-        other.seats = 0;
-        mine.calibration += other.calibration * (other.pollShare / Math.max(1, mine.pollShare)) * 0.8;
-        for (const [g, v] of Object.entries(other.affinity)) mine.affinity[g as keyof typeof mine.affinity] = (mine.affinity[g as keyof typeof mine.affinity] ?? 0) + (v ?? 0) * 0.5;
-        for (const id of other.memberIds) { s.politicians[id].partyId = mine.id; mine.memberIds.push(id); }
-        other.memberIds = [];
-        other.calibration = 0.0001;
-        remember(s, other.leaderId, 'deal', 'ריצה משותפת', 10);
-        addNews(s, `${mine.name} ו${other.name} מתאחדות`, 'good', '🔗');
-        logEvent(s, '🔗', `איחוד עם ${other.name}`, 3, 'good', 'party');
-        s.career.memorable.push(`איחד את ${other.name} עם המפלגה`);
-        return R(`איחוד עם ${other.name}`, 'approved');
+        mergeParties(s, other.id);
+        return R(`איחוד עם ${other.name}`, 'approved', 'יו״ר המפלגה המצטרפת יקבל את המקום השני ברשימה.');
       }
       return R('דחית את האיחוד', 'info');
+    }
+    case 'commitment_reminder':
+      return R('התזכורת נרשמה', 'info', 'את כל ההתחייבויות והמועדים אפשר לראות במסך הממשלה.');
+    case 'rotation_due': {
+      const text = resolveRotation(s, String(it.payload.commitmentId), opt === 'honor');
+      syncRole(s);
+      return R(opt === 'honor' ? 'הרוטציה בוצעה' : 'סירבת לרוטציה', opt === 'honor' ? 'approved' : 'rejected', text);
+    }
+    case 'coalition_invite': {
+      const party = s.parties[me.partyId];
+      if (opt === 'refuse') {
+        partyLeavesCoalition(s, party.id, 'החלטנו לא להצטרף לממשלה');
+        return R(`${party.name} נשארת באופוזיציה`, 'info');
+      }
+      if (opt === 'demand') {
+        const target = ['finance', 'defense', 'foreign'].map((id) => getMinistry(s, id)).find((m) => m && m.ministerId !== s.government.pmId);
+        if (target && rand(s) < 0.45) {
+          const prev = target.ministerId ? s.politicians[target.ministerId] : null;
+          if (prev) { prev.ministryId = null; remember(s, prev.id, 'fired', 'התיק עבר לשותפה', -10); }
+          assignMinister(s, target.id, me.id);
+          setRole(s, 'minister', `מונה ל${target.name}`);
+          return R(`קיבלת את ${target.name}`, 'approved', 'ראש הממשלה המיועד נענה לדרישה.');
+        }
+        if (rand(s) < 0.5) {
+          partyLeavesCoalition(s, party.id, 'הדרישות לא התקבלו');
+          return R('המשא ומתן נכשל', 'rejected', 'הממשלה הוקמה בלעדיכם.');
+        }
+        return R('הדרישה נדחתה, אבל נשארתם בקואליציה', 'info');
+      }
+      return R(`${party.name} מצטרפת לממשלה`, 'approved');
     }
     case 'budget_review':
       return R('התקציב מחכה לך במסך התקציב', 'info', 'התקציב צריך לעבור עד המועד הקבוע בחוק.');

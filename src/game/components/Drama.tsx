@@ -28,12 +28,12 @@ export function DramaModal() {
       <div className={`modal ${big ? 'shake' : ''}`} style={{ maxWidth: 620 }}>
         {big ? (
           <div className="breaking px-4 py-2 text-xl flex items-center justify-between">
-            <span>🚨 מבזק</span><span className="text-sm opacity-90">{d.level === 'extreme' ? 'מצב קיצון' : 'דרמה פוליטית'}</span>
+            <span>🚨 מבזק</span><span className="text-sm opacity-90">{d.level === 'extreme' ? 'אירוע חמור' : 'אירוע מתגלגל'}</span>
           </div>
         ) : (
           <div className="px-4 py-1.5 flex items-center justify-between" style={{ background: 'linear-gradient(90deg, #6c4dff, #b04dff)', color: '#fff' }}>
             <span>📰 בינתיים, בישמעאל…</span>
-            <span className="text-xs opacity-80">חייב החלטה</span>
+            <span className="text-xs opacity-80">נדרשת החלטה</span>
           </div>
         )}
         <div className="p-5 relative">
@@ -54,7 +54,7 @@ export function DramaModal() {
           {best && (
             <div className="flex items-start gap-2 mt-4">
               <Caricature spec={ADVISOR_SPEC} size={40} />
-              <div className="bubble flex-1 text-sm"><b style={{ color: 'var(--violet)' }}>מוטי ממליץ:</b> "{best.label}". בממוצע: {rec!.reason}.</div>
+              <div className="bubble flex-1 text-sm"><b style={{ color: 'var(--violet)' }}>היועץ ממליץ:</b> "{best.label}". בממוצע: {rec!.reason}.</div>
             </div>
           )}
           <div className="grid gap-3 mt-5">

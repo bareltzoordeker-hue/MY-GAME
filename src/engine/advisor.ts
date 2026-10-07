@@ -19,7 +19,7 @@ export function advisorTips(s: GameState): AdvisorTip[] {
   for (const c of s.crises) t.push({ priority: 95, icon: '🚨', text: `${c.title} עדיין לא טופל. כל תור בלי טיפול פוגע בשביעות הרצון ובתמיכה בממשלה.`, screen: 'crises' });
   if (s.elections.phase === 'negotiation') t.push({ priority: 100, icon: '🤝', text: `צריך להרכיב ממשלה: ${MAJORITY} מנדטים לפחות. כל שותפה מציבה דרישות לתיקים, לתקציבים ולחוקים.`, screen: 'government' });
   if (pm && !s.budget.passed && !s.government.caretaker) t.push({ priority: 90, icon: '📒', text: `תקציב ${s.budget.fiscalYear} עוד לא אושר. אם הוא לא יעבור בזמן, הכנסטון יתפזר ויתקיימו בחירות.`, screen: 'budget' });
-  if (pm && coalitionSeats(s) < MAJORITY) t.push({ priority: 92, icon: '⚠️', text: `לקואליציה ${coalitionSeats(s)} מנדטים, פחות מרוב. כל הצבעת אי-אמון עלולה להפיל את הממשלה.`, screen: 'government' });
+  if (pm && !s.government.caretaker && coalitionSeats(s) < MAJORITY) t.push({ priority: 92, icon: '⚠️', text: `לקואליציה ${coalitionSeats(s)} מנדטים, פחות מרוב. כל הצבעת אי-אמון עלולה להפיל את הממשלה.`, screen: 'government' });
   if (def > 5) t.push({ priority: 80, icon: '📉', text: `הגירעון ${def.toFixed(1)}% מהתוצר. חברות הדירוג עלולות להוריד את דירוג האשראי, וזה ייקר את החוב.`, screen: 'economy' });
   else if (def > 3.5 && pm) t.push({ priority: 55, icon: '📉', text: `הגירעון ${def.toFixed(1)}% מהתוצר, מעל היעד. הוצאות נוספות יחייבו מקור מימון.`, screen: 'economy' });
   if (debtPct(s) > 80) t.push({ priority: 70, icon: '🏦', text: `החוב ${debtPct(s).toFixed(0)}% מהתוצר. תשלומי הריבית גדלים ומצמצמים את התקציב לשירותים.`, screen: 'economy' });

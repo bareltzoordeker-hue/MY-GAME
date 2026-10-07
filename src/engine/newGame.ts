@@ -9,7 +9,7 @@ import { clamp, sum } from '../utils';
 import { dayNumber, turnsUntilElection } from './calendar';
 import { refreshFiscals } from './economy';
 import { computeApproval, groupTargetRaw } from './population';
-import { computeShares } from './polls';
+import { computeShares, seatsFromShares } from './polls';
 import { serviceDrivers, updateMetrics } from './services';
 import { pushHistory } from './history';
 
@@ -271,7 +271,7 @@ export function createGame(cfg: NewGameConfig): GameState {
     }
   }
   const shares = computeShares(s, 0);
-  const seats = Object.fromEntries(Object.values(s.parties).map((p) => [p.id, p.seats]));
+  const seats = seatsFromShares(shares); // the first poll, in seats (the outgoing Knesseton stays in party.seats)
   s.polls.push({ turn: 0, shares, seats, govApproval: s.government.approval, playerApproval: me.popularity });
   for (const p of Object.values(s.parties)) p.pollShare = shares[p.id];
 

@@ -15,6 +15,8 @@ import { buildCharacterContext } from '../../engine/ai/contextBuilder';
 import type { GameState, Ideology, Politician } from '../../types/game';
 import { Caricature } from '../../shared/components/Caricature';
 import { AlliancesSection } from './Alliances';
+import { DEMAND_ICON } from './Coalition';
+import { dayNumber, spanText } from '../../engine/calendar';
 import { ActionButton, Empty, Explain, Meter, PartyChip, PolName, ScreenHeader, Section, Tabs } from '../components/ui';
 
 const tooltipStyle = { background: '#fff', border: '0', borderRadius: 12, fontSize: 12, color: '#1d1b3a', boxShadow: '0 10px 24px -10px rgba(60,40,160,.5)' };
@@ -51,6 +53,30 @@ export function PolCard({ p, s, extra }: { p: Politician; s: GameState; extra?: 
   );
 }
 
+/** The written coalition agreement and how each commitment stands. */
+function AgreementSection({ s }: { s: GameState }) {
+  const list = (s.government.agreements ?? []).filter((c) => !c.secret || c.status === 'broken');
+  if (!list.length) return null;
+  const due = (c: (typeof list)[number]) => c.dueTurn !== undefined ? (c.dueTurn - s.turn > 0 ? `עוד ${c.dueTurn - s.turn} תורות` : 'המועד הגיע') : c.dueDay !== undefined ? `בעוד ${spanText(Math.max(0, c.dueDay - dayNumber(s.date)))}` : '';
+  return (
+    <Section title="ההסכם הקואליציוני" icon="📜">
+      <p className="text-sm muted mb-2">כל מה שהתחייבת אליו מול השותפות. התחייבות שלא תקוים בזמן נחשבת הפרה: השותפה כועסת, היציבות יורדת, ולפעמים היא פורשת.</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        {list.map((c) => (
+          <div key={c.id} className="inset flex items-start gap-2">
+            <span className="text-lg" aria-hidden>{DEMAND_ICON[c.kind]}</span>
+            <div className="flex-1 min-w-0">
+              <div className="text-sm font-bold">{c.label}</div>
+              <div className="text-xs muted">{s.parties[c.partyId]?.name}{c.status === 'pending' && due(c) ? ` · ${due(c)}` : ''}</div>
+            </div>
+            <span className={`chip ${c.status === 'kept' ? 'chip-good' : c.status === 'broken' ? 'chip-bad' : 'chip-warn'}`}>{c.status === 'kept' ? 'קוים' : c.status === 'broken' ? 'הופר' : 'פתוח'}</span>
+          </div>
+        ))}
+      </div>
+    </Section>
+  );
+}
+
 export function GovernmentScreen() {
   const s = useGame((x) => x.game)!;
   const pm = isPM(s);
@@ -63,8 +89,9 @@ export function GovernmentScreen() {
       <Section title="הקואליציה" icon="🤝" right={<Explain k="stability" />}>
         <div className="flex flex-wrap gap-2">{s.government.coalition.map((id) => <PartyChip key={id} party={s.parties[id]} seats={s.parties[id].seats} />)}</div>
         {pm && <div className="flex flex-wrap gap-2 mt-3">{s.government.coalition.filter((id) => id !== s.player.partyId).map((id) => <ActionButton key={id} id="coalition_gift" params={{ partyId: id }} className="btn btn-sm">🎁 כספים ל{s.parties[id].shortName}</ActionButton>)}
-          <ActionButton id="early_elections" className="btn btn-sm btn-danger" confirm="לפזר את הכנסטון? בחירות בעוד חצי שנה.">🗳️ הקדמת בחירות</ActionButton></div>}
+          <ActionButton id="early_elections" className="btn btn-sm btn-danger" confirm="לפזר את הכנסטון? הבחירות יתקיימו בתוך כ-90 יום.">🗳️ הקדמת בחירות</ActionButton></div>}
       </Section>
+      <AgreementSection s={s} />
       <Section title="שרים ומשרדים" icon="🏛️">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {s.government.ministries.map((m) => {
@@ -148,7 +175,7 @@ export function ParliamentScreen() {
   const stage = { preliminary: 'קריאה טרומית', committee: 'ועדה', final: 'קריאה שלישית' };
   return (
     <div className="space-y-4">
-      <ScreenHeader title="הכנסטון" sub="120 מושבים. 61 זה רוב. כל השאר זה רעש." />
+      <ScreenHeader title="הכנסטון" sub="120 מושבים. כדי להעביר חוק או להקים ממשלה צריך רוב." />
       <Section title="המליאה" icon="🏟️" right={<Explain k="seats" />}>
         <div className="flex justify-center"><Hemicycle s={s} /></div>
         <div className="flex flex-wrap gap-1.5 justify-center mt-2">{Object.values(s.parties).filter((p) => p.seats).map((p) => <PartyChip key={p.id} party={p} seats={p.seats} />)}</div>

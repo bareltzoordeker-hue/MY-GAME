@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { GameState, Reaction } from '../../types/game';
+import type { Demand, GameState, Reaction } from '../../types/game';
 import { clone } from '../../utils';
 import { createGame, type NewGameConfig } from '../../engine/newGame';
 import { advanceTurn, canAdvance } from '../../engine/turn';
@@ -16,7 +16,7 @@ import { breakAlliance, proposeAlliance } from '../../engine/alliances';
 
 export type ScreenId =
   | 'dashboard' | 'state' | 'economy' | 'budget' | 'population' | 'parliament' | 'government' | 'party' | 'ministry'
-  | 'news' | 'polls' | 'projects' | 'laws' | 'crises' | 'map' | 'advisor' | 'career' | 'save';
+  | 'news' | 'polls' | 'projects' | 'laws' | 'crises' | 'map' | 'advisor' | 'career' | 'save' | 'relations';
 
 interface Store {
   game: GameState | null;
@@ -46,7 +46,7 @@ interface Store {
   makeAlliance: (partyId: string, kind: 'votes' | 'bloc') => void;
   endAlliance: (partyId: string) => void;
   handleCrisis: (crisisId: string, actionId: string) => void;
-  negotiateWith: (partyId: string, action: 'accept' | 'counter' | 'refuse', drop?: number) => void;
+  negotiateWith: (partyId: string, action: 'accept' | 'counter' | 'refuse' | 'sweeten', drop?: number, sweetener?: Demand) => void;
   formCoalition: () => void;
   returnMandate: () => void;
   endTurn: () => void;
@@ -141,11 +141,11 @@ export const useGame = create<Store>((set, get) => ({
     const reaction = resolveCrisis(s, crisisId, actionId);
     set((st) => ({ game: s, reactions: reaction ? [...st.reactions, reaction] : st.reactions }));
   },
-  negotiateWith: (partyId, action, drop = -1) => {
+  negotiateWith: (partyId, action, drop = -1, sweetener) => {
     const g = get().game;
     if (!g) return;
     const s = clone(g);
-    const reaction = negotiate(s, partyId, action, drop);
+    const reaction = negotiate(s, partyId, action, drop, sweetener);
     set((st) => ({ game: s, reactions: [...st.reactions, reaction] }));
   },
   formCoalition: () => {

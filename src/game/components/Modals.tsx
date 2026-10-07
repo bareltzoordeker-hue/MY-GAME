@@ -2,10 +2,11 @@ import { useEffect, useState } from 'react';
 import { useGame } from '../store/gameStore';
 import { babble, voiceFor } from '../audio/sound';
 import { voiceOf } from './Drama';
-import { Burst, fxKind } from './Fx';
+import { StatusBar, fxKind } from './Fx';
 import { EXPLAIN } from '../content/explain';
 import { Caricature, ADVISOR_SPEC } from '../../shared/components/Caricature';
-import { dateLabel, turnsToText } from '../../utils';
+import { dateLabel } from '../../utils';
+import { daysBetween, spanText } from '../../engine/calendar';
 import { ACTIONS } from '../../engine/decisions';
 import { LAW_BY_ID } from '../../data/laws';
 import { PROJECT_BY_ID } from '../../data/projects';
@@ -25,9 +26,8 @@ export function ReactionModal() {
   return (
     <div className="backdrop" onClick={dismiss}>
       <div className="relative w-full" style={{ maxWidth: 580 }} onClick={(e) => e.stopPropagation()} key={r.title + (r.quip ?? '')}>
-        <Burst kind={fx} />
-        <div className="fx-icon">{{ war: '💥', money: '💰', good: '🎉', bad: '🍅', meh: '🤷' }[fx]}</div>
-      <div className={`modal ${fx === 'bad' || fx === 'war' ? 'shake' : ''}`}>
+      <div className="modal overflow-hidden">
+        <StatusBar kind={fx} />
         <div className="p-5 border-b" style={{ borderColor: 'var(--line)' }}>
           <div className="text-xs font-bold" style={{ color: head.c }}>{head.i} {head.t}</div>
           <div className="text-xl font-black mt-1">{r.title}</div>
@@ -128,8 +128,7 @@ export function MeetingModal() {
             <div className="flex flex-col items-center text-center rise" style={{ transition: 'transform .25s', transform: speaking === m.participants.length ? 'translateY(-8px) scale(1.07)' : undefined }}>
               <div className="bubble mb-3 w-full">{m.advisor}</div>
               <Caricature spec={ADVISOR_SPEC} size={84} />
-              <div className="font-bold text-sm mt-1">מוטי ספין</div>
-              <div className="text-[11px] muted">היועץ</div>
+              <div className="font-bold text-sm mt-1">היועץ</div>
             </div>
           </div>
           <div className="inset mt-5 flex items-center justify-between text-sm">
@@ -163,7 +162,7 @@ export function BriefingModal() {
           <Caricature spec={ADVISOR_SPEC} size={52} />
           <div>
             <div className="text-xs font-bold" style={{ color: 'var(--gold)' }}>📋 תדריך · {dateLabel(s.date)}</div>
-            <div className="text-xl font-black">{b.turn === 0 ? 'ברוך הבא לכיסא' : 'מה קרה בחודשיים האחרונים'}</div>
+            <div className="text-xl font-black">{b.turn === 0 ? 'ברוכים הבאים' : 'סיכום התור'}</div>
           </div>
         </div>
         <div className="p-5 space-y-2">
@@ -209,7 +208,7 @@ export function ExplainModal() {
           <div className="text-xl font-black mb-2">{e.title}</div>
           <p className="text-sm leading-relaxed">{e.text}</p>
           {e.tip && <div className="inset text-sm mt-3">💡 {e.tip}</div>}
-          <div className="flex justify-end mt-4"><button className="btn btn-primary btn-sm" onClick={() => close(null)}>תודה, מוטי</button></div>
+          <div className="flex justify-end mt-4"><button className="btn btn-primary btn-sm" onClick={() => close(null)}>הבנתי</button></div>
         </div>
       </div>
     </div>
@@ -243,13 +242,13 @@ export function GameOverScreen() {
   const g = s.gameOver!;
   const me = s.politicians[s.player.politicianId];
   const c = s.career;
-  const years = turnsToText(s.turn);
+  const years = spanText(Math.max(1, daysBetween(s.startDate ?? s.date, s.date)));
   return (
     <div className="min-h-screen p-4 flex justify-center">
       <div className="w-full max-w-3xl space-y-4 rise">
         <div className="card text-center">
-          <div className="text-6xl">🪑💥</div>
-          <div className="text-xs muted mt-2">GAME OVER · {dateLabel(s.date)}</div>
+          <div className="text-5xl">🏛️</div>
+          <div className="text-xs muted mt-2">סוף הקריירה הפוליטית · {dateLabel(s.date, true)}</div>
           <h1 className="text-3xl font-black mt-1">{g.title}</h1>
           <p className="mt-2 text-lg" style={{ color: 'var(--gold)' }}>"{g.text}"</p>
           <div className="flex justify-center mt-4"><Caricature spec={me.caricature} size={110} tie={s.parties[s.player.partyId]?.color} mood="bad" /></div>
@@ -257,9 +256,9 @@ export function GameOverScreen() {
           <div className="text-sm muted">{roleLabel(s)} · {s.parties[s.player.partyId]?.name}</div>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <Box l="שנים בפוליטיקה" v={years} />
-          <Box l="חודשים כראש ממשלה" v={`${c.turnsInRole.pm * 2}`} />
-          <Box l="חודשים כשר" v={`${c.turnsInRole.minister * 2}`} />
+          <Box l="זמן במשחק" v={years} />
+          <Box l="חודשים כראש ממשלה" v={`${Math.round(c.turnsInRole.pm)}`} />
+          <Box l="חודשים כשר" v={`${Math.round(c.turnsInRole.minister)}`} />
           <Box l="ממשלות שהקים" v={`${c.governmentsFormed}`} />
           <Box l="חוקים שהעביר" v={`${c.lawsPassed}`} />
           <Box l="כסף שהושקע" v={`₪${c.moneyInvested.toFixed(1)}B`} />
@@ -272,13 +271,13 @@ export function GameOverScreen() {
           <div><div className="label">שביעות רצון הציבור</div><div className="font-black">{s.government.approval.toFixed(0)}%</div></div>
         </div>
         <div className="grid sm:grid-cols-2 gap-3">
-          <List t="🏆 הישגים מרכזיים" items={c.achievements} empty="אה... השתתפת?" />
-          <List t="💀 כישלונות מרכזיים" items={c.failures} empty="אף אחד לא זוכר כישלונות. גם לא הצלחות." />
+          <List t="🏆 הישגים מרכזיים" items={c.achievements} empty="לא נרשמו הישגים מיוחדים." />
+          <List t="📉 כישלונות מרכזיים" items={c.failures} empty="לא נרשמו כישלונות מיוחדים." />
         </div>
-        <List t="📸 רגעים בלתי נשכחים" items={[...c.memorable].slice(-10)} empty="הקריירה הייתה שקטה מאוד." />
+        <List t="📌 רגעים מרכזיים" items={[...c.memorable].slice(-10)} empty="הקריירה הייתה שקטה מאוד." />
         <List t="🧭 מסלול הקריירה" items={c.roleHistory.map((r) => `${ROLE_NAMES[r.role]} – ${r.label} (תור ${r.turn})`)} empty="" />
         <div className="flex justify-center gap-2 pb-8">
-          <button className="btn btn-primary btn-lg" onClick={() => { wipe(); quit(); }}>🎬 קריירה חדשה</button>
+          <button className="btn btn-primary btn-lg" onClick={() => { wipe(); quit(); }}>קריירה חדשה</button>
         </div>
       </div>
     </div>

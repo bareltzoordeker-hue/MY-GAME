@@ -14,7 +14,7 @@ import { NAV } from './Layout';
 /** Common labels that don't carry their own data-tip. Every button explains itself. */
 const FALLBACK: Record<string, string> = {
   'הבנתי': 'סוגר את החלון וחוזר למשחק',
-  'לעבודה': 'סוגר את התדריך. החודשיים הבאים מתחילים עכשיו',
+  'לעבודה': 'סוגר את התדריך ומתחיל את התור',
   'ביטול': 'לא עושה כלום. חוזרים אחורה',
   'כן': 'מאשר את הפעולה. אין דרך חזרה',
   'שמור': 'שומר את השינוי',

@@ -14,7 +14,6 @@ import { serialize, deserialize, saveGame } from '../../engine/persistence/save'
 import type { Domain } from '../../types/game';
 import { resetTutorial } from '../components/Tutorial';
 import { DecideButton } from '../components/Overlay';
-import { AdSlot } from '../components/Fx';
 import { Caricature, ADVISOR_SPEC } from '../../shared/components/Caricature';
 import { ActionButton, Empty, Explain, Meter, ScreenHeader, Section, Tabs } from '../components/ui';
 
@@ -26,7 +25,6 @@ export function NewsScreen() {
     <div className="space-y-4">
       <ScreenHeader title="חדשות" sub="כותרות מהתקשורת על מה שקרה בתורות האחרונים." right={<Tabs value={f} onChange={setF} items={[{ id: 'all', label: 'הכול' }, { id: 'bad', label: 'רעות' }, { id: 'good', label: 'טובות' }, { id: 'neutral', label: 'כלליות' }]} />} />
       <div className="grid md:grid-cols-2 gap-3">
-        <div className="md:col-span-2"><AdSlot slot="news" seed={s.turn + 2} /></div>
         {items.map((n) => (
           <div key={n.id} className="card card-tight card-hover flex gap-3">
             <span className="text-2xl">{n.icon}</span>
@@ -122,7 +120,7 @@ function CrisisActions({ crisisId, onPick }: { crisisId: string; onPick: (action
           </button>
         ))}
       </div>
-      {rec && <div className="text-xs mt-2" style={{ color: 'var(--violet)' }}>🧠 מוטי: "{c.actions.find((a) => a.id === rec.bestId)?.label}" – {rec.reason}</div>}
+      {rec && <div className="text-xs mt-2" style={{ color: 'var(--violet)' }}>🧠 היועץ ממליץ: "{c.actions.find((a) => a.id === rec.bestId)?.label}" – {rec.reason}</div>}
     </>
   );
 }

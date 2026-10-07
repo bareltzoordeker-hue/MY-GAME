@@ -25,11 +25,12 @@ import { addNews, applyEffects, logEvent, remember, scaleEffects } from './effec
 import { BUDGET_PREF, callEarlyElections } from './elections';
 import { addMonths, electionDate, inCampaign, monthsUntilElection } from './calendar';
 import { assignMinister, createMinistry, getMinistry, mergeMinistries, removeMinistry } from './government';
-import { partyStance, proposeBill, repealLaw, voteBudget } from './parliament';
+import { ideologyDistance, partyStance, proposeBill, repealLaw, voteBudget } from './parliament';
 import { coalitionSeats } from './polls';
 import { cancelProject, startProject } from './projects';
 import { makePromise } from './promises';
 import { allyHurt } from './alliances';
+import { mergeParties, partyRelation, shiftPartyRelation } from './relations';
 import { getCapabilities, isPM, isPartyLeader, ministryLawDomains, playerMinistry } from './roles';
 
 export type Params = Record<string, string | number>;
@@ -379,6 +380,7 @@ def({
     }
     const bill = proposeBill(s, law.id, s.player.politicianId, gov, num(p, 'scale') === 0.5);
     if (!bill) return { status: 'rejected', title: 'לא ניתן להגיש' };
+    if (s.flags.mutual_push) { bill.push += s.flags.mutual_push; s.flags.mutual_push = 0; }
     applyEffects(s, { playerPopularity: 1, playerReputation: 1 });
     addNews(s, `${me(s).name} מגיש: ${law.title}`, 'neutral', law.icon);
     return { title: `הוגש: ${law.title}`, subtitle: gov ? 'הצעה ממשלתית — עוברת ישר לוועדה' : 'הצעה פרטית — קריאה טרומית בתור הבא', status: 'pending', people };
@@ -720,6 +722,7 @@ def({
   run: (s, p) => {
     const t = s.politicians[str(p, 'politicianId')];
     remember(s, t.id, 'insult', 'תקף אותי בתקשורת', -14);
+    shiftPartyRelation(s, s.player.partyId, t.partyId, s.parties[t.partyId]?.leaderId === t.id ? -8 : -3);
     const strong = (me(s).popularity - t.popularity) / 100;
     const res = rollOut(s, `מתקפה על ${t.name}`, '🥊', [
       { w: 4 + strong * 6, tone: 'good', text: `${t.name} נאלץ להתגונן, והשיח עבר לנושאים שלך.`, fx: { playerPopularity: 3, partyMomentum: { [s.player.partyId]: 2, [t.partyId]: -3 } }, extra: (x) => { x.politicians[t.id].popularity = clamp(x.politicians[t.id].popularity - 7); } },
@@ -1145,6 +1148,130 @@ def({
     const names = { economic: ['לכיוון ליברלי', 'לכיוון סוציאליסטי'], security: ['ימינה', 'שמאלה'], religion: ['לכיוון דתי', 'לכיוון חילוני'] };
     addNews(s, `${party.name} זזה ${names[axis][dir > 0 ? 0 : 1]}`, 'neutral', '🧭');
     return { title: `המפלגה זזה ${names[axis][dir > 0 ? 0 : 1]}` };
+  },
+});
+
+// ===== RELATIONSHIPS (MK to MK, party to party) =====
+const otherPol = (s: GameState, p: Params) => {
+  const t = s.politicians[str(p, 'politicianId')];
+  return t && t.active && !t.isPlayer ? t : null;
+};
+
+def({
+  id: 'joint_event', title: 'אירוע ציבורי משותף', icon: '🤝', category: 'career', level: 'simple', capital: 4, cooldown: 1,
+  description: 'כנס, סיור או אירוע קהילתי יחד עם ח״כ אחר. מחזק את הקשר ביניכם (+10) ונותן חשיפה לשניכם. אם הוא מגוש אחר – המנהיג שלך עלול להסתייג.',
+  unavailable: (s, p) => (otherPol(s, p) ? null : 'בחר ח״כ'),
+  run: (s, p) => {
+    const t = otherPol(s, p)!;
+    remember(s, t.id, 'support', 'אירוע משותף', 10);
+    t.popularity = clamp(t.popularity + 1);
+    shiftPartyRelation(s, s.player.partyId, t.partyId, 3);
+    const cross = s.parties[t.partyId]?.bloc !== s.parties[s.player.partyId]?.bloc;
+    applyEffects(s, { playerPopularity: cross ? 2 : 1, playerReputation: cross ? 2 : 0 });
+    const l = myLeader(s);
+    if (cross && l && !l.isPlayer) remember(s, l.id, 'insult', `אירוע משותף עם ${t.name} מהצד השני`, -4);
+    return { title: `אירוע משותף עם ${t.name}`, subtitle: 'יחסים +10', quip: cross ? 'שיתוף פעולה מעבר לקווים הפוליטיים זוכה להערכה בציבור; בבית הפוליטי שלך לא כולם מרוצים.' : 'הקשר ביניכם התחזק.', people: [{ icon: '🤝', label: t.name, text: 'שמח על שיתוף הפעולה.', tone: 'good' }] };
+  },
+});
+
+def({
+  id: 'mutual_support', title: 'הסכם תמיכה הדדית בחקיקה', icon: '🔁', category: 'parliament', level: 'simple', capital: 5, cooldown: 2,
+  description: 'אתה מתחייב לתמוך בהצעת חוק שלו, והוא בשלך. יחסים +12, וההצעה הבאה שלך תקבל תמיכה נוספת (+15).',
+  unavailable: (s, p) => (otherPol(s, p) ? null : 'בחר ח״כ'),
+  run: (s, p) => {
+    const t = otherPol(s, p)!;
+    remember(s, t.id, 'deal', 'הסכם תמיכה הדדית', 12);
+    s.flags.mutual_push = (s.flags.mutual_push ?? 0) + 15;
+    for (const b of s.bills.filter((x) => x.status === 'active' && x.sponsorId === s.player.politicianId)) b.push += 15;
+    return { title: `הסכם תמיכה הדדית עם ${t.name}`, subtitle: 'יחסים +12 · תמיכה בהצעות שלך +15', quip: 'אם תצביע נגד הצעה שלו בהמשך, הוא יראה בזה הפרה.', people: [{ icon: '🔁', label: t.name, text: 'סגרנו. אני סומך עליך.', tone: 'good' }] };
+  },
+});
+
+def({
+  id: 'public_defense', title: 'הגנה פומבית על עמית', icon: '🛡️', category: 'media', level: 'simple', capital: 2, cooldown: 1,
+  description: 'יציאה להגנתו של ח״כ שמותקף בתקשורת. יחסים +14. אם הוא שנוי במחלוקת – גם אתה תספוג ביקורת.',
+  unavailable: (s, p) => (otherPol(s, p) ? null : 'בחר ח״כ'),
+  run: (s, p) => {
+    const t = otherPol(s, p)!;
+    remember(s, t.id, 'support', 'הגן עליי בפומבי', 14);
+    const risky = t.popularity < 35;
+    applyEffects(s, { playerReputation: risky ? -3 : 1, playerPopularity: risky ? -1 : 1 });
+    return { title: `הגנת על ${t.name}`, subtitle: 'יחסים +14', quip: risky ? 'הוא לא פופולרי כרגע, וחלק מהביקורת עברה גם אליך.' : 'הגיבוי התקבל בהערכה.', people: [{ icon: '🛡️', label: t.name, text: 'לא אשכח את הגיבוי.', tone: 'good' }] };
+  },
+});
+
+def({
+  id: 'help_primaries', title: 'עזרה לחבר מפלגה בפריימריז', icon: '🗳️', category: 'party', level: 'simple', capital: 5, cooldown: 2,
+  description: 'גיוס תומכים ומתפקדים לטובת חבר מפלגה. יחסים +18 וכוחו עולה; מתחריו במפלגה יתרעמו.',
+  unavailable: (s, p) => { const t = otherPol(s, p); return !t ? 'בחר ח״כ' : t.partyId !== s.player.partyId ? 'רק חברי המפלגה שלך' : null; },
+  run: (s, p) => {
+    const t = otherPol(s, p)!;
+    remember(s, t.id, 'favor', 'עזר לי בפריימריז', 18);
+    t.power = clamp(t.power + 5);
+    if (t.listRank && t.listRank > 2) t.listRank = Math.max(2, t.listRank - 2);
+    const rival2 = s.parties[s.player.partyId].memberIds.map((id) => s.politicians[id]).find((x) => x && !x.isPlayer && x.id !== t.id && Math.abs((x.listRank ?? 99) - (t.listRank ?? 99)) <= 2);
+    if (rival2) remember(s, rival2.id, 'insult', `עזר ל${t.name} נגדי בפריימריז`, -8);
+    return { title: `עזרת ל${t.name} בפריימריז`, subtitle: 'יחסים +18 · עלה ברשימה', people: [{ icon: '🗳️', label: t.name, text: 'אני חייב לך.', tone: 'good' }] };
+  },
+});
+
+def({
+  id: 'leaders_meeting', title: 'פגישת ראשי מפלגות', icon: '🏛️', category: 'party', level: 'simple', capital: 5, cooldown: 1,
+  description: 'פגישה עם יו״ר מפלגה אחרת לשיפור היחסים בין המפלגות. יחסים בין המפלגות +12, נאמנות היו״ר +8. פגישה עם יריב אידיאולוגי מעוררת שאלות בבסיס.',
+  unavailable: (s, p) => (!isPartyLeader(s) ? 'רק יו״ר מפלגה' : !s.parties[str(p, 'partyId')] || str(p, 'partyId') === s.player.partyId ? 'בחר מפלגה אחרת' : null),
+  run: (s, p) => {
+    const party = s.parties[str(p, 'partyId')];
+    const rel = shiftPartyRelation(s, s.player.partyId, party.id, 12);
+    remember(s, party.leaderId, 'support', 'פגישת ראשי מפלגות', 8);
+    const far = s.parties[s.player.partyId].bloc !== party.bloc;
+    if (far) applyEffects(s, { partyMomentum: { [s.player.partyId]: -1 }, playerReputation: 2 });
+    addNews(s, `${me(s).name} נפגש עם ${s.politicians[party.leaderId]?.name}, יו״ר ${party.name}`, 'neutral', '🏛️');
+    return { title: `פגישה עם יו״ר ${party.name}`, subtitle: `יחסים בין המפלגות: ${rel.toFixed(0)}`, quip: far ? 'הפגישה עם מפלגה מהגוש השני עוררה ביקורת אצל חלק מהמצביעים שלך.' : undefined };
+  },
+});
+
+def({
+  id: 'surplus_agreement', title: 'הסכם עודפים', icon: '➗', category: 'campaign', level: 'simple', capital: 4,
+  description: 'הסכם עודפים לבחירות הקרובות: הקולות העודפים של שתי המפלגות מצורפים יחד, וזה עשוי להוסיף מנדט לאחת מהן. צריך יחסים סבירים (20+).',
+  unavailable: (s, p) => {
+    if (!isPartyLeader(s)) return 'רק יו״ר מפלגה';
+    if (monthsUntilElection(s) > 6) return 'הסכמי עודפים נחתמים בחצי השנה שלפני הבחירות';
+    if (s.elections.surplusWith) return `כבר נחתם הסכם עודפים עם ${s.parties[s.elections.surplusWith]?.name}`;
+    const party = s.parties[str(p, 'partyId')];
+    if (!party || party.id === s.player.partyId) return 'בחר מפלגה אחרת';
+    return partyRelation(s, s.player.partyId, party.id) < 20 ? 'היחסים בין המפלגות לא מספיק טובים (נדרש 20+)' : null;
+  },
+  run: (s, p) => {
+    const party = s.parties[str(p, 'partyId')];
+    s.elections.surplusWith = party.id;
+    shiftPartyRelation(s, s.player.partyId, party.id, 5);
+    addNews(s, `${s.parties[s.player.partyId].name} ו${party.name} חתמו על הסכם עודפים`, 'neutral', '➗');
+    return { title: `הסכם עודפים עם ${party.name}`, quip: 'בחלוקת המנדטים, העודפים של שתי המפלגות יחושבו יחד.' };
+  },
+});
+
+def({
+  id: 'propose_merger', title: 'הצעה לריצה משותפת', icon: '🔗', category: 'campaign', level: 'major', capital: 10, cooldown: 3,
+  description: 'איחוד רשימות עם מפלגה קטנה וקרובה. מונע בזבוז קולות מתחת לאחוז החסימה. היו״ר שלה יקבל את המקום השני ברשימה. הסיכוי תלוי ביחסים ובקרבה האידיאולוגית.',
+  unavailable: (s, p) => {
+    if (!isPartyLeader(s)) return 'רק יו״ר מפלגה';
+    if (monthsUntilElection(s) > 8) return 'איחודים נעשים בחודשים שלפני הבחירות';
+    const party = s.parties[str(p, 'partyId')];
+    if (!party || party.id === s.player.partyId) return 'בחר מפלגה אחרת';
+    if (party.pollShare > s.parties[s.player.partyId].pollShare) return 'רק מפלגה קטנה ממך';
+    return null;
+  },
+  run: (s, p) => {
+    const party = s.parties[str(p, 'partyId')];
+    const rel = partyRelation(s, s.player.partyId, party.id);
+    const dist = ideologyDistance(party.ideology, s.parties[s.player.partyId].ideology);
+    const pr = clamp(0.25 + rel / 150 - dist * 0.4 + (party.pollShare < 3.5 ? 0.25 : 0), 0.03, 0.85);
+    if (rand(s) < pr) {
+      mergeParties(s, party.id);
+      return { title: `${party.name} מצטרפת לרשימה משותפת`, status: 'approved', subtitle: `הסיכוי היה ${Math.round(pr * 100)}%` };
+    }
+    shiftPartyRelation(s, s.player.partyId, party.id, -6);
+    return { title: `${party.name} דחתה את ההצעה`, status: 'rejected', subtitle: `הסיכוי היה ${Math.round(pr * 100)}%`, people: [{ icon: party.logo, label: s.politicians[party.leaderId]?.name ?? party.name, text: 'נרוץ לבד.', tone: 'neutral' }] };
   },
 });
 

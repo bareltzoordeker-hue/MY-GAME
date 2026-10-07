@@ -11,6 +11,8 @@ import { chance } from './rng';
 import type { Briefing, GameState } from '../types/game';
 import { clamp, clone, debtPct, deficitPct } from '../utils';
 import { newFiscalYear, processBudgetDeadline, simulateAIGovernment } from './aiGovernment';
+import { processCommitments } from './coalitionDeals';
+import { driftRelations } from './relations';
 import { evaluateGameOver, setGameOver, syncRole, updateCareer } from './career';
 import { generateInitiatives, simulateCharacters } from './characters';
 import { generateCrises, tickCrises } from './crises';
@@ -53,6 +55,8 @@ export function advanceTurn(s0: GameState): GameState {
 
   // 2. decisions mature: expired inbox items resolve by default
   expireInbox(s);
+  processCommitments(s);
+  driftRelations(s);
 
   // budget cycle (new fiscal year when the calendar crosses into January)
   if (s.date.year > prevDate.year) newFiscalYear(s);
@@ -107,7 +111,7 @@ export function advanceTurn(s0: GameState): GameState {
   // career, game over
   if (!s.gameOver) {
     syncRole(s);
-    updateCareer(s);
+    updateCareer(s, days / 30.4);
     if (s.flags.expel && s.parties[s.player.partyId].leaderId !== s.player.politicianId) {
       setGameOver(s, 'expelled', 'המנהיג הוציא אותך מהמפלגה');
     }

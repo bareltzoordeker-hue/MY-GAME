@@ -5,14 +5,12 @@ import { CATEGORIES, TAX_NAMES } from '../../data/world';
 import { growthDrivers } from '../../engine/economy';
 import { fundingRatio } from '../../engine/services';
 import { getCapabilities, isPM, playerMinistry } from '../../engine/roles';
-import { debtPct, deficitPct, turnToDate, MONTHS } from '../../utils';
-import type { BudgetCategory, GameState } from '../../types/game';
+import { debtPct, deficitPct } from '../../utils';
+import { MONTHS_HE } from '../../engine/calendar';
+import type { BudgetCategory, GameDate } from '../../types/game';
 import { ActionButton, Explain, Meter, ScreenHeader, Section, Stat, Tabs } from '../components/ui';
 
-const axisLabel = (_s: GameState, turn: number) => {
-  const d = turnToDate({ year: 2027, month: 3 }, turn);
-  return `${MONTHS[d.month - 1].slice(0, 3)} ${String(d.year).slice(2)}`;
-};
+const axisLabel = (d: GameDate | undefined, turn: number) => (d ? `${d.day ? `${d.day}.` : ''}${MONTHS_HE[d.month - 1].slice(0, 3)} ${String(d.year).slice(2)}` : `תור ${turn}`);
 const tooltipStyle = { background: '#fff', border: '0', borderRadius: 12, fontSize: 12, color: '#1d1b3a', boxShadow: '0 10px 24px -10px rgba(60,40,160,.5)' };
 
 export function EconomyScreen() {
@@ -21,7 +19,7 @@ export function EconomyScreen() {
   const e = s.economy;
   const pm = isPM(s);
   const isFinance = s.player.role === 'minister' && (playerMinistry(s)?.origins ?? [playerMinistry(s)?.id]).includes('finance');
-  const data = s.history.map((h) => ({ t: axisLabel(s, h.turn), growth: +h.growth.toFixed(2), unemployment: +h.unemployment.toFixed(2), inflation: +h.inflation.toFixed(2), deficit: +h.deficitPct.toFixed(2), debt: +h.debtPct.toFixed(1), approval: +h.approval.toFixed(1), services: +h.servicesAvg.toFixed(1) }));
+  const data = s.history.map((h) => ({ t: axisLabel(h.date, h.turn), growth: +h.growth.toFixed(2), unemployment: +h.unemployment.toFixed(2), inflation: +h.inflation.toFixed(2), deficit: +h.deficitPct.toFixed(2), debt: +h.debtPct.toFixed(1), approval: +h.approval.toFixed(1), services: +h.servicesAvg.toFixed(1) }));
   const lines: Record<typeof chart, { k: string; n: string; c: string }[]> = {
     growth: [{ k: 'growth', n: 'צמיחה %', c: '#2bd47d' }, { k: 'inflation', n: 'אינפלציה %', c: '#ff9f1c' }],
     jobs: [{ k: 'unemployment', n: 'אבטלה %', c: '#ff5d6c' }],

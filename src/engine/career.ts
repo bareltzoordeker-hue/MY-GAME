@@ -25,17 +25,18 @@ export function syncRole(s: GameState): void {
   if (role !== s.player.role) setRole(s, role);
 }
 
-export function updateCareer(s: GameState): void {
-  s.career.turnsInRole[s.player.role] += 1;
+/** `months`: how long the turn that just ended lasted. turnsInRole counts months in each role. */
+export function updateCareer(s: GameState, months = 4): void {
+  s.career.turnsInRole[s.player.role] += months;
   const a = s.career.achievements;
   const add = (cond: boolean, text: string) => { if (cond && !a.includes(text)) a.push(text); };
-  add(s.career.turnsInRole.pm >= 24, 'קדנציה מלאה כראש ממשלה');
-  add(s.career.turnsInRole.minister >= 12, 'שנתיים רצופות בממשלה');
+  add(s.career.turnsInRole.pm >= 48, 'קדנציה מלאה כראש ממשלה');
+  add(s.career.turnsInRole.minister >= 24, 'שנתיים בממשלה');
   add(s.economy.growth > 4.5, 'צמיחה של מעל 4.5%');
   add(s.economy.unemployment < 3.5, 'אבטלה של פחות מ-3.5%');
-  add(s.economy.deficit < 0, 'עודף תקציבי (!)');
+  add(s.economy.deficit < 0, 'עודף תקציבי');
   add(s.government.approval > 62 && s.player.role === 'pm', 'שביעות רצון מעל 62%');
-  add(s.career.lawsPassed >= 5, 'מחוקק סדרתי: 5 חוקים');
+  add(s.career.lawsPassed >= 5, 'חמישה חוקים שהעביר');
   add(s.politicians[s.player.politicianId].popularity > 65, 'הפוליטיקאי הפופולרי במדינה');
 }
 

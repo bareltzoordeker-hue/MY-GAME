@@ -71,7 +71,7 @@ export function dateLabel(d: GameDate, withDay = false): string {
 
 /** Human length of a span of days ("שבועיים", "4 חודשים", "שנה ו-4 חודשים"). */
 export function spanText(days: number): string {
-  if (days < 25) return days <= 15 ? 'שבועיים' : `${Math.round(days / 7)} שבועות`;
+  if (days < 60) { const w = Math.round(days / 7); return w <= 1 ? 'שבוע' : w === 2 ? 'שבועיים' : `${w} שבועות`; }
   const months = Math.round(days / 30.4);
   if (months < 12) return months === 1 ? 'חודש' : `${months} חודשים`;
   const y = Math.floor(months / 12);

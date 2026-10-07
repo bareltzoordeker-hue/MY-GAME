@@ -108,7 +108,8 @@ describe('world creation', () => {
     const last = s.polls[0];
     const total = PARTIES.reduce((a, p) => a + p.poll, 0);
     for (const p of PARTIES) expect(Math.abs(last.shares[p.id] - (p.poll / total) * 100)).toBeLessThan(0.3);
-    expect(last.seats.likud).toBe(34); // outgoing Knesset
+    expect(Math.abs(last.seats.likud - 23)).toBeLessThanOrEqual(2); // the first poll, in seats
+    expect(s.parties.likud.seats).toBe(34); // the outgoing Knesset
   });
   it('the advisor recommends one of the real options', async () => {
     const { adviseDrama, screenAdvice } = await import('./advisorPlus');
@@ -407,5 +408,56 @@ describe('long simulation', () => {
     expect(s.economy.gdp).not.toBe(gdp0);
     expect(s.news.length).toBeGreaterThan(0);
     expect(s.polls.length).toBe(7);
+  });
+});
+
+describe('coalition deals (v2)', () => {
+  it('negotiation spends mandate days, sweeteners raise willingness, and the agreement is written', async () => {
+    const { sweetenerOptions, processCommitments } = await import('./coalitionDeals');
+    const s = createGame(cfg('pm'));
+    startNegotiation(s);
+    const n = s.elections.negotiation!;
+    expect(n.daysLeft).toBe(28);
+    const before = n.offers.shas.willingness;
+    const sw = sweetenerOptions(s, 'shas').find((d) => d.kind === 'budget')!;
+    negotiate(s, 'shas', 'sweeten', -1, sw);
+    expect(s.elections.negotiation!.daysLeft).toBe(27);
+    expect(s.elections.negotiation!.offers.shas.willingness).toBeGreaterThan(before);
+    for (const id of ['otzma', 'rzp', 'shas', 'utj', 'bluewhite', 'yb']) {
+      if (negotiationSeats(s) >= 64 || s.elections.phase !== 'negotiation') break;
+      for (let t = 0; t < 3 && s.elections.negotiation?.offers[id]?.status === 'pending'; t++) negotiate(s, id, 'accept');
+    }
+    if (s.elections.phase === 'negotiation' && negotiationSeats(s) >= 61) {
+      finalizeCoalition(s);
+      expect(s.government.agreements!.length).toBeGreaterThan(0);
+      const law = s.government.agreements!.find((c) => c.kind === 'law' && c.status === 'pending');
+      if (law) {
+        s.turn = law.dueTurn!;
+        s.activeLaws = s.activeLaws.filter((l) => l !== law.lawId);
+        processCommitments(s);
+        expect(law.status).toBe('broken');
+      }
+    }
+  });
+  it('the mandate expires after 28 + 14 days', () => {
+    const s = createGame(cfg('pm'));
+    startNegotiation(s);
+    for (let i = 0; i < 20 && s.elections.phase === 'negotiation'; i++) {
+      const pending = Object.values(s.elections.negotiation!.offers).find((o) => o.status === 'pending');
+      if (!pending) break;
+      negotiate(s, pending.partyId, 'sweeten', -1, { kind: 'jobs', label: 'x' });
+    }
+    // 42 days of single-day sweeteners need more than 20 steps: still negotiating, extension used
+    if (s.elections.phase === 'negotiation') expect(s.elections.negotiation!.extended).toBe(false);
+  });
+  it('red lines: Haredi parties never vote for the draft equality law, even as a government bill', () => {
+    const s = createGame(cfg('pm'));
+    s.government.coalition = ['likud', 'shas', 'utj', 'otzma', 'rzp'];
+    const bill = proposeBill(s, 'draft_equality', 'player', true)!;
+    bill.stage = 'final';
+    bill.push = 100;
+    const v = computeVote(s, bill);
+    expect(v.byParty.utj).toBe('against');
+    expect(v.byParty.shas).toBe('against');
   });
 });

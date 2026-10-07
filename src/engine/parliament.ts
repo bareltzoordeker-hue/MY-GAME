@@ -11,9 +11,14 @@ export function ideologyDistance(a: Ideology, b: Ideology): number {
 }
 
 /** Support of a party for a bill: -1.5..1.5 */
+/** Basic laws or amendments to them: need 61 votes in the final reading. */
+export const BASIC_LAWS = ['torah_study_basic_law', 'judicial_selection', 'override_clause', 'term_limits', 'nation_state_plus'];
+
 export function partyStance(s: GameState, party: Party, bill: Bill): number {
   const law = LAW_BY_ID[bill.lawId];
   if (!law) return 0;
+  // red lines: never vote for these, coalition or not
+  if (party.redLines?.includes(law.id)) return -1.5;
   let v = 1 - ideologyDistance(law.ideology, party.ideology) * 1.3;
   if (party.favoriteLaws.includes(law.id)) v += 0.8;
   if (party.hatedLaws.includes(law.id)) v -= 1.2;
@@ -47,6 +52,10 @@ export function computeVote(s: GameState, bill: Bill): VoteResult {
       res.for += party.seats - d;
       res.abstain += d;
       res.byParty[party.id] = d > 0 ? 'split' : 'for';
+    } else if (stance < -0.15 && bill.isGovernment && s.government.coalition.includes(party.id) && !party.redLines?.includes(bill.lawId) && stance > -0.9) {
+      // values over loyalty: a coalition partner that dislikes a government bill stays away rather than voting against it
+      res.abstain += party.seats;
+      res.byParty[party.id] = 'abstain';
     } else if (stance < -0.15) {
       const d = Math.round(party.seats * defect * (stance > -0.5 ? 1 : 0.4));
       res.against += party.seats - d;
@@ -57,7 +66,9 @@ export function computeVote(s: GameState, bill: Bill): VoteResult {
       res.byParty[party.id] = 'abstain';
     }
   }
-  res.passed = res.for > res.against && (bill.stage !== 'final' || res.for >= 40);
+  // Basic laws (and changes to them) need an absolute majority of 61 in the final reading
+  const basic = BASIC_LAWS.includes(bill.lawId);
+  res.passed = res.for > res.against && (bill.stage !== 'final' || res.for >= (basic ? 61 : 40));
   return res;
 }
 

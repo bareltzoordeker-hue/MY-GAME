@@ -6,10 +6,9 @@ import { roleLabel } from '../../engine/newGame';
 import { canAdvance } from '../../engine/turn';
 import { coalitionSeats } from '../../engine/polls';
 import { getCapabilities } from '../../engine/roles';
-import { electionCountdown, monthsUntilElection } from '../../engine/calendar';
+import { daysBetween, electionCountdown, monthsUntilElection, nextTurnDate, spanText } from '../../engine/calendar';
 import { Caricature } from '../../shared/components/Caricature';
 import { setMusic, setSfx, soundPrefs } from '../audio/sound';
-import { AdSlot } from './Fx';
 import { Explain } from './ui';
 import { HowToPlayButton } from './HowToPlay';
 
@@ -25,12 +24,13 @@ export const NAV: NavItem[] = [
   { id: 'government', icon: '🪑', label: 'ממשלה', tip: 'שרים, משרדים וקואליציה: מינויים, פיטורים, איחוד משרדים וכספים קואליציוניים' },
   { id: 'parliament', icon: '🏟️', label: 'כנסטון', tip: '120 המושבים, הצעות חוק בדיון וצפי הצבעה' },
   { id: 'laws', icon: '📜', label: 'חוקים', tip: 'הגשת חוקים חדשים וביטול חוקים קיימים' },
+  { id: 'relations', icon: '🕸️', label: 'מפת יחסים', tip: 'היחסים בין המפלגות ובינך לבין חברי הכנסטון: פגישות, אירועים משותפים, תמיכה הדדית, הסכמי עודפים ואיחודים' },
   { id: 'party', icon: '🎌', label: 'מפלגה ובריתות', tip: 'המפלגה שלך, הקמפיין, הבטחות בחירות ובריתות עם מפלגות אחרות' },
   { id: 'projects', icon: '🏗️', label: 'פרויקטים', tip: 'פרויקטים לאומיים: כבישים, רכבות, בתי חולים. לוקחים זמן ועולים כסף' },
   { id: 'crises', icon: '🚨', label: 'משברים', tip: 'משברים פעילים ודרכי הטיפול בהם, ויומן האירועים', badge: (s) => s.crises.length },
   { id: 'polls', icon: '📊', label: 'סקרים', tip: 'מנדטים בסקר, מגמות ומי הכי כועס' },
   { id: 'news', icon: '📰', label: 'חדשות', tip: 'כל הכותרות. רובן לא מחמיאות' },
-  { id: 'advisor', icon: '🧠', label: 'היועץ', tip: 'כל העצות של מוטי ספין לפי סדר דחיפות' },
+  { id: 'advisor', icon: '🧠', label: 'היועץ', tip: 'כל העצות של היועץ לפי סדר דחיפות' },
   { id: 'career', icon: '🎖️', label: 'קריירה', tip: 'איך להתקדם: ועדות, ראיונות, פריימריז, מעבר מפלגה או התפטרות' },
   { id: 'save', icon: '💾', label: 'שמירה והגדרות', tip: 'שמירה, ייבוא וייצוא, הגדרות פרטיות ונגישות והפעלה מחדש של המדריך' },
 ];
@@ -75,6 +75,8 @@ export function Header({ onMenu }: { onMenu: () => void }) {
   const seats = s.polls[s.polls.length - 1]?.seats[party.id] ?? party.seats;
   const def = deficitPct(s);
   const tte = monthsUntilElection(s);
+  const next = nextTurnDate(s);
+  const span = spanText(daysBetween(s.date, next));
   return (
     <header className="sticky top-0 z-30 border-b-4 masthead" style={{ borderColor: 'var(--ink)' }}>
       <div className="flex items-center gap-2 px-3 md:px-5 h-16">
@@ -89,7 +91,7 @@ export function Header({ onMenu }: { onMenu: () => void }) {
         </div>
         {/* Stats scroll inside their own strip on mid-size screens instead of widening the page. */}
         <div className="flex items-center mr-2 min-w-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          <HeaderStat label="תאריך" value={dateLabel(s.date)} />
+          <HeaderStat label="תאריך" value={dateLabel(s.date, true)} />
           <HeaderStat label={`${party.logo} ${party.shortName}`} value={`${seats} מנדטים`} k="seats" />
           {s.player.role === 'pm' && <HeaderStat label="קואליציה" value={coalitionSeats(s)} tone={coalitionSeats(s) < 61 ? 'bad' : ''} />}
           <HeaderStat label="שביעות רצון" value={`${s.government.approval.toFixed(0)}%`} k="approval" tone={s.government.approval < 35 ? 'bad' : ''} />
@@ -102,8 +104,8 @@ export function Header({ onMenu }: { onMenu: () => void }) {
           {saveStatus === 'saved' ? '💾 נשמר' : saveStatus === 'failed' ? '⚠️ לא נשמר' : ''}
         </span>
         <SoundToggles />
-        <button className="btn btn-primary" onClick={endTurn} disabled={!!blocked} data-tip={blocked ?? 'הזמן מתקדם בחודשיים: הכלכלה, הציבור והפוליטיקאים מגיבים'}>
-          <span className="hidden xl:inline">המשך לחודשיים הבאים</span><span className="xl:hidden">חודשיים ⏭</span> <span className="hidden xl:inline">⏭</span>
+        <button className="btn btn-primary" onClick={endTurn} disabled={!!blocked} data-tip={blocked ?? `הזמן מתקדם ב${span} (עד ${dateLabel(next, true)}): הכלכלה, הציבור והפוליטיקאים מגיבים`}>
+          <span className="hidden xl:inline">התור הבא: {span}</span><span className="xl:hidden">{span} ⏭</span> <span className="hidden xl:inline">⏭</span>
         </button>
       </div>
       <div className="ticker" aria-hidden><div>{[0, 1].map((k) => <span key={k}>{s.news.slice(0, 8).map((n) => `${n.icon} ${n.headline}`).join('   ✦   ')}</span>)}</div></div>
@@ -130,7 +132,6 @@ export function Layout({ children }: { children: ReactNode }) {
       <div className="flex">
         <aside className="hidden lg:block w-56 shrink-0 p-3 sticky top-[5.6rem] self-start h-[calc(100vh-5.6rem)] overflow-y-auto border-l" style={{ borderColor: 'var(--line)' }}>
           <Sidebar />
-          <div className="mt-4"><AdSlot slot="sidebar" seed={1} /></div>
         </aside>
         <main id="main" tabIndex={-1} className="flex-1 min-w-0 p-3 md:p-5 pb-24">{children}</main>
       </div>

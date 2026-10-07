@@ -112,7 +112,7 @@ export function screenAdvice(s: GameState, screen: string): AdviceTip[] {
       if (isPM(s)) {
         if (weak) out.push(`${weak.p.name} ב${weak.m.name} עם מומחיות ${(weak.p.expertise[weak.m.domain] ?? 20).toFixed(0)} בלבד. מינוי מקצועי ישפר את השירות – אבל המפלגה שלו תיעלב.`, 'government', `appoint:${weak.m.id}`);
         if (angryMin) out.push(`${angryMin.name} (נאמנות ${angryMin.loyalty.toFixed(0)}) לא מרוצה ועלול לפעול נגדך. פגישה אישית יכולה לשפר את היחסים.`, 'government', `network:${angryMin.id}`);
-        out.push(`יש לך ${coalitionSeats(s)} מנדטים. מתחת ל-61 הממשלה חשופה להצבעת אי-אמון.`);
+        out.push(s.government.caretaker ? `זו ממשלת מעבר עד הבחירות. אחרי הבחירות צריך להרכיב קואליציה של 61 לפחות.` : `יש לך ${coalitionSeats(s)} מנדטים. מתחת ל-61 הממשלה חשופה להצבעת אי-אמון.`);
       } else out.push(`ראש הממשלה ${s.politicians[s.government.pmId]?.name} מתייחס אליך ב-${s.politicians[s.government.pmId]?.loyalty.toFixed(0)}. מעל 55 – הוא יאשר לך בקשות.`);
       break;
     }

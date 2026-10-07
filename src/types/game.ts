@@ -187,10 +187,19 @@ export interface Politician {
   bio?: string;
   /** real person from the roster (not generated) */
   real?: boolean;
+  /** deputy minister in this ministry */
+  deputyOf?: string;
 }
 
+/** ministry/deputy/committee = posts; budget = sector money; law = pass it; veto = never advance it;
+ *  rotation = the partner leader becomes PM half-way; jobs = appointments; cash = off-budget funds (secret, may be exposed). */
+export type DemandKind = 'ministry' | 'budget' | 'law' | 'deputy' | 'committee' | 'rotation' | 'veto' | 'jobs' | 'cash';
+
 export interface Demand {
-  kind: 'ministry' | 'budget' | 'law';
+  kind: DemandKind;
+  committee?: string;
+  /** offered by the player as a sweetener (not demanded by the party) */
+  sweetener?: boolean;
   ministryId?: string;
   category?: BudgetCategory;
   amount?: number;
@@ -257,6 +266,23 @@ export interface Government {
   caretaker?: boolean;
   lowMajorityTurns: number;
   lowApprovalTurns: number;
+  /** the written coalition agreement: commitments to partners, with due dates */
+  agreements?: Commitment[];
+}
+
+export interface Commitment {
+  id: string;
+  partyId: string;
+  kind: DemandKind;
+  label: string;
+  lawId?: string;
+  ministryId?: string;
+  /** turn by which it must be kept (laws), or day number (rotation) */
+  dueTurn?: number;
+  dueDay?: number;
+  status: 'pending' | 'kept' | 'broken';
+  remindedTurn?: number;
+  secret?: boolean;
 }
 
 export type BillStage = 'preliminary' | 'committee' | 'final';
@@ -417,6 +443,7 @@ export interface HistoryPoint {
   approval: number;
   playerApproval: number;
   servicesAvg: number;
+  date?: GameDate;
 }
 
 export interface PartyOffer {
@@ -427,10 +454,14 @@ export interface PartyOffer {
   willingness: number; // 0..1
 }
 
+
 export interface Negotiation {
   formateurId: string;
   offers: Record<string, PartyOffer>;
   attempt: number;
+  /** days left on the mandate (28 + one 14-day extension by the President) */
+  daysLeft?: number;
+  extended?: boolean;
 }
 
 export interface ElectionResult {
@@ -450,6 +481,8 @@ export interface Elections {
   last: ElectionResult | null;
   campaignBoost: Record<string, number>; // partyId -> campaign effect accumulated before election
   count: number;
+  /** surplus-vote agreement partner for the coming election */
+  surplusWith?: string;
 }
 
 export interface GameOverInfo {
@@ -493,6 +526,8 @@ export interface GameState {
   startDate?: GameDate;
   drama: DramaEvent | null; // pending dramatic event — must be resolved before advancing
   alliances: Alliance[];
+  /** party-to-party relations, key "a|b" (sorted), -100..100 */
+  partyRelations?: Record<string, number>;
   version: number;
   seed: number;
   rngState: number;

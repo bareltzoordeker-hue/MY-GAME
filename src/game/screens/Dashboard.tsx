@@ -2,7 +2,6 @@ import { useMemo } from 'react';
 import { useGame } from '../store/gameStore';
 import { adviseInbox } from '../../engine/advisorPlus';
 import { DecideButton } from '../components/Overlay';
-import { AdSlot } from '../components/Fx';
 import { canHandleCrisis, crisisOwner } from '../../engine/crises';
 import type { GameState } from '../../types/game';
 import { debtPct, deficitPct } from '../../utils';
@@ -44,8 +43,6 @@ export function Dashboard() {
         <Inbox />
         <News />
       </div>
-
-      <AdSlot slot="dashboard" seed={s.turn} />
 
       <div className="grid lg:grid-cols-2 gap-4">
         <RoleCard />
@@ -163,7 +160,7 @@ function Inbox() {
   const s = useGame((x) => x.game)!;
   return (
     <Section title="החלטות ממתינות" icon="📥" right={s.inbox.length ? <span className="chip chip-warn">{s.inbox.length}</span> : undefined}>
-      {!s.inbox.length ? <Empty icon="📭" text="אין החלטות שממתינות לך. נדיר." /> : (
+      {!s.inbox.length ? <Empty icon="📭" text="אין החלטות שממתינות לך." /> : (
         <div className="space-y-2">
           {s.inbox.map((it) => {
             const from = it.fromId ? s.politicians[it.fromId] : undefined;
@@ -203,7 +200,7 @@ function InboxOptions({ itemId }: { itemId: string }) {
           </button>
         ))}
       </div>
-      {rec && <div className="text-[11px] mt-1.5" style={{ color: 'var(--violet)' }}>🧠 מוטי: "{it.options.find((o) => o.id === rec.bestId)?.label}" – {rec.reason}</div>}
+      {rec && <div className="text-[11px] mt-1.5" style={{ color: 'var(--violet)' }}>🧠 היועץ ממליץ: "{it.options.find((o) => o.id === rec.bestId)?.label}" – {rec.reason}</div>}
     </>
   );
 }
@@ -214,7 +211,7 @@ function News() {
   const items = s.news.slice(0, 6);
   return (
     <Section title="חדשות" icon="📰" right={<button className="btn btn-sm btn-ghost" onClick={() => setScreen('news')}>כל החדשות ←</button>}>
-      {!items.length ? <Empty icon="🗞️" text="שקט תקשורתי. העיתונאים בחופש." /> : (
+      {!items.length ? <Empty icon="🗞️" text="אין כותרות חדשות." /> : (
         <ul className="space-y-2">
           {items.map((n) => (
             <li key={n.id} className="flex gap-2 items-start text-sm">
