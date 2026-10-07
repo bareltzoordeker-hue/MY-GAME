@@ -75,7 +75,7 @@ export function ActionButton({ id, params = {}, children, className = 'btn', ico
   const reason = checkAction(game, id, params);
   const cost = actionCapital(game, id, params);
   const def = ACTIONS[id];
-  const desc = id === 'ministry_action' ? '' : def?.description ?? '';
+  const desc = def?.description ?? '';
   const tip = reason ? `⛔ ${reason}` : [desc, cost ? `עולה ${cost} הון פוליטי` : '', def?.level === 'major' ? 'החלטה גדולה: עשויה לדרוש ישיבת ממשלה' : ''].filter(Boolean).join(' · ');
   const keyParam = ['category', 'lawId', 'defId', 'partyId', 'regionId', 'actionId', 'tax', 'politicianId', 'billId', 'promiseId', 'templateId', 'ministryId', 'domain'].map((k) => params[k]).find((v) => v !== undefined);
   // direction matters: the advisor must light up +budget, not -budget
@@ -83,7 +83,7 @@ export function ActionButton({ id, params = {}, children, className = 'btn', ico
   const focusKey = (keyParam !== undefined ? `${id}:${keyParam}` : id) + sign;
   const run = () => (confirm ? ask({ title: 'בטוח?', text: confirm, onYes: () => act(id, params) }) : act(id, params));
   return (
-    <button className={className} disabled={!!reason} onClick={run} data-focus={focusKey} data-tip={tip || undefined}>
+    <button className={className} disabled={!!reason} onClick={run} data-focus={focusKey} data-tip={tip || undefined} data-tip-action={reason ? undefined : JSON.stringify({ id, p: params })}>
       {icon && <span>{icon}</span>}
       {children}
       {cost > 0 && !reason && <span className="chip" style={{ padding: '1px 6px', fontSize: '.65rem' }}>🎯{cost}</span>}
@@ -111,7 +111,7 @@ export function Tabs<T extends string>({ value, onChange, items }: { value: T; o
   return (
     <div className="tabs" role="tablist">
       {items.map((i) => (
-        <button key={i.id} role="tab" aria-selected={value === i.id} className={`tab ${value === i.id ? 'tab-active' : ''}`} onClick={() => onChange(i.id)}>{i.label}</button>
+        <button key={i.id} role="tab" aria-selected={value === i.id} data-tip={typeof i.label === 'string' ? `מעבר לתצוגה "${i.label}". לא משנה דבר במשחק, רק מה שמוצג על המסך` : undefined} className={`tab ${value === i.id ? 'tab-active' : ''}`} onClick={() => onChange(i.id)}>{i.label}</button>
       ))}
     </div>
   );

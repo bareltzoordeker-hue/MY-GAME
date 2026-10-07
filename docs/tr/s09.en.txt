@@ -1,0 +1,200 @@
+I learned about it from the media. This is not appropriate.
+I will consider my next steps.
+Merging ministries
+Merges two ministries into one. Saves on administrative costs; in the short term it hurts efficiency and employees.
+Choose two different ministries
+The merger failed
+In the short term efficiency will suffer; in the long term savings are expected.
+Establishing a ministry
+Establishing a new government ministry (from among former ministries). Allows an extra portfolio for a coalition partner; costs administrative expenses.
+The ministry already exists
+Now a minister must be appointed to it.
+Closing a ministry
+Closing a ministry that does not run a service or a budget. Saves administrative costs; the minister loses their portfolio.
+A ministry that runs services cannot be closed
+Coalition funds
+₪1.5 billion for the issues the partner demands. Strengthens stability and loyalty; hurts public image and trust.
+Choose a coalition partner
+That is what was agreed. We will keep supporting the government.
+Bringing the election forward
+Dissolving the Knesseton. The election will be held within about 90 days, and until then the government is a caretaker government.
+-
+The election is already near
+The prime minister dissolved the Knesseton
+The Knesseton dissolved
+The election is in about 3 months. Now everything depends on the campaign.
+Submitting a bill
+Submitting a law to the Knesseton. A government bill goes straight to committee; a private bill starts with a preliminary reading. A majority is needed to pass.
+The law does not exist
+The law is already in force
+Already under debate in the Knesseton
+Not in your ministry's area of responsibility
+The Knesseton dissolved – no legislation until after the election
+Approved as a government bill.
+Not as a government bill. It can be submitted as a private bill.
+Cannot be submitted
+Government bill — goes straight to committee
+Private bill — a preliminary reading next turn
+Repealing a law
+Repealing an existing law. Needs a majority in the Knesseton; the parties that advanced the law will see it as betrayal.
+Only the prime minister can repeal a law
+The law is not in force
+Rallying support for a bill
+Talks with MKs and faction heads to increase support for the bill (+25 to its chances of passing).
+The bill is not active
+Wavering MKs received explanations and promises of later coordination.
+Softening a bill
+A moderate version of the law: more support, less impact.
+The bill was already softened
+Only the initiator can soften it
+The moderate version increases the chance of a majority, but the law's impact is smaller.
+Plenum vote
+Your vote on a bill. Voting against the party line hurts relations with the leader.
+Voting against the faction's position. We will talk about it.
+No-confidence motion
+An attempt to bring down the government. It succeeds only if there is a majority against it and coalition partners are willing to defect.
+You are in the coalition
+Only a party leader
+The government lost a no-confidence vote
+Brought down the government in a no-confidence vote
+The government fell
+The Knesseton is dissolving. Now you must win the election.
+The coalition kept its majority.
+Launching a project
+A national project: costs money over time and improves service and the region when it is completed.
+The project does not exist
+Already under way
+Only the prime minister or the responsible minister
+The project is not your ministry's responsibility
+Cancelling a project
+Halting a project under way. Saves the remaining cost and hurts the region and whoever initiated it.
+You have no authority
+Not found
+Ministry action
+A dedicated ministry action.
+No ministry
+This is not your ministry
+The action does not exist
+The step was not coordinated with me and was not approved in the government.
+This is an action contrary to the principle of collective responsibility.
+I am considering your continued tenure in the government.
+Approved, within the existing budget.
+Requesting a budget supplement
+A request to the prime minister for an increase of about 5% of the ministry's needs. The prime minister decides according to the deficit and the relations with you.
+Only a minister
+Your ministry has no budget item
+Approved. I expect to see results.
+Ministry efficiency +8 and bureaucracy -6. State employees are not happy.
+Efficiency +8 · bureaucracy -6
+Agreement with the workers' committee
+An industrial peace agreement: lowers the chance of a strike in the ministry's area for a year.
+An industrial peace agreement was signed
+The chance of a strike in the area dropped for a year
+The agreement includes improvements in working conditions, at low cost.
+Consulting professionals
+A working session with experts in the field: expertise +5 and reputation +1.
+You studied the field in depth
+The professional understanding will help you in future decisions and interviews.
+Press conference
+A statement and questions from journalists. Your reputation affects the chance it goes well.
+You presented the position clearly and answered the hard questions.
+A question about the ministry's conduct caught you unprepared. The answer sounded evasive.
+You announced a plan that has not yet been coordinated with the party. It sounded good, but now it has to be carried out.
+Announced a plan without coordinating
+A sharp answer to a hard question spread on social media and reached young audiences.
+Studio interview
+A live television interview. It can strengthen you greatly or create a storm. Reputation changes the odds.
+A strong interview: clear positions, precise data. Even critics admitted it was convincing.
+We have a plan
+Attacked me in the studio
+A sharp confrontation with the interviewer. The right-wing base is pleased, centrist voters less so.
+A microphone left open after the interview picked up your criticism of the party leader.
+Criticized me on an open microphone
+An open microphone exposed tension in the party
+A sharp social media post
+A sharp message on social media. Reaches young people quickly; may create a storm.
+A social media post
+The post was widely shared and reached new audiences.
+The post drew sharp criticism and was deleted. Screenshots keep circulating.
+A social media clash
+An attack on a rival
+Direct criticism of a political rival. When you are stronger than they are it works; otherwise it may come back at you.
+Choose a rival
+Attacked me in the media
+This attack proves they have no substantive answers.
+The public will know how to judge.
+I will not respond at this level.
+Touring a region
+A visit in the field: meetings with residents and local authority heads. Improves satisfaction in the region, if the tour goes well.
+Choose a region
+You committed on the spot to an infrastructure project. Residents will check whether it happens.
+Committee work
+In-depth work in committee: expertise +6 and political power +2. Sometimes flaws come to light and make headlines.
+The prime minister is not a member of committees
+You studied the professional material in depth and advanced amendments to legislation.
+Exposed flaws in my ministry
+A committee debate exposed flaws in the conduct of a government ministry
+A sharp clash with the committee chair ended with you being removed from the debate.
+Speech at a demonstration
+A speech at a rally. Strengthens you with the base; if you are in the coalition and it is a demonstration against the government, the prime minister will remember.
+The speech was received enthusiastically and spread in the media.
+Spoke at a demonstration against the government
+The prime minister did not like that.
+The demonstration was small and the speech was barely covered.
+The demonstration ended in clashes with the police, and you were filmed at the scene.
+Clashes at a demonstration; an MK was present
+Leaking information about a rival
+Passing embarrassing information about a rival to the media. It may be exposed, and then it hurts you badly.
+The source's identity was exposed. The damage to your reputation is severe.
+Leaked about me
+The material turned out to be meaningless, and the public sympathized with the rival.
+Publishing a book
+A book about your path and worldview. May strengthen you; chapters about colleagues may hurt relations.
+The book was published
+The book was well received and led to a series of interviews.
+A chapter on government meetings angered three ministers.
+Wrote about me in a book
+A new book reveals tension in the government
+The book did not arouse much interest.
+Volunteer visit
+A visit and volunteering at an aid organization. Strengthens the connection with weaker segments, if it is seen as genuine.
+You spoke with the volunteers and the needy and learned about needs on the ground.
+The visit was seen as a short PR event, and the criticism was published.
+Criticism: a short visit for photo purposes
+Declaring a special situation on the home front
+Emergency powers for the Home Front Command and the government. Increases stability and readiness; hurts the trust of groups that fear harm to democracy.
+The government declared a special situation on the home front
+A special situation on the home front was declared
+Human rights organizations will monitor the use of the powers.
+One-off assistance grant to every household
+₪10 billion one-off grant. Improves mood and increases debt and inflation. Before an election it will be seen as a political move.
+A one-off grant to every household; the opposition: "election bribe"
+The government approved a one-off assistance grant to every household
+A one-off grant was approved
+Address to the nation
+A live prime-time speech. It can unite and strengthen, or be seen as a political speech.
+A unifying, statesmanlike speech. Even critics admitted the tone was right.
+The prime minister's address to the nation: "We will get through this together"
+The speech was seen as an election speech, and was shared mostly in criticism.
+Criticism: a political speech in prime time
+The speech passed without special echoes.
+Proposal to postpone the election
+Extending the Knesseton's term by a year. Under the Basic Law an 80-MK majority is needed. Even if it passes – expect protest and petitions to the High Court.
+The election is still far off
+Caretaker government
+The proposal failed
+The High Court struck down the election postponement law
+The High Court struck down the postponement
+The election will be held on time, and the protest continues.
+The Knesseton approved by a majority of 80 postponing the election by a year
+Postponed the election by a year
+The election was postponed by a year
+The move passed, but the public price is heavy.
+A broad military operation
+A broad military operation with cabinet approval. Calls up reserves and hurts the economy; at first the public rallies, later questions are asked.
+A war is already under way
+Led a broad military operation
+A broad military operation was launched
+Reservists were called up. The home front is preparing, and the economy will be affected in the coming months.
+A personal meeting with a politician
+A personal conversation to strengthen the relationship. Improves relations and loyalty (less so with high-ego people).

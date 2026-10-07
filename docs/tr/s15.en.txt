@@ -1,0 +1,200 @@
+Sound effects and politicians' voices: on or off
+Quiet background music: on or off
+Skip to main content
+🪑 Government of Ishmael
+The decision was made
+Did not pass
+In progress
+Update
+-
+-
+Softened version
+-
+Supporters:
+-
+The decision is yours. The opponents will be offended.
+✅ Approve
+A majority in the meeting decides
+🗳️ Bring to a vote
+8 political capital: an attempt to persuade the opponents
+🗣️ Persuade (🎯8)
+₪0.8B for each opposing ministry – and they are in
+🤝 Offer a deal
+Half the impact, more support
+✏️ Soften the proposal
+✖ Shelve
+-
+Welcome
+Turn summary
+To work
+-
+Cancel
+-
+Time in the game
+Months as prime minister
+-
+-
+-
+-
+-
+-
+-
+-
+-
+🏆 Key achievements
+No special achievements were recorded.
+📉 Key failures
+No special failures were recorded.
+📌 Key moments
+The career was very quiet.
+🧭 Career path
+New career
+Closes the window and returns to the game
+Closes the briefing and starts the turn
+Does nothing. Goes back
+Confirms the action. There is no way back
+Save
+Saves the change
+Remove
+Deletes the key from the browser
+Skip
+Hides the guide. It can be restored from settings
+Next
+To the next step in the guide
+Previous
+To the previous step in the guide
+Finish
+Closes the guide
+More
+Opens more information
+Back
+Returns to the previous screen
+Execute
+Carries out the ministry action: costs political capital, and sometimes needs advance budget approval from the prime minister
+Launch
+Starts a project: the money goes out over the course of the work, and the benefit comes only at the end
+Activate
+Activates the economic tool
+Submit
+Submits the proposal to the Knesseton
+Closes
+Opens the menu
+📍 To the relevant screen
+Opens the government screen and highlights the choice of minister for this ministry
+Opens the party screen and highlights the alliance proposal
+Cut
+Increase
+Lowering
+Raising
+Tax
+Quiet. Suspicious.
+Hide the adviser
+Another piece of advice on this screen
+More advice
+The adviser runs a simulation on several available actions and recommends the most worthwhile
+What should I do?
+Writing a speech
+-
+-
+-
+Stage
+Subject
+Your position
+-
+to
+Tone
+Target audience (optional)
+The general public
+Automatic draft according to the stage, subject, position and tone. It can be edited.
+✍️ Write for me
+Speech text
+-
+-
+🎤 Deliver the speech
+This is a step-by-step guide to all the screens. You can skip at any moment and turn it on again from the "Save and settings" screen. In the top row: the date, the seats in the poll, the coalition, satisfaction, the deficit, political capital (🎯) and the time until the election. Clicking "?" explains each number.
+A regular turn is 4 months. In the 4 months before the election each turn is two weeks of campaign. In each turn you make as many decisions as you want, and then press the next-turn button in the corner. The button shows exactly how much time will pass.
+Almost every action costs political capital. It renews every turn, according to your role and popularity. Some actions are available again only after a few turns – it is written on the button.
+The dashboard
+Here wait decisions with a deadline, emergencies, news and the adviser. A decision you did not answer in time is decided automatically at the end of the turn. After each decision a window opens showing what changed and who responded.
+Six fronts with a threat level. The prime minister and the defense minister plan operations; large operations go to a cabinet vote and are carried out immediately, with results and casualties. Alongside: dialogue channels, mediated ceasefires, confidence-building steps and A/B/C areas.
+Budget and taxes
+The prime minister divides the budget and sets taxes. A change affects the deficit immediately, and the quality of services gradually, over several months. The annual budget must pass in the Knesseton; if it falls – there is an election.
+Growth, unemployment, inflation and debt. The graphs show the trend over time, and each number has an explanation of what drives it.
+Government and coalition
+Appointments, dismissals and merging ministries. The coalition agreement also appears here: each commitment to a partner, its deadline, and whether it was kept. A reminder will arrive before a deadline; a violation angers the partner and may break up the government.
+Legislation
+A private bill starts with a preliminary reading; a government bill goes straight to committee. The process takes several turns (about a year). Each party votes according to its values, and there are red lines that will not be crossed even from inside the coalition. Basic Laws need 61.
+120 seats, the bills under debate and the vote forecast for each party. You can rally support or soften a bill to get a majority.
+Relations between the parties and between you and Knesseton members. Meetings, joint events, mutual legislative support and public defense build ties; attacks wear them down. Good relations help in votes, in recommendations to the President and in forming a coalition.
+Party and campaign
+A party leader runs the campaign: strategy, target audiences, budget, house meetings, spots, debates, internal polls, surplus agreements and mergers. A strategy on an issue that is burning for the public pays off more.
+A minister has dedicated actions for their ministry, indicators and a budget. Requesting extra money requires the prime minister's approval. The prime minister can instruct any minister.
+National projects take months and years (shown on each project). They improve service and the region when they are completed, and in bureaucratic ministries they are delayed.
+A crisis that is not handled gets worse and does damage every turn. Each crisis has several ways of handling it, with a cost and a chance of success.
+The career
+Committee work, interviews, requesting a position, primaries and switching parties. You can give a speech at any moment from the "🎤 Speech" button in the top row – with an automatic draft.
+Elections
+On election day the seats are allocated, the President tasks the person with the most recommendations with forming the government, and there are 28 days (plus 14) to reach 61. Whoever fails – the mandate passes on. You can lose and continue as the opposition.
+Ready
+That's it. The goal: to stay in politics and have influence. The game saves automatically at the end of each turn. Good luck.
+Game guide
+→ Previous
+Next ←
+What does this mean?
+You
+A big decision: may require a government meeting
+Sure?
+How much the state spends beyond what it brings in during a year, as a percentage of GDP. A high deficit increases the debt.
+Above 3% – be careful. Above 5% – the rating agencies wake up.
+National debt
+The state's total debt relative to the size of the economy. High debt = high interest = less money for services.
+Above 80% is a dangerous zone.
+How much the economy grows in a year. Growth raises tax revenue, salaries and satisfaction.
+Affected by taxes, investments, stability and crises.
+The percentage of the labor force that is looking for work and cannot find it. Hurts mainly young people and those with low income.
+How much prices rise in a year. A high deficit and VAT raise it. The central bank (independent!) responds with the interest rate.
+Set by the Bank of Ishmael, not by you. A high interest rate restrains inflation but slows growth and makes debt more expensive.
+Credit rating
+A score that international agencies give the state. Affects the interest we pay on the debt.
+Satisfaction with the government
+A weighted average of the satisfaction of all population groups, together with the government's stability.
+If it stays below 18% for three consecutive turns – the prime minister is removed.
+Coalition stability
+How well the government holds on. Depends on the number of seats, the mood of the partners and crises.
+The "currency" of politics: accumulated every turn according to your role and popularity, and spent on decisions, persuasion and deals.
+Reputation
+How seriously and professionally you are seen. Helps in interviews, in advancement and in getting positions.
+How much the public likes you personally. For a prime minister – tied to satisfaction with the government.
+Loyalty
+The character's attitude toward you. Affected by what you did to them (they remember!), by ideology and by their ministry's budget.
+Political power
+Influence in the party and in the government. Built from role, popularity and experience. Needed for primaries and advancement.
+Seats in the Knesseton out of 120. You need 61 to form a government.
+The threshold
+A party that gets less than 3.25% does not enter the Knesseton at all.
+How much money a service gets compared with what it needs to function "reasonably". Below 100% – quality slowly declines.
+Service quality
+How good the service actually is. Moves slowly toward a target set by funding, ministry efficiency, the minister's expertise and projects.
+What drives growth?
+Low taxes, investment in infrastructure, education and science, political stability and good services raise it. A high deficit, inflation and crises lower it.
+Mainly from income tax, VAT and corporate tax. They grow with the economy and with tax rates.
+State expenditure
+The total budget of all ministries + interest on the debt + national projects.
+Ministry efficiency
+How well the ministry turns money into results. Rises with a professional minister and efficiency programs.
+Party cohesion
+How united the party members are behind the leadership. Low cohesion = defections in votes and revolts.
+Political alliances
+-
+-
+Bloc
+Strength of the alliance
+Dissolve the alliance?
+💔 Dissolve
+Burning now
+Relevant
+Less on the agenda
+-
+-
+-
+Second target audience

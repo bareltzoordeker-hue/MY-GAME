@@ -10,6 +10,7 @@ import { CATEGORY_BY_ID, REGION_BY_ID, TAX_NAMES } from '../../data/world';
 import { LAW_BY_ID } from '../../data/laws';
 import { PROJECT_BY_ID } from '../../data/projects';
 import { NAV } from './Layout';
+import { actionPreview } from '../actionPreview';
 
 /** Common labels that don't carry their own data-tip. Every button explains itself. */
 const FALLBACK: Record<string, string> = {
@@ -41,6 +42,16 @@ export function TipLayer() {
       const el = (e.target as HTMLElement)?.closest?.('[data-tip], button, .side-link') as HTMLElement | null;
       if (!el) { setTip(null); return; }
       let text = el.getAttribute('data-tip') ?? '';
+      const act = el.getAttribute('data-tip-action');
+      if (act) {
+        // action buttons: describe what it does and the expected effect (computed only now, on hover)
+        const g = useGame.getState().game;
+        try {
+          const { id, p } = JSON.parse(act) as { id: string; p: Params };
+          const cost = g ? actionCapital(g, id, p) : 0;
+          if (g) text = `${actionPreview(g, id, p)}${cost ? ` · עולה ${cost} הון פוליטי` : ''}`;
+        } catch { /* keep the static text */ }
+      }
       if (!text && el.tagName === 'BUTTON') {
         const label = (el.textContent ?? '').replace(/[←→⏭🎯\d]/g, '').trim();
         text = FALLBACK[label] ?? Object.entries(FALLBACK).find(([k]) => label.startsWith(k))?.[1] ?? '';

@@ -227,22 +227,22 @@ export function SaveScreen() {
         <div>סטטוס: <b>{status === 'saved' ? '💾 נשמר' : status === 'failed' ? '⚠️ השמירה נכשלה – המשחק בזיכרון, ננסה שוב בתור הבא' : '—'}</b></div>
         <div className="text-sm muted">Seed: {s.seed} · רמת קושי: {s.difficulty} · תור {s.turn}</div>
         <div className="flex flex-wrap gap-2">
-          <button className="btn" onClick={exportSave}>⬇️ ייצוא שמירה</button>
+          <button className="btn" data-tip="מוריד את המשחק השמור כקובץ למחשב שלך, לגיבוי או למעבר למחשב אחר. לא משנה דבר במשחק" onClick={exportSave}>⬇️ ייצוא שמירה</button>
           <label className="btn">⬆️ ייבוא שמירה<input type="file" accept=".json" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) importSave(f); }} /></label>
-          <button className="btn btn-danger" onClick={quit}>🏠 לתפריט הראשי</button>
+          <button className="btn btn-danger" data-tip="חוזר לתפריט הראשי. המשחק נשמר אוטומטית בסוף כל תור, ולכן מה שנעשה אחרי השמירה האחרונה לא יישמר" onClick={quit}>🏠 לתפריט הראשי</button>
         </div>
         {msg && <div className="bad text-sm">{msg}</div>}
       </div>
       <div className="card space-y-2">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm flex-1">🌐 {t('set.language')}</span>
-          {LANGS.map((l) => <button key={l.id} lang={l.id} className={`btn btn-sm ${getLang() === l.id ? 'btn-blue' : ''}`} aria-pressed={getLang() === l.id} onClick={() => setLang(l.id)}>{l.name}</button>)}
+          {LANGS.map((l) => <button key={l.id} lang={l.id} data-tip={l.id === 'he' ? 'ממשק ותוכן בעברית' : l.id === 'en' ? 'Interface and content in English' : 'الواجهة والمحتوى بالعربية'} className={`btn btn-sm ${getLang() === l.id ? 'btn-blue' : ''}`} aria-pressed={getLang() === l.id} onClick={() => setLang(l.id)}>{l.name}</button>)}
         </div>
         <p className="text-xs muted">{t('set.languageNote')}</p>
       </div>
       <div className="card flex items-center justify-between gap-2">
         <span className="text-sm">🎓 מדריך המשחק</span>
-        <button className="btn btn-sm" onClick={() => { resetTutorial(); useGame.getState().setScreen('dashboard'); }}>הצג שוב</button>
+        <button className="btn btn-sm" data-tip="מפעיל מחדש את הסיור המודרך בין המסכים. לא משפיע על מצב המשחק" onClick={() => { resetTutorial(); useGame.getState().setScreen('dashboard'); }}>הצג שוב</button>
       </div>
       <div className="card flex flex-wrap items-center gap-2">
         <span className="text-sm flex-1">🔒 פרטיות ונגישות</span>

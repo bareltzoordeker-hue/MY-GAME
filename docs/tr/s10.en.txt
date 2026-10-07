@@ -1,0 +1,200 @@
+Choose a politician
+Personal meeting
+A good conversation. We will stay in touch.
+I appreciate the outreach.
+We have a lot in common.
+Public backing for the leader
+A statement of support for the party leader. Improves relations with them; slightly hurts your independence in the public's eyes.
+You are the leader
+Backed me in the media
+I appreciate the backing.
+Requesting a position
+An appeal to the leader asking for a position. Succeeds if they trust you (loyalty 58+), you have power (32+) and reputation (40+).
+You already have a position
+The request was rejected
+The time has not yet come. Prove yourself through work.
+Appointed chair of the Finance Committee
+You received a committee chairmanship
+Running for party leadership
+A challenge to the incumbent leader. The chance is set by power, popularity and the support of party members. A loss will cost dearly.
+-
+At least 35 political power is needed
+Ousted me from the party leadership
+You won the primaries
+Chair
+Tried to oust me
+You lost the primaries
+Relations with the leader were badly damaged.
+Switching parties
+Moving to another party. Members of the former party will see it as betrayal; in the new party you will get a place according to your power.
+A leader does not leave their own party
+Choose another party
+Defected from the party
+Resignation
+Retiring from political life. The game ends.
+You resigned
+Rebranding
+A new name, symbol and color for the party. It can give momentum, or confuse voters.
+-
+Name too short
+The new branding was well received.
+Some voters find it hard to recognize the party under its new name.
+Promoting a party member
+Promotion within the party: their power +6 and their loyalty rises. The other members are a little envious.
+Only the party leader
+Only party members
+Promoted in the party
+Thank you for the trust. I will not let you down.
+Demoting a party member
+Demotion within the party: their power -8. They may look for another party.
+Demoted in the party
+The decision is unfair.
+Expulsion from the party
+Expelling a member from the faction. The party loses a seat; if they were disloyal, cohesion rises.
+Expelled from the faction.
+Recruiting an outside candidate
+Adding a well-known professional to the list (₪2 million from the party treasury). Adds momentum; veterans fear dropping down the list.
+Not enough money in the party
+A senior economist
+A veteran journalist
+A hospital director
+A tech company CEO
+A school principal
+Noa
+Michal
+Ronit
+Shira
+Anat
+Hadas
+Guy
+Omer
+Uri
+Yoav
+Amit
+Alon
+Barak
+Shimoni
+Levin
+Azoulay
+Rosen
+Haddad
+Friedman
+Mizrahi
+A senior ministry
+Veteran party members fear dropping down the list.
+Fundraising
+A fundraising event under the party financing law. The amount depends on your popularity.
+All donations were reported to the State Comptroller, in accordance with the law.
+Changing the party line
+Moving the party along one of the axes (right-left, liberal-socialist, religious-secular). Attracts new groups and pushes others away.
+Changed the line
+Toward liberal
+Toward socialist
+Rightward
+Leftward
+Toward religious
+Toward secular
+Joint public event
+A conference, tour or community event together with another MK. Strengthens your bond (+10) and gives both of you exposure. If they are from another bloc – your leader may object.
+Choose an MK
+Joint event
+Relations +10
+Cooperation across political lines is appreciated by the public; in your own political home, not everyone is pleased.
+The bond between you grew stronger.
+Glad about the cooperation.
+Mutual legislative support agreement
+You commit to support one of their bills, and they to yours. Relations +12, and your next bill gets additional support (+15).
+Mutual support agreement
+Relations +12 · support for your bills +15
+If you later vote against one of their bills, they will see it as a violation.
+Done. I trust you.
+Publicly defending a colleague
+Coming to the defense of an MK under attack in the media. Relations +14. If they are controversial – you too will absorb criticism.
+Defended me publicly
+Relations +14
+They are not popular right now, and some of the criticism passed to you as well.
+The backing was received with appreciation.
+I will not forget the backing.
+Helping a party member in the primaries
+Recruiting supporters and registered members for a party member. Relations +18 and their power rises; their rivals in the party will resent it.
+Only your party's members
+Helped me in the primaries
+Relations +18 · moved up the list
+I owe you.
+Party leaders' meeting
+A meeting with the leader of another party to improve relations between the parties. Inter-party relations +12, the leader's loyalty +8. A meeting with an ideological rival raises questions among the base.
+Only a party leader
+The meeting with a party from the other bloc drew criticism from some of your voters.
+Surplus agreement
+A surplus agreement for the coming election: the surplus votes of the two parties are pooled, which may add a seat to one of them. Needs reasonable relations (20+).
+Surplus agreements are signed in the half year before the election
+Relations between the parties are not good enough (20+ required)
+In the allocation of seats, the two parties' surpluses will be calculated together.
+Proposal for a joint run
+Merging lists with a small, close party. Prevents wasted votes below the threshold. Its leader will get the second place on the list. The chance depends on relations and ideological proximity.
+Mergers are made in the months before the election
+Only a party smaller than yours
+We will run alone.
+Only a party leader runs a campaign
+The campaign begins 4 months before the election
+Opening the campaign
+Choosing a strategy, target audiences, budget and slogan for the election campaign.
+The campaign has not started yet
+Choose a strategy
+-
+The issue you chose is not at the top of the agenda right now. The impact will be limited, unless the situation changes.
+The issue you chose interests part of the public.
+House meetings and door to door
+Activists and volunteers in the field (₪0.5 million). Campaign +1.5, and more among your target audiences.
+Thousands of activists in the field
+Campaign +1.5
+Field work builds stable support, especially among undecided voters.
+Negative campaign against a rival party
+Ads against a rival party (₪2 million). It hurts them – but in 35% of cases it comes back at you as a boomerang.
+Choose a rival party
+The negative campaign backfired
+The public saw it as an unfair attack. The more it is used – the higher the risk.
+Internal poll
+An in-depth party poll (₪0.3 million): an accurate estimate of seats and of the issue that most concerns voters.
+Not enough money in the treasury
+Your strategy matches what concerns voters.
+Public endorsement by a public figure
+A well-known public figure (a reserve major general, an economist, an artist) announces support for the party. Campaign +2.
+A well-known artist
+A well-known rabbi
+A mayor in the periphery
+Campaign +2
+Getting voters out on election day
+Transportation, phone banks and activists at the polling stations (₪2 million). Only in the last two weeks. Campaign +3.
+Only in the last two weeks before the election
+The election-day operation is ready
+Campaign +3
+Turnout among your supporters is expected to rise.
+Asked to approve a security-diplomatic move
+The prime minister did not approve
+Not at this stage. The risk is too high.
+This does not match government policy.
+Military operation
+Planning an operation on a particular front. Large operations require the approval of the Political-Security Cabinet.
+Only the prime minister and the defense minister
+Choose an operation type
+The operation does not suit this front
+An operation on this front was already carried out this turn
+With the approval of the Political-Security Cabinet
+Diplomatic move
+Dialogue channels, mediated ceasefires, confidence-building steps, transfers of territory and normalization.
+Only the prime minister, the defense minister and the foreign minister
+Choose a move
+Choose a channel
+Choose a front
+A ceasefire is achieved through the mediation of Egypt, Qatar, Jordan or the US
+Such a move was already made this turn
+Unit training and equipping
+Concentrated training and equipment completion: unit readiness +15 (₪0.3 billion).
+Choose a unit
+The unit is already training this turn
+Speech
+A speech to the public: the stage, the subject, the position and the tone determine who will like what is said and who will object.
+Choose a stage
+Choose a subject
+At a state ceremony the prime minister and the ministers speak

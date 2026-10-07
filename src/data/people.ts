@@ -48,8 +48,8 @@ P('likud', 11, 'יעקב ברדוגו', 'm', 4, 'media', { skills: { media: 85, 
 P('likud', 12, 'מיקי זוהר', 'm', 4, 'culture', { role: 'culture', skills: { culture: 65, management: 60, media: 60 }, look: { hair: 'comb', hairColor: '#1f1f1f' }, bio: 'שר התרבות והספורט' });
 P('likud', 13, 'אלמוג כהן', 'm', 3, 'law', { role: 'deputy:pmo', skills: { law: 55, defense: 50 }, look: { hair: 'bald', beard: 'full', hairColor: '#2a2a2a' } });
 P('likud', 14, 'עמיחי שיקלי', 'm', 3, 'foreign', { role: 'diaspora', skills: { foreign: 60, media: 60 }, look: { hair: 'comb', beard: 'stubble', hairColor: '#2a2a2a' }, bio: 'שר התפוצות' });
-P('likud', 15, 'אלישע מדן', 'm', 1, 'management', { unverified: true });
-P('likud', 16, 'דוד פטר', 'm', 1, 'defense', { unverified: true });
+P('likud', 15, 'אלישע מדן', 'm', 1, 'management');
+P('likud', 16, 'דוד פטר', 'm', 1, 'defense');
 P('likud', 17, 'משה סעדה', 'm', 2, 'law', { mk: true, skills: { law: 65 }, look: { hair: 'bald', hairColor: '#333' } });
 P('likud', 18, 'חיים כץ', 'm', 3, 'welfare', { skills: { welfare: 65, economy: 55 }, look: { hair: 'grey', glasses: true }, bio: 'לשעבר שר הרווחה והכלכלה' });
 P('likud', 19, 'דודי אמסלם', 'm', 4, 'interior', { role: 'regional', skills: { interior: 55, management: 60, media: 65 }, look: { hair: 'bald', hairColor: '#333' }, bio: 'השר לשיתוף פעולה אזורי' });
@@ -59,15 +59,15 @@ P('likud', 22, 'דוד ביטן', 'm', 3, 'economy', { mk: true, skills: { econo
 P('likud', 23, 'שלמה קרעי', 'm', 4, 'media', { mk: true, role: 'communications', skills: { media: 70, science: 50 }, look: { hair: 'kippah', beard: 'stubble', glasses: true, hairColor: '#2a2a2a' }, bio: 'שר התקשורת' });
 P('likud', 24, 'ניר ברקת', 'm', 4, 'economy', { mk: true, role: 'economy', skills: { economy: 80, management: 75, science: 60 }, look: { hair: 'grey', hairColor: '#cfcfcf' }, bio: 'שר הכלכלה, לשעבר ראש עיריית ירושלים' });
 P('likud', 25, 'גילה גמליאל', 'f', 3, 'science', { mk: true, role: 'science', skills: { science: 65, management: 55 }, look: { hair: 'long', hairColor: '#3b2a1a' }, bio: 'שרת החדשנות, המדע והטכנולוגיה' });
-P('likud', 26, 'אלי גולדשמידט', 'm', 1, 'management', { unverified: true });
+P('likud', 26, 'אלי גולדשמידט', 'm', 1, 'management');
 P('likud', 27, 'ארז תדמור', 'm', 2, 'media', { skills: { media: 60 } });
-P('likud', 28, 'שלמה לרנר', 'm', 1, 'economy', { unverified: true });
-P('likud', 29, 'איציק בונצל', 'm', 1, 'interior', { unverified: true });
-P('likud', 30, 'משה בנימין פרץ', 'm', 1, 'management', { unverified: true });
-P('likud', 31, 'שוקי אוחנה', 'm', 1, 'interior', { unverified: true });
+P('likud', 28, 'שלמה יוסף לרנר', 'm', 1, 'economy');
+P('likud', 29, 'יצחק בונצל', 'm', 1, 'interior');
+P('likud', 30, 'משה בנימין פרץ', 'm', 1, 'management');
+P('likud', 31, 'שוקי אוחנה', 'm', 1, 'interior');
 P('likud', 32, 'זאב אלקין', 'm', 3, 'housing', { mk: true, skills: { housing: 70, foreign: 60, management: 70 }, look: { hair: 'comb', glasses: true, beard: 'stubble', hairColor: '#4a4a4a' }, bio: 'שר, לשעבר שר הבינוי והשיכון' });
 P('likud', 33, 'עמית הלוי', 'm', 2, 'defense', { mk: true, skills: { defense: 55 } });
-P('likud', 34, 'קרן אטיאס-בובליל', 'f', 1, 'welfare', { unverified: true });
+P('likud', 34, 'קרן אטיאס בובליל', 'f', 1, 'welfare');
 P('likud', 35, 'אביחי בוארון', 'm', 2, 'law', { mk: true, skills: { law: 55 }, look: { hair: 'kippah', beard: 'stubble' } });
 P('likud', 36, 'אפי נוה', 'm', 2, 'law', { skills: { law: 70 }, bio: 'לשעבר ראש לשכת עורכי הדין' });
 P('likud', 37, 'שרון סעדה', 'f', 1, 'welfare', { unverified: true });
@@ -121,19 +121,19 @@ P('together', 7, 'מיכל הירש נגרי', 'f', 1, 'management', { skills: {
 P('together', 8, 'איתן גינזבורג', 'm', 2, 'interior', { mk: true, skills: { interior: 65, management: 65 }, bio: 'לשעבר ראש עירייה' });
 P('together', 9, 'מירב כהן', 'f', 3, 'welfare', { mk: true, skills: { welfare: 65, education: 55 }, bio: 'לשעבר השרה לשוויון חברתי' });
 P('together', 10, 'יונתן שלו', 'm', 2, 'defense', { skills: { defense: 45 }, look: { hair: 'comb', hairColor: '#3b2a1a' } });
-P('together', 11, 'ברוריה נעים ארמן', 'f', 1, 'welfare', { unverified: true });
+P('together', 11, 'ברוריה נעים ארמן', 'f', 1, 'welfare');
 P('together', 12, 'רם בן ברק', 'm', 3, 'defense', { mk: true, skills: { defense: 85, foreign: 70 }, look: { hair: 'bald', glasses: true }, bio: 'לשעבר המשנה לראש המוסד' });
-P('together', 13, 'אמיר סטרוגו', 'm', 1, 'economy', { unverified: true });
+P('together', 13, 'אמיר סטרוגו', 'm', 1, 'economy');
 P('together', 14, 'נאור שירי', 'm', 2, 'economy', { mk: true, skills: { economy: 55 } });
-P('together', 15, 'ניסן זאבי', 'm', 1, 'management', { unverified: true });
+P('together', 15, 'ניסן זאבי', 'm', 1, 'management');
 P('together', 16, 'ולדימיר בליאק', 'm', 2, 'finance', { mk: true, skills: { finance: 60, economy: 55 } });
-P('together', 17, 'אורלי אלידן-הראל', 'f', 1, 'education', { unverified: true });
+P('together', 17, 'אורלי אלידן-הראל', 'f', 1, 'education');
 P('together', 18, 'יוראי להב-הרצנו', 'm', 2, 'housing', { mk: true, skills: { housing: 55 } });
-P('together', 19, 'שחר ורון', 'm', 1, 'economy', { unverified: true });
+P('together', 19, 'שחר ורון', 'm', 1, 'economy');
 P('together', 20, 'יסמין פרידמן', 'f', 2, 'welfare', { mk: true, skills: { welfare: 50 } });
-P('together', 21, 'אסתי אילון קובו', 'f', 1, 'education', { unverified: true });
-P('together', 22, 'ג׳רמי סלטן', 'm', 1, 'foreign', { unverified: true });
-P('together', 23, 'נטע אטיאס', 'f', 1, 'welfare', { unverified: true });
+P('together', 21, 'אסתי אילון קובו', 'f', 1, 'education');
+P('together', 22, 'ג׳רמי סלטן', 'm', 1, 'foreign');
+P('together', 23, 'נטע אטיאס מויאל', 'f', 1, 'welfare');
 P('together', 24, 'צבי פלוטניצקי', 'm', 1, 'management', { unverified: true });
 P('together', 25, 'משה טור-פז', 'm', 2, 'education', { mk: true, skills: { education: 60 }, look: { hair: 'kippah' } });
 P('together', 26, 'אולסיה קנטור', 'f', 1, 'welfare', { unverified: true });
@@ -151,19 +151,19 @@ P('democrats', 3, 'גלעד קריב', 'm', 3, 'law', { mk: true, skills: { law:
 P('democrats', 4, 'אפרת רייטן', 'f', 2, 'law', { mk: true, skills: { law: 60 } });
 P('democrats', 5, 'יאיא פינק', 'm', 2, 'welfare', { skills: { welfare: 50 } });
 P('democrats', 6, 'גבי לסקי', 'f', 2, 'law', { skills: { law: 80 }, look: { hair: 'curly', hairColor: '#7a7a7a' }, bio: 'עורכת דין, לשעבר חברת כנסת' });
-P('democrats', 7, 'עמרי רונן', 'm', 1, 'management', { unverified: true });
+P('democrats', 7, 'עמרי רונן', 'm', 1, 'management');
 P('democrats', 8, 'מיכל רוזין', 'f', 2, 'welfare', { skills: { welfare: 70 }, bio: 'לשעבר חברת כנסת' });
 P('democrats', 9, 'משה רדמן', 'm', 3, 'economy', { skills: { economy: 60, media: 65 }, look: { hair: 'long', beard: 'stubble' } });
-P('democrats', 10, 'סומיה בשיר', 'f', 1, 'education', { unverified: true });
+P('democrats', 10, 'סומיה בשיר', 'f', 1, 'education');
 P('democrats', 11, 'נמרוד שפר', 'm', 2, 'defense', { skills: { defense: 80 }, bio: 'אלוף במילואים' });
 P('democrats', 12, 'מורן זר קצנשטיין', 'f', 2, 'media', { skills: { media: 55 } });
 P('democrats', 13, 'אבי דבוש', 'm', 2, 'welfare', { skills: { welfare: 60 } });
 P('democrats', 14, 'אמילי מואטי', 'f', 2, 'law', { skills: { law: 55 }, bio: 'לשעבר חברת כנסת' });
 P('democrats', 15, 'תומר אביטל', 'm', 1, 'media', { skills: { media: 60 } });
-P('democrats', 16, 'נאוה רוזיליו', 'f', 1, 'welfare', { unverified: true });
+P('democrats', 16, 'נאוה רוזיליו', 'f', 1, 'welfare');
 P('democrats', 17, 'רם שפע', 'm', 2, 'education', { skills: { education: 55 }, bio: 'לשעבר חבר כנסת' });
-P('democrats', 18, 'עלי סלאלחה', 'm', 1, 'education', { unverified: true });
-P('democrats', 19, 'רתם סיון', 'f', 1, 'welfare', { unverified: true });
+P('democrats', 18, 'עלי סלאלחה', 'm', 1, 'education');
+P('democrats', 19, 'רתם סיון', 'f', 1, 'welfare');
 P('democrats', 20, 'ערן עציון', 'm', 2, 'foreign', { skills: { foreign: 70 } });
 P('democrats', 0, 'מרב מיכאלי', 'f', 3, 'transport', { mk: true, skills: { transport: 65, media: 70 }, look: { hair: 'long', hairColor: '#cfa070' }, bio: 'לשעבר שרת התחבורה' });
 
@@ -173,12 +173,12 @@ P('shas', 2, 'ינון אזולאי', 'm', 2, 'welfare', { mk: true, skills: { w
 P('shas', 3, 'מיכאל מלכיאלי', 'm', 3, 'interior', { mk: true, skills: { interior: 65 }, look: { hair: 'kippah', beard: 'full', hairColor: '#111' }, bio: 'לשעבר השר לשירותי דת' });
 P('shas', 4, 'יואב בן-צור', 'm', 3, 'welfare', { mk: true, skills: { welfare: 70 }, look: { hair: 'kippah', beard: 'full', hairColor: '#222' }, bio: 'לשעבר שר הרווחה' });
 P('shas', 5, 'חיים ביטון', 'm', 2, 'education', { mk: true, skills: { education: 60 }, look: { hair: 'kippah', beard: 'full', glasses: true, hairColor: '#111' } });
-P('shas', 6, 'דרור עמוס', 'm', 1, 'interior', { unverified: true, look: { hair: 'kippah', beard: 'full' } });
+P('shas', 6, 'דרור עמוס', 'm', 1, 'interior', { look: { hair: 'kippah', beard: 'full' } });
 P('shas', 7, 'משה אבוטבול', 'm', 2, 'interior', { mk: true, skills: { interior: 60 }, look: { hair: 'kippah', beard: 'full', hairColor: '#222' }, bio: 'לשעבר ראש עירייה' });
 P('shas', 8, 'אוריאל בוסו', 'm', 3, 'health', { mk: true, skills: { health: 65 }, look: { hair: 'kippah', beard: 'full', hairColor: '#111' }, bio: 'לשעבר שר הבריאות' });
 P('shas', 9, 'יוסי טייב', 'm', 2, 'welfare', { mk: true, skills: { welfare: 50 }, look: { hair: 'kippah', beard: 'full' } });
 P('shas', 10, 'יונתן מישרקי', 'm', 2, 'interior', { mk: true, look: { hair: 'kippah', beard: 'full' } });
-P('shas', 11, 'יוסף אלנתנוב', 'm', 1, 'welfare', { unverified: true, look: { hair: 'kippah', beard: 'full' } });
+P('shas', 11, 'יוסי אילנתנוב', 'm', 1, 'welfare', { look: { hair: 'kippah', beard: 'full' } });
 P('shas', 12, 'ארז מלול', 'm', 2, 'interior', { mk: true, look: { hair: 'kippah', beard: 'full' } });
 
 // ---------------- יהדות התורה ----------------
@@ -187,12 +187,12 @@ P('utj', 1, 'יעקב אשר', 'm', 3, 'interior', { mk: true, skills: { interio
 P('utj', 2, 'יצחק גולדקנופף', 'm', 4, 'housing', { mk: true, skills: { housing: 60 }, look: { ...hat, hairColor: '#9a9a9a' }, bio: 'לשעבר שר הבינוי והשיכון' });
 P('utj', 3, 'יצחק פינדרוס', 'm', 2, 'finance', { mk: true, skills: { finance: 55 }, look: { ...hat, glasses: true } });
 P('utj', 4, 'מאיר פרוש', 'm', 3, 'interior', { mk: true, skills: { interior: 60 }, look: { ...hat, hairColor: '#d4d4d4' }, bio: 'לשעבר שר' });
-P('utj', 5, 'משה רוזנטל', 'm', 1, 'interior', { unverified: true, look: hat });
-P('utj', 6, 'אליקים שטארק', 'm', 1, 'welfare', { unverified: true, look: hat });
-P('utj', 7, 'יהודה וייספיש', 'm', 1, 'education', { unverified: true, look: hat });
+P('utj', 5, 'משה רוזנטל', 'm', 1, 'interior', { look: hat });
+P('utj', 6, 'אליקים שטארק', 'm', 1, 'welfare', { look: hat });
+P('utj', 7, 'יהודה וייספיש', 'm', 1, 'education', { look: hat });
 P('utj', 8, 'יעקב טסלר', 'm', 2, 'welfare', { mk: true, look: hat });
-P('utj', 9, 'דוד זלץ', 'm', 1, 'interior', { unverified: true, look: hat });
-P('utj', 10, 'דוד אוחנה', 'm', 1, 'welfare', { unverified: true, look: hat });
+P('utj', 9, 'דוד זלץ', 'm', 1, 'interior', { look: hat });
+P('utj', 10, 'דוד אוחנה', 'm', 1, 'welfare', { look: hat });
 P('utj', 11, 'משה רוט', 'm', 2, 'welfare', { mk: true, look: hat });
 P('utj', 0, 'משה גפני', 'm', 4, 'finance', { mk: true, skills: { finance: 70 }, look: { ...hat, hairColor: '#e0e0e0', glasses: true }, bio: 'לשעבר יו״ר ועדת הכספים' });
 
@@ -204,9 +204,9 @@ P('otzma', 4, 'עמיחי אליהו', 'm', 2, 'culture', { mk: true, role: 'her
 P('otzma', 5, 'לימור סון הר-מלך', 'f', 2, 'interior', { mk: true, skills: { interior: 55 }, look: { hair: 'scarf', hairColor: '#3b2a5a' } });
 P('otzma', 6, 'יצחק קרויזר', 'm', 2, 'interior', { mk: true, look: { hair: 'kippah', beard: 'full' } });
 P('otzma', 7, 'חנמאל דורפמן', 'm', 2, 'management', { skills: { management: 50 }, look: { hair: 'kippah', beard: 'full' } });
-P('otzma', 8, 'צחי יצחק אליהו', 'm', 1, 'interior', { unverified: true, look: { hair: 'kippah' } });
-P('otzma', 9, 'יוסי גולדנברגר', 'm', 1, 'interior', { unverified: true, look: { hair: 'kippah' } });
-P('otzma', 10, 'איתיאל ניימן', 'm', 1, 'interior', { unverified: true, look: { hair: 'kippah' } });
+P('otzma', 8, 'צחי יצחק אליהו', 'm', 1, 'interior', { look: { hair: 'kippah' } });
+P('otzma', 9, 'יוסי גולדנברגר', 'm', 1, 'interior', { look: { hair: 'kippah' } });
+P('otzma', 10, 'איתיאל ניימן', 'm', 1, 'interior', { look: { hair: 'kippah' } });
 P('otzma', 0, 'צביקה פוגל', 'm', 2, 'defense', { mk: true, skills: { defense: 65 }, look: { hair: 'grey', beard: 'stubble' }, bio: 'תת-אלוף במילואים' });
 
 // ---------------- הציונות הדתית-זהות ----------------
@@ -225,24 +225,24 @@ P('rzp', 0, 'אופיר סופר', 'm', 2, 'interior', { mk: true, role: 'aliyah
 // ---------------- ישראל ביתנו ----------------
 P('yb', 1, 'אביגדור ליברמן', 'm', 5, 'finance', { mk: true, skills: { finance: 80, defense: 80, foreign: 70 }, look: { hair: 'bald', beard: 'full', hairColor: '#9a9a9a', brows: 'flat' }, bio: 'יו״ר ישראל ביתנו, לשעבר שר הביטחון והאוצר' });
 P('yb', 2, 'רפי בן שטרית', 'm', 2, 'interior', { skills: { interior: 60 }, bio: 'ראש עירייה' });
-P('yb', 3, 'טליה לנקרי', 'f', 1, 'welfare', { unverified: true });
+P('yb', 3, 'טליה לנקרי', 'f', 1, 'welfare');
 P('yb', 4, 'עודד פורר', 'm', 3, 'agriculture', { mk: true, skills: { agriculture: 70 }, look: { hair: 'comb', glasses: true }, bio: 'לשעבר שר החקלאות' });
 P('yb', 5, 'יוליה מלינובסקי', 'f', 2, 'welfare', { mk: true, skills: { welfare: 55 } });
-P('yb', 6, 'שרון שרעבי', 'm', 1, 'management', { unverified: true });
+P('yb', 6, 'שרון שרעבי', 'm', 1, 'management');
 P('yb', 7, 'חמד עמאר', 'm', 2, 'finance', { mk: true, skills: { finance: 55 }, bio: 'לשעבר שר במשרד האוצר' });
 P('yb', 8, 'יבגני סובה', 'm', 2, 'media', { mk: true, skills: { media: 55 } });
-P('yb', 9, 'אלוירה קוליחמן', 'f', 1, 'welfare', { unverified: true });
+P('yb', 9, 'אלוירה קוליחמן', 'f', 1, 'welfare');
 P('yb', 10, 'דן אילוז', 'm', 2, 'foreign', { mk: true, skills: { foreign: 55 } });
-P('yb', 11, 'לילי בן עמי', 'f', 1, 'welfare', { unverified: true });
+P('yb', 11, 'לילי בן עמי', 'f', 1, 'welfare');
 
 // ---------------- הרשימה המשותפת ----------------
 P('joint', 1, 'יוסף ג׳בארין', 'm', 2, 'law', { skills: { law: 75 }, look: { glasses: true, hair: 'comb' }, bio: 'לשעבר חבר כנסת' });
 P('joint', 2, 'אחמד טיבי', 'm', 4, 'health', { mk: true, skills: { health: 60, media: 75 }, look: { hair: 'grey', beard: 'stubble' }, bio: 'רופא, חבר כנסת ותיק' });
-P('joint', 3, 'פאתן ג׳טאס', 'f', 1, 'education', { unverified: true });
+P('joint', 3, 'פאתן ג׳טאס', 'f', 1, 'education');
 P('joint', 4, 'בכר עואודה', 'm', 1, 'welfare', { unverified: true });
 P('joint', 5, 'עופר כסיף', 'm', 3, 'economy', { mk: true, skills: { economy: 50 }, look: { hair: 'grey', beard: 'full' } });
 P('joint', 6, 'יוסף עטאונה', 'm', 2, 'welfare', { skills: { welfare: 50 }, bio: 'לשעבר חבר כנסת' });
-P('joint', 7, 'מהא כרכבי-סבאח', 'f', 1, 'education', { unverified: true });
+P('joint', 7, 'מהא כרכבי-סבאח', 'f', 1, 'education');
 P('joint', 8, 'אחמד דראושה', 'm', 1, 'health', { unverified: true });
 P('joint', 9, 'נהאיה ושאחי', 'f', 1, 'welfare', { unverified: true });
 P('joint', 10, 'חסן נסאסרה', 'm', 1, 'interior', { unverified: true });
@@ -262,7 +262,7 @@ P('raam', 7, 'אברהים אל טורי', 'm', 1, 'welfare', { unverified: true
 P('bluewhite', 1, 'בני גנץ', 'm', 5, 'defense', { mk: true, skills: { defense: 90, management: 70 }, look: { hair: 'grey', hairColor: '#cfcfcf' }, bio: 'יו״ר כחול לבן, לשעבר שר הביטחון והרמטכ״ל' });
 P('bluewhite', 2, 'פנינה תמנו-שטה', 'f', 3, 'interior', { mk: true, skills: { interior: 60, welfare: 55 }, bio: 'לשעבר שרת העלייה והקליטה' });
 P('bluewhite', 3, 'עליזה בלוך', 'f', 2, 'interior', { skills: { interior: 60 }, bio: 'לשעבר ראש עירייה' });
-P('bluewhite', 4, 'רועי קונקול', 'm', 1, 'management', { unverified: true });
+P('bluewhite', 4, 'רועי קונקול', 'm', 1, 'management');
 P('bluewhite', 6, 'אלון שוסטר', 'm', 2, 'agriculture', { mk: true, skills: { agriculture: 60 } });
 
 // ---------------- המילואימניקים והמפלגה הכלכלית ----------------

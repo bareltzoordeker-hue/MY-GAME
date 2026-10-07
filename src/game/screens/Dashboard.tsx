@@ -146,7 +146,7 @@ function AdvisorCard() {
           <div className="bubble">{tips[0].icon} {tips[0].text}</div>
           {tips[0].screen && <div><DecideButton tip={{ text: tips[0].text, screen: tips[0].screen }} /></div>}
           {tips.slice(1).map((t) => (
-            <button key={t.text} className="text-xs muted text-right block hover:underline" style={{ background: 'none', border: 0, cursor: t.screen ? 'pointer' : 'default' }} onClick={() => t.screen && setScreen(t.screen as never)}>
+            <button key={t.text} className="text-xs muted text-right block hover:underline" data-tip={t.screen ? 'עצה נוספת מהיועץ. לחיצה פותחת את המסך שבו אפשר לטפל בעניין, בלי לבצע פעולה' : 'עצה נוספת מהיועץ, לקריאה בלבד'} style={{ background: 'none', border: 0, cursor: t.screen ? 'pointer' : 'default' }} onClick={() => t.screen && setScreen(t.screen as never)}>
               {t.icon} {t.text}
             </button>
           ))}
@@ -210,7 +210,7 @@ function News() {
   const setScreen = useGame((x) => x.setScreen);
   const items = s.news.slice(0, 6);
   return (
-    <Section title="חדשות" icon="📰" right={<button className="btn btn-sm btn-ghost" onClick={() => setScreen('news')}>כל החדשות ←</button>}>
+    <Section title="חדשות" icon="📰" right={<button className="btn btn-sm btn-ghost" data-tip="פותח את מסך החדשות המלא, עם סינון לפי טובות ורעות" onClick={() => setScreen('news')}>כל החדשות ←</button>}>
       {!items.length ? <Empty icon="🗞️" text="אין כותרות חדשות." /> : (
         <ul className="space-y-2">
           {items.map((n) => (
@@ -235,7 +235,7 @@ function Politics() {
   const pm = s.politicians[s.government.pmId];
   const parties = Object.values(s.parties).filter((p) => p.seats > 0 || seats[p.id] > 0).sort((a, b) => b.seats - a.seats);
   return (
-    <Section title="פוליטיקה" icon="🏟️" right={<button className="btn btn-sm btn-ghost" onClick={() => setScreen('polls')}>סקרים ←</button>}>
+    <Section title="פוליטיקה" icon="🏟️" right={<button className="btn btn-sm btn-ghost" data-tip="פותח את מסך הסקרים: מנדטים לכל מפלגה, מגמות ומי הכי כועס" onClick={() => setScreen('polls')}>סקרים ←</button>}>
       <div className="grid grid-cols-3 gap-2 mb-3 text-center">
         <div className="inset"><div className="label">קואליציה</div><div className={`font-black text-xl num ${coalitionSeats(s) < 61 ? 'bad' : ''}`}>{coalitionSeats(s)}</div></div>
         <div className="inset"><div className="label">יציבות</div><div className="font-black text-xl num">{s.government.stability.toFixed(0)}</div></div>
@@ -324,12 +324,12 @@ function RoleCard() {
   return (
     <Section title="פעולות מהירות" icon="⚡">
       <div className="grid grid-cols-2 gap-2">
-        <button className="btn" onClick={() => setScreen('budget')}>💰 תקציב ומסים</button>
-        <button className="btn" onClick={() => setScreen('government')}>🪑 מינויים וממשלה</button>
-        <button className="btn" onClick={() => setScreen('laws')}>📜 חקיקה</button>
-        <button className="btn" onClick={() => setScreen('projects')}>🏗️ פרויקטים לאומיים</button>
+        <button className="btn" data-tip="פותח את מסך התקציב והמסים, שם מחלקים כסף בין המשרדים ומשנים מסים. כל שינוי משפיע על הגירעון ועל השירותים" onClick={() => setScreen('budget')}>💰 תקציב ומסים</button>
+        <button className="btn" data-tip="פותח את מסך הממשלה: מינוי ופיטורי שרים, איחוד משרדים וכספים לשותפות הקואליציה" onClick={() => setScreen('government')}>🪑 מינויים וממשלה</button>
+        <button className="btn" data-tip="פותח את מסך החוקים, שם מגישים חוקים חדשים או מבטלים קיימים. החקיקה לוקחת כמה תורות" onClick={() => setScreen('laws')}>📜 חקיקה</button>
+        <button className="btn" data-tip="פותח את מסך הפרויקטים: כבישים, רכבות ובתי חולים שעולים כסף לאורך זמן ומשפרים שירות כשהם מסתיימים" onClick={() => setScreen('projects')}>🏗️ פרויקטים לאומיים</button>
         <ActionButton id="press_conference" icon="🎙️">מסיבת עיתונאים</ActionButton>
-        <button className="btn" onClick={() => setScreen('party')}>🎌 {isPartyLeader(s) ? 'המפלגה' : 'מפלגה'}</button>
+        <button className="btn" data-tip="פותח את מסך המפלגה: קמפיין, הבטחות בחירות, מיתוג ובריתות עם מפלגות אחרות" onClick={() => setScreen('party')}>🎌 {isPartyLeader(s) ? 'המפלגה' : 'מפלגה'}</button>
       </div>
       {!s.budget.passed && <div className="inset mt-3 text-sm flex items-center justify-between gap-2"><span>📒 תקציב {s.budget.fiscalYear} ממתין לאישור</span><ActionButton id="submit_budget" className="btn btn-sm btn-primary">הגש</ActionButton></div>}
       <div className="mt-3"><PartyChip party={party} seats={party.seats} /></div>

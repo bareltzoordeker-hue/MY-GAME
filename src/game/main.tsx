@@ -6,6 +6,9 @@ import './styles/game.css';
 import '../shared/consent/banner';
 import '../shared/a11y/menu';
 import './a11y';
+import { initContentTranslation } from '../shared/i18n/contentTranslator';
+
+initContentTranslation();
 
 if (import.meta.env.DEV && location.search.includes('shot=')) void import('./devShots').then((m) => m.runShotMode());
 

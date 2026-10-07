@@ -13,7 +13,8 @@
     "test": "vitest run",
     "typecheck": "tsc -b",
     "assets:generate": "vite-node scripts/gen-assets.tsx",
-    "assets:optimize": "node scripts/optimize-images.mjs"
+    "assets:optimize": "node scripts/optimize-images.mjs",
+    "i18n:build": "node scripts/build-content-dict.mjs"
   },
   "dependencies": {
     "@fontsource/rubik": "^5.3.0",

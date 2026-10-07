@@ -1,0 +1,200 @@
+Bald
+Long hair
+Hair up
+Head covering
+Dana Cohen
+Danny Cohen
+Game creation steps
+Around the threshold
+-
+Not on the list
+An unrealistic place according to the polls
+Choose from the list
+The character's name
+Gender
+Male politician
+Female politician
+-
+Play with a guide
+– Step-by-step explanation of every screen and every action. Can be turned on again in any game from the settings screen.
+Average travel time
+Road congestion
+Train punctuality
+Km of rail
+Satisfaction with transportation
+Students per class
+-
+-
+-
+Wait in the emergency room
+Beds per 1,000
+-
+-
+-
+Readiness
+Reserve days per year
+Average apartment price
+-
+Poverty rate
+Risk of outages
+Renewable energy
+Days waiting for service
+All the ministry's actions
+All
+Exceptional steps: big impact, sharp reactions, and sometimes without the prime minister's approval
+Acting on your own: it happens even without approval, but the prime minister and the coalition will not forgive
+⚠️ Without approval
+🎲 The outcome is not known in advance
+Execute (exceptional step)
+You have no ministry. Yet.
+As prime minister you can instruct the minister (costs 2 more capital).
+Your ministry. Your budget. Your problems.
+Choose a ministry to view
+Snapshot
+-
+Efficiency
+-
+Day-to-day management
+🙏 Budget request from the prime minister
+⚙️ Efficiency drive
+🤝 Meeting with the unions
+🧑‍🔬 Professional consultation
+🎙️ Press conference
+Projects in the field
+Media headlines about what happened in recent turns.
+Bad
+Good
+General
+No headlines.
+National projects
+Under way
+No project is under way.
+Cancel? The region will remember.
+🛑 Cancel
+🏗️ National projects are launched by the prime minister and the ministers, each in their own ministry's area. As a Knesseton member you can demand a project for your region in the media, or criticize a neglected region (career screen).
+Can be launched
+There are no open projects in your area.
+Completed
+Crises are born of the state of the country. Neglected service = strike. Deficit = rating.
+Event log
+🔒 The crisis is managed by
+. All that is left for you is to respond in the media:
+Calm the public
+Demand a solution at a press conference
+🥊 Attack the prime minister
+-
+Committee chair
+Party leader
+Building a name
+Field for committee work
+📺 Interview
+🐦 Tweet
+📢 Speech at a demonstration
+🍲 Filmed volunteering
+📕 Memoir
+🏝️ Reality show
+Advance
+🙌 Backing the leader
+Primaries against the leader. A loss will cost dearly.
+⚔️ Challenge
+Party to switch to
+Switching to a party…
+Switch parties? "Jumper" is not a compliment.
+🦘 Switch
+Resign? That is the end of the game.
+🚪 Resignation
+Path and moments
+Invalid file
+We could not save the file in the browser
+We could not read the file
+The game saves automatically at the end of each turn (in the browser).
+-
+⬇️ Export save
+⬆️ Import save
+🏠 To the main menu
+🎓 Game guide
+Show again
+🔒 Privacy and accessibility
+Opens the cookie notice to change the choice
+🍪 Cookie settings
+The site's accessibility statement
+♿ Accessibility statement
+Privacy policy
+Privacy policy
+Loyalty to you
+Wants:
+Remembers:
+💬 Chat
+☕ Personal meeting
+🥊 Attack
+🗂️ Leak about them
+The deadline has arrived
+The coalition agreement
+-
+Kept
+Breached
+Open
+The coalition
+Dissolve the Knesseton? The election will be held within about 90 days.
+🗳️ Bring the election forward
+Ministers and ministries
+-
+Appointing a new minister to the ministry: the numbers show expertise in the field and political power
+Appoint a minister…
+National steps
+Only for the prime minister
+-
+🎥 Address to the nation
+🚨 Special situation on the home front
+💵 One-off grant to every household
+⏸️ Proposal to postpone the election
+💥 Broad military operation
+Approve? This step has broad and irreversible consequences.
+Government structure
+First ministry to merge
+Ministry A
+Second ministry to merge
+Ministry B
+🧩 Merge
+Preliminary reading
+Committee
+Third reading
+120 seats. A majority is needed to pass a law or form a government.
+The plenum
+Bills under debate
+No bills under debate. Submit a law from the laws screen.
+Softened
+Government
+-
+-
+📣 Rally support
+🧈 Soften
+For
+Against
+Recent votes
+Laws and reforms
+A law passes preliminary → committee → third reading. Big ones require a government meeting.
+As a minister you submit only laws in your ministry's area. The prime minister decides whether it is a government bill.
+As a Knesseton member you submit private bills. Without the coalition's support they fall in the preliminary reading.
+Possible proposals
+Reform
+🧨 Repeal the law
+-
+👎 Opposes
+🤷 Undecided
+📝 Submit
+Economic left
+Economic right
+Hawkish
+Secular
+Religious
+-
+Cohesion
+-
+-
+Branding and line
+Party name
+Party symbol (emoji)
+🌟 Recruit a star
+Recommendations and promises
+-

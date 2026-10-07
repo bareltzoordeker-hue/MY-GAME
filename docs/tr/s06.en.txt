@@ -1,0 +1,200 @@
+Self-employed
+Employees
+Public employees
+Students
+Retirees
+Welfare and social security
+Police
+Science and innovation
+Culture and sports
+Government apparatus
+Income tax
+VAT
+Corporate tax
+Government services
+The Galilee and the north
+The Galilee, the valleys and the Golan Heights. Near the northern border.
+Haifa and the Krayot
+The northern metropolis, the port and industry.
+The Sharon
+The Sharon cities and the moshavim.
+Gush Dan
+The economic center. High cost of living and traffic congestion.
+Israeli communities alongside a Palestinian population (Areas A, B, C).
+Jerusalem
+The capital. A diverse and complex population.
+The Shfela
+Cities of the Shfela and the south-center.
+The Negev
+Beer Sheva, the Gaza Envelope, the Bedouin communities and the development towns.
+Eilat and the Arava
+Eilat, the Arava and the agricultural moshavim.
+Easy
+A stable economy, loyal partners and fewer crises.
+Normal
+A challenging political and economic situation, as in reality.
+Hard
+A high deficit, a fragile coalition and a hostile media.
+Extreme
+Frequent crises, aggressive rivals and a volatile economy.
+Daily newspaper
+News broadcast
+News website
+Business newspaper
+Current-affairs program
+Radio
+Social networks
+Political commentator
+The advisor
+The strategic advisor
+This is the time to build a campaign, alliances and promises that can be kept.
+This is the time to strengthen your standing in the party ahead of the list being formed.
+Your political power is low. Committee work, interviews and meetings with colleagues will strengthen your standing.
+You have power and reputation. You can ask the leader for a position, or consider running for the party leadership.
+You have accumulated a lot of political capital. A good time to push a big move: a law, a reform or a project.
+Satisfaction with the government is high. An opportunity to advance a reform that needs public support.
+There is no urgent issue at the moment. You can move on to the next turn or push an initiative of your own.
+Small effect
+The prime minister allocates the budget. You can ask for an addition – the chance rises when he likes you and the deficit is low.
+The prime minister allocates the budget, and ministers can ask for an addition for their ministry. As a Knesseton member, your influence goes through committees and the media.
+This is a caretaker government until the election. After the election a coalition of at least 61 must be formed.
+and your party is in favor
+A private bill by an opposition MK almost always fails. Voting alliances change that.
+The campaign has not opened yet: choose a strategy on an issue that is burning for the public, target groups and a budget.
+Election period: rallies and advertising raise support, but with diminishing returns. Endorsement commitments matter for forming the government.
+Efficiency program
+The ministry is efficient. Now is the time for a reform with a headline.
+An agreement with the workers' union before a reform prevents strikes for a year. It is a cheap step that prevents disruptions.
+As prime minister you can instruct any minister. It costs 2 more capital – and annoys the minister.
+Projects are launched by the prime minister and ministers. As a Knesseton member – visiting a neglected area and demanding in the media advance a project for your area.
+Will be completed before the election
+Will not be completed before the election, but will appear in the program
+Projects in bureaucratic ministries are delayed more. Better to improve the ministry's efficiency first.
+As a minister: achievement in the ministry + good relations with the leader = the road to the party leadership. Primaries require power of at least 35 – preferably 60.
+As a candidate: bloc alliances and endorsement commitments are worth more than another rally. Numbers in the Knesseton win elections.
+As prime minister: keep a majority of 61 and the coalition's stability; without these the government falls.
+Press conference: cheap popularity
+Committee work: reputation and expertise
+Studio interview: a gamble on popularity
+Agreement with the workers' union: prevents a strike
+Efficiency program: better service without a budget
+Tax enforcement: money without raising taxes
+Campaign rally: rises in the polls
+Public backing for the leader: his loyalty to you
+Your political capital is low. It is renewed every turn, so you can move on to the next turn.
+Debt above 80% – every new loan is more expensive.
+MK
+Sharp opposition. Organizations talk about protest.
+Severe harm – this will be remembered at the ballot box.
+A sense that the government is acting against them.
+They oppose the decision.
+They fear negative consequences.
+Disappointment with the direction.
+The decision does not affect them directly.
+No particular reaction.
+Waiting to see the implementation.
+They welcome the decision.
+A step in the right direction.
+Cautious support.
+Broad support for the decision.
+They see it as an important achievement.
+They welcome it and expect quick implementation.
+Young people talk about emigration and an impossible cost of living.
+Young people fear the burden is shifting to them again.
+Young people see this as some relief.
+Youth organizations welcome it: "Finally they are treating us seriously."
+Retiree and senior organizations warn of harm to the weaker segment.
+Among the older population there is satisfaction with the attention.
+Families talk about an unbearable burden of expenses.
+Another expense on families that are already struggling.
+The decision eases things for families with children.
+Parents' organizations welcome the step.
+Aid organizations warn of deepening poverty.
+The weaker classes are hurt again.
+Welfare organizations speak of a real change in families' lives.
+The middle class feels it carries the burden alone.
+The decision burdens the middle class.
+The middle class receives some relief.
+The business sector warns of capital flight.
+Employers' organizations criticize the decision.
+The market reacts positively.
+Among conscript soldiers there is a feeling of disrespect.
+Soldiers feel they are being seen.
+Reservists' organizations: "After hundreds of days of service – this is the answer?"
+Reservists again feel the burden is not equal.
+Reservists' organizations welcome the recognition.
+Reservists: "A significant step toward an equal burden."
+The Haredi leadership calls the decision harm to the world of Torah. Calls for protest.
+The Haredi public criticizes the decision.
+The Haredi public welcomes the decision.
+The Haredi leadership welcomes it and gives thanks.
+Among secular people there is a sense of religious coercion.
+Secular people feel they are financing everyone except themselves.
+Secular organizations welcome the step.
+The religious public sees this as harm to traditional values.
+The religious public welcomes the decision.
+Heads of Arab local authorities warn of deepening discrimination.
+Arab society criticizes the decision.
+Heads of Arab local authorities cautiously welcome it.
+Arab society sees this as a significant step toward equality.
+Immigrant organizations warn of harm to absorption.
+Immigrants welcome the step.
+Center residents are collapsing under the cost of living.
+The center welcomes it, and waits for a solution for transport and housing.
+Heads of authorities in the periphery: "Again the money goes to the center."
+In the periphery they again feel forgotten.
+Heads of authorities in the periphery welcome the investment.
+The Yesha Council calls the decision severe harm to settlement.
+Settlement leaders welcome the decision.
+Left-wing organizations announce demonstrations.
+The left criticizes the direction.
+The left welcomes it and asks to continue.
+The right speaks of "betrayal of the voters".
+The right is unhappy with the direction.
+The right welcomes it: "This is what we promised."
+Human rights and liberties organizations warn of harm to individual freedom.
+Liberals welcome the strengthening of freedoms.
+Workers' organizations warn of harm to the welfare state.
+Workers' and welfare organizations welcome the step.
+Self-employed organizations warn of business closures.
+The self-employed welcome the relief.
+The Histadrut threatens organizational steps.
+Employees feel some relief.
+State employees' committees declare a labor dispute.
+Workers' committees welcome it.
+The student union announces a protest.
+The student union welcomes it.
+Retiree organizations warn of harm to pensions.
+Retiree organizations welcome it.
+We will support. It matches our policy.
+We will examine the matter in the faction.
+This does not match our policy.
+We will support a statesmanlike and responsible move.
+We will demand details and a professional review.
+The move is not responsible or statesmanlike.
+This is right for the country, and we will support.
+We will examine whether it really serves the public.
+This is another political move at the public's expense.
+We will support any step that advances equality and social justice.
+We need to examine the impact on the weaker classes.
+This harms democracy and the weaker classes.
+We will support, God willing.
+We will consult the Council of Torah Sages.
+This harms tradition and the weaker classes.
+We will support, in accordance with the ruling of the great Torah leaders.
+The matter will be brought for the Council's ruling.
+This is harm to the world of Torah and we will not support it.
+We will support a move that strengthens security and governance.
+We will examine whether it is strong enough.
+This is a weak and dangerous step.
+We will support. It strengthens settlement and Jewish identity.
+We will examine the implications for settlement.
+This endangers the Land of Israel and we will not support it.
+We will support a sensible and egalitarian move.
+We will examine whether this is again funding for one sector.
+This is another sectoral budget and we will not support it.
+We will support any step that advances equality.
+We will examine the impact on Arab society.
+This deepens discrimination and we will not support it.
+We will support. It answers the needs of Arab society.
+We will examine what this gives our public.

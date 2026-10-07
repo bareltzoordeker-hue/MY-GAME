@@ -43,7 +43,7 @@ export function PolCard({ p, s, extra }: { p: Politician; s: GameState; extra?: 
           <div className="bubble">{say.text}</div>
           {p.memory.length > 0 && <div><b>זוכר:</b> {p.memory.slice(-3).map((m) => m.text).join(' · ')}</div>}
           <div className="flex gap-1 flex-wrap pt-1">
-            {!p.isPlayer && <button className="btn btn-sm btn-blue" onClick={() => useGame.getState().openChat(p.id)}>💬 שיחה</button>}
+            {!p.isPlayer && <button className="btn btn-sm btn-blue" data-tip="פותח מסך שיחה עם הפוליטיקאי. שיחה לא עולה הון, אבל מה שנאמר בה משנה יחסים ונשמר בזיכרון" onClick={() => useGame.getState().openChat(p.id)}>💬 שיחה</button>}
             {!p.isPlayer && <ActionButton id="network" params={{ politicianId: p.id }} className="btn btn-sm">☕ פגישה אישית</ActionButton>}
             {!p.isPlayer && <ActionButton id="attack_opponent" params={{ politicianId: p.id }} className="btn btn-sm">🥊 לתקוף</ActionButton>}
             {!p.isPlayer && <ActionButton id="leak_rival" params={{ politicianId: p.id }} className="btn btn-sm">🗂️ להדליף עליו</ActionButton>}

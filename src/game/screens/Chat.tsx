@@ -19,11 +19,11 @@ function Row({ s, p, active, onPick }: { s: GameState; p: Politician; active: bo
   const last = s.chats?.[p.id]?.at(-1);
   const role = p.id === s.government.pmId ? 'ראש הממשלה' : p.ministryId ? s.government.ministries.find((m) => m.id === p.ministryId)?.name : s.parties[p.partyId]?.leaderId === p.id ? `יו״ר ${s.parties[p.partyId]?.shortName}` : s.parties[p.partyId]?.shortName;
   return (
-    <button className={`inset w-full text-right flex items-center gap-2 ${active ? 'card-selected' : ''}`} onClick={onPick} aria-pressed={active}>
+    <button className={`inset w-full text-right flex items-center gap-2 ${active ? 'card-selected' : ''}`} onClick={onPick} aria-pressed={active} data-tip={`פותח שיחה עם ${p.name}. אפשר לכתוב איום, הבטחה, בקשה, התנצלות או מילה טובה, וההשפעה תלויה ביחסים ובאופי של הצד השני`}>
       <Caricature spec={p.caricature} size={38} tie={s.parties[p.partyId]?.color} />
       <span className="flex-1 min-w-0">
         <span className="block font-bold text-sm leading-tight">{p.name}</span>
-        <span className="block text-xs muted truncate">{role}{last ? ` · ${last.text.slice(0, 30)}` : ''}</span>
+        <span className="block text-xs muted truncate">{role}{last ? ` · ${last.text}` : ''}</span>
       </span>
       {unread > 0 && <span className="chip chip-bad" aria-label={`${unread} הודעות חדשות`}>{unread}</span>}
     </button>
@@ -83,7 +83,7 @@ export function ChatScreen() {
                 <div ref={endRef} />
               </div>
               <div className="flex flex-wrap gap-1 pb-2">
-                {SUGGESTIONS.map((x) => <button key={x} className="chip" style={{ cursor: 'pointer' }} onClick={() => setText(x)} data-tip="לחצו כדי למלא את ההודעה, ואפשר לערוך אותה">{x.length > 34 ? `${x.slice(0, 34)}…` : x}</button>)}
+                {SUGGESTIONS.map((x) => <button key={x} className="chip" style={{ cursor: 'pointer', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} onClick={() => setText(x)} data-tip="לחצו כדי למלא את ההודעה, ואפשר לערוך אותה">{x}</button>)}
               </div>
               <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); submit(); }}>
                 <input type="text" className="flex-1" value={text} maxLength={400} onChange={(e) => setText(e.target.value)} placeholder="כתבו הודעה…" aria-label={`הודעה ל${target.name}`} />

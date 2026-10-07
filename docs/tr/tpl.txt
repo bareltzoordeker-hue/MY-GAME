@@ -1,0 +1,397 @@
+# he ||| en ||| ar    ({} = value, numbered in order; use {0},{1}.. on the translation side)
+לקואליציה {} מנדטים, פחות מרוב. כל הצבעת אי-אמון עלולה להפיל את הממשלה. ||| The coalition has {0} seats, short of a majority. Any no-confidence vote could bring down the government. ||| للائتلاف {0} مقعدًا، أقل من الأغلبية. أي تصويت لحجب الثقة قد يُسقط الحكومة.
+האינפלציה {}%. יוקר המחיה פוגע במשפחות ובמעמד הביניים ועלול להוביל למחאה. ||| Inflation is {0}%. The cost of living hurts families and the middle class and may lead to protest. ||| التضخم {0}%. غلاء المعيشة يضر بالعائلات وبالطبقة الوسطى وقد يقود إلى احتجاج.
+האבטלה {}%. כדאי לשקול גירוי כלכלי או הכשרות מקצועיות. ||| Unemployment is {0}%. Consider economic stimulus or vocational training. ||| البطالة {0}%. يجدر النظر في تحفيز اقتصادي أو تأهيل مهني.
+{} במצב קשה ({}). השירות מקבל {}% מהצורך התקציבי. ||| {0} is in a bad state ({1}). The service receives {2}% of its budget need. ||| {0} في حالة صعبة ({1}). الخدمة تحصل على {2}% من حاجتها الميزانية.
+{} מאוד לא מרוצים ממך. פגישה אישית, מינוי או פיטורים – לפני שהם יפעלו נגדך. ||| {0} are very unhappy with you. A personal meeting, an appointment or a dismissal – before they act against you. ||| {0} غير راضين عنك إطلاقًا. لقاء شخصي أو تعيين أو إقالة – قبل أن يتحركوا ضدك.
+תזכורת: הבטחת ל{}: "{}". המועד מתקרב. ||| Reminder: you promised {0}: "{1}". The deadline is approaching. ||| تذكير: وعدت {0}: "{1}". الموعد يقترب.
+תזכורת: הבטחת לציבור "{}". אם היא לא תקוים, האמון בך ייפגע. ||| Reminder: you promised the public "{0}". If it is not kept, trust in you will suffer. ||| تذكير: وعدت الجمهور "{0}". إذا لم يُنفَّذ الوعد، ستتضرر الثقة بك.
+הבחירות בעוד {}. {} ||| The election is in {0}. {1} ||| الانتخابات بعد {0}. {1}
+זה הזמן לבנות קמפיין, בריתות והבטחות שאפשר לעמוד בהן. ||| This is the time to build a campaign, alliances and promises that can be kept. ||| هذا وقت بناء حملة وتحالفات ووعود يمكن الوفاء بها.
+{} נושאים ממתינים להחלטתך. מה שלא תחליט – יוכרע אוטומטית בסוף התור. ||| {0} issues are awaiting your decision. Whatever you do not decide will be settled automatically at the end of the turn. ||| {0} مواضيع تنتظر قرارك. ما لا تقرره – سيُحسم تلقائيًا في نهاية الدور.
+יש לך מרווח: גירעון {}%. {} מקבל רק {}% מהצורך – שם כל שקל מורגש. ||| You have room: deficit {0}%. {1} receives only {2}% of its need – there every shekel is felt. ||| لديك هامش: العجز {0}%. {1} يحصل على {2}% فقط من حاجته – هناك يُلمس كل شيكل.
+הורדת מס הכנסה = מעמד הביניים מחייך, אבל כל 1% עולה בערך ₪{}B בשנה. ||| Cutting income tax = the middle class smiles, but each 1% costs about ₪{0}B a year. ||| خفض ضريبة الدخل = الطبقة الوسطى تبتسم، لكن كل 1% يكلّف نحو {0} مليار شيكل في السنة.
+אינפלציה {}%: גירעון גבוה מדליק אותה. בנק ישמעאל עלול להעלות ריבית, וזה יאט את הצמיחה. ||| Inflation {0}%: a high deficit fuels it. The Bank of Ishmael may raise interest rates, which would slow growth. ||| التضخم {0}%: العجز المرتفع يؤججه. قد يرفع بنك إسماعيل الفائدة، وهذا سيبطّئ النمو.
+{} ב{} עם מומחיות {} בלבד. מינוי מקצועי ישפר את השירות – אבל המפלגה שלו תיעלב. ||| {0} at {1} with only {2} expertise. A professional appointment would improve the service – but their party would be offended. ||| {0} في {1} بخبرة {2} فقط. تعيين مهني سيحسّن الخدمة – لكن حزبه سيستاء.
+{} (נאמנות {}) לא מרוצה ועלול לפעול נגדך. פגישה אישית יכולה לשפר את היחסים. ||| {0} (loyalty {1}) is unhappy and may act against you. A personal meeting could improve relations. ||| {0} (ولاء {1}) غير راضٍ وقد يتحرك ضدك. لقاء شخصي قد يحسّن العلاقات.
+יש לך {} מנדטים. מתחת ל-61 הממשלה חשופה להצבעת אי-אמון. ||| You have {0} seats. Below 61 the government is exposed to a no-confidence vote. ||| لديك {0} مقعدًا. تحت 61 تكون الحكومة معرّضة لتصويت حجب الثقة.
+ראש הממשלה {} מתייחס אליך ב-{}. מעל 55 – הוא יאשר לך בקשות. ||| Prime Minister {0} regards you at {1}. Above 55 – they will approve your requests. ||| رئيس الحكومة {0} يتعامل معك بمستوى {1}. فوق 55 – سيوافق على طلباتك.
+{} הכי כועסים עכשיו. "{}" ישמח אותם{}. ||| {0} are the angriest right now. "{1}" would please them{2}. ||| {0} الأكثر غضبًا الآن. "{1}" سيُسعدهم{2}.
+הגוש הכי משתלם עכשיו: {} ({} מנדטים, {}% סיכוי). גוש = המלצה עליך לנשיא. ||| The most worthwhile bloc right now: {0} ({1} seats, {2}% chance). A bloc = a recommendation of you to the President. ||| الكتلة الأكثر جدوى الآن: {0} ({1} مقاعد، فرصة {2}%). الكتلة = توصية بك لدى الرئيس.
+שים עין על {} – נאמנות {}, כוח {}. קידום במפלגה ישפר את נאמנותו. ||| Keep an eye on {0} – loyalty {1}, power {2}. A promotion in the party would improve their loyalty. ||| انتبه إلى {0} – ولاء {1}، قوة {2}. الترقية في الحزب ستحسّن ولاءه.
+אתה במקום {} ברשימה. כדי לטפס: כוח פוליטי. ועדות, ראיונות וגיבוי למנהיג בונים אותו. ||| You are in place {0} on the list. To climb: political power. Committees, interviews and backing the leader build it. ||| أنت في المكان {0} في القائمة. للصعود: القوة السياسية. اللجان والمقابلات ودعم الزعيم تبنيها.
+המימון של המשרד: {}% מהצורך. מתחת ל-95% – האיכות תרד לאט, ושביתה בדרך. ||| The ministry's funding: {0}% of need. Below 95% – quality will slowly decline, and a strike is on the way. ||| تمويل الوزارة: {0}% من الحاجة. تحت 95% – ستنخفض الجودة ببطء، وإضراب في الطريق.
+יעילות {}: "תוכנית התייעלות" נותנת יותר מכל תוספת תקציב. ||| Efficiency {0}: an "efficiency program" gives more than any budget supplement. ||| الكفاءة {0}: "خطة ترشيد" تعطي أكثر من أي زيادة في الميزانية.
+{} הכי ממורמר ({}). סיור שם יעשה יותר מעוד נאום במרכז. ||| {0} is the most embittered ({1}). A tour there will do more than another speech in the center. ||| {0} الأكثر مرارة ({1}). جولة هناك ستفعل أكثر من خطاب آخر في المركز.
+{} הכי כועסים ({}), {} הכי מרוצים ({}). אל תשכח מי הבסיס שלך. ||| {0} are the angriest ({1}), {2} the most satisfied ({3}). Do not forget who your base is. ||| {0} الأكثر غضبًا ({1})، و{2} الأكثر رضا ({3}). لا تنسَ من هي قاعدتك.
+השירות הכי חלש: {} ({}). שם יבוא המשבר הבא. ||| The weakest service: {0} ({1}). That is where the next crisis will come. ||| الخدمة الأضعف: {0} ({1}). من هناك ستأتي الأزمة القادمة.
+"{}" ישפר את השירות הכי חלש. {} חודשים – {}. ||| "{0}" would improve the weakest service. {1} months – {2}. ||| "{0}" سيحسّن الخدمة الأضعف. {1} أشهر – {2}.
+{} מכריעים בחירות יותר ממה שנדמה. {} כועסים = מנדטים שזזים. ||| {0} decide elections more than it seems. {1} angry = seats that move. ||| {0} يحسمون الانتخابات أكثر مما يبدو. {1} غاضبون = مقاعد تتحرك.
+צעד הבא: יו״ר ועדה או שר. צריך כוח ~40 ומוניטין ~45. יש לך {} ו-{}. ||| Next step: committee chair or minister. You need power ~40 and reputation ~45. You have {0} and {1}. ||| الخطوة التالية: رئيس لجنة أو وزير. يلزم قوة ~40 وسمعة ~45. لديك {0} و{1}.
+אם אין לך רעיון – {}. ||| If you have no idea – {0}. ||| إذا لم تكن لديك فكرة – {0}.
+תקציב {} אושר בכנסטון ({}-{}) ||| The {0} budget was approved in the Knesseton ({1}-{2}) ||| أُقرّت ميزانية {0} في الكنيستون ({1}-{2})
+התקציב אושר ({}-{}) ||| The budget was approved ({0}-{1}) ||| أُقرّت الميزانية ({0}-{1})
+התקציב נפל! ({}-{}) ||| The budget fell! ({0}-{1}) ||| سقطت الميزانية! ({0}-{1})
+התקציב נפל ({}-{}) ||| The budget fell ({0}-{1}) ||| سقطت الميزانية ({0}-{1})
+תקציב {} אושר ({}-{}) ||| The {0} budget was approved ({1}-{2}) ||| أُقرّت ميزانية {0} ({1}-{2})
+הממשלה מקדמת את {} ||| The government is advancing {0} ||| الحكومة تدفع {0}
+{}: "{}" – {} הסתיים ||| {0}: "{1}" – {2} ended ||| {0}: "{1}" – انتهت {2}
+פוטר מ{} ||| Dismissed from {0} ||| أُقيل من {0}
+{} פיטר את {} מ{} ||| {0} dismissed {1} from {2} ||| {0} أقال {1} من {2}
+ראש הממשלה פיטר אותך מ{} ||| The prime minister dismissed you from {0} ||| رئيس الحكومة أقالك من {0}
+הצעה: {} ||| Offer: {0} ||| عرض: {0}
+"{}, אני רוצה אותך בממשלה. {} – שלך, אם אתה רוצה." ||| "{0}, I want you in the government. {1} – yours, if you want it." ||| "{0}، أريدك في الحكومة. {1} – لك، إن شئت."
+{} מונה ליו״ר {} ||| {0} was appointed chair of {1} ||| عُيّن {0} رئيسًا لـ{1}
++₪{}B ל{} ||| +₪{0}B to {1} ||| +{0} مليار شيكل إلى {1}
+{} דחתה את הברית ||| {0} rejected the alliance ||| {0} رفضت التحالف
+סיכוי היה {}% ||| The chance was {0}% ||| كانت الفرصة {0}%
+גוש חדש: {} + {} ||| New bloc: {0} + {1} ||| كتلة جديدة: {0} + {1}
+ברית הצבעה עם {} ||| Voting alliance with {0} ||| تحالف تصويت مع {0}
+הברית עם {} פורקה ||| The alliance with {0} was dissolved ||| فُكّ التحالف مع {0}
+קץ הברית: {} – "{}" ||| End of the alliance: {0} – "{1}" ||| نهاية التحالف: {0} – "{1}"
+הברית עם {} התפרקה: {} ||| The alliance with {0} fell apart: {1} ||| انفرط التحالف مع {0}: {1}
+{} רומז: "הברית לא מובנת מאליה" ||| {0} hints: "The alliance is not to be taken for granted" ||| {0} يلمّح: "التحالف ليس أمرًا مسلّمًا به"
+{} שבועות ||| {0} weeks ||| {0} أسابيع
+{} שנים ||| {0} years ||| {0} سنوات
+{} פותחת בקמפיין: "{}" ||| {0} opens a campaign: "{1}" ||| {0} تفتتح حملة: "{1}"
+פתחת בקמפיין ({}; יעד: {}) ||| You opened a campaign ({0}; target: {1}) ||| افتتحت حملة ({0}؛ الهدف: {1})
+{}: "הבטיחו לי {}, וההבטחה לא קוימה." ||| {0}: "I was promised {1}, and the promise was not kept." ||| {0}: "وُعدت بـ{1}، ولم يُوفَّ بالوعد."
+{} זוכר שלא קיימת הבטחה ||| {0} remembers that you did not keep a promise ||| {0} يتذكر أنك لم تفِ بوعد
+{} תוקף: "{}" ||| {0} attacks: "{1}" ||| {0} يهاجم: "{1}"
+האופוזיציה תוקפת: {} ||| The opposition attacks: {0} ||| المعارضة تهاجم: {0}
+{} מגיש הצעת חוק: {} ||| {0} submits a bill: {1} ||| {0} يقدّم اقتراح قانون: {1}
+{} הגיש הצעת חוק פרטית ||| {0} submitted a private bill ||| {0} قدّم اقتراح قانون خاصًا
+{} דורש תוספת תקציב ||| {0} demands a budget supplement ||| {0} يطالب بزيادة في الميزانية
+"המשרד שלי לא עומד במשימות בתקציב הנוכחי. אני מבקש תוספת של ₪{} מיליארד בשנה." ||| "My ministry cannot meet its tasks on the current budget. I request an addition of ₪{0} billion a year." ||| "وزارتي لا تفي بمهامها بالميزانية الحالية. أطلب زيادة قدرها {0} مليار شيكل في السنة."
+לאשר ₪{}B ||| Approve ₪{0}B ||| الموافقة على {0} مليار شيكل
+{} מאיים להתפטר ||| {0} threatens to resign ||| {0} يهدد بالاستقالة
+"בלי תוספת של ₪{} מיליארד אני לא יכול להמשיך לשאת באחריות. אם הבקשה תידחה, אתפטר." ||| "Without an addition of ₪{0} billion I cannot keep bearing responsibility. If the request is rejected, I will resign." ||| "بدون زيادة قدرها {0} مليار شيكل لا أستطيع مواصلة تحمّل المسؤولية. إذا رُفض الطلب، سأستقيل."
+אולטימטום מ{} ||| Ultimatum from {0} ||| إنذار من {0}
+"אם {} לא יקודם כפי שסוכם, נשקול את המשך דרכנו בקואליציה." ||| "If {0} is not advanced as agreed, we will reconsider our path in the coalition." ||| "إذا لم يُدفع {0} كما اتُّفق، سنعيد النظر في مواصلة طريقنا في الائتلاف."
+{} מציב אולטימטום לראש הממשלה ||| {0} gives the prime minister an ultimatum ||| {0} يضع إنذارًا لرئيس الحكومة
+{} רוצה {} ||| {0} wants {1} ||| {0} يريد {1}
+"עבדתי קשה למען המפלגה בשנים האחרונות. אני מבקש {}." ||| "I have worked hard for the party in recent years. I ask for {0}." ||| "عملت بجد من أجل الحزب في السنوات الأخيرة. أطلب {0}."
+{} קורא תיגר על ההנהגה ||| {0} challenges the leadership ||| {0} يتحدى القيادة
+{} מודיע על התמודדות על ראשות {} ||| {0} announces a run for the leadership of {1} ||| {0} يعلن الترشح لرئاسة {1}
+הדלפה: "{}" ||| Leak: "{0}" ||| تسريب: "{0}"
+מישהו מהמפלגה מדליף (חשוד: {}) ||| Someone in the party is leaking (suspect: {0}) ||| أحدهم في الحزب يسرّب (المشتبه: {0})
+"הגירעון גבוה מהיעד. אני מבקש שהמשרד שלך יקצץ ₪{} מיליארד." ||| "The deficit is above target. I ask that your ministry cut ₪{0} billion." ||| "العجز أعلى من الهدف. أطلب أن تقلّص وزارتك {0} مليار شيكل."
+{} דורש משמעת ||| {0} demands discipline ||| {0} يطالب بالانضباط
+{} מציע שיתוף פעולה ||| {0} proposes cooperation ||| {0} يقترح التعاون
+"אני מציע שנגיש יחד את {}. הצעה משותפת תגדיל את הסיכוי שתעבור." ||| "I suggest we submit {0} together. A joint proposal will raise the chance it passes." ||| "أقترح أن نقدّم {0} معًا. اقتراح مشترك سيزيد فرصة تمريره."
+{} מציעה ריצה משותפת ||| {0} proposes a joint run ||| {0} تقترح خوضًا مشتركًا
+{}: "{} איים עליי בשיחה פרטית" ||| {0}: "{1} threatened me in a private conversation" ||| {0}: "{1} هددني في محادثة خاصة"
+{} רשמתי: {}. ||| {0} Noted: {1}. ||| {0} سجّلت: {1}.
+{} אני מצפה לתפקיד כפי שנאמר. ||| {0} I expect the position as promised. ||| {0} أتوقع المنصب كما قيل.
+{} אחכה לראות את זה בתקציב. ||| {0} I will wait to see it in the budget. ||| {0} سأنتظر لأراه في الميزانية.
+זה קו אדום עבורי ועבור {}. לא נתמוך ב{} בשום מצב. ||| This is a red line for me and for {0}. We will not support {1} under any circumstances. ||| هذا خط أحمر بالنسبة لي ولـ{0}. لن ندعم {1} تحت أي ظرف.
+בנושא {}: אני {}. {} ||| On {0}: I am {1}. {2} ||| بشأن {0}: أنا {1}. {2}
+{}, אני לא מרוצה מההתנהלות כלפיי ולכן אני שוקל את צעדיי. כדאי שנדבר. ||| {0}, I am not pleased with how I have been treated, and so I am weighing my steps. We should talk. ||| {0}، لست راضيًا عن التعامل معي، ولذلك أدرس خطواتي. يجدر أن نتحدث.
+{}, רציתי לומר שאני מעריך את שיתוף הפעולה בינינו. אם אפשר לעזור במשהו – אני כאן. ||| {0}, I wanted to say that I appreciate our cooperation. If I can help with anything – I am here. ||| {0}، أردت أن أقول إنني أقدّر التعاون بيننا. إذا كان بالإمكان المساعدة في شيء – أنا هنا.
+אני עוקב אחרי {}. אם צריך תמיכה שלי בהצבעה, תגיד. ||| I am following {0}. If you need my support in the vote, say so. ||| أتابع {0}. إذا احتجت إلى دعمي في التصويت، قل.
+אני מבקש שתקדם את {}. זה חשוב לנו, ואנחנו נזכור מי עזר. ||| I ask that you advance {0}. It is important to us, and we will remember who helped. ||| أطلب أن تدفع {0}. هذا مهم لنا، وسنتذكر من ساعد.
+אני מזהיר אותך: {} תתנגד ל{} בכל כוחה. ||| I warn you: {0} will oppose {1} with all its might. ||| أحذّرك: {0} ستعارض {1} بكل قوتها.
+{} כתב לך הודעה ||| {0} wrote you a message ||| {0} كتب لك رسالة
+סגן שר ב{} ||| Deputy minister at {0} ||| نائب وزير في {0}
+לחוקק: {} ||| To legislate: {0} ||| التشريع: {0}
+לא לקדם: {} ||| Not to advance: {0} ||| عدم الدفع: {0}
+תיק נוסף: {} ||| Additional portfolio: {0} ||| حقيبة إضافية: {0}
+סגן שר נוסף{} ||| An additional deputy minister{0} ||| نائب وزير إضافي{0}
++₪1B נוסף ל{} ||| +₪1B more to {0} ||| +مليار شيكل إضافي إلى {0}
+{}: "ההסכם הקואליציוני הופר – {}" ||| {0}: "The coalition agreement was breached – {1}" ||| {0}: "خُرق الاتفاق الائتلافي – {1}"
+הפרת התחייבות ל{}: {} ||| Breach of a commitment to {0}: {1} ||| خرق التزام تجاه {0}: {1}
+תזכורת: התחייבות ל{} ||| Reminder: commitment to {0} ||| تذكير: التزام تجاه {0}
+לפי ההסכם הקואליציוני, "{}" צריך לעבור עד התור הבא. אם לא – {} תראה בזה הפרה. ||| Under the coalition agreement, "{0}" must pass by the next turn. If not – {1} will see it as a breach. ||| بحسب الاتفاق الائتلافي، يجب أن يمر "{0}" حتى الدور القادم. وإلا – ستعتبر {1} ذلك خرقًا.
+לפי ההסכם, {} אמור להיכנס עכשיו לתפקיד ראש הממשלה. אם תכבד את ההסכם, תמשיך בממשלה כשר החוץ. אם לא – השותפה תפרוש. ||| Under the agreement, {0} is due to take over as prime minister now. If you honor the agreement, you will continue in the government as foreign minister. If not – the partner will withdraw. ||| بحسب الاتفاق، من المفترض أن يتولى {0} رئاسة الحكومة الآن. إذا احترمت الاتفاق، ستواصل في الحكومة كوزير للخارجية. وإلا – سينسحب الشريك.
+בעוד כ-4 חודשים מגיע מועד הרוטציה עם {}. ||| In about 4 months the rotation date with {0} arrives. ||| بعد نحو 4 أشهر يحين موعد التناوب مع {0}.
+חשד: כספים קואליציוניים הועברו ל{} מחוץ לתקציב ||| Suspicion: coalition funds were transferred to {0} outside the budget ||| اشتباه: حُوّلت أموال ائتلافية إلى {0} من خارج الميزانية
+רוטציה: {} נכנס לתפקיד ראש הממשלה; {} – שר החוץ ||| Rotation: {0} takes over as prime minister; {1} – foreign minister ||| تناوب: {0} يتولى رئاسة الحكومة؛ {1} – وزير الخارجية
+כיבדת את הרוטציה. {} ראש הממשלה ||| You honored the rotation. {0} is prime minister ||| احترمت التناوب. {0} رئيس الحكومة
+{} נכנס לתפקיד ראש הממשלה. אתה ממשיך בממשלה כשר החוץ. ||| {0} takes over as prime minister. You continue in the government as foreign minister. ||| {0} يتولى رئاسة الحكومة. أنت تواصل في الحكومة كوزير للخارجية.
+את המשבר מנהל/ת {} ||| The crisis is managed by {0} ||| الأزمة يديرها {0}
+{} תורות ||| {0} turns ||| {0} أدوار
+הממשלה מעלה את ה{} ב-{}% ||| The government raises the {0} by {1}% ||| الحكومة ترفع {0} بنسبة {1}%
+הורדת {}: {}% פחות ||| Lowering {0}: {1}% less ||| خفض {0}: {1}% أقل
+תוספת של ₪{}B ל{} ||| An addition of ₪{0}B to {1} ||| زيادة قدرها {0} مليار شيكل إلى {1}
+קיצוץ של ₪{}B ב{} ||| A cut of ₪{0}B in {1} ||| تقليص قدره {0} مليار شيكل في {1}
+הוחלף ב{} ||| Replaced by {0} ||| استُبدل بـ{0}
+מונה ל{} ||| Appointed to {0} ||| عُيّن في {0}
+לקחת להם את {} ||| You took {0} from them ||| أخذت منهم {0}
+{} מונה ל{} ||| {0} was appointed to {1} ||| عُيّن {0} في {1}
+פיטרת את {} שלנו ||| You fired our {0} ||| أقلت {0} الخاص بنا
+{} הועבר מתפקידו כ{} ||| {0} was removed from their post as {1} ||| أُبعد {0} عن منصبه كـ{1}
+פיטרת את {} ||| You fired {0} ||| أقلت {0}
+{} פוטר ||| {0} was fired ||| أُقيل {0}
+הממשלה אישרה את הקמת {} ||| The government approved the establishment of {0} ||| الحكومة أقرّت إنشاء {0}
+נוצר: {} ||| Created: {0} ||| أُنشئ: {0}
+הוקם {} ||| {0} was established ||| أُنشئ {0}
+{} נסגר; תחומי האחריות הועברו למשרדים אחרים ||| {0} was closed; its areas of responsibility were transferred to other ministries ||| أُغلقت {0}؛ ونُقلت مجالات مسؤوليتها إلى وزارات أخرى
+{} נסגר ||| {0} was closed ||| أُغلقت {0}
+₪1.5 מיליארד כספים קואליציוניים ל{} ||| ₪1.5 billion in coalition funds to {0} ||| 1.5 مليار شيكل أموال ائتلافية إلى {0}
+{} קיבלה ₪1.5 מיליארד ||| {0} received ₪1.5 billion ||| {0} حصلت على 1.5 مليار شيكل
+{} מגיש: {} ||| {0} submits: {1} ||| {0} يقدّم: {1}
+{} התנגדו ||| {0} objected ||| {0} اعترضوا
+{} תמכו בביטול ||| {0} supported the repeal ||| {0} أيدوا الإلغاء
+יוצא לדרך: {} ||| Under way: {0} ||| ينطلق: {0}
+₪{}B · {} חודשים · {} ||| ₪{0}B · {1} months · {2} ||| {0} مليار شيكل · {1} أشهر · {2}
+בוטל: {}. התושבים מאוכזבים ||| Cancelled: {0}. Residents are disappointed ||| أُلغي: {0}. السكان خائبو الأمل
+{} בוטל ||| {0} was cancelled ||| أُلغي {0}
+זמין שוב בעוד {} ||| Available again in {0} ||| متاح مجددًا بعد {0}
+{} השיג תוספת של ₪{}B ל{} ||| {0} secured an addition of ₪{1}B for {2} ||| {0} حصل على زيادة قدرها {1} مليار شيكل لـ{2}
+אושרה תוספת של ₪{} מיליארד ||| An addition of ₪{0} billion was approved ||| أُقرّت زيادة قدرها {0} مليار شيكل
+{} מתייעל ||| {0} is becoming more efficient ||| {0} يزداد كفاءة
+מומחיות +5 ({}) ||| Expertise +5 ({0}) ||| خبرة +5 ({0})
+{} התקשה להשיב לשאלות במסיבת העיתונאים ||| {0} struggled to answer questions at the press conference ||| {0} واجه صعوبة في الإجابة عن الأسئلة في المؤتمر الصحفي
+{} לא עודכן מראש. ||| {0} was not informed in advance. ||| {0} لم يُبلَّغ مسبقًا.
+התשובה של {} הופצה ברשתות ||| {0}'s answer spread on social media ||| انتشر رد {0} في الشبكات الاجتماعية
+{} בראיון: "יש לנו תוכנית" ||| {0} in an interview: "We have a plan" ||| {0} في مقابلة: "لدينا خطة"
+אמירה על {} התפרשה כפוגענית. נציגיהם דורשים התנצלות. ||| A remark about {0} was taken as offensive. Their representatives demand an apology. ||| عبارة عن {0} فُسّرت على أنها مسيئة. ممثلوهم يطالبون بالاعتذار.
+סערה בעקבות דברי {} על {} ||| Storm after {0}'s remarks about {1} ||| عاصفة إثر كلام {0} عن {1}
+תקפת את {} בשידור. הבסיס שלך מרוצה, היחסים ביניכם הורעו. ||| You attacked {0} on air. Your base is pleased, relations between you worsened. ||| هاجمت {0} على الهواء. قاعدتك راضية، والعلاقات بينكما ساءت.
+עימות חריף באולפן עם {} ||| A sharp clash in the studio with {0} ||| مواجهة حادة في الاستوديو مع {0}
+{} שמע את הדברים. ||| {0} heard the remarks. ||| {0} سمع الكلام.
+הפוסט של {} הופץ באופן נרחב ||| {0}'s post was widely shared ||| انتشر منشور {0} على نطاق واسع
+{} מחק פוסט אחרי ביקורת ||| {0} deleted a post after criticism ||| {0} حذف منشورًا بعد الانتقاد
+{} הגיב, והוויכוח ביניכם עלה לכותרות. ||| {0} responded, and the argument between you made the headlines. ||| {0} ردّ، وتصدّر الخلاف بينكما العناوين.
+מתקפה על {} ||| Attack on {0} ||| هجوم على {0}
+{} נאלץ להתגונן, והשיח עבר לנושאים שלך. ||| {0} had to defend themselves, and the discussion moved to your issues. ||| {0} اضطر للدفاع عن نفسه، وانتقل الحديث إلى مواضيعك.
+המתקפה נתפסה כבוטה מדי, ו{} זכה לגל אהדה. ||| The attack was seen as too blunt, and {0} gained a wave of sympathy. ||| اعتُبر الهجوم فظًا جدًا، وحظي {0} بموجة تعاطف.
+גל אהדה ל{} אחרי המתקפה ||| A wave of sympathy for {0} after the attack ||| موجة تعاطف مع {0} بعد الهجوم
+{} הגיש תביעת לשון הרע. ההליך יגזול זמן ותשומת לב. ||| {0} filed a defamation suit. The proceeding will take time and attention. ||| {0} قدّم دعوى تشهير. الإجراء سيستهلك وقتًا واهتمامًا.
+{} תובע את {} בגין לשון הרע ||| {0} sues {1} for defamation ||| {0} يقاضي {1} بتهمة التشهير
+סיור ב{} ||| Tour of {0} ||| جولة في {0}
+התושבים ב{} קיבלו אותך בחום והציגו את הבעיות שלהם. ||| Residents of {0} welcomed you warmly and presented their problems. ||| استقبلك سكان {0} بحرارة وعرضوا مشاكلهم.
+מפגינים ב{} האשימו את הממשלה בהזנחת האזור. ||| Protesters in {0} accused the government of neglecting the region. ||| متظاهرون في {0} اتهموا الحكومة بإهمال المنطقة.
+קריאות מחאה נגד {} ב{} ||| Protest chants against {0} in {1} ||| هتافات احتجاج ضد {0} في {1}
+זיהית בעיה אמיתית ב{} ודחפת לפתרון מהיר. ||| You identified a real problem in {0} and pushed for a quick solution. ||| حددت مشكلة حقيقية في {0} ودفعت نحو حل سريع.
+בדיון התגלו ליקויים בהתנהלות המשרד של {}. הממצאים עלו לכותרות. ||| The debate exposed flaws in the conduct of {0}'s ministry. The findings made the headlines. ||| كشف النقاش إخفاقات في أداء وزارة {0}. وصلت النتائج إلى العناوين.
+הדלפה על {} ||| A leak about {0} ||| تسريب عن {0}
+{} עסוק בהכחשות. המקור לא נחשף. ||| {0} is busy denying. The source was not exposed. ||| {0} مشغول بالنفي. لم يُكشف المصدر.
+פרסום: חשדות נגד {} ||| Publication: suspicions against {0} ||| نشر: شبهات ضد {0}
+{} נחשף כמקור ההדלפה על {} ||| {0} was exposed as the source of the leak about {1} ||| انكشف {0} كمصدر للتسريب عن {1}
+הספר של {} ברשימת רבי המכר ||| {0}'s book is on the bestseller list ||| كتاب {0} في قائمة الأكثر مبيعًا
+פגישה עם {} ||| Meeting with {0} ||| لقاء مع {0}
+יחסים +{} ||| Relations +{0} ||| علاقات +{0}
+גיבית את {} ||| You backed {0} ||| دعمت {0}
+מונית ל{} ||| You were appointed to {0} ||| عُيّنت في {0}
+ניצח בפריימריז ב{} ||| Won the primaries in {0} ||| فاز في الانتخابات التمهيدية في {0}
+{} ניצח את {} בבחירות לראשות {} ||| {0} defeated {1} in the election for the leadership of {2} ||| {0} هزم {1} في انتخابات رئاسة {2}
+{} הפסיד בבחירות לראשות {} ||| {0} lost the election for the leadership of {1} ||| {0} خسر في انتخابات رئاسة {1}
+הפסיד בפריימריז ב{} ||| Lost the primaries in {0} ||| خسر في الانتخابات التمهيدية في {0}
+סיכויי הניצחון היו {}% ||| The chance of winning was {0}% ||| كانت فرصة الفوز {0}%
+עבר מ{} ל{} ||| Moved from {0} to {1} ||| انتقل من {0} إلى {1}
+{} עובר ל{} ||| {0} moves to {1} ||| {0} ينتقل إلى {1}
+הצטרפת ל{} ||| You joined {0} ||| انضممت إلى {0}
+מקום {} ברשימה (עד הפריימריז) ||| Place {0} on the list (until the primaries) ||| المكان {0} في القائمة (حتى الانتخابات التمهيدية)
+{} משנה את שמה ל"{}" ||| {0} changes its name to "{1}" ||| {0} تغيّر اسمها إلى "{1}"
+{} קודם ||| {0} was promoted ||| تمت ترقية {0}
+{} הורד ||| {0} was demoted ||| أُنزل {0}
+{} הוצא מסיעת {} ||| {0} was expelled from the {1} faction ||| طُرد {0} من كتلة {1}
+{} הוצא מהסיעה ||| {0} was expelled from the faction ||| طُرد {0} من الكتلة
+{} מצרפת לרשימה: {}, {} ||| {0} adds to the list: {1}, {2} ||| {0} تضم إلى القائمة: {1}، {2}
+הצטרף/ה: {} ||| Joined: {0} ||| انضم/ت: {0}
+גויסו ₪{} מיליון ||| ₪{0} million was raised ||| جُمع {0} مليون شيكل
+{} זזה {} ||| {0} moved {1} ||| {0} تحرّكت {1}
+המפלגה זזה {} ||| The party moved {0} ||| الحزب تحرّك {0}
+אירוע משותף עם {} מהצד השני ||| A joint event with {0} from the other side ||| فعالية مشتركة مع {0} من الجانب الآخر
+אירוע משותף עם {} ||| A joint event with {0} ||| فعالية مشتركة مع {0}
+הסכם תמיכה הדדית עם {} ||| A mutual support agreement with {0} ||| اتفاق دعم متبادل مع {0}
+הגנת על {} ||| You defended {0} ||| دافعت عن {0}
+עזר ל{} נגדי בפריימריז ||| Helped {0} against me in the primaries ||| ساعد {0} ضدي في الانتخابات التمهيدية
+עזרת ל{} בפריימריז ||| You helped {0} in the primaries ||| ساعدت {0} في الانتخابات التمهيدية
+{} נפגש עם {}, יו״ר {} ||| {0} met with {1}, chair of {2} ||| {0} التقى {1}، رئيس {2}
+פגישה עם יו״ר {} ||| Meeting with the chair of {0} ||| لقاء مع رئيس {0}
+כבר נחתם הסכם עודפים עם {} ||| A surplus agreement with {0} has already been signed ||| وُقّع اتفاق فائض مع {0} بالفعل
+{} ו{} חתמו על הסכם עודפים ||| {0} and {1} signed a surplus agreement ||| {0} و{1} وقّعتا اتفاق فائض
+הסכם עודפים עם {} ||| A surplus agreement with {0} ||| اتفاق فائض مع {0}
+{} מצטרפת לרשימה משותפת ||| {0} joins a joint list ||| {0} تنضم إلى قائمة مشتركة
+הסיכוי היה {}% ||| The chance was {0}% ||| كانت الفرصة {0}%
+{} דחתה את ההצעה ||| {0} rejected the proposal ||| {0} رفضت الاقتراح
+הקמפיין יצא לדרך: "{}" ||| The campaign is under way: "{0}" ||| انطلقت الحملة: "{0}"
+ביקורת על הקמפיין השלילי של {} ||| Criticism of the negative campaign by {0} ||| انتقاد للحملة السلبية لـ{0}
+הקמפיין נגד {} פגע ||| The campaign against {0} landed ||| الحملة ضد {0} أصابت هدفها
+{} נאלצת להתגונן. ||| {0} had to defend itself. ||| {0} اضطرت للدفاع عن نفسها.
+הנושא הבוער: {} ||| The burning issue: {0} ||| الموضوع الملتهب: {0}
+האסטרטגיה שלך ({}) לא תואמת את מה שמעסיק את הבוחרים כרגע. ||| Your strategy ({0}) does not match what concerns voters right now. ||| استراتيجيتك ({0}) لا تتوافق مع ما يشغل الناخبين حاليًا.
+{} מודיע/ה על תמיכה ב{} ||| {0} announces support for {1} ||| {0} يعلن/تعلن دعمه/ها لـ{1}
+הקבינט דחה את המבצע ({}-{}) ||| The cabinet rejected the operation ({0}-{1}) ||| الكابينت رفض العملية ({0}-{1})
+הקבינט דחה את המהלך ({}-{}) ||| The cabinet rejected the move ({0}-{1}) ||| الكابينت رفض الخطوة ({0}-{1})
+הסלוגן: "{}" ||| The slogan: "{0}" ||| الشعار: "{0}"
+פרשנים: {} ניצח בעימות ||| Commentators: {0} won the debate ||| المحللون: {0} فاز في المناظرة
+פרשנים: {} התקשה בעימות ||| Commentators: {0} struggled in the debate ||| المحللون: {0} واجه صعوبة في المناظرة
+{}: "אחרי הבחירות נמליץ על {}" ||| {0}: "After the election we will recommend {1}" ||| {0}: "بعد الانتخابات سنوصي بـ{1}"
+{} התחייבה להמליץ עליך ||| {0} committed to recommend you ||| {0} التزمت بالتوصية بك
+{} לא מתחייב ||| {0} does not commit ||| {0} لا يلتزم
+{} (צפי) ||| {0} (forecast) ||| {0} (توقع)
+{} הגירעון כבר {}%. ||| {0} The deficit is already {1}%. ||| {0} العجز بلغ بالفعل {1}%.
+הממשלה דחתה את ההצעה ({}-{}) ||| The government rejected the proposal ({0}-{1}) ||| الحكومة رفضت الاقتراح ({0}-{1})
+תחקיר עיתונאי חשף ש{} טס עם פמליה גדולה לכנס בחו״ל, בעלות של מאות אלפי שקלים מכספי ציבור, בזמן ש{}. ||| A journalistic investigation revealed that {0} flew with a large entourage to a conference abroad, at a cost of hundreds of thousands of shekels of public money, while {1}. ||| كشف تحقيق صحفي أن {0} سافر بحاشية كبيرة إلى مؤتمر في الخارج، بكلفة مئات آلاف الشواكل من المال العام، في حين {1}.
+{}: "הנסיעה אושרה כדין" ||| {0}: "The trip was approved lawfully" ||| {0}: "أُقرّ السفر قانونيًا"
+{} נחשד בהדלפה. הוא מכחיש בתוקף, והאווירה בסיעה מתוחה. ||| {0} is suspected of leaking. They strongly deny it, and the atmosphere in the faction is tense. ||| اشتُبه بـ{0} في التسريب. ينفي بشدة، والأجواء في الكتلة متوترة.
+{} נמצא בחו״ל ולא יספיק לחזור להצבעה על הצעת חוק ממשלתית. בלי הקול שלו הרוב בסכנה. ||| {0} is abroad and will not make it back for the vote on a government bill. Without their vote the majority is in danger. ||| {0} موجود في الخارج ولن يلحق بالعودة للتصويت على اقتراح قانون حكومي. دون صوته الأغلبية في خطر.
+{}, יו״ר {}, מודיע שהסיעה לא תתמוך בהצעות הממשלה עד שיועבר תקציב שסוכם בהסכם הקואליציוני. ||| {0}, chair of {1}, announces that the faction will not support the government's proposals until a budget agreed in the coalition agreement is transferred. ||| {0}، رئيس {1}، يعلن أن الكتلة لن تدعم اقتراحات الحكومة حتى يُحوَّل مبلغ متفق عليه في الاتفاق الائتلافي.
+₪400 מיליון לנושאים של {} ||| ₪400 million for {0}'s issues ||| 400 مليون شيكل لقضايا {0}
+חברי {} עלו לדוכן והפריעו לנאום שלך במחאה על מדיניות הממשלה. יו״ר הכנסטון הוציא כמה מהם מהאולם. ||| Members of {0} went up to the podium and disrupted your speech in protest at the government's policy. The Knesseton Speaker removed several of them from the hall. ||| صعد أعضاء {0} إلى المنصة وعطّلوا خطابك احتجاجًا على سياسة الحكومة. أخرج رئيس الكنيستون بعضهم من القاعة.
+סקר מפוברק ופוסטים כוזבים על {} מופצים ברשתות על ידי חשבונות מזויפים. חלק מהחשבונות מזוהים כמופעלים מחו״ל. ||| A fabricated poll and false posts about {0} are spread on social media by fake accounts. Some of the accounts are identified as operated from abroad. ||| استطلاع ملفّق ومنشورات كاذبة عن {0} تنتشر في الشبكات الاجتماعية عبر حسابات مزيفة. بعض الحسابات يُعرّف على أنها تُدار من الخارج.
+{} התבטא בראיון באופן שנתפס כפוגעני כלפי ציבור שלם. דרישות להתנצלות מגיעות גם מתוך הקואליציה. ||| {0} spoke in an interview in a way that was seen as offensive toward an entire public. Demands for an apology come from within the coalition too. ||| {0} تحدث في مقابلة بشكل اعتُبر مسيئًا لجمهور بأكمله. مطالب بالاعتذار تأتي أيضًا من داخل الائتلاف.
+{} ו{} הודיעו על ברית פוליטית משותפת, במטרה למנוע ממך להרכיב את הממשלה הבאה. ||| {0} and {1} announced a joint political alliance, aiming to stop you from forming the next government. ||| {0} و{1} أعلنتا عن تحالف سياسي مشترك، بهدف منعك من تشكيل الحكومة القادمة.
+{} פרשה מהגוש ובחרה בתיאום איתך. ||| {0} withdrew from the bloc and chose to coordinate with you. ||| {0} انسحبت من الكتلة واختارت التنسيق معك.
+המשטרה פתחה בחקירה נגד {} בחשד להפרת אמונים במינויים במשרד. {} מכחיש כל עבירה. האופוזיציה דורשת שיפרוש. ||| The police opened an investigation against {0} on suspicion of breach of trust in ministry appointments. {1} denies any wrongdoing. The opposition demands that they resign. ||| فتحت الشرطة تحقيقًا ضد {0} بشبهة خيانة الأمانة في تعيينات في الوزارة. {1} ينفي أي مخالفة. المعارضة تطالب بأن يستقيل.
+{} {} יצאו להפגנה המונית מול הכנסטון ובצמתים ברחבי הארץ. המפגינים דורשים שינוי מיידי במדיניות. ||| {0} {1} went out to a mass demonstration outside the Knesseton and at junctions across the country. The protesters demand an immediate change in policy. ||| {0} {1} خرجوا إلى مظاهرة جماهيرية أمام الكنيستون وعند مفترقات في أنحاء البلاد. المتظاهرون يطالبون بتغيير فوري في السياسة.
+₪3 מיליארד ל{}. המחאה התפזרה, וקבוצות אחרות לומדות שמחאה עובדת. ||| ₪3 billion to {0}. The protest dispersed, and other groups learn that protest works. ||| 3 مليار شيكل لـ{0}. تفرّق الاحتجاج، وتتعلم فئات أخرى أن الاحتجاج ينجح.
+{} אושפז בלילה לבדיקות. מצבו מוגדר יציב, אבל במערכת הפוליטית כבר מדברים על היום שאחרי. ||| {0} was hospitalized overnight for tests. Their condition is defined as stable, but in the political system people already talk about the day after. ||| {0} أُدخل المستشفى ليلًا لإجراء فحوص. حالته مستقرة، لكن في المنظومة السياسية يتحدثون بالفعل عن اليوم التالي.
+{} פרסמו מכתב משותף: אם לא יהיה שינוי במדיניות ובתקציבים, הם יפעלו להפלת הממשלה. ||| {0} published a joint letter: if there is no change in policy and budgets, they will work to bring down the government. ||| {0} نشروا رسالة مشتركة: إذا لم يحدث تغيير في السياسة والميزانيات، فسيعملون على إسقاط الحكومة.
+{} פנה אליך בשקט: הוא מוכן לפרוש מסיעתו ולהצטרף לקואליציה, בתמורה לתפקיד בממשלה. ||| {0} approached you quietly: they are willing to leave their faction and join the coalition, in return for a government post. ||| {0} توجّه إليك بهدوء: هو مستعد لترك كتلته والانضمام إلى الائتلاف، مقابل منصب في الحكومة.
+{} עבר לקואליציה. בסיעתו הקודמת מאשימים אותו בבגידה בבוחרים. ||| {0} moved to the coalition. In their former faction they accuse them of betraying the voters. ||| {0} انتقل إلى الائتلاف. في كتلته السابقة يتهمونه بخيانة الناخبين.
+הכנסטון התפזר: {}. הבחירות ייערכו בעוד כשלושה חודשים ||| The Knesseton dissolved: {0}. The election will be held in about three months ||| حُلّ الكنيستون: {0}. ستُجرى الانتخابات بعد نحو ثلاثة أشهر
+בחירות מוקדמות: {} ||| Early election: {0} ||| انتخابات مبكرة: {0}
+הממשלה נפלה: {} ||| The government fell: {0} ||| سقطت الحكومة: {0}
+תוצאות הבחירות: {} – {} מנדטים ||| Election results: {0} – {1} seats ||| نتائج الانتخابات: {0} – {1} مقعدًا
+בחירות: {} קיבלה {} מנדטים (לפני: {}) ||| Election: {0} received {1} seats (before: {2}) ||| الانتخابات: {0} حصلت على {1} مقعدًا (قبل: {2})
+בחירות {}: {} – {} מנדטים ||| Election {0}: {1} – {2} seats ||| انتخابات {0}: {1} – {2} مقعدًا
+{} לא עברה את אחוז החסימה ||| {0} did not pass the threshold ||| {0} لم تتجاوز نسبة الحسم
+נשארת במקום {} ברשימה – מחוץ לכנסטון ||| You stayed in place {0} on the list – outside the Knesseton ||| بقيت في المكان {0} في القائمة – خارج الكنيستون
+{} הרכיב את הממשלה. המפלגה שלך באופוזיציה ||| {0} formed the government. Your party is in opposition ||| {0} شكّل الحكومة. حزبك في المعارضة
+{} החזיר את המנדט: אין רוב לממשלה ||| {0} returned the mandate: there is no majority for a government ||| {0} أعاد التفويض: لا توجد أغلبية للحكومة
+{} הרכיב ממשלה עם {} שותפות ({} מנדטים) ||| {0} formed a government with {1} partners ({2} seats) ||| {0} شكّل حكومة مع {1} شريكات ({2} مقعدًا)
+{} מזמין אותך לממשלה ||| {0} invites you to the government ||| {0} يدعوك إلى الحكومة
+{} מחוץ לממשלה ||| {0} outside the government ||| {0} خارج الحكومة
+הצעה ל{}: {} ||| Offer to {0}: {1} ||| عرض إلى {0}: {1}
+נכונות {}% ||| Willingness {0}% ||| الاستعداد {0}%
+{} מצטרפת לקואליציה ||| {0} joins the coalition ||| {0} تنضم إلى الائتلاف
+{} עזבה את השולחן ||| {0} left the table ||| {0} غادرت الطاولة
+{} לא השתכנעה ||| {0} was not convinced ||| {0} لم تقتنع
+להעביר את {} ||| To pass {0} ||| تمرير {0}
+{} הרכיב ממשלה: {} מנדטים ||| {0} formed a government: {1} seats ||| {0} شكّل حكومة: {1} مقعدًا
+{} מנדטים, {} שותפות ||| {0} seats, {1} partners ||| {0} مقعدًا، {1} شريكات
+{} החזיר את המנדט להרכבת הממשלה ||| {0} returned the mandate to form the government ||| {0} أعاد تفويض تشكيل الحكومة
+משרד ה{} וה{} ||| The Ministry of {0} and {1} ||| وزارة {0} و{1}
+סגרו לו את {} ||| They closed {0} on him ||| أغلقوا عليه {0}
+{} פורשת מהקואליציה: "{}" ||| {0} withdraws from the coalition: "{1}" ||| {0} تنسحب من الائتلاف: "{1}"
+{} פרשה מהקואליציה ||| {0} withdrew from the coalition ||| {0} انسحبت من الائتلاف
+{} קיבל ₪{}B ||| {0} received ₪{1}B ||| {0} حصل على {1} مليار شيكل
+{} נשאר (בינתיים) ||| {0} stays (for now) ||| {0} يبقى (في الوقت الحالي)
+{} פוטר מהממשלה ||| {0} was dismissed from the government ||| أُقيل {0} من الحكومة
+{} התפטר מהממשלה ||| {0} resigned from the government ||| {0} استقال من الحكومة
+{} התפטר ||| {0} resigned ||| {0} استقال
+{} נשאר בתפקיד ||| {0} stays in office ||| {0} يبقى في المنصب
+{} נשארת בקואליציה ||| {0} stays in the coalition ||| {0} تبقى في الائتلاف
+{} עזבה את הקואליציה! ||| {0} left the coalition! ||| {0} غادرت الائتلاف!
+{} נשארת בקואליציה, בינתיים ||| {0} stays in the coalition, for now ||| {0} تبقى في الائتلاف، في الوقت الحالي
+הבטחת ל{} ||| You promised {0} ||| وعدت {0}
+{} מאוכזב ||| {0} is disappointed ||| {0} خائب الأمل
+פרשת מול {} ||| You withdrew from {0} ||| انسحبت أمام {0}
+{} מקפיא את המרד ||| {0} freezes the revolt ||| {0} يجمّد التمرد
+{} ניצח בפריימריז מול {} ||| {0} won the primaries against {1} ||| {0} فاز في الانتخابات التمهيدية أمام {1}
+הדף תיגר של {} ||| You repelled the challenge of {0} ||| صددت تحدي {0}
+הודחת בפריימריז על ידי {} ||| You were ousted in the primaries by {0} ||| أُزحت في الانتخابات التمهيدية على يد {0}
+{} הדיח אותך מראשות המפלגה ||| {0} ousted you from the party leadership ||| {0} أزاحك من رئاسة الحزب
+קיצצת ₪{}B במשרד ||| You cut ₪{0}B in the ministry ||| قلّصت {0} مليار شيكل في الوزارة
+{} מונה ל{} ||| {0} was appointed to {1} ||| عُيّن {0} في {1}
+איחוד עם {} ||| Merger with {0} ||| اتحاد مع {0}
+{} נשארת באופוזיציה ||| {0} stays in opposition ||| {0} تبقى في المعارضة
+קיבלת את {} ||| You received {0} ||| حصلت على {0}
+{} מצטרפת לממשלה ||| {0} joins the government ||| {0} تنضم إلى الحكومة
+"{}" עבר בקריאה טרומית ({}-{}) ||| "{0}" passed the preliminary reading ({1}-{2}) ||| "{0}" مرّ في القراءة التمهيدية ({1}-{2})
+"{}" נפל בקריאה טרומית ({}-{}) ||| "{0}" fell in the preliminary reading ({1}-{2}) ||| "{0}" سقط في القراءة التمهيدية ({1}-{2})
+הכנסטון הפיל את "{}" של {} ||| The Knesseton voted down "{0}" by {1} ||| أسقط الكنيستون "{0}" الخاص بـ{1}
+"{}" עבר בקריאה שלישית ({}-{}) ||| "{0}" passed the third reading ({1}-{2}) ||| "{0}" مرّ في القراءة الثالثة ({1}-{2})
+הכנסטון אישר את {} ||| The Knesseton approved {0} ||| أقرّ الكنيستونون {0}
+{} עבר בקריאה שלישית ||| {0} passed the third reading ||| {0} مرّ في القراءة الثالثة
+סופית: {} בספר החוקים ||| Final: {0} is in the statute book ||| نهائيًا: {0} في سجل القوانين
+{} עבר ({}-{}) ||| {0} passed ({1}-{2}) ||| {0} مرّ ({1}-{2})
+"{}" נפל בקריאה שלישית ({}-{}) ||| "{0}" fell in the third reading ({1}-{2}) ||| "{0}" سقط في القراءة الثالثة ({1}-{2})
+יוצא לדרך: {} (₪{} מיליארד) ||| Under way: {0} (₪{1} billion) ||| ينطلق: {0} ({1} مليار شيكل)
+{}: עיכוב נוסף וחריגה בתקציב ||| {0}: another delay and a budget overrun ||| {0}: تأخير إضافي وتجاوز في الميزانية
+נחנך: {}{} ||| Inaugurated: {0}{1} ||| دُشّن: {0}{1}
+הפרויקט "{}" הושלם ||| The project "{0}" was completed ||| اكتمل المشروع "{0}"
+חנך את {} ||| Inaugurated {0} ||| دشّن {0}
+{} מבטיח: "{}" ||| {0} promises: "{1}" ||| {0} يعد: "{1}"
+{} ו{} מתאחדות לרשימה משותפת ||| {0} and {1} merge into a joint list ||| {0} و{1} تتحدان في قائمة مشتركة
+איחד את {} עם המפלגה ||| Merged {0} into the party ||| دمج {0} في الحزب
+צה״ל הודיע בצער על נפילתם של {} לוחמים. ||| The IDF announced with sorrow the fall of {0} fighters. ||| أعلن الجيش بحزن عن سقوط {0} مقاتلين.
+בירי לעבר העורף נהרגו {} אזרחים. ||| {0} civilians were killed in fire toward the home front. ||| قُتل {0} مدنيين في إطلاق نار باتجاه الجبهة الداخلية.
+{} לוחמים נפלו במבצע ||| {0} fighters fell in the operation ||| سقط {0} مقاتلين في العملية
+{}; {} לוחמים נפלו ||| {0}; {1} fighters fell ||| {0}؛ سقط {1} مقاتلين
+{} מ{}: {} הרוגים ||| {0} from {1}: {2} killed ||| {0} من {1}: {2} قتلى
+שיחות גלויות עם {} ||| Open talks with {0} ||| محادثات علنية مع {0}
+{}: רמת הקשר עלתה ל-{}. {} ||| {0}: the level of contact rose to {1}. {2} ||| {0}: ارتفع مستوى التواصل إلى {1}. {2}
+בתיווך {}: הפסקת אש ב{} ||| Mediated by {0}: ceasefire in {1} ||| بوساطة {0}: وقف إطلاق نار في {1}
+הפסקת אש ב{} בתיווך {} ||| A ceasefire in {0} mediated by {1} ||| وقف إطلاق نار في {0} بوساطة {1}
+הפסקת אש ב{} ||| A ceasefire in {0} ||| وقف إطلاق نار في {0}
+בתיווך {} הושגה הפסקת אש לשנה. הימין מבקר; משפחות בעורף מברכות. ||| Through the mediation of {0} a one-year ceasefire was reached. The right criticizes; families on the home front welcome it. ||| بوساطة {0} تم التوصل إلى وقف إطلاق نار لمدة سنة. اليمين ينتقد؛ والعائلات في الجبهة الداخلية ترحّب.
+{} לא הצליחה לגשר על הפערים. אפשר לחזק את הערוץ ולנסות שוב (הסיכוי היה {}%). ||| {0} did not manage to bridge the gaps. You can strengthen the channel and try again (the chance was {1}%). ||| {0} لم تنجح في سد الفجوات. يمكن تعزيز القناة والمحاولة مجددًا (كانت الفرصة {1}%).
+נקטה צעד בונה אמון: {} ||| Took a confidence-building step: {0} ||| اتخذت خطوة لبناء الثقة: {0}
+הממשלה אישרה: {} ||| The government approved: {0} ||| الحكومة أقرّت: {0}
+היסטוריה: נחתם הסכם נורמליזציה עם {} ||| History: a normalization agreement was signed with {0} ||| تاريخ: وُقّع اتفاق تطبيع مع {0}
+הסכם נורמליזציה עם {} ||| Normalization agreement with {0} ||| اتفاق تطبيع مع {0}
+הצד השני דורש צעדים משמעותיים יותר מול הפלסטינים (הסיכוי היה {}%). ||| The other side demands more significant steps toward the Palestinians (the chance was {0}%). ||| الطرف الآخر يطالب بخطوات أكثر أهمية تجاه الفلسطينيين (كانت الفرصة {0}%).
+אימון: {} ||| Training: {0} ||| تدريب: {0}
+הכשירות עלתה ל-{}. ||| Readiness rose to {0}. ||| ارتفعت الجاهزية إلى {0}.
+איזון בין {} לבין {} ||| Balance between {0} and {1} ||| توازن بين {0} و{1}
+אני רוצה לדבר היום על {}. ||| I want to talk today about {0}. ||| أريد أن أتحدث اليوم عن {0}.
+הציבור יודע ש{} הוא אחד הנושאים החשובים ביותר עבור המדינה. ||| The public knows that {0} is one of the most important issues for the country. ||| يعرف الجمهور أن {0} من أهم المواضيع بالنسبة للدولة.
+במשך שנים דיברו על {}, ומעט מדי נעשה. ||| For years people talked about {0}, and too little was done. ||| لسنوات تحدثوا عن {0}، وفُعل القليل جدًا.
+אין נושא שמעסיק את הבתים בישמעאל יותר מ{}. ||| No issue occupies homes in Ishmael more than {0}. ||| لا يوجد موضوع يشغل البيوت في إسماعيل أكثر من {0}.
+אני מתכוון לפעול {}, {}. ||| I intend to act {0}, {1}. ||| أنوي العمل {0}، {1}.
+ל{} אני רוצה לומר: {}. ||| To {0} I want to say: {1}. ||| إلى {0} أريد أن أقول: {1}.
+נאום על {} ||| A speech on {0} ||| خطاب عن {0}
+{} צודק בעניין הזה. ||| {0} is right on this matter. ||| {0} محق في هذا الأمر.
+{} יצאו בקמפיין נגד הדברים. ||| {0} launched a campaign against the remarks. ||| {0} أطلقوا حملة ضد الكلام.
+{}: {} על {} ||| {0}: {1} on {2} ||| {0}: {1} بشأن {2}
+נאום: {} ({}) ||| Speech: {0} ({1}) ||| خطاب: {0} ({1})
+הדברים התקבלו היטב בקרב {}. ||| The remarks were well received among {0}. ||| استُقبل الكلام جيدًا لدى {0}.
+{} הגיבו בביקורת. ||| {0} responded with criticism. ||| {0} ردّوا بالنقد.
+סקר: {} {} ל-{} מנדטים ||| Poll: {0} {1} to {2} seats ||| استطلاع: {0} {1} إلى {2} مقعدًا
+סקר: {} מנדטים ({}{}) ||| Poll: {0} seats ({1}{2}) ||| استطلاع: {0} مقعدًا ({1}{2})
+מה דורש תשומת לב: {} ||| What needs attention: {0} ||| ما يحتاج إلى انتباه: {0}
+קבוצות: {} ||| Groups: {0} ||| فئات: {0}
+השפעה משוערת: {} ||| Estimated impact: {0} ||| التأثير المقدّر: {0}
+הזמן מתקדם ב{} (עד {}): הכלכלה, הציבור והפוליטיקאים מגיבים ||| Time advances by {0} (until {1}): the economy, the public and the politicians react ||| يتقدم الوقت بمقدار {0} (حتى {1}): الاقتصاد والجمهور والسياسيون يتفاعلون
+🪑 מינוי שר ל{} ||| 🪑 Appoint a minister to {0} ||| 🪑 تعيين وزير لـ{0}
+פותח את מסך {} ||| Opens the {0} screen ||| يفتح شاشة {0}
+פותח את מסך {}. ההחלטה עצמה – שם ||| Opens the {0} screen. The decision itself is made there ||| يفتح شاشة {0}. القرار نفسه يُتخذ هناك
+💰 {} תקציב: {} ||| 💰 {0} budget: {1} ||| 💰 ميزانية {0}: {1}
+לוקח אותך למסך {} ומסמן את הכפתור ||| Takes you to the {0} screen and highlights the button ||| ينقلك إلى شاشة {0} ويحدد الزر
+{}: לחץ לעצה על המסך הזה ||| {0}: click for advice on this screen ||| {0}: اضغط للحصول على نصيحة حول هذه الشاشة
+עמדה: מ"{}" ועד "{}" ||| Position: from "{0}" to "{1}" ||| الموقف: من "{0}" إلى "{1}"
+{} ייקח את זה אישית. ||| {0} will take this personally. ||| {0} سيأخذ هذا بشكل شخصي.
+שיחה עם {} ||| Chat with {0} ||| محادثة مع {0}
+הודעה ל{} ||| Message to {0} ||| رسالة إلى {0}
+הצעה נוספת ל{} ||| Another offer to {0} ||| عرض إضافي إلى {0}
+{} – ראש הממשלה · {} ||| {0} – prime minister · {1} ||| {0} – رئيس الحكومة · {1}
+באחריות {}. אתה יכול להגיב בתקשורת ||| Under the responsibility of {0}. You can respond in the media ||| تحت مسؤولية {0}. يمكنك الرد في الإعلام
+נשארו {} להחליט ||| {0} left to decide ||| تبقّى {0} للحسم
+צפי: {} ||| Forecast: {0} ||| التوقع: {0}
+יחס המנהיג ({}) ||| The leader's attitude ({0}) ||| موقف الزعيم ({0})
+תור {} ||| Turn {0} ||| الدور {0}
+ריבית: ₪{}B ||| Interest: ₪{0}B ||| الفائدة: {0} مليار شيكل
+דירוג {} · ריבית {}% ||| Rating {0} · interest {1}% ||| تصنيف {0} · فائدة {1}%
+שר/ה {} ||| Minister {0} ||| وزير/ة {0}
+{} מנדטים ||| {0} seats ||| {0} مقعدًا
+בחרו פוליטיקאי – {} ||| Choose a politician – {0} ||| اختاروا سياسيًا – {0}
+את מי הדמות שלך מחליפה? – {} ||| Whom does your character replace? – {0} ||| من تحلّ شخصيتك محله؟ – {0}
+מקום {} ||| Place {0} ||| المكان {0}
+מקום {} ברשימה ||| Place {0} on the list ||| المكان {0} في القائمة
+פעולות המשרד ({}) ||| Ministry actions ({0}) ||| إجراءات الوزارة ({0})
+פעולות מסוג {} ||| Actions of type {0} ||| إجراءات من نوع {0}
+מומחיות {} · {} ||| Expertise {0} · {1} ||| خبرة {0} · {1}
+הוצאה שנתית על פרויקטים: ₪{}B. עיכובים תלויים בביורוקרטיה וביעילות המשרד. ||| Annual spending on projects: ₪{0}B. Delays depend on bureaucracy and ministry efficiency. ||| الإنفاق السنوي على المشاريع: {0} مليار شيكل. التأخيرات تعتمد على البيروقراطية وكفاءة الوزارة.
+פרויקטים של {} ||| Projects of {0} ||| مشاريع {0}
+סיכוי הצלחה {}% ||| Chance of success {0}% ||| احتمال النجاح {0}%
+{} · מקום {} ברשימה ||| {0} · place {1} on the list ||| {0} · المكان {1} في القائمة
+עוד {} תורות ||| {0} more turns ||| {0} أدوار أخرى
+בעוד {} ||| In {0} ||| بعد {0}
+ראש הממשלה: {} · {} מנדטים · יציבות {} ||| Prime minister: {0} · {1} seats · stability {2} ||| رئيس الحكومة: {0} · {1} مقعدًا · استقرار {2}
+{} · מומחיות {} · נאמנות {} ||| {0} · expertise {1} · loyalty {2} ||| {0} · خبرة {1} · ولاء {2}
+מינוי שר ל{} ||| Appoint a minister to {0} ||| تعيين وزير لـ{0}
+לפטר את {}? הוא יזכור. ||| Fire {0}? They will remember. ||| إقالة {0}؟ سيتذكر.
+פרטית ({}) ||| Private ({0}) ||| خاص ({0})
+בתוקף ({}) ||| In force ({0}) ||| ساري المفعول ({0})
+להוציא את {}? ||| Expel {0}? ||| طرد {0}؟
+{}, {} מנדטים ||| {0}, {1} seats ||| {0}، {1} مقعدًا
+היחסים של {} ||| The relations of {0} ||| علاقات {0}
+סוג מבצע ב{} ||| Operation type in {0} ||| نوع العملية في {0}
+{}: {} צפויים נפגעים. לאשר? ||| {0}: {1} casualties expected. Approve? ||| {0}: يُتوقع {1} إصابات. هل تصادق؟
+
+{} פורש מסיעתו ומצטרף לקואליציה ||| {0} leaves their faction and joins the coalition ||| {0} ينسحب من كتلته وينضم إلى الائتلاف

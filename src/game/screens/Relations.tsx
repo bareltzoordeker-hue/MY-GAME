@@ -36,7 +36,7 @@ function PartyMap({ s, selected, onSelect }: { s: GameState; selected: string; o
         const rad = 14 + Math.sqrt(Math.max(1, p.seats || p.pollShare * 1.2)) * 4;
         const mine = p.id === s.player.partyId;
         return (
-          <g key={p.id} onClick={() => onSelect(p.id)} style={{ cursor: 'pointer' }} role="button" tabIndex={0} aria-label={`${p.name}, ${p.seats} מנדטים`}
+          <g key={p.id} onClick={() => onSelect(p.id)} style={{ cursor: 'pointer' }} data-tip={`${p.name}: ${p.seats} מנדטים. לחיצה מציגה את היחסים של המפלגה עם כל השאר, ואת הפעולות האפשריות מולה`} role="button" tabIndex={0} aria-label={`${p.name}, ${p.seats} מנדטים`}
             onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onSelect(p.id); }}>
             <circle cx={x} cy={y} r={rad} fill={p.color} stroke={p.id === selected ? 'var(--ink)' : mine ? 'var(--gold)' : '#fff'} strokeWidth={p.id === selected || mine ? 4 : 2} />
             <text x={x} y={y + 5} textAnchor="middle" fontSize="14" fontWeight="800" fill="#fff" style={{ pointerEvents: 'none' }}>{p.logo}</text>
@@ -58,7 +58,7 @@ function PersonRow({ s, p }: { s: GameState; p: Politician }) {
         <span className="chip shrink-0" style={{ color: p.loyalty >= 55 ? 'var(--good)' : p.loyalty <= 35 ? 'var(--bad)' : undefined }} data-tip="היחס שלו אליך (0–100)">❤️ {p.loyalty.toFixed(0)}</span>
       </div>
       <div className="flex gap-1 flex-wrap mt-2">
-        <button className="btn btn-sm btn-blue" onClick={() => useGame.getState().openChat(p.id)}>💬 שיחה</button>
+        <button className="btn btn-sm btn-blue" data-tip="פותח מסך שיחה עם הפוליטיקאי. שיחה לא עולה הון, אבל מה שנאמר בה משנה יחסים ונשמר בזיכרון" onClick={() => useGame.getState().openChat(p.id)}>💬 שיחה</button>
         <ActionButton id="network" params={{ politicianId: p.id }} className="btn btn-sm">☕ פגישה</ActionButton>
         <ActionButton id="joint_event" params={{ politicianId: p.id }} className="btn btn-sm">🤝 אירוע משותף</ActionButton>
         <ActionButton id="mutual_support" params={{ politicianId: p.id }} className="btn btn-sm">🔁 תמיכה הדדית</ActionButton>

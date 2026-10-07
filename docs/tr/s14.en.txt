@@ -1,0 +1,200 @@
+An apartment = 12+ years of salary
+Low readiness
+High poverty rate
+Risk of power outages in summer
+Old piping and failures
+Slow bureaucracy
+Underfunding
+Speech in the Knesseton plenum
+Television interview
+Supporters' rally
+State ceremony
+Economic conference
+Social media video
+Statesmanlike
+Unifying, respectful, less exciting to the base
+Firm
+Excites the base, pushes away the center
+Empathetic
+Speaks to emotion, works well in a crisis
+Optimistic
+Vision and hope, less credible when the situation is hard
+Security and the war
+A heavy hand and military decision
+Diplomatic arrangements and reducing the fighting
+The judicial reform
+Changing the justice system and governability
+Defending the independence of the courts
+The draft and equal burden
+Anchoring the status of Torah students
+A draft for everyone and an equal burden
+Cost of living and housing
+Free market and competition
+Government intervention and regulation
+Welfare, health and education
+Efficiency and shrinking the public sector
+Broad public investment
+The Palestinian issue
+Sovereignty and settlement
+Separation and a diplomatic arrangement
+Religion and state
+Preserving the status quo and tradition
+Freedom from religion, transport on Shabbat, civil marriage
+Unity and hope
+Unity around the flag
+Unity through dialogue
+Mr. Speaker, Members of the Knesseton,
+Honored Speaker, Members of the Knesseton,
+Thank you for inviting me.
+I want to speak tonight openly with the citizens of Ishmael.
+Dear friends, thank you for coming!
+Good evening everyone, how great to see you all here.
+Dear families, honored guests,
+We gather today at a moment of remembrance and responsibility.
+Businesspeople, economists, dear guests,
+Thank you to the organizers of the conference.
+Hello everyone.
+I wanted to speak with you directly.
+We will do it together, as one people, responsibly.
+This is my commitment to all the citizens of Ishmael.
+And we will not give up. Not now and not in the future.
+Whoever thinks we will be deterred is mistaken.
+I hear you, and I am here for you.
+I know how hard it is now, and I will not leave you alone.
+The good days are still ahead of us.
+I believe in the future of this country, and in you.
+Without hesitation
+With determination
+With caution and responsibility
+With an orderly plan and timetables
+With a professional team
+Together with everyone willing to work together
+You are not alone
+I heard you
+Your voice matters to me
+Whoever opposes this path will have to explain to the public why.
+We will not accept more excuses.
+I know the difficulties, and I have met people who struggle with them every day.
+Behind every number there is a family.
+We have the tools, the people and the spirit.
+I see a great opportunity.
+This is the time for responsibility, not division.
+We will act for the benefit of the whole public.
+A correct and important statement.
+We agree with the words.
+The words are dangerous and divisive.
+This is a path that will harm the country.
+We will act against this policy.
+A large demonstration was called.
+The speech was too short to leave an impression.
+The speech was too long, and part of the audience lost interest.
+First a government must be formed (or the mandate returned)
+The leader expelled you from the party
+Soaring
+Plunging
+A new poll: support for the government dropped
+A relatively quiet period. No unusual events.
+Satisfaction
+Growth
+Unemployment
+Seats in the poll
+Close
+Menu
+Explanation
+Sound effects
+Sound effects (muted)
+Background music
+Loading…
+🚨 Breaking news
+A serious event
+An unfolding event
+📰 Meanwhile, in Ishmael…
+A decision is required
+Urgent
+-
+🧠 Recommended
+-
+-
+🔄 Try again
+🗑️ Delete the save and start over
+Back to the home page
+The goal
+A simulation of politics in Ishmael, with the parties and people as they are in September 2026. The goal: to stay in politics, to have influence and to carry out your policy.
+The game ends if your party does not pass the threshold, if you are not elected to the Knesseton, if you are removed, if you are expelled from the party or if you retire. Losing an election does not end the game – you can continue in opposition.
+Whom you play
+Any of the real Knesseton members and candidates, or a character of your own who takes a place on the list.
+The starting role follows the real role: prime minister, minister, party leader or Knesseton member. Each role has different powers.
+How time passes
+A regular turn is 4 months. In the 4 months before the election each turn is two weeks of campaign.
+In each turn you decide as many decisions as you want. Each decision costs political capital (🎯), money or relations.
+At the end of the turn the economy moves, the polls update, the enemies grow stronger and the politicians remember what you did. A detailed summary of the turn appears.
+Coalition and negotiation
+After the election the President tasks the person with the most recommendations with forming the government. There are 28 days, plus an extension of 14.
+Each party demands portfolios, deputy ministers, committees, budgets, laws, vetoes and sometimes a rotation. You can give up demands or offer additions.
+The agreement is written, and each commitment gets a deadline and a reminder. A violation may break up the government.
+Legislation and values
+Real laws go through a preliminary reading, committee and a third reading over several turns. Basic Laws need 61.
+Each party votes according to its values. Some parties have red lines they will not cross even from inside the coalition.
+Security and diplomacy
+Six fronts, IDF units under their real names and operations approved by the cabinet. Each operation has a price: casualties, economy and foreign relations.
+Alongside the military track there is a diplomatic track: dialogue channels, mediators, ceasefires, confidence-building steps, A/B/C areas and normalization.
+Campaign and speeches
+A party leader opens a campaign: strategy, target audiences, budget and slogan, and then house meetings, spots, debates, internal polls and surplus agreements.
+The "🎤 Speech" button is always available: you choose a stage, subject, position and tone, and write or ask for a draft. Each party responds according to its values.
+The adviser in the floating button gives a recommendation in every situation, and explains exactly what each button will do before you press.
+It runs a simulation before it recommends, but the decision is yours.
+Tips
+Hovering the mouse over a button explains what it does. A "?" next to a number explains where it comes from.
+The game saves automatically at the end of each turn, in your browser only.
+How to play
+-
+How to play?
+The guided tour of the screens will appear again
+🔁 Show the guided tour
+📖 How to play?
+Guide: the goal, the roles, how time passes, coalition, legislation, security and campaign
+Dashboard
+Overview: the state of the country, crises, decisions waiting for you and news
+My ministry
+Managing the ministry: budget, dedicated indicators and actions only this ministry can do
+State of the country
+The quality of public services, what makes it rise or fall and which problems are open
+Growth, unemployment, inflation, debt and taxes, including what drives each number
+Budget
+Dividing the money among the ministries. Every change affects services, the deficit and the public
+Population
+21 population groups: who is satisfied, who is angry and how it changes
+Map
+A map of Ishmael with layers: unemployment, income, investment, infrastructure and satisfaction by region
+Fronts, IDF forces, operations approved by the cabinet, dialogue channels, ceasefires, A/B/C areas and foreign relations
+Government
+Ministers, ministries and coalition: appointments, dismissals, merging ministries and coalition funds
+Knesseton
+The 120 seats, bills under debate and the vote forecast
+Laws
+Submitting new laws and repealing existing laws
+Relations map
+Relations between the parties and between you and Knesseton members: meetings, joint events, mutual support, surplus agreements and mergers
+Chats
+Free writing to ministers and party leaders: threats, promises, requests and strengthening ties. Search by name
+Party and alliances
+Your party, the campaign, election promises and alliances with other parties
+Projects
+National projects: roads, railways, hospitals. They take time and cost money
+Crises
+Active crises and ways of handling them, and the event log
+Polls
+Seats in the poll, trends and who is angriest
+News
+All the headlines. Most are not flattering
+All of the adviser's advice by order of urgency
+Career
+How to advance: committees, interviews, primaries, switching parties or resigning
+Save and settings
+Saving, import and export, privacy and accessibility settings and restarting the guide
+Opening the menu: all the game's screens
+Government of Ishmael
+The save failed – the game is still in memory, we will try again next turn
+Automatic save at the end of each turn
+⚠️ Not saved
+Writing and delivering a speech: on television, in the plenum, at a rally or on social media

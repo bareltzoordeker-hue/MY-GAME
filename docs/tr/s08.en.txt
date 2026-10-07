@@ -1,0 +1,200 @@
+Five laws passed
+The most popular politician in the country
+You were removed from the party
+The great protest brought you down
+You vanished from public awareness
+Approve half
+Approve the addition
+Fire him now
+"We demand ₪2 billion for the issues agreed in the coalition agreement. Otherwise we will consider our steps."
+Comply
+A realistic slot
+A position
+A realistic slot on the list
+A position in the government
+Promise (within two years)
+Decline politely
+"The party needs new leadership to win the election. I announce my candidacy for the party leadership."
+Run
+Reach an arrangement (20 capital)
+Retire with dignity
+The prime minister asks for a cut
+Agree
+The prime minister asks for backing
+"I ask that you go on the studio tonight and present the government's position. Your backing is important to me."
+Go on the studio
+Follow the instruction
+Vote by conscience
+Sign
+Give up
+"A joint run will ensure that the two sets of votes are not lost below the threshold. We will ask for slot 2 on the list and a senior portfolio."
+Join forces
+No thanks
+Law
+Laws
+Regulating
+Bill
+Amendment
+To the law
+On the subject
+The ministry
+Ministry
+The minister
+Minister
+Draft
+Equal burden
+Exemption
+Haredi draft
+Judges
+Judicial reform
+Override
+Commission of inquiry
+State inquiry
+Minimum wage
+Rent
+Regulation
+Civil marriage
+Thank you. I appreciate the words, and I would be glad to keep working together.
+Glad to hear it. Let's keep it up.
+Thank you. We'll see how it progresses.
+Accepted. I welcome substantive cooperation.
+The words are pleasant. Actions matter more.
+Sounds good, but I haven't forgotten what happened.
+No need to apologize. Moving on.
+Thank you for the words. That is behind us.
+I accept the apology. Let's see it in actions too.
+I appreciate the honesty.
+The apology is accepted, but trust does not return in one conversation.
+We'll see. I haven't forgotten.
+That is not appropriate, and I am surprised at you.
+I hope it was a slip of the tongue.
+I am not willing to have a conversation in this tone.
+That's not my business. We'll talk when there is a proper conversation.
+This conversation will not continue. I will remember this.
+You will get my answer in the vote.
+Received. Would you like to elaborate?
+I heard. We would be glad to continue the conversation.
+Received. Can you elaborate on what you mean?
+I'm listening.
+I'm not sure what you are asking of me.
+Get to the point.
+I trust you. Let's see it in practice.
+Thank you. I hope we can advance this together.
+I'll be glad to. I'll check it when it reaches the table.
+Promises in politics are measured by delivery.
+I have heard promises before. We'll see.
+I'll wait and see.
+We already talked about this today. We'll return to the subject later.
+I understood the point. I have nothing to add right now.
+Threatened me in a conversation
+I don't like working under threats, but I will reconsider my position.
+I understood the message. I will adjust my conduct.
+The threat worked, but it will be remembered badly.
+Threats will not deter me. I will tell about this conversation in public.
+The threat failed and the conversation leaked.
+Threats don't work on me. I will remember this conversation.
+If that is the path you chose, my response will be in the vote.
+The threat failed and relations were damaged.
+A promise was recorded with a deadline (two years). You will get a reminder before it arrives.
+A position or portfolio
+A promise for a position was recorded with a deadline (one year).
+A promise about the budget
+Relations improved slightly. A general promise is not recorded with a deadline; to set a commitment, name a law or a position.
+A general promise
+A general promise improves relations slightly. To commit, name a specific law or position.
+Support for the bill grew.
+There is currently no active bill on the subject. The request was recorded.
+I cannot commit to that right now.
+I will need something in return to support this.
+You can offer something in return (a promise for a law, a position or the budget).
+I am not in a position to help you right now.
+What exactly do you ask me to support? Name a law or subject.
+I'll be glad to help if you specify what it is about.
+Apologized to me
+Relations improved.
+A positive conversation
+Insulted me in a conversation
+Relations were damaged.
+Supports
+Opposes
+Strongly opposes
+Undecided
+This is a red line of the faction.
+I need to see the text and the compensation.
+The question is important. I would be glad to discuss it face to face.
+I have no final position. What do you think?
+I prefer to answer in a meeting and not in writing.
+We have already talked a lot today. Let's continue next turn.
+We oppose your policy, and we will act against it in the Knesseton.
+I have an idea for cooperation. I'd be glad to meet.
+The election is approaching. Maybe we should talk about cooperation after the day after.
+We are examining a surplus agreement. Would you be open to a conversation?
+Constitution, Law and Justice Committee
+Health Committee
+Labor and Welfare Committee
+Rotation in the premiership after two years
+Appointments in government companies and boards
+Earmarked funds outside the budget (secret, may be exposed)
+Coalition agreement
+Understood
+The rotation date has arrived
+Chair of the partner
+Honor the rotation
+A secret transfer of funds to a coalition partner was exposed
+The agreement is no longer in effect.
+Refused to honor the rotation
+You refused to honor the rotation. The partner sees this as a serious violation of the agreement.
+Honored a rotation agreement
+Prime minister
+This is not your responsibility
+You can react in the media – criticize or back – but the decision is not in your hands.
+Political capital renews every turn.
+Popularity
+The crisis will continue and may worsen.
+Cost
+One turn
+3 turns
+Asked for money in a hard time
+The prime minister rejected the request
+Rejected the request
+Tax change
+Raising or lowering a tax. Changes state revenue and affects different groups by tax type.
+Only the prime minister sets taxes
+Revenue will rise, but the public will feel it in their pocket.
+The public will gain, but revenue will fall and the deficit will grow.
+Budget change
+Adding or cutting a budget item. Affects service quality, the responsible minister and the groups that rely on it.
+Only the prime minister allocates the budget
+Economic stimulus package
+₪8 billion one-off to accelerate growth and lower unemployment. Increases debt and may raise inflation.
+Only the prime minister
+Austerity program
+Across-the-board 3% cut in all civilian ministries (defense excluded). Reduces the deficit and hurts services and state employees.
+The austerity program cut his budget
+Austerity program: the government cuts 3% in all civilian ministries
+Tax enforcement operation
+Reinforcing the Tax Authority against evasion and black money. Brings in about ₪5 billion; the self-employed and business sector are unhappy.
+Submitting the budget to the Knesseton
+A vote on the state budget. If the budget fails, the Knesseton dissolves and elections are held.
+A caretaker government does not submit a budget
+The annual budget has already been approved
+The budget passed
+The budget fell
+By law, the Knesseton dissolves and elections will be held within about 90 days.
+Appointing a minister
+Appointing a coalition member to a portfolio. Appointing from a portfolio assigned by agreement to another party harms coalition stability.
+Only the prime minister appoints ministers
+Only coalition members can be appointed
+I regret the decision. It is not substantive.
+I will continue to serve the public from any position.
+The decision is disappointing.
+I thank you for the trust and will act for the benefit of the whole public.
+This is a great responsibility. We will get to work tomorrow.
+I know the field and will know how to advance it.
+This is a violation of the coalition agreement.
+Dismissing a minister
+Removing a minister from office. The portfolio passes to the prime minister. The minister and his party will remember this.
+There is no minister to dismiss
+-
+-
+This is a political decision, not a professional one.
