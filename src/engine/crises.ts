@@ -51,7 +51,7 @@ export function tickCrises(s: GameState): void {
     if (c.remaining <= 0) {
       s.crises = s.crises.filter((x) => x !== c);
       logEvent(s, '✅', `${c.title} דעך מעצמו`, 2, 'neutral', 'crisis');
-      addNews(s, `${c.title}: המשבר נרגע. איש לא יודע למה.`, 'neutral', c.icon);
+      addNews(s, `${c.title}: המשבר נרגע`, 'neutral', c.icon);
     }
   }
 }
@@ -74,19 +74,19 @@ export function resolveCrisis(s: GameState, crisisId: string, actionId: string):
   const c = s.crises.find((x) => x.id === crisisId);
   if (!c) return null;
   if (!canHandleCrisis(s, c)) {
-    return { title: 'זה לא באחריותך', subtitle: `את המשבר מנהל/ת ${crisisOwner(s, c)}`, status: 'rejected', stats: [], groups: [], people: [], quip: 'אפשר להגיב בתקשורת – לתקוף או לגבות. להחליט – לא.' };
+    return { title: 'זה לא באחריותך', subtitle: `את המשבר מנהל/ת ${crisisOwner(s, c)}`, status: 'rejected', stats: [], groups: [], people: [], quip: 'אפשר להגיב בתקשורת – לבקר או לגבות – אבל ההחלטה לא בידיך.' };
   }
   const a = c.actions.find((x) => x.id === actionId);
   if (!a) return null;
   if (a.capital > s.player.politicalCapital) {
-    return { title: 'אין מספיק הון פוליטי', status: 'rejected', stats: [], groups: [], people: [], quip: 'היועץ: "צריך קודם לצבור קצת כוח."' };
+    return { title: 'אין מספיק הון פוליטי', status: 'rejected', stats: [], groups: [], people: [], quip: 'ההון הפוליטי מתחדש בכל תור.' };
   }
   s.player.politicalCapital = clamp(s.player.politicalCapital - a.capital);
   if (a.cost) { s.economy.debt += a.cost; s.career.moneyInvested += a.cost; }
   applyEffects(s, a.effects);
   if (a.id === 'ignore') {
     logEvent(s, '🙈', `החלטת להתעלם מ${c.title}`, 1, 'bad', 'crisis');
-    return { title: `התעלמת מ${c.title}`, status: 'info', stats: [{ icon: '📉', label: 'פופולריות', value: '-2', tone: 'bad' }], groups: [], people: [], quip: 'היועץ: "אולי זה יעבור מעצמו. ואולי לא."' };
+    return { title: `התעלמת מ${c.title}`, status: 'info', stats: [{ icon: '📉', label: 'פופולריות', value: '-2', tone: 'bad' }], groups: [], people: [], quip: 'המשבר ימשיך ועלול להחריף.' };
   }
   const ok = rand(s) < a.successChance;
   if (ok) {

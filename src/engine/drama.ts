@@ -9,9 +9,9 @@ import { isPM } from './roles';
 
 /** When the player has no authority over a national decision, they get a political-response role instead. */
 const COMMENTARY: DramaOption[] = [
-  { id: 'c_attack', label: 'לתקוף את הטיפול של הממשלה', hint: 'אופוזיציה: מומנטום. קואליציה: ראש הממשלה ייעלב' },
-  { id: 'c_back', label: 'לגבות את הממשלה בפומבי', hint: 'קואליציה: נקודות אצל ראש הממשלה. אופוזיציה: מוניטין של "ממלכתי"' },
-  { id: 'c_silent', label: 'לשתוק ולחכות שזה יעבור', hint: 'בלי סיכון, בלי רווח' },
+  { id: 'c_attack', label: 'לתקוף את הטיפול של הממשלה', hint: 'באופוזיציה: מומנטום למפלגה. בקואליציה: פוגע ביחסים עם ראש הממשלה' },
+  { id: 'c_back', label: 'לגבות את הממשלה בפומבי', hint: 'בקואליציה: משפר יחסים עם ראש הממשלה. באופוזיציה: מוניטין ממלכתי' },
+  { id: 'c_silent', label: 'לא להגיב', hint: 'בלי סיכון, בלי רווח' },
 ];
 
 function optionsFor(s: GameState, def: DramaDef): DramaOption[] {
@@ -47,9 +47,9 @@ export function fire(s: GameState, defId: string): void {
     id: newId(s, 'dr'), defId, title: m.title, text: m.text, icon: m.icon, level: def.level, fromId: m.fromId, partyId: m.partyId,
     vars: m.vars ?? {}, turn: s.turn, options: optionsFor(s, def),
   };
-  s.flags[`drama_cd_${defId}`] = s.turn + (def.level === 'normal' ? 9 : 14);
+  s.flags[`drama_cd_${defId}`] = s.turn + (def.level === 'normal' ? 4 : 6);
   if (def.level !== 'normal') addNews(s, `מבזק: ${m.title}`, 'bad', '🚨');
-  logEvent(s, m.icon, m.title, def.level === 'normal' ? 2 : 3, def.level === 'normal' ? 'satire' : 'bad', 'drama');
+  logEvent(s, m.icon, m.title, def.level === 'normal' ? 2 : 3, def.level === 'normal' ? 'neutral' : 'bad', 'drama');
 }
 
 /** The government (AI) takes the national decision; the player's personal standing is not touched by it. */
@@ -59,7 +59,7 @@ function governmentDecides(s: GameState, def: DramaDef): string {
   const keep = { pop: me.popularity, power: me.power, rep: s.player.reputation, cap: s.player.politicalCapital };
   const out = govOpt.resolve(s, s.drama!);
   me.popularity = keep.pop; me.power = keep.power; s.player.reputation = keep.rep; s.player.politicalCapital = keep.cap;
-  if (out.headline) addNews(s, out.headline, out.tone === 'bad' ? 'bad' : out.tone === 'good' ? 'good' : 'satire', s.drama!.icon);
+  if (out.headline) addNews(s, out.headline, out.tone === 'bad' ? 'bad' : out.tone === 'good' ? 'good' : 'neutral', s.drama!.icon);
   return `${isPM(s) ? 'הוחלט' : 'הממשלה החליטה'}: "${govOpt.label}". ${out.text}`;
 }
 
@@ -70,21 +70,21 @@ function commentary(s: GameState, id: string): { text: string; tone: 'good' | 'b
     if (inGov) {
       remember(s, pm, 'insult', 'תקף את הממשלה מבפנים', -10);
       applyEffects(s, { playerPopularity: 2, playerReputation: 1 });
-      return { text: 'תקפת את הממשלה שאתה חלק ממנה. התקשורת אוהבת "מורדים". ראש הממשלה פחות.', tone: 'neutral' };
+      return { text: 'ביקרת את הממשלה שאתה חבר בה. התקשורת סיקרה, וראש הממשלה לא מרוצה.', tone: 'neutral' };
     }
     applyEffects(s, { playerPopularity: 3, partyMomentum: { [s.player.partyId]: 2 } });
-    return { text: 'מסיבת עיתונאים חריפה מול הכנסטון. ככה בונים אופוזיציה.', tone: 'good' };
+    return { text: 'ביקורת חריפה על הממשלה במסיבת עיתונאים. האופוזיציה מתחזקת.', tone: 'good' };
   }
   if (id === 'c_back') {
     if (inGov) {
       remember(s, pm, 'support', 'גיבה את הממשלה ברגע קשה', 8);
       applyEffects(s, { playerReputation: 1 });
-      return { text: 'גיבית את הממשלה. ראש הממשלה רשם לפניו. לטובה, הפעם.', tone: 'good' };
+      return { text: 'גיבית את הממשלה ברגע קשה. ראש הממשלה מעריך את זה.', tone: 'good' };
     }
     applyEffects(s, { playerReputation: 3, partyMomentum: { [s.player.partyId]: -1 } });
-    return { text: 'גיבית את הממשלה "למען המדינה". הבוחרים שלך שואלים בצד מי אתה בכלל.', tone: 'neutral' };
+    return { text: 'גיבית את הממשלה מתוך אחריות ממלכתית. חלק מהבוחרים שלך לא מבינים את הצעד.', tone: 'neutral' };
   }
-  return { text: 'שתקת. איש לא שם לב. זה גם הישג.', tone: 'neutral' };
+  return { text: 'בחרת לא להגיב. אין רווח ואין נזק.', tone: 'neutral' };
 }
 
 export function resolveDrama(s0: GameState, optionId: string): ActionResult {
@@ -108,7 +108,7 @@ export function resolveDrama(s0: GameState, optionId: string): ActionResult {
   s.drama = null;
   s.career.decisions += 1;
   s.player.politicalCapital = clamp(s.player.politicalCapital);
-  if (out.headline) addNews(s, out.headline, out.tone === 'bad' ? 'bad' : out.tone === 'good' ? 'good' : 'satire', ev.icon);
+  if (out.headline) addNews(s, out.headline, out.tone === 'bad' ? 'bad' : out.tone === 'good' ? 'good' : 'neutral', ev.icon);
   logEvent(s, ev.icon, `${ev.title} → ${label}`, ev.level === 'normal' ? 1 : 2, out.tone === 'good' ? 'good' : out.tone === 'bad' ? 'bad' : 'neutral', 'drama');
   if (ev.level !== 'normal') s.career.memorable.push(`${ev.title}: ${label}`);
   const pseudo = { id: 'drama', title: ev.title, icon: ev.icon, category: 'media', level: 'simple', description: '', unavailable: () => null, run: () => undefined } as ActionDef;

@@ -1,6 +1,4 @@
 // Narrative provider interface. The default is local, seeded templates (no internet).
-// TODO(phase 3+): an optional LLM provider (e.g. Claude) can implement `statement`
-// asynchronously; its output must pass `validateStatement` before the engine uses it.
 import type { CharacterContext, AIStatement } from './contextBuilder';
 
 export interface NarrativeProvider {
@@ -9,10 +7,10 @@ export interface NarrativeProvider {
 }
 
 const LINES: Record<AIStatement['tone'], string[]> = {
-  angry: ['אני לא מוכן לתמוך במהלך הזה.', 'זה עוד לא נגמר.', 'אני זוכר כל מילה.'],
+  angry: ['אני לא מוכן לתמוך במדיניות הזו.', 'יש בינינו חילוקי דעות עמוקים.', 'אני לא שוכח את מה שקרה.'],
   neutral: ['נבחן את הדברים לגופם.', 'נדבר על זה בוועדה.', 'יש מה לשפר.'],
-  friendly: ['אני איתך בזה.', 'מהלך נכון. כמעט כמו שלי.', 'תסמוך עליי.'],
-  sarcastic: ['עוד רפורמה? איזו הפתעה.', 'מבריק. פשוט מבריק.', 'אני בטוח שהפעם זה יעבוד.'],
+  friendly: ['אני תומך בדרך שלך.', 'אפשר לסמוך עליי.', 'נעבוד יחד על זה.'],
+  sarcastic: ['אני מסופק אם זה יעבוד.', 'יש לי ספקות רציניים לגבי הכיוון.', 'נראה בתוצאות.'],
 };
 
 export const templateProvider: NarrativeProvider = {

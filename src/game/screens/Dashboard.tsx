@@ -9,7 +9,8 @@ import { debtPct, deficitPct } from '../../utils';
 import { advisorTips } from '../../engine/advisor';
 import { coalitionSeats } from '../../engine/polls';
 import { servicesAverage } from '../../engine/services';
-import { isPartyLeader, playerMinistry, turnsToElection } from '../../engine/roles';
+import { isPartyLeader, playerMinistry } from '../../engine/roles';
+import { electionCountdown } from '../../engine/calendar';
 import { playerListRank } from '../../engine/elections';
 import { ADVISOR } from '../../data/world';
 import { Caricature, ADVISOR_SPEC } from '../../shared/components/Caricature';
@@ -175,7 +176,7 @@ function Inbox() {
                     <div className="text-sm muted mt-0.5">{it.text}</div>
                     <InboxOptions itemId={it.id} />
 
-                    <div className="text-[10px] muted mt-1">{it.expiresTurn - s.turn <= 0 ? 'יוחלט אוטומטית בסוף התור' : `נשארו ${(it.expiresTurn - s.turn) * 2} חודשים להחליט`}</div>
+                    <div className="text-[10px] muted mt-1">{it.expiresTurn - s.turn <= 0 ? 'יוחלט אוטומטית בסוף התור' : `נשארו ${it.expiresTurn - s.turn === 1 ? 'תור אחד' : `${it.expiresTurn - s.turn} תורות`} להחליט`}</div>
                   </div>
                 </div>
               </div>
@@ -241,7 +242,7 @@ function Politics() {
       <div className="grid grid-cols-3 gap-2 mb-3 text-center">
         <div className="inset"><div className="label">קואליציה</div><div className={`font-black text-xl num ${coalitionSeats(s) < 61 ? 'bad' : ''}`}>{coalitionSeats(s)}</div></div>
         <div className="inset"><div className="label">יציבות</div><div className="font-black text-xl num">{s.government.stability.toFixed(0)}</div></div>
-        <div className="inset"><div className="label">בחירות בעוד</div><div className="font-black text-xl num">{turnsToElection(s) * 2} ח׳</div></div>
+        <div className="inset"><div className="label">בחירות בעוד</div><div className="font-black text-xl num">{electionCountdown(s)}</div></div>
       </div>
       <div className="text-xs muted mb-2">ראש הממשלה: <b>{pm?.name}</b></div>
       <div className="space-y-1.5">
@@ -308,7 +309,7 @@ function RoleCard() {
     return (
       <Section title="המרוץ לבחירות" icon="🗳️" right={<button className="btn btn-sm btn-blue" onClick={() => setScreen('party')}>לקמפיין ←</button>}>
         <div className="grid grid-cols-3 gap-2 text-center">
-          <div className="inset"><div className="label">בחירות בעוד</div><div className="font-black text-xl num">{turnsToElection(s) * 2} ח׳</div></div>
+          <div className="inset"><div className="label">בחירות בעוד</div><div className="font-black text-xl num">{electionCountdown(s)}</div></div>
           <div className="inset"><div className="label">בסקר</div><div className="font-black text-xl num">{seats[party.id]}</div></div>
           <div className="inset"><div className="label">קופת המפלגה</div><div className="font-black text-xl num">₪{party.funds.toFixed(1)}M</div></div>
         </div>

@@ -12,7 +12,6 @@ import { getCapabilities, isPM, ministryLawDomains } from '../../engine/roles';
 import { playerListRank } from '../../engine/elections';
 import { getProvider } from '../../engine/ai/provider';
 import { buildCharacterContext } from '../../engine/ai/contextBuilder';
-import { llmEnabled, llmStatement } from '../../engine/ai/llm';
 import type { GameState, Ideology, Politician } from '../../types/game';
 import { Caricature } from '../../shared/components/Caricature';
 import { AlliancesSection } from './Alliances';
@@ -24,15 +23,7 @@ export function PolCard({ p, s, extra }: { p: Politician; s: GameState; extra?: 
   const [open, setOpen] = useState(false);
   const focus = useGame((x) => x.focusKey);
   useEffect(() => { if (focus && focus.endsWith(p.id)) setOpen(true); }, [focus, p.id]);
-  const [live, setLive] = useState<string | null>(null);
-  const [busy, setBusy] = useState(false);
   const say = getProvider().statement(buildCharacterContext(s, p, 'general'));
-  const askClaude = async () => {
-    setBusy(true);
-    const r = await llmStatement(buildCharacterContext(s, p, 'what do you think of the player right now'));
-    setLive(r.text);
-    setBusy(false);
-  };
   return (
     <div className="inset">
       <div className="flex items-center justify-between gap-2" style={{ cursor: 'pointer' }} onClick={() => setOpen(!open)}>
@@ -46,11 +37,10 @@ export function PolCard({ p, s, extra }: { p: Politician; s: GameState; extra?: 
         <div className="mt-2 text-xs space-y-1">
           <div className="muted">{p.quirk}</div>
           <div>רוצה: <b>{p.ambitionTarget}</b> · פופולריות {p.popularity.toFixed(0)}</div>
-          <div className="bubble">{live ?? say.text}</div>
-          {llmEnabled() && !p.isPlayer && <button className="btn btn-sm" disabled={busy} onClick={askClaude}>{busy ? '…' : '🤖 מה הוא חושב עכשיו? (Claude)'}</button>}
+          <div className="bubble">{say.text}</div>
           {p.memory.length > 0 && <div><b>זוכר:</b> {p.memory.slice(-3).map((m) => m.text).join(' · ')}</div>}
           <div className="flex gap-1 flex-wrap pt-1">
-            {!p.isPlayer && <ActionButton id="network" params={{ politicianId: p.id }} className="btn btn-sm">☕ קפה</ActionButton>}
+            {!p.isPlayer && <ActionButton id="network" params={{ politicianId: p.id }} className="btn btn-sm">☕ פגישה אישית</ActionButton>}
             {!p.isPlayer && <ActionButton id="attack_opponent" params={{ politicianId: p.id }} className="btn btn-sm">🥊 לתקוף</ActionButton>}
             {!p.isPlayer && <ActionButton id="leak_rival" params={{ politicianId: p.id }} className="btn btn-sm">🗂️ להדליף עליו</ActionButton>}
             {extra}
@@ -105,12 +95,12 @@ export function GovernmentScreen() {
         </div>
       </Section>
       {pm && (
-        <Section title="דרמה לאומית" icon="🔥" right={<span className="chip chip-bad">רק לראש הממשלה</span>}>
-          <p className="text-sm muted mb-3">צעדים שרק ראש ממשלה יכול לעשות. כולם משאירים חותם. חלקם משאירים גם ועדת חקירה.</p>
+        <Section title="צעדים לאומיים" icon="🏛️" right={<span className="chip chip-bad">רק לראש הממשלה</span>}>
+          <p className="text-sm muted mb-3">צעדים שרק ראש הממשלה יכול לנקוט. לכל אחד יש השלכות רחבות על הציבור, על הכלכלה ועל הקואליציה.</p>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-2">
-            {[['nation_address', '🎥 נאום לאומה'], ['state_emergency', '🚨 מצב חירום לאומי'], ['cabinet_purge', '🧹 טיהור הממשלה'], ['cash_handout', '💵 ₪1,000 לכל אזרח'], ['birthday_holiday', '🎂 יום חופש ביום ההולדת שלך'], ['media_enemy', '📵 התקשורת: אויבת העם'], ['postpone_elections', '⏸️ לדחות את הבחירות'], ['declare_war_pm', '💥 להכריז מלחמה']].map(([id, label]) => (
-              <ActionButton key={id} id={id} className={`btn btn-sm ${['declare_war_pm', 'postpone_elections', 'cabinet_purge', 'state_emergency'].includes(id) ? 'btn-danger' : ''}`}
-                confirm={['declare_war_pm', 'postpone_elections', 'cabinet_purge'].includes(id) ? 'בטוח? זה לא הפיך, וההשלכות קשות.' : undefined}>{label}</ActionButton>
+            {[['nation_address', '🎥 נאום לאומה'], ['state_emergency', '🚨 מצב מיוחד בעורף'], ['cash_handout', '💵 מענק חד-פעמי לכל משק בית'], ['postpone_elections', '⏸️ הצעה לדחיית הבחירות'], ['declare_war_pm', '💥 מבצע צבאי רחב']].map(([id, label]) => (
+              <ActionButton key={id} id={id} className={`btn btn-sm ${['declare_war_pm', 'postpone_elections', 'state_emergency'].includes(id) ? 'btn-danger' : ''}`}
+                confirm={['declare_war_pm', 'postpone_elections'].includes(id) ? 'לאשר? לצעד הזה השלכות רחבות ולא הפיכות.' : undefined}>{label}</ActionButton>
             ))}
           </div>
         </Section>

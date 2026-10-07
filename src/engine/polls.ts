@@ -1,4 +1,5 @@
 import { GROUPS, SEATS, THRESHOLD, groupWeight } from '../data/world';
+import { dayNumber } from './calendar';
 import { gauss } from './rng';
 import type { GameState, Party } from '../types/game';
 import { clamp } from '../utils';
@@ -18,7 +19,7 @@ export function rawScore(s: GameState, party: Party): number {
   const cohesion = 0.85 + party.cohesion / 670;
   const campaign = 1 + (s.elections.campaignBoost[party.id] ?? 0) / 100;
   // government fatigue: voters tire of whoever is in power (up to -12%)
-  const years = Math.max(0, (s.turn - s.government.formedTurn) / 6);
+  const years = Math.max(0, s.government.formedDay !== undefined ? (dayNumber(s.date) - s.government.formedDay) / 365 : (s.turn - s.government.formedTurn) / 3);
   const fatigue = inGov ? 1 - Math.min(0.12, 0.025 * years) : 1;
   return score * Math.exp(party.momentum / 50) * leaderFactor * cohesion * campaign * fatigue;
 }

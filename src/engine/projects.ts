@@ -15,7 +15,7 @@ export function startProject(s: GameState, defId: string, sponsorId: string): Pr
   s.projects.push(p);
   if (sponsorId === s.player.politicianId) s.career.moneyInvested += def.cost;
   refreshFiscals(s);
-  addNews(s, def.satire ? `${def.name} יוצא לדרך. ${def.satire}` : `יוצא לדרך: ${def.name} (₪${def.cost} מיליארד)`, 'neutral', def.icon);
+  addNews(s, `יוצא לדרך: ${def.name} (₪${def.cost} מיליארד)`, 'neutral', def.icon);
   return p;
 }
 

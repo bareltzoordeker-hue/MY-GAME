@@ -32,7 +32,7 @@ export function DramaModal() {
           </div>
         ) : (
           <div className="px-4 py-1.5 flex items-center justify-between" style={{ background: 'linear-gradient(90deg, #6c4dff, #b04dff)', color: '#fff' }}>
-            <span>📰 בינתיים, בצבריה…</span>
+            <span>📰 בינתיים, בישמעאל…</span>
             <span className="text-xs opacity-80">חייב החלטה</span>
           </div>
         )}

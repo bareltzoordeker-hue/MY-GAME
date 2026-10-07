@@ -264,3 +264,6 @@ input[type=range] { accent-color: var(--violet); }
   /* Everything else (screen flips, ticker, floating icons) finishes instantly instead of moving. */
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
 }
+
+/* the chosen option in pickers (new game, settings) */
+.card-selected { outline: 3px solid var(--violet); outline-offset: 1px; }

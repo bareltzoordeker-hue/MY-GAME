@@ -1,10 +1,11 @@
 // ============================================================
-// advanceTurn — one turn = exactly two months.
+// advanceTurn — one turn = 4 months, or 2 weeks in the 4 months before an election.
+// Continuous systems run in 2-month steps (a 4-month turn = 2 steps; campaign turns accumulate).
 // Fixed order: time → budget cycle → projects → economy → services →
 // population → crises → politics → parliament → polls → elections →
 // career → game over → news/briefing.
 // ============================================================
-import { N } from './ai/narrative';
+import { dayNumber, daysBetween, electionDate, inCampaign, nextTurnDate, stepsForDays, turnsUntilElection } from './calendar';
 import { MAJORITY } from '../data/world';
 import { chance } from './rng';
 import type { Briefing, GameState } from '../types/game';
@@ -42,58 +43,66 @@ export function advanceTurn(s0: GameState): GameState {
   const before = snapshot(s);
   s.turnLog = [];
 
-  // 1. time
+  // 1. time (calendar)
   s.turn += 1;
-  s.date.month += 2;
-  if (s.date.month > 12) { s.date.month -= 12; s.date.year += 1; }
+  const prevDate = s.date;
+  const campaignTurn = inCampaign(s);
+  s.date = nextTurnDate(s);
+  const days = daysBetween(prevDate, s.date);
+  const steps = stepsForDays(days);
 
   // 2. decisions mature: expired inbox items resolve by default
   expireInbox(s);
 
-  // budget cycle
-  if (s.date.month === 1) newFiscalYear(s);
-  processBudgetDeadline(s);
+  // budget cycle (new fiscal year when the calendar crosses into January)
+  if (s.date.year > prevDate.year) newFiscalYear(s);
+  if (!s.government.caretaker) processBudgetDeadline(s);
 
-  // 3-5. projects, economy, services, needs
-  simulateProjects(s);
-  growNeeds(s);
-  simulateEconomy(s);
-  simulateServices(s);
+  // 3-8. continuous simulation in 2-month steps (campaign turns accumulate until a full step)
+  s.flags.simAcc = (s.flags.simAcc ?? 0) + steps;
+  while (s.flags.simAcc >= 1) {
+    s.flags.simAcc -= 1;
+    simulateProjects(s);
+    growNeeds(s);
+    simulateEconomy(s);
+    simulateServices(s);
+    simulatePopulation(s);
+    tickCrises(s);
+    simulateCharacters(s);
+    simulateAlliances(s);
+    simulateGovernment(s);
+    simulateParliament(s);
+  }
 
-  // 6. public opinion
-  simulatePopulation(s);
-
-  // crises (Event Engine)
-  tickCrises(s);
-  generateCrises(s);
-
-  // 7-8. characters react; rare AI initiatives
-  simulateCharacters(s);
-  generateInitiatives(s);
-  simulateAlliances(s);
-  simulateGovernment(s);
-  simulateAIGovernment(s);
-  if (isPM(s)) {
+  // discrete events: once per turn, with chance scaled to the turn's length
+  const events = Math.min(2, steps);
+  if (events >= 1 || chance(s, events)) {
+    generateCrises(s);
+    generateInitiatives(s);
+    if (!s.government.caretaker) simulateAIGovernment(s);
+  }
+  if (events >= 2) generateCrises(s);
+  if (isPM(s) && !s.government.caretaker) {
     fillVacancies(s, false);
     if (coalitionSeats(s) < MAJORITY && s.government.lowMajorityTurns >= 2) callEarlyElections(s, 'הקואליציה איבדה את הרוב');
   }
-  simulateParliament(s);
   checkPromises(s);
 
-  // polls
+  // polls every turn (campaign moves them)
   simulatePolls(s);
   pollNews(s, before);
 
-  // elections
-  if (s.turn >= s.elections.scheduledTurn) {
+  // elections (by date)
+  if (dayNumber(s.date) >= dayNumber(electionDate(s)) && s.elections.phase === 'none') {
     runElection(s);
-  } else if (s.elections.scheduledTurn - s.turn <= 4) {
+  } else if (campaignTurn || inCampaign(s)) {
     // AI parties campaign too
     for (const p of Object.values(s.parties)) {
       if (p.isPlayerParty) continue;
-      s.elections.campaignBoost[p.id] = (s.elections.campaignBoost[p.id] ?? 0) + (chance(s, 0.5) ? 1 : 0.3);
+      s.elections.campaignBoost[p.id] = (s.elections.campaignBoost[p.id] ?? 0) + (chance(s, 0.5) ? 0.6 : 0.2);
     }
   }
+  s.elections.scheduledTurn = s.turn + turnsUntilElection(s);
 
   // career, game over
   if (!s.gameOver) {
@@ -105,8 +114,7 @@ export function advanceTurn(s0: GameState): GameState {
     evaluateGameOver(s);
   }
 
-  for (const h of N.satireHeadlines(s)) addNews(s, h, 'satire', '🤡');
-  generateDrama(s);
+  if (events >= 1 || chance(s, events)) generateDrama(s);
   pushHistory(s);
   s.briefing = buildBriefing(s, before);
   validateState(s);
@@ -139,7 +147,7 @@ function buildBriefing(s: GameState, b: Snap): Briefing {
     .sort((x, y) => y.importance - x.importance)
     .slice(0, 6)
     .map((e) => ({ icon: e.icon, text: e.text, tone: e.tone }));
-  if (!lines.length) lines.push({ icon: '☕', text: 'חודשיים שקטים. חשוד.', tone: 'neutral' });
+  if (!lines.length) lines.push({ icon: '📋', text: 'תקופה שקטה יחסית. אין אירועים חריגים.', tone: 'neutral' });
   const now = snapshot(s);
   return {
     turn: s.turn,

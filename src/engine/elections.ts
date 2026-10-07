@@ -1,5 +1,6 @@
 import { LAW_BY_ID } from '../data/laws';
 import { CATEGORY_BY_ID, DIFFICULTIES, MAJORITY, TERM_TURNS } from '../data/world';
+import { addDays, addMonths, daysBetween, dayNumber, electionDate, turnsUntilElection } from './calendar';
 import { rand } from './rng';
 import type { BudgetCategory, Demand, GameState, Party, PartyOffer, Reaction } from '../types/game';
 import { clamp } from '../utils';
@@ -9,16 +10,21 @@ import { assignMinister, fillVacancies, getMinistry } from './government';
 import { ideologyDistance, proposeBill } from './parliament';
 import { computeShares, seatsFromShares } from './polls';
 
-const BUDGET_PREF: Record<string, BudgetCategory> = {
-  kise: 'defense', yesh: 'education', kugel: 'welfare', givaa: 'housing', smol: 'welfare', generals: 'defense',
-  beitenu: 'police', startup: 'science', gimlaim: 'welfare',
+/** The budget line each party asks for in coalition talks. */
+export const BUDGET_PREF: Record<string, BudgetCategory> = {
+  likud: 'defense', yashar: 'education', together: 'education', democrats: 'welfare', shas: 'welfare', utj: 'education',
+  otzma: 'police', rzp: 'housing', yb: 'defense', joint: 'welfare', raam: 'government', bluewhite: 'defense',
+  reservists: 'defense', amcha: 'defense', noam: 'education', israel_first: 'science',
 };
 
 export function callEarlyElections(s: GameState, reason: string): void {
-  if (s.elections.scheduledTurn <= s.turn + 3) return;
-  s.elections.scheduledTurn = s.turn + 3;
+  // the Knesseton dissolves; by law the election is held about 90 days later
+  if (s.elections.date && daysBetween(s.date, s.elections.date) <= 90) return;
+  s.elections.date = addDays(s.date, 90);
+  s.elections.scheduledTurn = s.turn + turnsUntilElection(s);
   s.flags.early_election = 1;
-  addNews(s, `הממשלה נפלה: ${reason}. בחירות בעוד חצי שנה`, 'bad', '🗳️');
+  s.government.caretaker = true;
+  addNews(s, `הכנסטון התפזר: ${reason}. הבחירות ייערכו בעוד כשלושה חודשים`, 'bad', '🗳️');
   logEvent(s, '🗳️', `בחירות מוקדמות: ${reason}`, 3, 'bad', 'election');
   s.career.memorable.push(`הממשלה נפלה: ${reason}`);
 }
@@ -67,7 +73,15 @@ export function runElection(s: GameState): void {
   }
   s.elections.campaignBoost = {};
   s.elections.count += 1;
+  // next regular election: four years from this one
+  s.elections.date = addMonths(electionDate(s), 48);
   s.elections.scheduledTurn = s.turn + TERM_TURNS;
+  // the new Knesseton: the top N of every list, in list order
+  for (const party of Object.values(s.parties)) {
+    const ranked = party.memberIds.map((id) => s.politicians[id]).filter((p) => p && p.active && (p.listRank ?? 0) > 0).sort((a, b) => (a.listRank ?? 99) - (b.listRank ?? 99));
+    ranked.forEach((p, i) => { p.inKnesset = i < seats[party.id]; });
+    for (const id of party.memberIds) { const p = s.politicians[id]; if (p && !(p.listRank ?? 0)) p.inKnesset = false; }
+  }
   const { formateurId } = recommendations(s, seats);
   s.elections.last = { turn: s.turn, shares, seats, formateurId, early };
   s.polls.push({ turn: s.turn, shares, seats, govApproval: s.government.approval, playerApproval: me.popularity });
@@ -105,14 +119,12 @@ export function runElection(s: GameState): void {
   aiFormGovernment(s, formateurId);
 }
 
-/** Player's place on the list: members with more power go first. */
+/** Player's place on the list (the real slot; primaries and deals can move it). */
 export function playerListRank(s: GameState): number {
   const party = s.parties[s.player.partyId];
   const me = s.politicians[s.player.politicianId];
   if (party.leaderId === me.id) return 1;
-  const ahead = party.memberIds.map((id) => s.politicians[id]).filter((p) => p && p.active && !p.isPlayer && p.power > me.power).length;
-  const fillers = me.power < 30 ? 6 : me.power < 45 ? 3 : 0;
-  return 1 + ahead + fillers;
+  return Math.max(1, me.listRank ?? s.player.listRank ?? 99);
 }
 
 export function aiFormGovernment(s: GameState, formateurId: string): void {
@@ -142,6 +154,8 @@ export function installGovernment(s: GameState, pmId: string, coalition: string[
   g.pmId = pmId;
   g.coalition = coalition;
   g.formedTurn = s.turn;
+  g.formedDay = dayNumber(s.date);
+  g.caretaker = false;
   g.stability = 62;
   g.lowMajorityTurns = 0;
   for (const p of Object.values(s.politicians)) p.ministryId = null;

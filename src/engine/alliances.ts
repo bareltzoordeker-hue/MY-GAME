@@ -6,10 +6,8 @@ import { clamp, clone } from '../utils';
 import { addNews, applyEffects, logEvent, remember } from './effects';
 import { ideologyDistance } from './parliament';
 import { isPartyLeader } from './roles';
+import { BUDGET_PREF } from './elections';
 
-const PREF: Record<string, BudgetCategory> = {
-  kise: 'defense', yesh: 'education', kugel: 'education', givaa: 'housing', smol: 'welfare', generals: 'defense', beitenu: 'police', startup: 'science', gimlaim: 'welfare',
-};
 export const COST = { votes: 8, bloc: 14 } as const;
 
 export const allianceWith = (s: GameState, partyId: string) => s.alliances.find((a) => a.partyId === partyId);
@@ -24,7 +22,7 @@ export function allianceChance(s: GameState, partyId: string, kind: Alliance['ki
 
 export function allianceDemand(s: GameState, partyId: string): { category: BudgetCategory; amount: number; label: string } {
   const p = s.parties[partyId];
-  const category = PREF[partyId] ?? 'welfare';
+  const category = BUDGET_PREF[partyId] ?? 'welfare';
   const amount = clamp(Math.round(p.seats / 6 + 0.5), 1, 4);
   return { category, amount, label: `+₪${amount}B ל${CATEGORY_BY_ID[category].name}` };
 }
@@ -51,7 +49,7 @@ export function proposeAlliance(s0: GameState, partyId: string, kind: Alliance['
   if (leader) remember(s, leader.id, 'deal', kind === 'bloc' ? 'גוש פוליטי משותף' : 'ברית הצבעה', 12);
   applyEffects(s, { partyMomentum: { [s.player.partyId]: kind === 'bloc' ? 3 : 1, [partyId]: kind === 'bloc' ? 2 : 0 } });
   const title = kind === 'bloc' ? `גוש חדש: ${s.parties[s.player.partyId].shortName} + ${p.shortName}` : `ברית הצבעה עם ${p.name}`;
-  addNews(s, `${title}. ${kind === 'bloc' ? 'החיבוק במסיבת העיתונאים נמשך 4 שניות מביכות' : 'מקורות: "זה יחזיק עד ההצבעה הראשונה"'}`, 'neutral', '🤝');
+  addNews(s, `${title}. ${kind === 'bloc' ? 'שתי המפלגות ימליצו זו על זו אחרי הבחירות' : 'המפלגות יתאמו הצבעות בכנסטון'}`, 'neutral', '🤝');
   logEvent(s, '🤝', title, 3, 'good', 'alliance');
   s.career.memorable.push(title);
   return {
@@ -59,8 +57,8 @@ export function proposeAlliance(s0: GameState, partyId: string, kind: Alliance['
     reaction: {
       title, subtitle: `המחיר: ${d.label}`, status: 'approved',
       stats: [{ icon: '🪑', label: 'מנדטים בברית', value: `${p.seats}`, tone: 'good' }, { icon: '🎯', label: 'הון פוליטי', value: `-${COST[kind]}`, tone: 'neutral' }],
-      groups: [], people: leader ? [{ icon: p.logo, label: leader.name, text: kind === 'bloc' ? 'ביחד ננצח. ואחר כך נריב על התיקים.' : 'נצביע איתך. כל עוד זה משתלם.', tone: 'good' }] : [],
-      quip: kind === 'bloc' ? 'בבחירות הם ימליצו עליך לנשיא. כל עוד לא תבגוד בהם.' : 'בכנסטון הם יתמכו בחוקים שלך. שמור על היחסים.',
+      groups: [], people: leader ? [{ icon: p.logo, label: leader.name, text: kind === 'bloc' ? 'נפעל יחד להרכבת הממשלה הבאה.' : 'נתאם איתך את ההצבעות בכנסטון.', tone: 'good' }] : [],
+      quip: kind === 'bloc' ? 'אחרי הבחירות הם ימליצו עליך לנשיא, כל עוד היחסים יישמרו.' : 'בכנסטון הם יתמכו בחוקים שלך. שמור על היחסים.',
     },
   };
 }
@@ -71,7 +69,7 @@ export function breakAlliance(s0: GameState, partyId: string): { state: GameStat
   if (!a) return { state: s0, reaction: { title: 'אין ברית', status: 'info', stats: [], groups: [], people: [] } };
   dissolve(s, a, 'פירקת את הברית');
   remember(s, s.parties[partyId].leaderId, 'betrayal', 'פירק את הברית', -25);
-  return { state: s, reaction: { title: `הברית עם ${s.parties[partyId].name} פורקה`, status: 'info', stats: [], groups: [], people: [], quip: 'הם לא ישכחו. אבל בפוליטיקה – אף פעם לא אומרים אף פעם.' } };
+  return { state: s, reaction: { title: `הברית עם ${s.parties[partyId].name} פורקה`, status: 'info', stats: [], groups: [], people: [], quip: 'פירוק הברית פגע קשות ביחסים עם המפלגה.' } };
 }
 
 function dissolve(s: GameState, a: Alliance, why: string): void {

@@ -5,7 +5,8 @@ import { dateLabel, deficitPct } from '../../utils';
 import { roleLabel } from '../../engine/newGame';
 import { canAdvance } from '../../engine/turn';
 import { coalitionSeats } from '../../engine/polls';
-import { getCapabilities, turnsToElection } from '../../engine/roles';
+import { getCapabilities } from '../../engine/roles';
+import { electionCountdown, monthsUntilElection } from '../../engine/calendar';
 import { Caricature } from '../../shared/components/Caricature';
 import { setMusic, setSfx, soundPrefs } from '../audio/sound';
 import { AdSlot } from './Fx';
@@ -20,7 +21,7 @@ export const NAV: NavItem[] = [
   { id: 'economy', icon: '📈', label: 'כלכלה', tip: 'צמיחה, אבטלה, אינפלציה, חוב ומסים, כולל מה מניע כל מספר' },
   { id: 'budget', icon: '💰', label: 'תקציב', tip: 'חלוקת הכסף בין המשרדים. כל שינוי משפיע על השירותים, על הגירעון ועל הציבור' },
   { id: 'population', icon: '👥', label: 'אוכלוסייה', tip: '21 קבוצות אוכלוסייה: מי מרוצה, מי כועס ואיך זה משתנה' },
-  { id: 'map', icon: '📍', label: 'מפה', tip: 'מפת צבריה עם שכבות: אבטלה, הכנסה, השקעות, תשתיות ושביעות רצון לפי אזור' },
+  { id: 'map', icon: '📍', label: 'מפה', tip: 'מפת ישמעאל עם שכבות: אבטלה, הכנסה, השקעות, תשתיות ושביעות רצון לפי אזור' },
   { id: 'government', icon: '🪑', label: 'ממשלה', tip: 'שרים, משרדים וקואליציה: מינויים, פיטורים, איחוד משרדים וכספים קואליציוניים' },
   { id: 'parliament', icon: '🏟️', label: 'כנסטון', tip: '120 המושבים, הצעות חוק בדיון וצפי הצבעה' },
   { id: 'laws', icon: '📜', label: 'חוקים', tip: 'הגשת חוקים חדשים וביטול חוקים קיימים' },
@@ -31,7 +32,7 @@ export const NAV: NavItem[] = [
   { id: 'news', icon: '📰', label: 'חדשות', tip: 'כל הכותרות. רובן לא מחמיאות' },
   { id: 'advisor', icon: '🧠', label: 'היועץ', tip: 'כל העצות של מוטי ספין לפי סדר דחיפות' },
   { id: 'career', icon: '🎖️', label: 'קריירה', tip: 'איך להתקדם: ועדות, ראיונות, פריימריז, מעבר מפלגה או התפטרות' },
-  { id: 'save', icon: '💾', label: 'שמירה והגדרות', tip: 'שמירה, ייבוא וייצוא, חיבור ל-Claude והפעלה מחדש של המדריך' },
+  { id: 'save', icon: '💾', label: 'שמירה והגדרות', tip: 'שמירה, ייבוא וייצוא, הגדרות פרטיות ונגישות והפעלה מחדש של המדריך' },
 ];
 
 function Sidebar({ onPick }: { onPick?: () => void }) {
@@ -73,7 +74,7 @@ export function Header({ onMenu }: { onMenu: () => void }) {
   const blocked = canAdvance(s);
   const seats = s.polls[s.polls.length - 1]?.seats[party.id] ?? party.seats;
   const def = deficitPct(s);
-  const tte = turnsToElection(s);
+  const tte = monthsUntilElection(s);
   return (
     <header className="sticky top-0 z-30 border-b-4 masthead" style={{ borderColor: 'var(--ink)' }}>
       <div className="flex items-center gap-2 px-3 md:px-5 h-16">
@@ -94,7 +95,7 @@ export function Header({ onMenu }: { onMenu: () => void }) {
           <HeaderStat label="שביעות רצון" value={`${s.government.approval.toFixed(0)}%`} k="approval" tone={s.government.approval < 35 ? 'bad' : ''} />
           <HeaderStat label="גירעון" value={`${def.toFixed(1)}%`} k="deficit" tone={def > 4.5 ? 'bad' : ''} />
           <HeaderStat label="הון פוליטי" value={`🎯 ${s.player.politicalCapital.toFixed(0)}`} k="capital" />
-          <HeaderStat label="בחירות" value={tte > 0 ? `${tte * 2} ח׳` : 'עכשיו'} tone={tte <= 3 ? 'warn' : ''} />
+          <HeaderStat label="בחירות" value={electionCountdown(s)} tone={tte <= 4 ? 'warn' : ''} />
         </div>
         <div className="flex-1" />
         <span className="hidden md:inline text-[11px] muted" data-tip={saveStatus === 'failed' ? 'השמירה נכשלה – המשחק עדיין בזיכרון, ננסה שוב בתור הבא' : 'שמירה אוטומטית בסוף כל תור'}>

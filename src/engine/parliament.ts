@@ -152,12 +152,12 @@ export function simulateParliament(s: GameState): void {
           if (s.career.lawsPassed === 1) s.career.achievements.push(`החוק הראשון שלך: ${law.title}`);
         }
         logEvent(s, '📜', `"${law.title}" עבר בקריאה שלישית (${v.for}-${v.against})`, 2, 'good', 'law');
-        addNews(s, law.satire ?? pick(s, [`הכנסטון אישר את ${law.title}`, `${law.title} עבר אחרי לילה של נאומים`, `סופית: ${law.title} בספר החוקים`]), 'good', law.icon);
+        addNews(s, pick(s, [`הכנסטון אישר את ${law.title}`, `${law.title} עבר בקריאה שלישית`, `סופית: ${law.title} בספר החוקים`]), 'good', law.icon);
         if (law.level === 'major') s.career.memorable.push(`${law.title} עבר (${v.for}-${v.against})`);
       } else {
         bill.status = 'failed';
         logEvent(s, '❌', `"${law.title}" נפל בקריאה שלישית (${v.for}-${v.against})`, 2, 'bad', 'law');
-        addNews(s, `מהפך במליאה: ${law.title} נפל`, 'bad', '❌');
+        addNews(s, `${law.title} נפל בהצבעה במליאה`, 'bad', '❌');
         if (mine) s.career.failures.push(`${law.title} נפל במליאה`);
       }
     }

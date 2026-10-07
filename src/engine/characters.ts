@@ -67,7 +67,7 @@ export function simulateCharacters(s: GameState): void {
         p.memory.push({ turn: s.turn, kind: 'betrayal', text: `הבטחת: "${m.text}" — ולא קיימת`, weight: -22 });
         p.loyalty = clamp(p.loyalty - 15);
         if (!p.isPlayer) {
-          addNews(s, `${p.name}: "הבטיחו לי ${m.text}. אני זוכר הכול."`, 'bad', '🗯️');
+          addNews(s, `${p.name}: "הבטיחו לי ${m.text}, וההבטחה לא קוימה."`, 'bad', '🗯️');
           logEvent(s, '🗯️', `${p.name} זוכר שלא קיימת הבטחה`, 2, 'bad', 'memory');
         }
       }
@@ -140,7 +140,7 @@ function initiativesFor(s: GameState, p: Politician): Initiative[] {
     out.push({ weight: 1.2, run: () => {
       party.momentum = clamp(party.momentum + 3, -40, 40);
       if (s.government.coalition.includes(me.partyId)) me.popularity = clamp(me.popularity - 1.5);
-      addNews(s, `${p.name} תוקף: "${pick(s, ['הממשלה הזאת מנותקת כמו טלפון בלי סוללה', 'הם שכחו את העם. העם לא ישכח אותם', 'זו ממשלת כישלון עם יחסי ציבור מצוינים', 'שר האוצר לא יודע כמה עולה קוטג׳', 'הממשלה הזאת היא קרקס, ואפילו הליצנים מתביישים'])}"`, 'bad', '🎤');
+      addNews(s, `${p.name} תוקף: "${pick(s, ['הממשלה מנותקת מהמצוקות של הציבור', 'יוקר המחיה מכביד, והממשלה לא עושה דבר', 'זו ממשלה של כישלון בניהול המדינה', 'הממשלה מפקירה את הפריפריה', 'הגיע הזמן לבחירות ולשינוי כיוון'])}"`, 'bad', '🎤');
       logEvent(s, '🎤', `האופוזיציה תוקפת: ${p.name}`, 1, 'bad', 'opposition');
     } });
   }
@@ -162,7 +162,7 @@ function initiativesFor(s: GameState, p: Politician): Initiative[] {
         const amount = round1(s.budget.needs[cat] * 0.04);
         out.push({ weight: 1.5, run: () => addInbox(s, {
           kind: 'minister_budget', title: `${p.name} דורש תוספת תקציב`, fromId: p.id, expiresTurn: exp,
-          text: `"המשרד שלי קורס. המזגן בלשכה מקולקל, המנכ״ל בוכה, והעובדים מגיעים עם נייר טואלט מהבית. ₪${amount} מיליארד בשנה, ואני שותק בתקשורת."`,
+          text: `"המשרד שלי לא עומד במשימות בתקציב הנוכחי. אני מבקש תוספת של ₪${amount} מיליארד בשנה."`,
           options: [{ id: 'approve', label: `לאשר ₪${amount}B` }, { id: 'half', label: 'לאשר חצי' }, { id: 'refuse', label: 'לסרב' }],
           defaultOptionId: 'refuse', payload: { category: cat, amount },
         }) });
@@ -172,8 +172,8 @@ function initiativesFor(s: GameState, p: Politician): Initiative[] {
         out.push({ weight: 1.3, run: () => {
           addInbox(s, {
             kind: 'resign_threat', title: `${p.name} מאיים להתפטר`, fromId: p.id, expiresTurn: exp,
-            text: `"או ₪${amount} מיליארד, או שאני מתפטר בשידור חי בפריים טיים. כבר הזמנתי איפור."`,
-            options: [{ id: 'give', label: 'לתת לו' }, { id: 'refuse', label: 'לסרב' }, { id: 'fire', label: 'לפטר אותו עכשיו' }],
+            text: `"בלי תוספת של ₪${amount} מיליארד אני לא יכול להמשיך לשאת באחריות. אם הבקשה תידחה, אתפטר."`,
+            options: [{ id: 'give', label: 'לאשר את התוספת' }, { id: 'refuse', label: 'לסרב' }, { id: 'fire', label: 'לפטר אותו עכשיו' }],
             defaultOptionId: 'refuse', payload: { category: cat, amount },
           });
           addNews(s, `${p.name} מאיים להתפטר`, 'bad', '🚪');
@@ -185,7 +185,7 @@ function initiativesFor(s: GameState, p: Politician): Initiative[] {
       out.push({ weight: 1.4, run: () => {
         addInbox(s, {
           kind: 'ultimatum', title: `אולטימטום מ${party.name}`, fromId: p.id, expiresTurn: exp,
-          text: lawId ? `"תעבירו את ${LAW_BY_ID[lawId].title} או שאנחנו מחוץ לקואליציה."` : `"אנחנו רוצים ₪2 מיליארד לרווחה. אחרת – בחירות."`,
+          text: lawId ? `"אם ${LAW_BY_ID[lawId].title} לא יקודם כפי שסוכם, נשקול את המשך דרכנו בקואליציה."` : `"אנחנו דורשים ₪2 מיליארד לנושאים שסוכמו בהסכם הקואליציוני. אחרת נשקול את צעדינו."`,
           options: [{ id: 'accept', label: 'להיענות' }, { id: 'refuse', label: 'לסרב' }],
           defaultOptionId: 'refuse', payload: lawId ? { lawId } : { category: 'welfare', amount: 2 },
         });
@@ -197,8 +197,8 @@ function initiativesFor(s: GameState, p: Politician): Initiative[] {
   if (sameParty && isPartyLeader(s) && !p.ministryId && p.personality.ambition > 0.5 && p.loyalty < 55) {
     out.push({ weight: 1, run: () => addInbox(s, {
       kind: 'demand_role', title: `${p.name} רוצה ${s.player.role === 'candidate' ? 'מקום ריאלי' : 'תפקיד'}`, fromId: p.id, expiresTurn: exp,
-      text: `"נתתי למפלגה את הנשמה, את הסופ״שים ואת הגרושה. מגיע לי ${s.player.role === 'candidate' ? 'מקום ריאלי ברשימה' : 'משרד. כל משרד. אפילו האסטרטגי'}."`,
-      options: [{ id: 'promise', label: 'להבטיח (תוך שנה)' }, { id: 'refuse', label: 'לסרב בנימוס' }],
+      text: `"עבדתי קשה למען המפלגה בשנים האחרונות. אני מבקש ${s.player.role === 'candidate' ? 'מקום ריאלי ברשימה' : 'תפקיד בממשלה'}."`,
+      options: [{ id: 'promise', label: 'להבטיח (תוך שנתיים)' }, { id: 'refuse', label: 'לסרב בנימוס' }],
       defaultOptionId: 'refuse', payload: {},
     }) });
   }
@@ -207,18 +207,18 @@ function initiativesFor(s: GameState, p: Politician): Initiative[] {
       s.flags.challenge_cd = s.turn + 8;
       addInbox(s, {
         kind: 'leadership_challenge', title: `${p.name} קורא תיגר על ההנהגה`, fromId: p.id, expiresTurn: s.turn + 1,
-        text: `"עם כל הכבוד – ואין הרבה – הגיע הזמן להנהגה צעירה, רעננה ומוכשרת. כלומר אני. פריימריז, עכשיו."`,
-        options: [{ id: 'fight', label: 'להתמודד' }, { id: 'deal', label: 'לסגור דיל (20 הון)' }, { id: 'resign', label: 'לפרוש בכבוד' }],
+        text: `"המפלגה צריכה הנהגה חדשה כדי לנצח בבחירות. אני מודיע על התמודדות על ראשות המפלגה."`,
+        options: [{ id: 'fight', label: 'להתמודד' }, { id: 'deal', label: 'להגיע להסדר (20 הון)' }, { id: 'resign', label: 'לפרוש בכבוד' }],
         defaultOptionId: 'fight', payload: {},
       });
-      addNews(s, `דרמה ב${myParty.name}: ${p.name} דורש פריימריז`, 'bad', '⚔️');
+      addNews(s, `${p.name} מודיע על התמודדות על ראשות ${myParty.name}`, 'bad', '⚔️');
     } });
   }
   if (sameParty && p.loyalty < 30 && p.personality.honesty < 0.5) {
     out.push({ weight: 0.8, run: () => {
       me.popularity = clamp(me.popularity - 2);
       s.government.stability = clamp(s.government.stability - (pm ? 2 : 0));
-      addNews(s, `הדלפה: "${pick(s, ['בישיבות סגורות זורקים בורקסים', 'המנהיג לא סופר אף אחד, חוץ מסקרים', 'יש תוכנית סודית לקיצוץ – גם בקפה', 'כולם מחכים שזה ייגמר. גם המנהיג', 'במפלגה כבר מהמרים מי יעזוב ראשון'])}"`, 'bad', '🕳️');
+      addNews(s, `הדלפה: "${pick(s, ['בישיבות הסגורות יש ביקורת חריפה על ההנהגה', 'חברי הסיעה חלוקים בנושאים המרכזיים', 'יש מחלוקת פנימית על הרכב הרשימה', 'חלק מהבכירים שוקלים לפרוש', 'המפלגה מתקשה להגיע להחלטות'])}"`, 'bad', '🕳️');
       logEvent(s, '🕳️', `מישהו מהמפלגה מדליף (חשוד: ${p.name})`, 2, 'bad', 'leak');
     } });
   }
@@ -231,21 +231,21 @@ function initiativesFor(s: GameState, p: Politician): Initiative[] {
       const amount = round1(s.budget.allocations[cat] * 0.03);
       out.push({ weight: 1.5, run: () => addInbox(s, {
         kind: 'pm_request_cut', title: 'ראש הממשלה מבקש קיצוץ', fromId: p.id, expiresTurn: exp,
-        text: `"הגירעון בורח ואני צריך ממך ₪${amount} מיליארד. תהיה שחקן קבוצתי. שחקן קבוצתי זה מי שמשלם."`,
+        text: `"הגירעון גבוה מהיעד. אני מבקש שהמשרד שלך יקצץ ₪${amount} מיליארד."`,
         options: [{ id: 'accept', label: 'להסכים' }, { id: 'refuse', label: 'לסרב' }], defaultOptionId: 'accept', payload: { category: cat, amount },
       }) });
     }
     out.push({ weight: 0.7, run: () => addInbox(s, {
       kind: 'pm_request_support', title: 'ראש הממשלה מבקש גיבוי', fromId: p.id, expiresTurn: exp,
-      text: '"תעלה הערב לאולפן ותגן על הממשלה. לא משנה על מה ישאלו, תגיד שזה באשמת הממשלה הקודמת. אני זוכר מי מגבה אותי."',
-      options: [{ id: 'comply', label: 'לעלות לאולפן' }, { id: 'refuse', label: 'להתחמק' }], defaultOptionId: 'refuse', payload: {},
+      text: '"אני מבקש שתעלה הערב לאולפן ותציג את עמדת הממשלה. הגיבוי שלך חשוב לי."',
+      options: [{ id: 'comply', label: 'לעלות לאולפן' }, { id: 'refuse', label: 'לסרב בנימוס' }], defaultOptionId: 'refuse', payload: {},
     }) });
   }
   if (!isPartyLeader(s) && isLeader && sameParty) {
     const bill = s.bills.find((b) => b.status === 'active' && b.sponsorId !== me.id);
     if (bill) out.push({ weight: 1, run: () => addInbox(s, {
       kind: 'leader_vote', title: `${p.name} דורש משמעת`, fromId: p.id, expiresTurn: exp,
-      text: `"בהצבעה על ${bill.title} אתה מצביע ${partySupports(s, p.partyId, bill.lawId) ? 'בעד' : 'נגד'}. אין לך דעה. הדעה שלך היא הדעה שלי."`,
+      text: `"הסיעה החליטה להצביע ${partySupports(s, p.partyId, bill.lawId) ? 'בעד' : 'נגד'} ${bill.title}. אני מצפה למשמעת סיעתית."`,
       options: [{ id: 'comply', label: 'להישמע להנחיה' }, { id: 'rebel', label: 'להצביע לפי המצפון' }], defaultOptionId: 'comply', payload: { billId: bill.id },
     }) });
     if (p.loyalty < 12 && me.power < 40 && (s.flags.failed_primaries ?? -99) > s.turn - 12) {
@@ -256,14 +256,14 @@ function initiativesFor(s: GameState, p: Politician): Initiative[] {
     const lawId = party?.favoriteLaws.find((l) => !s.activeLaws.includes(l) && !s.bills.some((b) => b.lawId === l && b.status === 'active'));
     if (lawId) out.push({ weight: 0.6, run: () => addInbox(s, {
       kind: 'cosponsor', title: `${p.name} מציע שיתוף פעולה`, fromId: p.id, expiresTurn: exp,
-      text: `"בוא נגיש יחד את ${LAW_BY_ID[lawId].title}. אני מביא קולות, אתה מביא מצלמות, ואת הקרדיט נריב עליו אחר כך."`,
+      text: `"אני מציע שנגיש יחד את ${LAW_BY_ID[lawId].title}. הצעה משותפת תגדיל את הסיכוי שתעבור."`,
       options: [{ id: 'accept', label: 'לחתום' }, { id: 'refuse', label: 'לוותר' }], defaultOptionId: 'refuse', payload: { lawId },
     }) });
   }
   if (s.player.role === 'candidate' && isLeader && !pInGov && p.partyId !== me.partyId && party.pollShare < 5 && party.seats <= 8) {
     out.push({ weight: 0.8, run: () => addInbox(s, {
       kind: 'merger_offer', title: `${party.name} מציעה ריצה משותפת`, fromId: p.id, expiresTurn: exp,
-      text: `"ביחד אולי נעבור את אחוז החסימה. נרצה רק את מקום 2 ברשימה, משרד בכיר וסטייק בכל ישיבה."`,
+      text: `"ריצה משותפת תבטיח ששני הקולות לא ילכו לאיבוד מתחת לאחוז החסימה. נבקש מקום 2 ברשימה ותיק בכיר."`,
       options: [{ id: 'accept', label: 'לאחד כוחות' }, { id: 'refuse', label: 'לא תודה' }], defaultOptionId: 'refuse', payload: { partyId: party.id },
     }) });
   }

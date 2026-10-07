@@ -1,13 +1,12 @@
 import { MINISTRIES } from '../data/ministries';
-import {
-  AMBITIONS, PARTY_QUIRKS, FIRST_F, FIRST_M, HAIR_COLORS, HAREDI_FIRST, HAREDI_LAST, LAST, LEADERS, PARTIES, PARTY_SIZE, QUIRKS, SKINS, SUITS,
-} from '../data/parties';
+import { PARTIES, SKINS, SUITS } from '../data/parties';
+import { PEOPLE, type PersonDef } from '../data/people';
 import { CATEGORIES, DIFFICULTIES, GROUPS, REGIONS, SERVICES } from '../data/world';
-import { chance, pick, rand, randInt, randRange } from './rng';
 import type {
-  BudgetCategory, CaricatureSpec, Difficulty, Domain, GameState, GroupId, Party, Politician, PopulationGroup, RegionId, Role, Service, ServiceId,
+  BudgetCategory, CaricatureSpec, Difficulty, Domain, GameState, GroupId, Politician, PopulationGroup, RegionId, Role, Service, ServiceId,
 } from '../types/game';
 import { clamp, sum } from '../utils';
+import { dayNumber, turnsUntilElection } from './calendar';
 import { refreshFiscals } from './economy';
 import { computeApproval, groupTargetRaw } from './population';
 import { computeShares } from './polls';
@@ -15,83 +14,129 @@ import { serviceDrivers, updateMetrics } from './services';
 import { pushHistory } from './history';
 
 export interface NewGameConfig {
-  playerName: string;
-  gender: 'm' | 'f';
-  role: Role;
-  partyId: string;
-  ministryId?: string;
+  /** play as this real person (id from data/people) */
+  personId?: string;
+  /** or play your own character, who takes the list slot of `replaceId` */
+  custom?: { name: string; gender: 'm' | 'f'; look?: Partial<CaricatureSpec>; replaceId: string };
   difficulty: Difficulty;
   seed?: number;
+  // ---- legacy/quick-start fields (tests, debug): pick a fitting real person ----
+  playerName?: string;
+  gender?: 'm' | 'f';
+  role?: Role;
+  partyId?: string;
+  ministryId?: string;
   partyName?: string;
   partyLogo?: string;
   look?: Partial<CaricatureSpec>;
 }
 
-const ALL_DOMAINS: Domain[] = ['economy', 'finance', 'defense', 'education', 'health', 'transport', 'law', 'foreign', 'infrastructure', 'management', 'welfare', 'energy', 'agriculture', 'interior', 'media', 'housing', 'science', 'culture'];
+/** Game starts the day after the lists were submitted; election day is 27.10.2026. */
+export const START_DATE = { year: 2026, month: 9, day: 8 };
+export const ELECTION_DATE = { year: 2026, month: 10, day: 27 };
 
-export function randomCaricature(s: GameState, gender: 'm' | 'f', partyId: string): CaricatureSpec {
-  const haredi = partyId === 'kugel';
-  const religious = partyId === 'givaa';
-  const hairOpts: CaricatureSpec['hair'][] = gender === 'f' ? ['long', 'bun', 'curly', 'long'] : ['bald', 'comb', 'curly', 'spiky', 'grey', 'comb'];
-  return {
-    skin: pick(s, SKINS),
-    hair: haredi && gender === 'm' ? 'hat' : religious && gender === 'm' && chance(s, 0.7) ? 'kippah' : pick(s, hairOpts),
-    hairColor: pick(s, HAIR_COLORS),
-    glasses: chance(s, 0.35),
-    beard: gender === 'f' ? 'none' : haredi ? 'long' : religious ? pick(s, ['full', 'stubble'] as const) : pick(s, ['none', 'none', 'stubble', 'full'] as const),
-    nose: rand(s),
-    mouth: pick(s, ['smile', 'smirk', 'open', 'frown'] as const),
-    suit: pick(s, SUITS),
-    brows: pick(s, ['flat', 'angry', 'worried'] as const),
-    ears: rand(s),
+/** small deterministic number from a string (stable looks / noise per person) */
+function hash(str: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) h = Math.imul(h ^ str.charCodeAt(i), 16777619);
+  return ((h >>> 0) % 10_000) / 10_000;
+}
+
+/** Base caricature for a real person: their known features (data/people) over neutral defaults. */
+export function personCaricature(p: Pick<PersonDef, 'id' | 'gender' | 'party' | 'look'>): CaricatureSpec {
+  const h = hash(p.id);
+  const haredi = p.party === 'utj';
+  const base: CaricatureSpec = {
+    skin: SKINS[Math.floor(h * SKINS.length)],
+    hair: p.gender === 'f' ? (['long', 'bun', 'short', 'curly'] as const)[Math.floor(h * 4)] : haredi ? 'hat' : (['comb', 'bald', 'comb', 'grey'] as const)[Math.floor(h * 4)],
+    hairColor: ['#1f2937', '#3b2a1a', '#4b3621', '#2a2a2a', '#6b4423'][Math.floor(h * 5)],
+    glasses: h > 0.72,
+    beard: p.gender === 'f' ? 'none' : haredi ? 'long' : h > 0.8 ? 'stubble' : 'none',
+    nose: 0.35 + h * 0.4,
+    mouth: 'smile',
+    suit: SUITS[Math.floor(h * 3)],
+    brows: 'flat',
+    ears: 0.3 + h * 0.3,
   };
+  return { ...base, ...(p.look ?? {}) };
 }
 
-function genName(s: GameState, gender: 'm' | 'f', partyId: string): string {
-  if (partyId === 'kugel' && gender === 'm') return `${pick(s, HAREDI_FIRST)} ${pick(s, HAREDI_LAST)}`;
-  return `${pick(s, gender === 'm' ? FIRST_M : FIRST_F)} ${pick(s, LAST)}`;
+/** Look for a newly created (non-roster) politician, e.g. a recruited candidate. */
+export function randomCaricature(s: GameState, gender: 'm' | 'f', partyId: string): CaricatureSpec {
+  return personCaricature({ id: `gen_${s.nextId}_${partyId}`, gender, party: partyId });
 }
 
-function makePolitician(s: GameState, id: string, party: Party, opts: Partial<Politician> & { domain?: Domain }): Politician {
-  const gender = opts.gender ?? (chance(s, partyId(party) === 'kugel' ? 0 : 0.35) ? 'f' : 'm');
-  const mainDomain = opts.domain ?? pick(s, ALL_DOMAINS);
-  const expertise: Partial<Record<Domain, number>> = { [mainDomain]: randInt(s, 50, 92) };
-  for (let i = 0; i < 2; i++) expertise[pick(s, ALL_DOMAINS)] ??= randInt(s, 30, 70);
-  const noise = () => randRange(s, -0.2, 0.2);
+function ambitionFor(p: PersonDef): string {
+  if (p.rank === 1) return 'לעמוד בראש הממשלה';
+  if (p.role && p.role !== 'speaker' && !p.role.startsWith('deputy')) return 'להמשיך לכהן כשר';
+  if (p.fame >= 3) return 'תיק בכיר בממשלה הבאה';
+  return p.rank && p.rank <= 20 ? 'ראשות ועדה בכנסטון' : 'מקום ריאלי ברשימה';
+}
+
+function makePolitician(p: PersonDef): Politician {
+  const party = PARTIES.find((x) => x.id === p.party)!;
+  const h = hash(p.id);
+  const noise = (k: number) => (hash(p.id + k) - 0.5) * 0.3;
+  const skills: Partial<Record<Domain, number>> = { ...(p.skills ?? { [p.domain]: 40 + p.fame * 8 }) };
+  skills[p.domain] ??= 40 + p.fame * 8;
+  const rankBonus = p.rank ? Math.max(0, 16 - p.rank * 0.6) : 4;
   return {
-    id,
-    name: opts.name ?? genName(s, gender, party.id),
-    gender,
-    partyId: party.id,
+    id: p.id,
+    name: p.name,
+    gender: p.gender,
+    partyId: p.party,
     ministryId: null,
     committee: null,
-    mainDomain,
-    expertise,
-    power: opts.power ?? randInt(s, 15, 50),
+    mainDomain: p.domain,
+    expertise: skills,
+    power: clamp(8 + p.fame * 14 + rankBonus),
     loyalty: 50,
-    popularity: opts.popularity ?? randInt(s, 15, 50),
-    experience: randInt(s, 1, 20),
-    personality: opts.personality ?? { ego: rand(s), ambition: rand(s), honesty: rand(s), aggression: rand(s) },
+    popularity: clamp(6 + p.fame * 14 + h * 6),
+    experience: p.mk ? 6 + Math.round(h * 14) : 2 + Math.round(h * 6),
+    personality: { ego: clamp(0.35 + p.fame * 0.1 + noise(1), 0, 1), ambition: clamp(0.45 + p.fame * 0.08 + noise(2), 0, 1), honesty: clamp(0.55 + noise(3), 0, 1), aggression: clamp(0.45 + noise(4), 0, 1) },
     ideology: {
-      economic: clamp(party.ideology.economic + noise(), -1, 1),
-      security: clamp(party.ideology.security + noise(), -1, 1),
-      religion: clamp(party.ideology.religion + noise(), -1, 1),
+      economic: clamp(party.ideology.economic + noise(5) * 0.6, -1, 1),
+      security: clamp(party.ideology.security + noise(6) * 0.6, -1, 1),
+      religion: clamp(party.ideology.religion + noise(7) * 0.6, -1, 1),
     },
     memory: [],
     relationships: {},
-    caricature: { ...randomCaricature(s, gender, party.id), ...(opts.caricature ?? {}) },
-    quirk: opts.quirk ?? (PARTY_QUIRKS[party.id] && chance(s, 0.55) ? pick(s, PARTY_QUIRKS[party.id]) : pick(s, QUIRKS)),
+    caricature: personCaricature(p),
+    quirk: p.bio ?? '',
+    bio: p.bio,
     cooldownUntil: 0,
     isPlayer: false,
     active: true,
-    ambitionTarget: opts.ambitionTarget ?? pick(s, AMBITIONS),
+    ambitionTarget: ambitionFor(p),
+    listRank: p.rank,
+    inKnesset: !!p.mk,
+    real: true,
   };
 }
-const partyId = (p: Party) => p.id;
 
 const INITIAL_QUALITY: Record<ServiceId, number> = {
-  health: 52, education: 50, transport: 45, housing: 40, security: 64, welfare: 50, infrastructure: 50, energy: 58, govServices: 47,
+  health: 50, education: 49, transport: 44, housing: 38, security: 52, welfare: 49, infrastructure: 48, energy: 58, govServices: 50,
 };
+
+/** Which real person a quick-start config maps to (legacy role/party fields). */
+export function defaultPersonFor(role: Role, partyId?: string, ministryId?: string): PersonDef {
+  const inParty = PEOPLE.filter((p) => !partyId || p.party === partyId);
+  if (role === 'pm') return PEOPLE.find((p) => p.role === 'pm')!;
+  if (role === 'minister') return PEOPLE.find((p) => p.role === ministryId) ?? PEOPLE.find((p) => p.role && MINISTRIES.some((m) => m.id === p.role) && (!partyId || p.party === partyId)) ?? PEOPLE.find((p) => p.role === 'transport')!;
+  if (role === 'candidate') return inParty.find((p) => p.rank === 1 && p.role !== 'pm') ?? PEOPLE.find((p) => p.party === 'yashar' && p.rank === 1)!;
+  return inParty.filter((p) => p.mk && p.rank > 1 && !p.role).sort((a, b) => b.rank - a.rank)[0] ?? inParty.find((p) => p.rank > 3) ?? PEOPLE.find((p) => p.party === 'likud' && p.rank === 20)!;
+}
+
+/** Role in the game from a person's real position. */
+export function roleOf(s: GameState, politicianId: string): Role {
+  const p = s.politicians[politicianId];
+  if (s.government.pmId === politicianId) return 'pm';
+  if (p.ministryId) return 'minister';
+  if (s.parties[p.partyId]?.leaderId === politicianId) return 'candidate';
+  return 'mk';
+}
+
+const POLL_TOTAL = PARTIES.reduce((a, p) => a + p.poll, 0);
 
 export function createGame(cfg: NewGameConfig): GameState {
   const seed = cfg.seed ?? Math.floor(Math.random() * 2 ** 31);
@@ -101,30 +146,31 @@ export function createGame(cfg: NewGameConfig): GameState {
   const needs = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.initial * diff.needFactor])) as Record<BudgetCategory, number>;
 
   const s: GameState = {
-    version: 1,
+    version: 2,
     seed,
     rngState: seed,
     turn: 0,
-    date: { year: 2027, month: 3 },
+    date: { ...START_DATE },
+    startDate: { ...START_DATE },
     difficulty: cfg.difficulty,
-    player: { name: cfg.playerName, role: cfg.role, politicianId: 'player', partyId: cfg.partyId, politicalCapital: 50, reputation: 45, actionCooldowns: {}, listRank: 1 },
+    player: { name: '', role: 'mk', politicianId: 'player', partyId: '', politicalCapital: 50, reputation: 45, actionCooldowns: {}, listRank: 1 },
     parties: {},
     politicians: {},
-    government: { pmId: '', coalition: [], ministries: [], stability: { easy: 70, normal: 60, hard: 50, chaos: 42 }[cfg.difficulty], approval: 45, formedTurn: 0, lowMajorityTurns: 0, lowApprovalTurns: 0 },
+    government: { pmId: '', coalition: [], ministries: [], stability: { easy: 60, normal: 50, hard: 42, chaos: 35 }[cfg.difficulty], approval: 42, formedTurn: 0, formedDay: dayNumber({ year: 2022, month: 12, day: 29 }), caretaker: true, lowMajorityTurns: 0, lowApprovalTurns: 0 },
     bills: [],
     activeLaws: [],
     economy: {
-      gdp: 2000, growth: 3 + diff.economyBias * 0.5, unemployment: 4.3, inflation: 2.8, interestRate: 4.25, effectiveDebtRate: 2.9,
-      debt: diff.startDebt, revenue: 0, spending: 0, deficit: 0, avgIncome: 12800,
-      taxes: { incomeTax: 20, vat: 17, corporateTax: 23 }, creditRating: 'AA',
+      gdp: 2150, growth: 2.6 + diff.economyBias * 0.5, unemployment: 3.1, inflation: 3, interestRate: 4.25, effectiveDebtRate: 3.1,
+      debt: diff.startDebt, revenue: 0, spending: 0, deficit: 0, avgIncome: 13900,
+      taxes: { incomeTax: 21, vat: 18, corporateTax: 23 }, creditRating: 'A',
       shocks: { growth: 0, inflation: 0, unemployment: 0 }, structural: { growth: 0, inflation: 0, unemployment: 0 }, otherRevenue: 0,
     },
-    budget: { allocations, needs, debtInterest: 0, projectSpending: 0, fiscalYear: 2027, passed: true, deadlineTurn: 0 },
+    budget: { allocations, needs, debtInterest: (diff.startDebt * 3.1) / 100, projectSpending: 0, fiscalYear: 2026, passed: true, deadlineTurn: 0 },
     services: {} as Record<ServiceId, Service>,
     population: {
-      total: 10.2, growthRate: 1.9, ages: { kids: 0.32, young: 0.22, adults: 0.34, seniors: 0.12 },
+      total: 10.1, growthRate: 1.8, ages: { kids: 0.32, young: 0.22, adults: 0.34, seniors: 0.12 },
       groups: {} as Record<GroupId, PopulationGroup>,
-      regions: Object.fromEntries(REGIONS.map((r) => [r.id, { id: r.id, populationShare: r.share, unemployment: 4, income: 12000, satisfaction: 50, investment: 40, infrastructure: r.infra, services: 50 }])) as GameState['population']['regions'],
+      regions: Object.fromEntries(REGIONS.map((r) => [r.id, { id: r.id, populationShare: r.share, unemployment: 3, income: 12000, satisfaction: 50, investment: 40, infrastructure: r.infra, services: 50 }])) as GameState['population']['regions'],
     },
     projects: [],
     crises: [],
@@ -137,80 +183,70 @@ export function createGame(cfg: NewGameConfig): GameState {
       startTurn: 0, turnsInRole: { pm: 0, candidate: 0, minister: 0, mk: 0 }, governmentsFormed: 0, lawsPassed: 0, billsProposed: 0,
       moneyInvested: 0, electionsWon: 0, electionsLost: 0, achievements: [], failures: [], memorable: [], roleHistory: [], decisions: 0,
     },
-    elections: { scheduledTurn: 18, phase: 'none', negotiation: null, last: null, campaignBoost: {}, count: 0 },
+    elections: { date: { ...ELECTION_DATE }, scheduledTurn: 0, phase: 'none', negotiation: null, last: null, campaignBoost: {}, count: 0 },
     turnLog: [],
     eventLog: [],
     briefing: null,
     flags: {},
     gameOver: null,
-    nextId: 100,
+    nextId: 1000,
     drama: null,
     alliances: [],
   };
 
-  // ---------------- parties & politicians ----------------
+  // ---------------- parties ----------------
   for (const def of PARTIES) {
     s.parties[def.id] = {
-      id: def.id, name: def.name, shortName: def.shortName, logo: def.logo, color: def.color, ideology: { ...def.ideology },
-      description: def.description, slogan: def.slogan, seats: def.seats, pollShare: (def.seats / 120) * 100, leaderId: '', memberIds: [],
-      power: def.seats * 2, momentum: 0, calibration: 1, affinity: { ...def.affinity }, preferredMinistries: def.preferredMinistries,
-      demands: [], favoriteLaws: def.favoriteLaws, hatedLaws: def.hatedLaws, funds: def.seats * 1.5, isPlayerParty: false, cohesion: 70,
+      id: def.id, name: def.name, shortName: def.shortName, logo: def.letters, color: def.color, ideology: { ...def.ideology },
+      description: def.description, slogan: '', seats: def.seats, pollShare: (def.poll / 120) * 100, leaderId: '', memberIds: [],
+      power: def.seats * 2 + def.poll, momentum: 0, calibration: 1, affinity: { ...def.affinity }, preferredMinistries: def.preferredMinistries,
+      demands: [], favoriteLaws: def.favoriteLaws, hatedLaws: def.hatedLaws, funds: 4 + def.poll * 1.2, isPlayerParty: false, cohesion: 70,
+      letters: def.letters, bloc: def.bloc, redLines: def.redLines,
     };
     if (def.coalition) s.government.coalition.push(def.id);
   }
-  let pid = 0;
-  for (const L of LEADERS) {
-    const party = s.parties[L.partyId];
-    const id = `pol_${++pid}`;
-    s.politicians[id] = makePolitician(s, id, party, {
-      name: L.name, gender: L.gender, domain: L.domain, quirk: L.quirk, personality: L.personality, ambitionTarget: L.ambition,
-      power: clamp(45 + party.seats * 1.4), popularity: randInt(s, 40, 62), caricature: L.caricature as CaricatureSpec,
-    });
-    s.politicians[id].experience = randInt(s, 10, 30);
-    party.leaderId = id;
-    party.memberIds.push(id);
-    for (let i = 0; i < (PARTY_SIZE[party.id] ?? 3); i++) {
-      const mid = `pol_${++pid}`;
-      s.politicians[mid] = makePolitician(s, mid, party, {});
-      party.memberIds.push(mid);
-    }
-  }
-  s.government.pmId = s.parties.kise.leaderId;
 
-  // ---------------- ministries ----------------
+  // ---------------- people (real roster) ----------------
+  for (const p of PEOPLE) {
+    s.politicians[p.id] = makePolitician(p);
+    s.parties[p.party].memberIds.push(p.id);
+  }
+  for (const party of Object.values(s.parties)) {
+    party.memberIds.sort((a, b) => (s.politicians[a].listRank || 999) - (s.politicians[b].listRank || 999));
+    party.leaderId = party.memberIds.find((id) => s.politicians[id].listRank === 1) ?? party.memberIds[0];
+  }
+  s.government.pmId = PEOPLE.find((p) => p.role === 'pm')!.id;
+
+  // ---------------- ministries (real ministers) ----------------
   for (const def of MINISTRIES) {
+    const holder = PEOPLE.find((p) => p.role === def.id);
     s.government.ministries.push({
       id: def.id, name: def.name, icon: def.icon, domain: def.domain, services: [...def.services], categories: [...def.categories],
-      ministerId: null, efficiency: randInt(s, 42, 58), bureaucracy: randInt(s, 40, 65), deep: def.deep, satire: def.satire, agreementPartyId: def.initialParty,
+      ministerId: holder?.id ?? null, efficiency: 46 + Math.round(hash(def.id) * 12), bureaucracy: 42 + Math.round(hash(def.id + 'b') * 22), deep: def.deep,
+      agreementPartyId: holder?.party ?? def.initialParty,
     });
-  }
-  for (const m of s.government.ministries) {
-    const party = s.parties[m.agreementPartyId!];
-    const cands = party.memberIds.map((id) => s.politicians[id]).filter((p) => !p.ministryId && p.id !== s.government.pmId);
-    cands.sort((a, b) => (b.expertise[m.domain] ?? 20) + b.power * 0.3 - ((a.expertise[m.domain] ?? 20) + a.power * 0.3));
-    if (cands[0]) {
-      cands[0].ministryId = m.id;
-      m.ministerId = cands[0].id;
-      cands[0].power = clamp(cands[0].power + 15);
+    if (holder) {
+      s.politicians[holder.id].ministryId = def.id;
+      s.politicians[holder.id].power = clamp(s.politicians[holder.id].power + 10);
     }
   }
 
   // ---------------- player ----------------
   setupPlayer(s, cfg);
 
-  // ---------------- loyalty baseline ----------------
+  // ---------------- loyalty & relationships baseline ----------------
   const me = s.politicians.player;
   for (const p of Object.values(s.politicians)) {
     if (p.isPlayer) continue;
     const same = p.partyId === me.partyId;
-    const coal = s.government.coalition.includes(p.partyId) === s.government.coalition.includes(me.partyId);
-    p.loyalty = clamp((same ? 60 : coal ? 47 : 28) + randInt(s, -10, 10) - (p.personality.ego - 0.5) * 10);
-    p.relationships[s.government.pmId] = randInt(s, -10, 40) + (s.parties[p.partyId] && s.government.coalition.includes(p.partyId) ? 25 : -20);
+    const sameBloc = s.parties[p.partyId]?.bloc === s.parties[me.partyId]?.bloc;
+    p.loyalty = clamp((same ? 58 : sameBloc ? 45 : 30) + (hash(p.id + 'l') - 0.5) * 20 - (p.personality.ego - 0.5) * 10);
+    p.relationships[s.government.pmId] = Math.round((hash(p.id + 'pm') - 0.5) * 40) + (s.government.coalition.includes(p.partyId) ? 25 : -20);
   }
 
   // ---------------- services & groups ----------------
   for (const def of SERVICES) {
-    s.services[def.id] = { id: def.id, quality: INITIAL_QUALITY[def.id], satisfaction: INITIAL_QUALITY[def.id] - 3, trend: 0, bonus: 0, metrics: { railKm: 1350, roadKm: 19000, beds: 0, classrooms: 0, renewables: 14, units: 0 }, issues: [] };
+    s.services[def.id] = { id: def.id, quality: INITIAL_QUALITY[def.id], satisfaction: INITIAL_QUALITY[def.id] - 3, trend: 0, bonus: 0, metrics: { railKm: 1450, roadKm: 20000, beds: 0, classrooms: 0, renewables: 15, units: 0 }, issues: [] };
   }
   refreshFiscals(s);
   for (const def of SERVICES) {
@@ -218,20 +254,21 @@ export function createGame(cfg: NewGameConfig): GameState {
     s.services[def.id].bonus = clamp(INITIAL_QUALITY[def.id] - raw, -30, 30);
     updateMetrics(s, def.id);
   }
-  s.services.energy.metrics.renewables = 14;
+  s.services.energy.metrics.renewables = 15;
   for (const g of GROUPS) {
     s.population.groups[g.id] = { id: g.id, satisfaction: g.base, structural: g.base, mood: 0, offset: 0, lastDelta: 0 };
   }
-  // calibrate permanent offsets so groups start at their base
   for (const g of GROUPS) s.population.groups[g.id].offset = g.base - groupTargetRaw(s, g.id);
   s.government.approval = computeApproval(s);
 
-  // calibrate parties so first poll ≈ starting seats
-  s.government.formedTurn = 0; // calibrate without fatigue; the clock starts now
-  const raw = computeShares(s, 0);
-  for (const p of Object.values(s.parties)) {
-    const target = (p.seats / 120) * 100;
-    p.calibration = target / Math.max(0.01, raw[p.id]);
+  // calibrate parties so the first poll matches the real poll average (research/01)
+  // shares are normalised together, so calibrate iteratively until every party sits on its poll average
+  for (let pass = 0; pass < 8; pass++) {
+    const raw = computeShares(s, 0);
+    for (const def of PARTIES) {
+      const target = (def.poll / POLL_TOTAL) * 100;
+      s.parties[def.id].calibration *= target / Math.max(0.01, raw[def.id]);
+    }
   }
   const shares = computeShares(s, 0);
   const seats = Object.fromEntries(Object.values(s.parties).map((p) => [p.id, p.seats]));
@@ -246,14 +283,15 @@ export function createGame(cfg: NewGameConfig): GameState {
     st.satisfaction = s.government.approval;
   }
 
-  s.career.roleHistory.push({ turn: 0, role: cfg.role, label: roleLabel(s) });
+  s.elections.scheduledTurn = turnsUntilElection(s);
+  s.career.roleHistory.push({ turn: 0, role: s.player.role, label: roleLabel(s) });
   pushHistory(s);
   s.briefing = {
     turn: 0,
     lines: [
-      { icon: '🪑', text: `ברוך הבא ל${'צבריה'}. ${roleLabel(s)} — בהצלחה. תצטרך אותה.`, tone: 'neutral' },
-      { icon: '🗳️', text: `הבחירות הבאות בעוד ${s.elections.scheduledTurn * 2} חודשים.`, tone: 'neutral' },
-      { icon: '🧠', text: 'היועץ שלך מחכה בצד. הוא לא מחליט — אתה כן.', tone: 'neutral' },
+      { icon: '🗓️', text: 'ספטמבר 2026. הכנסטון התפזר והרשימות הוגשו. הבחירות לכנסטון ה-26 ייערכו ב-27 באוקטובר.', tone: 'neutral' },
+      { icon: '🏛️', text: `${roleLabel(s)}. עד הבחירות כל תור הוא שבועיים של קמפיין.`, tone: 'neutral' },
+      { icon: '🧠', text: 'היועץ זמין בכל רגע. ההחלטות שלך.', tone: 'neutral' },
     ],
     changes: [],
   };
@@ -261,90 +299,49 @@ export function createGame(cfg: NewGameConfig): GameState {
 }
 
 function setupPlayer(s: GameState, cfg: NewGameConfig): void {
-  const party = s.parties[cfg.partyId];
-  party.isPlayerParty = true;
-  if (cfg.partyName) {
-    party.name = cfg.partyName;
-    party.shortName = cfg.partyName.length > 14 ? cfg.partyName.slice(0, 14) : cfg.partyName;
-  }
-  if (cfg.partyLogo) party.logo = cfg.partyLogo;
+  // whom does the player play (or replace)?
+  const legacyRole = cfg.role ?? 'mk';
+  const target = cfg.custom
+    ? PEOPLE.find((p) => p.id === cfg.custom!.replaceId)
+    : cfg.personId
+      ? PEOPLE.find((p) => p.id === cfg.personId)
+      : defaultPersonFor(legacyRole, cfg.partyId, cfg.ministryId);
+  const slot = target ?? PEOPLE.find((p) => p.role === 'pm')!;
+  const old = s.politicians[slot.id];
 
-  const base: Record<Role, { power: number; pop: number; cap: number; rep: number; elections: number }> = {
-    pm: { power: 85, pop: 46, cap: 60, rep: 50, elections: 18 },
-    candidate: { power: 65, pop: 44, cap: 50, rep: 45, elections: 12 },
-    minister: { power: 50, pop: 34, cap: 40, rep: 48, elections: 15 },
-    mk: { power: 20, pop: 15, cap: 25, rep: 30, elections: 15 },
-  };
-  const b = base[cfg.role];
-  const me = makePolitician(s, 'player', party, {
-    name: cfg.playerName, gender: cfg.gender, domain: 'management', quirk: 'הדמות שלך. ההיסטוריה עוד לא החליטה מה היא.',
-    personality: { ego: 0.5, ambition: 1, honesty: 0.6, aggression: 0.5 }, power: b.power, popularity: b.pop,
-  });
-  me.isPlayer = true;
-  me.loyalty = 100;
-  me.experience = cfg.role === 'mk' ? 0 : 6;
-  me.expertise = { management: 55, media: 50 };
-  if (cfg.look) me.caricature = { ...me.caricature, ...cfg.look };
+  // the player takes over this record under the id 'player'
+  const me: Politician = { ...old, id: 'player', isPlayer: true, loyalty: 100, relationships: {} };
+  if (cfg.custom || cfg.playerName) {
+    me.name = cfg.custom?.name ?? cfg.playerName ?? old.name;
+    me.gender = cfg.custom?.gender ?? cfg.gender ?? old.gender;
+    me.real = !!cfg.personId && !cfg.custom;
+    if (cfg.custom) { me.bio = undefined; me.quirk = ''; me.experience = 2; }
+    if (cfg.custom?.look ?? cfg.look) me.caricature = { ...me.caricature, ...(cfg.custom?.look ?? cfg.look) };
+  }
+  delete s.politicians[old.id];
   s.politicians.player = me;
-  s.player.politicalCapital = b.cap;
-  s.player.reputation = b.rep;
-  s.elections.scheduledTurn = b.elections;
+  const swap = (id: string) => (id === old.id ? 'player' : id);
+  for (const party of Object.values(s.parties)) {
+    party.memberIds = party.memberIds.map(swap);
+    party.leaderId = swap(party.leaderId);
+  }
+  s.government.pmId = swap(s.government.pmId);
+  for (const m of s.government.ministries) if (m.ministerId) m.ministerId = swap(m.ministerId);
 
-  const replaceLeader = () => {
-    const old = s.politicians[party.leaderId];
-    if (old) {
-      old.active = false;
-      old.quirk = 'מונה לשגריר באיי פיג׳י אחרי שאיבד את ראשות המפלגה.';
-      if (old.ministryId) {
-        const m = s.government.ministries.find((x) => x.id === old.ministryId);
-        if (m) m.ministerId = null;
-        old.ministryId = null;
-      }
-      party.memberIds = party.memberIds.filter((id) => id !== old.id);
-    }
-    party.leaderId = 'player';
-    party.memberIds.unshift('player');
-    s.player.listRank = 1;
+  const party = s.parties[me.partyId];
+  party.isPlayerParty = true;
+  if (cfg.partyName) { party.name = cfg.partyName; party.shortName = cfg.partyName.slice(0, 14); }
+
+  const role = roleOf(s, 'player');
+  const base: Record<Role, { cap: number; rep: number }> = {
+    pm: { cap: 60, rep: 52 }, candidate: { cap: 52, rep: 48 }, minister: { cap: 45, rep: 48 }, mk: { cap: 30, rep: 34 },
   };
-
-  if (cfg.role === 'pm') {
-    replaceLeader();
-    s.government.pmId = 'player';
-    // the old kise leader, if not the replaced one, stays as an ambitious rival
-    for (const m of s.government.ministries) if (!m.ministerId) fillMinistry(s, m.id);
-  } else if (cfg.role === 'candidate') {
-    replaceLeader();
-  } else if (cfg.role === 'minister') {
-    party.memberIds.push('player');
-    const mid = cfg.ministryId ?? 'transport';
-    const m = s.government.ministries.find((x) => x.id === mid)!;
-    if (m.ministerId) {
-      const old = s.politicians[m.ministerId];
-      old.ministryId = null;
-      old.memory.push({ turn: 0, kind: 'fired', text: `פינה את ${m.name} בשבילך`, weight: -12 });
-      old.loyalty = clamp(old.loyalty - 10);
-    }
-    m.ministerId = 'player';
-    m.agreementPartyId = party.id;
-    me.ministryId = m.id;
-    me.expertise[m.domain] = 55;
-    s.player.listRank = Math.min(5, Math.max(2, Math.round(party.seats * 0.25)));
-  } else {
-    party.memberIds.push('player');
-    s.player.listRank = Math.max(2, Math.round(party.seats * 0.6));
-  }
-  s.player.partyId = party.id;
-}
-
-function fillMinistry(s: GameState, ministryId: string): void {
-  const m = s.government.ministries.find((x) => x.id === ministryId)!;
-  const party = s.parties[m.agreementPartyId ?? s.politicians[s.government.pmId].partyId];
-  const cand = party.memberIds.map((id) => s.politicians[id]).filter((p) => p.active && !p.ministryId && !p.isPlayer);
-  cand.sort((a, b) => (b.expertise[m.domain] ?? 20) - (a.expertise[m.domain] ?? 20));
-  if (cand[0]) {
-    cand[0].ministryId = m.id;
-    m.ministerId = cand[0].id;
-  }
+  s.player.name = me.name;
+  s.player.role = role;
+  s.player.partyId = me.partyId;
+  s.player.politicalCapital = base[role].cap;
+  s.player.reputation = clamp(base[role].rep + (me.real ? 6 : 0));
+  s.player.listRank = me.listRank || 99;
 }
 
 export function roleLabel(s: GameState): string {
@@ -352,11 +349,14 @@ export function roleLabel(s: GameState): string {
   const f = me?.gender === 'f';
   switch (s.player.role) {
     case 'pm': return f ? 'ראשת הממשלה' : 'ראש הממשלה';
-    case 'candidate': return f ? 'מועמדת לראשות הממשלה' : 'מועמד לראשות הממשלה';
+    case 'candidate': return f ? `יו״ר ${s.parties[s.player.partyId]?.name}` : `יו״ר ${s.parties[s.player.partyId]?.name}`;
     case 'minister': {
       const m = s.government.ministries.find((x) => x.id === me?.ministryId);
-      return m ? `${f ? 'השרה' : 'השר'} ב${m.name}` : f ? 'שרה' : 'שר';
+      if (!m) return f ? 'שרה' : 'שר';
+      // "משרד הביטחון" → "שר הביטחון"; "המשרד לביטחון לאומי" → "השר לביטחון לאומי"
+      if (m.name.startsWith('המשרד ')) return `${f ? 'השרה' : 'השר'} ${m.name.slice('המשרד '.length)}`;
+      return `${f ? 'שרת' : 'שר'} ${m.name.replace(/^משרד /, '')}`;
     }
-    default: return f ? 'חברת כנסטון' : 'חבר כנסטון';
+    default: return me?.inKnesset ? (f ? 'חברת הכנסטון' : 'חבר הכנסטון') : (f ? 'מועמדת לכנסטון' : 'מועמד לכנסטון');
   }
 }

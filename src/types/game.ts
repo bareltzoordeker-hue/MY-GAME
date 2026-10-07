@@ -10,7 +10,7 @@ export type GroupId =
   | 'youth' | 'elderly' | 'families' | 'lowIncome' | 'middleClass' | 'highIncome'
   | 'soldiers' | 'reservists' | 'haredim' | 'secular' | 'religious' | 'center'
   | 'periphery' | 'settlers' | 'left' | 'right' | 'selfEmployed' | 'employees'
-  | 'publicSector' | 'students' | 'retirees';
+  | 'publicSector' | 'students' | 'retirees' | 'arabs' | 'liberals' | 'socialists' | 'olim';
 
 export type BudgetCategory =
   | 'defense' | 'education' | 'health' | 'transport' | 'welfare' | 'housing'
@@ -26,9 +26,9 @@ export type Domain =
   | 'interior' | 'media' | 'housing' | 'science' | 'culture';
 
 export type RegionId =
-  | 'north' | 'haifa' | 'sharon' | 'center' | 'jerusalem' | 'shfela' | 'hills' | 'negev' | 'eilat';
+  | 'north' | 'haifa' | 'sharon' | 'center' | 'jerusalem' | 'shfela' | 'judea_samaria' | 'negev' | 'eilat';
 
-export interface GameDate { year: number; month: number } // month 1..12 (odd months: each turn = 2 months)
+export interface GameDate { year: number; month: number; day?: number } // month 1..12, day 1..31 (turns: 4 months, or 2 weeks during a campaign)
 
 /** -1..1 on each axis: economic (left..right), security (dove..hawk), religion (secular..religious) */
 export interface Ideology { economic: number; security: number; religion: number }
@@ -129,7 +129,7 @@ export interface Population {
 // ---------------- Politics ----------------
 export interface CaricatureSpec {
   skin: string;
-  hair: 'bald' | 'comb' | 'curly' | 'kippah' | 'hat' | 'beret' | 'long' | 'spiky' | 'bun' | 'grey';
+  hair: 'bald' | 'comb' | 'curly' | 'kippah' | 'hat' | 'beret' | 'long' | 'spiky' | 'bun' | 'grey' | 'scarf' | 'short';
   hairColor: string;
   glasses: boolean;
   beard: 'none' | 'stubble' | 'full' | 'long';
@@ -179,6 +179,14 @@ export interface Politician {
   isPlayer: boolean;
   active: boolean;
   ambitionTarget: string; // flavour: what they want
+  /** place on the party list for the next election (0 = not on the list) */
+  listRank?: number;
+  /** currently a member of the Knesseton */
+  inKnesset?: boolean;
+  /** short neutral description (current or past roles) */
+  bio?: string;
+  /** real person from the roster (not generated) */
+  real?: boolean;
 }
 
 export interface Demand {
@@ -214,6 +222,9 @@ export interface Party {
   funds: number; // ₪M
   isPlayerParty: boolean;
   cohesion: number; // 0..100 internal unity
+  letters?: string;
+  bloc?: 'gov' | 'opp' | 'arab';
+  redLines?: string[];
 }
 
 export interface Ministry {
@@ -240,6 +251,10 @@ export interface Government {
   stability: number; // 0..100
   approval: number; // 0..100
   formedTurn: number;
+  /** day number (engine/calendar) when the government was formed */
+  formedDay?: number;
+  /** transitional government until the next election (no confidence votes / budget deadline) */
+  caretaker?: boolean;
   lowMajorityTurns: number;
   lowApprovalTurns: number;
 }
@@ -427,6 +442,8 @@ export interface ElectionResult {
 }
 
 export interface Elections {
+  /** election day (the calendar drives elections; scheduledTurn is kept in sync for the UI) */
+  date?: GameDate;
   scheduledTurn: number;
   phase: 'none' | 'negotiation';
   negotiation: Negotiation | null;
@@ -472,6 +489,8 @@ export interface Alliance {
 }
 
 export interface GameState {
+  /** date the career started (for career length) */
+  startDate?: GameDate;
   drama: DramaEvent | null; // pending dramatic event — must be resolved before advancing
   alliances: Alliance[];
   version: number;

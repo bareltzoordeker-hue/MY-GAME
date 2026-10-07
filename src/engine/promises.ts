@@ -21,8 +21,8 @@ export function makePromise(s: GameState, defId: string): Reaction {
   return {
     title: 'ההבטחה נרשמה', subtitle: def.text, status: 'approved',
     stats: [{ icon: '📈', label: 'מומנטום בסקרים', value: `+${def.momentum}`, tone: 'good' }, { icon: '📅', label: 'מועד לקיום', value: 'שנתיים אחרי הבחירות', tone: 'neutral' }],
-    groups: def.groups.map((g) => ({ icon: GROUP_BY_ID[g].emoji, label: GROUP_BY_ID[g].name, text: 'מקשיבים בעניין.', tone: 'good' as const })),
-    people: [], quip: 'היועץ: "הבטחות הן כמו משכנתא. מישהו ישלם אותן."',
+    groups: def.groups.map((g) => ({ icon: GROUP_BY_ID[g].emoji, label: GROUP_BY_ID[g].name, text: 'מקשיבים, ויזכרו אם ההבטחה לא תקוים.', tone: 'good' as const })),
+    people: [], quip: 'אם תהיה בשלטון ולא תקיים את ההבטחה עד המועד, תשלם על כך בתמיכה הציבורית.',
   };
 }
 
@@ -32,7 +32,8 @@ export function checkPromises(s: GameState): void {
     if (p.status !== 'pending') continue;
     const def = PROMISE_BY_ID[p.defId];
     const now = def.measure(s);
-    if (s.turn > s.elections.scheduledTurn - 24 && def.kept(now, p.baseline) && s.turn > p.madeTurn) {
+    // a promise counts only once the election it was made for has passed (deadline = that election + half a term)
+    if (s.turn >= p.deadlineTurn - Math.round(TERM_TURNS / 2) && def.kept(now, p.baseline) && s.turn > p.madeTurn) {
       p.status = 'kept';
       me.popularity = clamp(me.popularity + 4);
       applyEffects(s, { groups: Object.fromEntries(p.groups.map((g) => [g, 4])) });
@@ -47,8 +48,8 @@ export function checkPromises(s: GameState): void {
       p.status = 'broken';
       me.popularity = clamp(me.popularity - 7);
       applyEffects(s, { groups: Object.fromEntries(p.groups.map((g) => [g, -6])), partyMomentum: { [s.player.partyId]: -5 } });
-      addNews(s, `"הבטחתם ולא קיימתם": ${p.text}`, 'bad', '🤥');
-      logEvent(s, '🤥', `הבטחה הופרה: ${p.text}`, 3, 'bad', 'promise');
+      addNews(s, `הבטחת בחירות לא קוימה: ${p.text}`, 'bad', '📜');
+      logEvent(s, '📜', `הבטחה הופרה: ${p.text}`, 3, 'bad', 'promise');
       s.career.failures.push(`הפר הבטחה: ${p.text}`);
     }
   }

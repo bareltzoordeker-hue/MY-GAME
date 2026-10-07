@@ -1,7 +1,7 @@
 // ============================================================
-// Dramatic events: dilemmas that hit the player almost every turn.
-// Weights are driven by the state (tension, role, coalition), so the
-// absurd stuff still lands on real systems.
+// Dramatic events: dilemmas that reach the player during a turn.
+// Weights are driven by the state (tension, role, coalition), and every
+// option changes real numbers. Tone: serious and factual.
 // ============================================================
 import { chance, pick, rand } from './rng';
 import type { BudgetCategory, DramaEvent, Effects, GameState, GroupId, Politician } from '../types/game';
@@ -10,7 +10,7 @@ import { GROUP_BY_ID, CATEGORY_BY_ID, MAJORITY } from '../data/world';
 import { applyDecision } from './decisions';
 import { applyEffects, remember } from './effects';
 import { startCrisis } from './crises';
-import { callEarlyElections } from './elections';
+import { BUDGET_PREF, callEarlyElections } from './elections';
 import { coalitionSeats } from './polls';
 import { isPartyLeader, isPM, playerMinistry } from './roles';
 
@@ -36,10 +36,11 @@ const me = (s: GameState) => s.politicians[s.player.politicianId];
 const fx = (s: GameState, e: Effects) => applyDecision(s, e);
 const ministers = (s: GameState) => Object.values(s.politicians).filter((p) => p.active && !p.isPlayer && p.ministryId);
 const pol = (s: GameState, ev: DramaEvent) => s.politicians[ev.fromId ?? ''] as Politician | undefined;
+const spend = (s: GameState, n: number) => { s.player.politicalCapital = clamp(s.player.politicalCapital - n); };
 const ok = (text: string, headline?: string): Outcome => ({ text, tone: 'good', headline });
 const bad = (text: string, headline?: string): Outcome => ({ text, tone: 'bad', headline });
 const meh = (text: string, headline?: string): Outcome => ({ text, tone: 'neutral', headline });
-/** How heated the country is: 0 calm … ~1 boiling. Extreme events need heat. */
+/** How heated the country is: 0 calm … ~1.5 boiling. Extreme events need heat. */
 export function tension(s: GameState): number {
   return clamp((50 - s.government.approval) / 40 + (50 - s.government.stability) / 60 + Math.max(0, deficitPct(s) - 3.5) / 5 + s.crises.length * 0.15, 0, 1.5);
 }
@@ -49,245 +50,275 @@ function angriestGroup(s: GameState): GroupId {
 const GROUP_CAT: Partial<Record<GroupId, BudgetCategory>> = {
   youth: 'housing', families: 'education', lowIncome: 'welfare', retirees: 'welfare', elderly: 'health', students: 'education',
   reservists: 'defense', soldiers: 'defense', periphery: 'transport', haredim: 'education', publicSector: 'government', settlers: 'housing',
+  arabs: 'police', olim: 'housing', middleClass: 'housing', secular: 'transport',
 };
 
 export const DRAMAS: DramaDef[] = [
-  // ======================= NORMAL (cynical daily politics) =======================
+  // ======================= NORMAL =======================
   {
-    id: 'sushi', level: 'normal',
-    weight: (s) => (ministers(s).length ? 1 : 0) + s.crises.length * 0.8,
+    id: 'bereaved_father', level: 'normal',
+    weight: (s) => 0.9 + (s.activeLaws.includes('oct7_state_commission') ? -0.5 : 0.3),
+    make: () => ({ icon: '🕯️', title: 'אב שכול מתפרץ בטקס', text: 'בטקס זיכרון ממלכתי קם אב שכול וקרא לעברך: "הבן שלי נפל, ואף אחד לא לקח אחריות. איפה ועדת החקירה?" הטקס הופסק לכמה דקות, והתיעוד מופץ בכל הערוצים.' }),
+    options: [
+      { id: 'meet', label: 'לגשת אליו ולהזמין אותו לפגישה אישית', hint: '-3 הון, אמפתיה', resolve: (s) => { spend(s, 3); fx(s, { playerPopularity: 3, playerReputation: 3, groups: { reservists: 2, families: 2 } }); return ok('נפגשתם למחרת לשיחה ארוכה. הוא לא שינה את עמדתו, אבל אמר בתקשורת שהרגיש שהקשבת.', 'פגישה בין האב השכול לבין חבר הממשלה'); } },
+      { id: 'commission', label: 'להתחייב לתמוך בוועדת חקירה ממלכתית', hint: 'משפחות ↑, שותפים מסוימים ↓', resolve: (s) => { remember(s, s.government.pmId, s.government.pmId === s.player.politicianId ? 'favor' : 'insult', 'התחייב לוועדה ממלכתית', s.government.pmId === s.player.politicianId ? 0 : -8); fx(s, { playerPopularity: 4, groups: { reservists: 4, families: 3, left: 3, center: 3, right: -2 } }); return ok('ההתחייבות התקבלה בהערכה בקרב המשפחות. עכשיו יצפו שתפעל לממש אותה.', 'התחייבות לתמוך בוועדת חקירה ממלכתית'); } },
+      { id: 'silent', label: 'להמשיך בטקס בלי להגיב', resolve: (s) => { fx(s, { playerPopularity: -4, groups: { reservists: -3, families: -2 } }); return bad('השתיקה נתפסה כאדישות. ארגוני המשפחות מבקרים אותך בחריפות.'); } },
+    ],
+  },
+  {
+    id: 'ptsd_veteran', level: 'normal',
+    weight: () => 0.8,
+    make: () => ({ icon: '🎖️', title: 'לוחם הלום קרב מוחה מול אגף השיקום', text: 'לוחם מילואים שאובחן עם פוסט-טראומה הפגין מול משרדי אגף השיקום: "חודשים אני מחכה לוועדה רפואית. אני לא מצליח לעבוד ולא לישון." עשרות לוחמים הצטרפו אליו.' }),
+    options: [
+      { id: 'reform', allow: (s) => holds(s, 'defense', 'finance', 'welfare'), label: 'רפורמה מיידית באגף השיקום', hint: '₪1 מיליארד בשנה', resolve: (s) => { fx(s, { budget: { defense: 1 }, groups: { reservists: 6, soldiers: 3, families: 2 }, playerPopularity: 3 }); return ok('קיצור זמני ההמתנה, טיפול נפשי מיידי וליווי אישי לכל לוחם. ארגוני הנכים מברכים.', 'רפורמה באגף השיקום: טיפול מיידי ללוחמים'); } },
+      { id: 'visit', label: 'להגיע אליהם ולהקשיב', hint: '-3 הון', resolve: (s) => { spend(s, 3); fx(s, { playerPopularity: 2, groups: { reservists: 2 } }); return meh('שוחחת עם הלוחמים. הם מעריכים את ההגעה, אבל מחכים לשינוי ממשי.'); } },
+      { id: 'committee', label: 'להעביר לבחינת ועדה', resolve: (s) => { fx(s, { playerPopularity: -2, groups: { reservists: -4 } }); return bad('ארגוני הלוחמים: "עוד ועדה. בינתיים אנשים קורסים."', 'הלוחמים: "הממשלה מושכת זמן"'); } },
+    ],
+  },
+  {
+    id: 'arab_crime', level: 'normal',
+    weight: (s) => 0.7 + Math.max(0, 45 - s.population.groups.arabs.satisfaction) / 30,
+    make: () => ({ icon: '🕊️', title: 'רצח נוסף בחברה הערבית', text: 'אם לשלושה נרצחה בירי בעיר בגליל. מתחילת השנה נרצחו עשרות בני אדם בחברה הערבית. ראשי הרשויות הכריזו על שביתה כללית ודורשים טיפול לאומי באלימות ובארגוני הפשיעה.' }),
+    options: [
+      { id: 'plan', allow: (s) => holds(s, 'national_security', 'finance'), label: 'תוכנית לאומית נגד הפשיעה', hint: '₪1.5 מיליארד, משטרה ושיקום', resolve: (s) => { fx(s, { budget: { police: 1, welfare: 0.5 }, services: { security: 2 }, groups: { arabs: 7, left: 2, center: 1 } }); return ok('יחידה ייעודית במשטרה, איסוף נשק לא חוקי ותוכניות חינוך ותעסוקה. ראשי הרשויות מברכים בזהירות.', 'הממשלה אישרה תוכנית לאומית נגד הפשיעה בחברה הערבית'); } },
+      { id: 'shin_bet', allow: (s) => holds(s, 'national_security'), label: 'לשלב את השב״כ במאבק', hint: 'יעיל, שנוי במחלוקת', resolve: (s) => { fx(s, { services: { security: 2 }, groups: { arabs: 2, liberals: -3, right: 2 } }); return meh('מספר המקרים ירד, אבל ארגוני זכויות האדם מזהירים מפגיעה בפרטיות.'); } },
+      { id: 'condemn', label: 'להוציא הודעת גינוי', resolve: (s) => { fx(s, { groups: { arabs: -3 }, playerPopularity: -1 }); return bad('ראשי הרשויות: "גינויים לא עוצרים כדורים."'); } },
+    ],
+  },
+  {
+    id: 'reservist_business', level: 'normal',
+    weight: (s) => 0.6 + Math.max(0, 50 - s.population.groups.reservists.satisfaction) / 30,
+    make: () => ({ icon: '🪖', title: 'עסק של משרת מילואים קרס', text: 'בעל עסק קטן שעשה יותר מ-200 ימי מילואים בשנה האחרונה פרסם מכתב פתוח: "העסק שלי קרס בזמן שהייתי במילואים. המענקים לא הגיעו." המכתב שותף מאות אלפי פעמים.' }),
+    options: [
+      { id: 'fund', allow: (s) => holds(s, 'finance', 'economy', 'defense'), label: 'קרן סיוע לעסקי משרתי מילואים', hint: '₪2 מיליארד', resolve: (s) => { fx(s, { oneOffCost: 2, groups: { reservists: 6, selfEmployed: 4, families: 1 } }); return ok('הקרן נפתחה: הלוואות בערבות מדינה ומענקים לעסקים שנפגעו.', 'קרן סיוע לעסקי משרתי המילואים'); } },
+      { id: 'call', label: 'להתקשר אליו אישית', hint: '-2 הון', resolve: (s) => { spend(s, 2); fx(s, { playerPopularity: 2 }); return meh('השיחה פורסמה ברשתות. הוא הודה, אבל ציין שהבעיה מערכתית.'); } },
+      { id: 'existing', label: 'להפנות למענקים הקיימים', resolve: (s) => { fx(s, { groups: { reservists: -3, selfEmployed: -2 } }); return bad('משרתי המילואים: "המענקים הקיימים לא מגיעים בזמן."'); } },
+    ],
+  },
+  {
+    id: 'minister_expenses', level: 'normal',
+    weight: (s) => (ministers(s).length ? 0.8 : 0),
     make: (s) => {
       const p = pick(s, ministers(s));
-      return { icon: '🍣', title: 'סושי ב-1,800 שקל', fromId: p.id, text: `${p.name} צולם במסעדת יוקרה, מזמין "מגש הטעימות של השף" בזמן ש${s.crises[0]?.title ?? 'חצי מדינה מחכה לאוטובוס'}. הקבלה כבר ברשת.` };
+      return { icon: '🧾', title: 'פרסום על הוצאות שר', fromId: p.id, text: `תחקיר עיתונאי חשף ש${p.name} טס עם פמליה גדולה לכנס בחו״ל, בעלות של מאות אלפי שקלים מכספי ציבור, בזמן ש${s.crises[0]?.title ?? 'משפחות רבות מתקשות בתשלום שכר הדירה'}.` };
     },
     options: [
-      { id: 'back', label: 'לגבות אותו', hint: 'הוא יאהב אותך. הציבור – פחות', resolve: (s, ev) => { remember(s, ev.fromId!, 'favor', 'גיבית אותו בפרשת הסושי', 12); fx(s, { playerPopularity: -3, groups: { lowIncome: -2, middleClass: -1 } }); return bad('"אדם צריך לאכול", אמרת. הציבור שאל: מה בדיוק?', `${pol(s, ev)?.name} נשאר. גם הוואסאבי`); } },
-      { id: 'condemn', label: 'לגנות בפומבי', hint: 'פופולריות עכשיו, אויב לתמיד', resolve: (s, ev) => { remember(s, ev.fromId!, 'insult', 'גינה אותי בפרשת הסושי', -18); fx(s, { playerPopularity: 3, playerReputation: 2 }); return ok('"זה לא מקובל!", אמרת, ומיד הזמנת פיצה משפחתית. בהנחה.'); } },
-      { id: 'blame', label: 'להאשים את המסעדה', hint: 'אבסורד שעשוי לעבוד', resolve: (s) => { const w = chance(s, 0.5); fx(s, { playerPopularity: w ? 2 : -2 }); return w ? ok('משרד הבריאות פשט על המסעדה. "ביקורת שגרתית", כמובן.', 'מסעדת הסושי נסגרה מסיבות תברואתיות מפתיעות') : bad('הבעלים פרסם שהשר ביקש "הנחת חבר כנסטון". אאוץ׳.'); } },
+      { id: 'back', label: 'לגבות אותו', hint: 'השר ירוויח, הציבור פחות', resolve: (s, ev) => { remember(s, ev.fromId!, 'favor', 'גיבה אותי בפרשת ההוצאות', 12); fx(s, { playerPopularity: -3, groups: { lowIncome: -2, middleClass: -1 } }); return bad('"הנסיעה הייתה חיונית", אמרת. התגובות ברשת היו קשות.', `${pol(s, ev)?.name}: "הנסיעה אושרה כדין"`); } },
+      { id: 'refund', label: 'לדרוש החזר כספי', hint: 'מוניטין ↑, יחסים ↓', resolve: (s, ev) => { remember(s, ev.fromId!, 'insult', 'דרש ממני החזר', -12); fx(s, { playerPopularity: 3, playerReputation: 3 }); return ok('השר החזיר חלק מההוצאות ופרסם התנצלות.', 'בעקבות הביקורת: השר יחזיר את ההוצאות'); } },
+      { id: 'audit', label: 'להעביר לבדיקת מבקר המדינה', hint: '-2 הון', resolve: (s) => { spend(s, 2); fx(s, { playerReputation: 2 }); return meh('מבקר המדינה יבדוק את הנסיעה. הסערה נרגעה בינתיים.'); } },
     ],
   },
   {
-    id: 'whatsapp_leak', level: 'normal',
-    weight: (s) => 0.8 + (100 - s.parties[s.player.partyId].cohesion) / 80,
-    make: () => ({ icon: '💬', title: 'קבוצת הווטסאפ דלפה', text: 'צילומי מסך מקבוצת "הנהגה – סודי ביותר 🤫" מסתובבים ברשת. בהם אתה כותב על אחד השותפים: "הוא חכם כמו כיסא פלסטיק".' }),
+    id: 'faction_recording', level: 'normal',
+    weight: (s) => 0.6 + (100 - s.parties[s.player.partyId].cohesion) / 90,
+    make: () => ({ icon: '🎧', title: 'הקלטה מישיבת סיעה', text: 'הקלטה מישיבה סגורה של הסיעה פורסמה. בה נשמעת ביקורת חריפה שלך על אחד השותפים הפוליטיים.' }),
     options: [
-      { id: 'deny', label: 'להכחיש: "זה פוטושופ"', hint: '50% שזה יעבוד', resolve: (s) => (chance(s, 0.5) ? (fx(s, { playerPopularity: 1 }), ok('מומחה טען שהפונט חשוד. הסיפור מת.')) : (fx(s, { playerPopularity: -5, playerReputation: -3 }), bad('פורסמה הקלטה קולית. הפונט היה תקין.', 'הוקלט: "חכם כמו כיסא פלסטיק"'))) },
-      { id: 'laugh', label: 'להודות ולצחוק על עצמך', hint: 'דורש מוניטין', resolve: (s) => (s.player.reputation > 42 ? (fx(s, { playerPopularity: 4 }), ok('"גם כיסא פלסטיק צריך אהבה". הציבור צחק. השותף פחות.')) : (fx(s, { playerPopularity: -3 }), bad('ניסית להיות מצחיק. התקשורת החליטה שלא.'))) },
-      { id: 'hunt', label: 'לצוד את המדליף', hint: '-5 הון, מישהו ייפגע', resolve: (s) => { s.player.politicalCapital = clamp(s.player.politicalCapital - 5); const sus = pick(s, s.parties[s.player.partyId].memberIds.filter((id) => id !== s.player.politicianId)); if (sus) remember(s, sus, 'insult', 'נחשד בהדלפה', -15); fx(s, { stability: -2, playerPopularity: 1 }); return meh(`${s.politicians[sus]?.name ?? 'מישהו'} נחשד. הוא נשבע בחתול שלו שזה לא הוא.`); } },
+      { id: 'own', label: 'לעמוד מאחורי הדברים', hint: 'עקביות, יחסים ↓', resolve: (s) => { fx(s, { playerReputation: 2, stability: -2 }); return meh('אמרת שזו ביקורת עניינית ושאתה עומד מאחוריה. השותף נעלב.'); } },
+      { id: 'apologize', label: 'להתנצל בפני השותף', hint: '-2 הון', resolve: (s) => { spend(s, 2); fx(s, { playerPopularity: -1, stability: 1 }); return ok('השיחה ביניכם הרגיעה את הרוחות.'); } },
+      { id: 'leaker', label: 'לחפש את המדליף בסיעה', hint: '-5 הון, מישהו ייפגע', resolve: (s) => { spend(s, 5); const sus = pick(s, s.parties[s.player.partyId].memberIds.filter((id) => id !== s.player.politicianId)); if (sus) remember(s, sus, 'insult', 'נחשד בהדלפה', -15); fx(s, { stability: -2 }); return meh(`${s.politicians[sus]?.name ?? 'אחד החברים'} נחשד בהדלפה. הוא מכחיש בתוקף, והאווירה בסיעה מתוחה.`); } },
     ],
   },
   {
-    id: 'billionaire', level: 'normal',
-    weight: (s) => 0.7 + (deficitPct(s) > 4 ? 0.6 : 0),
-    make: () => ({ icon: '🛥️', title: 'מיליארדר עם הצעה', text: 'איל הון "שמעדיף לא להזכיר את שמו" (כולם יודעים מי) מציע ₪3 מיליארד לפרויקט לאומי. תמורה: "תיקון טכני קטן" בחוק ההגבלים. מאוד קטן. כמעט בלתי נראה.' }),
+    id: 'donor_offer', level: 'normal',
+    weight: (s) => 0.6 + (deficitPct(s) > 4 ? 0.5 : 0),
+    make: () => ({ icon: '💼', title: 'איש עסקים עם הצעה', text: 'איש עסקים בולט מציע לממן פרויקט לאומי ב-₪3 מיליארד. הוא מבקש "תיקון טכני" בחוק ההגבלים העסקיים שיקל על החברות שלו.' }),
     options: [
-      { id: 'take', allow: (s) => holds(s, 'finance'), label: 'לקחת את הכסף', hint: '+₪3B, מוניטין ↓, סיכון לפרשה', resolve: (s) => { fx(s, { revenue: 3, playerReputation: -8, groups: { highIncome: 3, left: -4 } }); if (chance(s, 0.45)) { startCrisis(s, 'scandal', 2); return bad('שלושה חודשים אחר כך: "פרשת היאכטה". חקירה נפתחה.', 'פרשת היאכטה: חשד לתיקון חוק תמורת תרומה'); } return meh('הכסף הגיע. ה"תיקון הטכני" עבר בשלוש בלילה. אף אחד לא שם לב. בינתיים.'); } },
-      { id: 'refuse', label: 'לסרב בנימוס', resolve: (s) => { fx(s, { playerReputation: 3 }); return ok('סירבת. הוא שלח עוגת שוקולד עם פתק: "עוד נדבר".'); } },
-      { id: 'leak', label: 'להדליף את ההצעה לתקשורת', hint: 'פופולריות ↑, יש לך אויב עם עיתון', resolve: (s) => { fx(s, { playerPopularity: 4, playerReputation: 3, partyMomentum: { [s.player.partyId]: -2 } }); return ok('כותרת ענק: "סירב למיליארדים". העיתון של המיליארדר מתחיל להשמיץ אותך מחר.', 'חשיפה: מיליארדר ניסה לקנות תיקון חוק'); } },
+      { id: 'take', allow: (s) => holds(s, 'finance', 'economy'), label: 'לקבל את ההצעה', hint: '+₪3B, סיכון לחקירה', resolve: (s) => { fx(s, { revenue: 3, playerReputation: -8, groups: { highIncome: 3, left: -4 } }); if (chance(s, 0.45)) { startCrisis(s, 'scandal', 2); return bad('כעבור כמה חודשים נפתחה בדיקה: חשד לתיקון חוק תמורת תרומה.', 'בדיקה: חשד לקשר בין תרומה לתיקון חקיקה'); } return meh('הכסף הועבר והתיקון עבר בוועדה. בינתיים בלי הדים.'); } },
+      { id: 'refuse', label: 'לסרב', resolve: (s) => { fx(s, { playerReputation: 3 }); return ok('סירבת. התיקון לא יקודם.'); } },
+      { id: 'expose', label: 'לחשוף את ההצעה בפומבי', hint: 'פופולריות ↑, יריב חזק', resolve: (s) => { fx(s, { playerPopularity: 4, playerReputation: 3, partyMomentum: { [s.player.partyId]: -2 } }); return ok('החשיפה עוררה הדים. כלי התקשורת של איש העסקים מתחילים לבקר אותך.', 'חשיפה: הצעת מימון תמורת שינוי חקיקה'); } },
     ],
   },
   {
-    id: 'wedding_dance', level: 'normal',
-    weight: () => 0.8,
-    make: () => ({ icon: '💃', title: 'הריקוד שהפך לוויראלי', text: 'סרטון שלך רוקד "מקרנה" בחתונה של בן דוד של יועץ התקשורת עבר 4 מיליון צפיות. תגובה פופולרית: "זה מסביר הרבה על התקציב".' }),
-    options: [
-      { id: 'tiktok', label: 'לרקוד שוב בטיקטוק', hint: 'צעירים ↑ מוניטין ↓', resolve: (s) => { fx(s, { groups: { youth: 4, students: 2, elderly: -1 }, playerPopularity: 3, playerReputation: -3 }); return ok('#מקרנה_לאומית במקום הראשון. היועץ מבקש להעלות לו משכורת.'); } },
-      { id: 'sorry', label: 'להתנצל ב"כבוד הממלכתי"', resolve: (s) => { fx(s, { playerPopularity: -1, playerReputation: 1 }); return meh('נאום רציני על "כבוד המשרה". 11 צפיות. 9 מהן של אמא שלך.'); } },
-      { id: 'campaign', label: 'להפוך את זה לסלוגן', hint: 'רק למנהיגי מפלגות', resolve: (s) => { if (isPartyLeader(s)) { s.elections.campaignBoost[s.player.partyId] = (s.elections.campaignBoost[s.player.partyId] ?? 0) + 3; return ok('"רוקדים לעתיד!" – השלטים כבר בדפוס.'); } fx(s, { playerPopularity: 2 }); return meh('המפלגה דחתה את הסלוגן. אבל הסטיקרים כבר הודפסו.'); } },
-    ],
-  },
-  {
-    id: 'salad_war', level: 'normal',
-    weight: () => 0.5,
-    make: () => ({ icon: '🥗', title: 'מלחמת הסלטים במזנון', text: 'הנהלת הכנסטון החליפה את החומוס בממרח עדשים "בריא ובר-קיימא". 40 ח״כים חתמו על עצומה. שניים מאיימים בשביתת רעב (חלקית, עד ארוחת הצהריים).' }),
-    options: [
-      { id: 'hummus', label: 'להחזיר את החומוס', resolve: (s) => { fx(s, { playerPopularity: 2, groups: { right: 1, periphery: 1 } }); return ok('החומוס חזר. 40 ח״כים הצביעו לראשונה פה אחד על משהו.', 'הכנסטון אחוד: החומוס חוזר'); } },
-      { id: 'lentils', label: 'לתמוך בעדשים', resolve: (s) => { fx(s, { groups: { left: 2, youth: 1, right: -2 } }); return meh('"עדשים זה עתיד". הימין הכריז על העדשים כ"אג׳נדה".'); } },
-      { id: 'committee', label: 'להקים ועדה ציבורית', hint: '-2 הון', resolve: (s) => { s.player.politicalCapital = clamp(s.player.politicalCapital - 2); return meh('ועדת "חומוס-עדשים" תגיש מסקנות בעוד שלוש שנים. כרגע: טחינה.', 'הוקמה ועדה ציבורית לבחינת סוגיית הממרחים'); } },
-    ],
-  },
-  {
-    id: 'vegas_mk', level: 'normal',
-    weight: (s) => (isPM(s) && s.bills.some((b) => b.status === 'active' && b.isGovernment) ? 1.1 : 0),
+    id: 'absent_mk', level: 'normal',
+    weight: (s) => (isPM(s) && s.bills.some((b) => b.status === 'active' && b.isGovernment) ? 1 : 0),
     make: (s) => {
       const p = pick(s, Object.values(s.politicians).filter((x) => x.active && !x.isPlayer && s.government.coalition.includes(x.partyId) && !x.ministryId));
-      return { icon: '🎰', title: 'ח״כ נעלם בלאס וגאס', fromId: p?.id, text: `${p?.name ?? 'ח״כ קואליציה'} טס ל"כנס בינלאומי לשקיפות" בלאס וגאס. הוא לא עונה. ההצבעה על החוק שלך – בעוד יומיים, והרוב תלוי בו.` };
+      return { icon: '✈️', title: 'ח״כ קואליציה בחו״ל לפני הצבעה', fromId: p?.id, text: `${p?.name ?? 'ח״כ מהקואליציה'} נמצא בחו״ל ולא יספיק לחזור להצבעה על הצעת חוק ממשלתית. בלי הקול שלו הרוב בסכנה.` };
     },
     options: [
-      { id: 'fly', label: 'להטיס אותו בחזרה במטוס פרטי', hint: '₪20 מיליון, ציבור כועס', resolve: (s) => { fx(s, { oneOffCost: 0.02, stability: 2, groups: { middleClass: -2 } }); return meh('הוא נחת, הצביע, ונרדם באמצע. ההצבעה עברה. חשבונית המטוס – בדרך לתקשורת.', 'מטוס פרטי ב-₪20 מיליון הביא ח״כ להצבעה'); } },
-      { id: 'pair', label: 'לסגור "קיזוז" עם האופוזיציה', hint: '-6 הון', resolve: (s) => { s.player.politicalCapital = clamp(s.player.politicalCapital - 6); return ok('האופוזיציה הסכימה לקזז. בתמורה: יום חופש לכנסטון ביום ההולדת של ראש האופוזיציה.'); } },
-      { id: 'lose', label: 'לוותר', hint: 'החוק נחלש מאוד', resolve: (s) => { for (const b of s.bills.filter((x) => x.status === 'active' && x.isGovernment)) b.push -= 25; return bad('בלי הקול שלו, החוק נראה רע. הוא בינתיים העלה סטורי מהקזינו.'); } },
+      { id: 'pair', label: 'לסגור קיזוז עם האופוזיציה', hint: '-6 הון', resolve: (s) => { spend(s, 6); return ok('האופוזיציה הסכימה לקזז. ההצבעה תתקיים כמתוכנן.'); } },
+      { id: 'delay', label: 'לדחות את ההצבעה', hint: 'ההצעה נחלשת מעט', resolve: (s) => { for (const b of s.bills.filter((x) => x.status === 'active' && x.isGovernment)) b.push -= 8; return meh('ההצבעה נדחתה בשבוע. האופוזיציה טוענת שהקואליציה מתפרקת.'); } },
+      { id: 'lose', label: 'להצביע בכל זאת', hint: 'סיכון לכישלון', resolve: (s) => { for (const b of s.bills.filter((x) => x.status === 'active' && x.isGovernment)) b.push -= 25; return bad('בלי הקול שלו, ההצעה בסכנה ממשית.'); } },
     ],
   },
   {
-    id: 'mayor_tractor', level: 'normal',
+    id: 'mayor_hunger_strike', level: 'normal',
     weight: (s) => 0.6 + Math.max(0, 50 - s.population.groups.periphery.satisfaction) / 25,
-    make: () => ({ icon: '🚜', title: 'ראש עיר על טרקטור', text: 'ראש עיריית "מצפה-שכחו-אותנו" חסם את הכביש הראשי עם טרקטור. "לא אזוז עד שתגיע הרכבת. או לפחות אוטובוס. או סתם מישהו מהממשלה".' }),
+    make: () => ({ icon: '🏘️', title: 'ראש עיר בפריפריה בשביתת רעב', text: 'ראש עיר בנגב פתח בשביתת רעב מול משרד ראש הממשלה. הוא דורש תקציב לתחבורה ציבורית, למרפאות ולמיגון: "תושבי הפריפריה לא אזרחים סוג ב׳."' }),
     options: [
-      { id: 'pay', allow: (s) => holds(s, 'infrastructure', 'interior', 'transport'), label: 'לתת לו ₪500 מיליון', hint: 'פריפריה ↑, תקדים מסוכן', resolve: (s) => { fx(s, { budget: { infrastructure: 0.5 }, groups: { periphery: 4, center: -1 }, regionInvestment: { negev: 8 } }); s.flags.tractor_precedent = (s.flags.tractor_precedent ?? 0) + 1; return ok('הטרקטור זז. מחר בבוקר: 14 ראשי ערים הזמינו טרקטורים.', 'גל טרקטורים: ראשי ערים מגלים שיטה חדשה'); } },
-      { id: 'police', allow: (s) => holds(s, 'police'), label: 'לשלוח משטרה', resolve: (s) => { fx(s, { groups: { periphery: -5, right: 1 } }); return bad('הטרקטור נגרר. התמונות של ראש העיר נגרר אחריו – לכל המהדורות.'); } },
-      { id: 'visit', label: 'לנסוע אליו בעצמך', hint: '-4 הון, פופולריות ↑', resolve: (s) => { s.player.politicalCapital = clamp(s.player.politicalCapital - 4); fx(s, { playerPopularity: 3, groups: { periphery: 2 } }); return ok('ישבתם על הטרקטור, אכלתם בורקס, הבטחת "לבחון". הוא בכה. גם המצלמות.'); } },
+      { id: 'pay', allow: (s) => holds(s, 'energy', 'interior', 'transport', 'negev_galilee'), label: 'תקציב ייעודי לעיר', hint: '₪500 מיליון, תקדים', resolve: (s) => { fx(s, { budget: { infrastructure: 0.5 }, groups: { periphery: 4, center: -1 }, regionInvestment: { negev: 8 } }); s.flags.mayor_precedent = (s.flags.mayor_precedent ?? 0) + 1; return ok('השביתה הסתיימה. ראשי ערים נוספים כבר מבקשים פגישות.', 'הממשלה הקצתה תקציב לעיר בנגב'); } },
+      { id: 'visit', label: 'להגיע לאוהל המחאה', hint: '-4 הון', resolve: (s) => { spend(s, 4); fx(s, { playerPopularity: 3, groups: { periphery: 2 } }); return ok('שוחחתם שעה ארוכה. הוא הסכים להפסיק את השביתה בתמורה לצוות עבודה משותף.'); } },
+      { id: 'ignore', label: 'לא להתערב', resolve: (s) => { fx(s, { groups: { periphery: -5 }, playerPopularity: -2 }); return bad('השביתה נמשכת, ותושבי הפריפריה מצטרפים למחאה.'); } },
     ],
   },
   {
     id: 'podcast', level: 'normal',
-    weight: () => 0.7,
-    make: () => ({ icon: '🎧', title: 'הזמנה לפודקאסט הכי גדול', text: '"חיים וכאלה עם עמית" – 3 שעות של שיחה, בלי עריכה, עם מנחה שאוכל גרעינים לאורך כל הפרק.' }),
+    weight: () => 0.6,
+    make: () => ({ icon: '🎧', title: 'הזמנה לראיון עומק בפודקאסט', text: 'פודקאסט פופולרי מזמין אותך לראיון של שלוש שעות, בלי עריכה ובלי הכנה מוקדמת של השאלות.' }),
     options: [
-      { id: 'go', label: 'ללכת. מה כבר יכול לקרות?', hint: '60% הצלחה גדולה', resolve: (s) => (rand(s) < 0.45 + s.player.reputation / 300 ? (fx(s, { playerPopularity: 7, groups: { youth: 3 } }), ok('הקטע שבו הסברת את הגירעון עם גרעינים – הפך למם לאומי.', 'הפרק עם המנחה והגרעינים שבר שיא')) : (fx(s, { playerPopularity: -6 }), bad('בשעה השנייה אמרת "אני לא בטוח מה זה אינפלציה". בשעה השלישית ניסית להסביר.'))) },
-      { id: 'spokes', label: 'לשלוח את הדובר', resolve: (s) => { fx(s, { playerPopularity: -1 }); return meh('הדובר דיבר 3 שעות ולא אמר כלום. מקצועי מאוד.'); } },
-      { id: 'no', label: 'לסרב', resolve: () => meh('המנחה פתח את הפרק ב"סירב להגיע. מעניין למה". 2 מיליון האזנות.') },
+      { id: 'go', label: 'להתראיין', hint: 'הצלחה תלויה במוניטין', resolve: (s) => (rand(s) < 0.45 + s.player.reputation / 300 ? (fx(s, { playerPopularity: 6, groups: { youth: 3 } }), ok('ראיון אישי ומעמיק. הציבור הצעיר הכיר צד חדש שלך.', 'הראיון הארוך שתפס את הקהל הצעיר')) : (fx(s, { playerPopularity: -5 }), bad('שאלות מקצועיות בכלכלה תפסו אותך לא מוכן. קטעים מהראיון מופצים בביקורת.'))) },
+      { id: 'spokes', label: 'לשלוח את הדובר', resolve: (s) => { fx(s, { playerPopularity: -1 }); return meh('הדובר הציג את העמדות, אבל בלי הדים מיוחדים.'); } },
+      { id: 'no', label: 'לסרב', resolve: () => meh('המנחה ציין שסירבת להגיע.') },
     ],
   },
   {
-    id: 'grandson_barmitzva', level: 'normal',
+    id: 'partner_demand', level: 'normal',
     weight: (s) => (isPM(s) && s.government.coalition.length > 1 ? 0.9 : 0),
     make: (s) => {
       const pid = pick(s, s.government.coalition.filter((id) => id !== s.player.partyId));
       const l = s.politicians[s.parties[pid].leaderId];
-      return { icon: '🎁', title: 'בר מצווה לנכד', fromId: l?.id, partyId: pid, text: `${l?.name} חוגג בר מצווה לנכד ב"אולם קיסר". 1,200 מוזמנים. ברור לכולם שמצופה ממך "מתנה משמעותית". לא, הוא לא מתכוון למעטפה.` };
+      return { icon: '📋', title: 'שותפה קואליציונית מציבה דרישה', fromId: l?.id, partyId: pid, text: `${l?.name}, יו״ר ${s.parties[pid].name}, מודיע שהסיעה לא תתמוך בהצעות הממשלה עד שיועבר תקציב שסוכם בהסכם הקואליציוני.` };
     },
     options: [
-      { id: 'gift', label: 'מתנה קואליציונית: ₪400 מיליון למוסדות שלו', hint: 'נאמנות ↑↑ ציבור ↓', resolve: (s, ev) => { const party = s.parties[ev.partyId!]; const cat = (party.id === 'kugel' ? 'education' : 'welfare') as BudgetCategory; fx(s, { budget: { [cat]: 0.4 }, groups: { center: -2, secular: -1 }, stability: 4 }); remember(s, ev.fromId!, 'favor', 'מתנה לבר המצווה', 18); return meh('"איזה ראש ממשלה!", נאם הסבא. המיקרופון היה פתוח.', `"מתנת בר מצווה" של ₪400 מיליון למוסדות ${party.shortName}`); } },
-      { id: 'card', label: 'כרטיס ברכה וספר תהילים', resolve: (s, ev) => { remember(s, ev.fromId!, 'insult', 'כרטיס ברכה. כרטיס!', -10); return bad('הכרטיס הוקרא בקול מהבמה. בטון מעליב.'); } },
-      { id: 'sing', label: 'להגיע ולשיר עם הלהקה', hint: '-3 הון', resolve: (s, ev) => { s.player.politicalCapital = clamp(s.player.politicalCapital - 3); remember(s, ev.fromId!, 'favor', 'הגיע ושר', 8); fx(s, { playerPopularity: 1 }); return ok('שרת "יום הולדת שמח" במקום "סימן טוב". אף אחד לא תיקן אותך. מאהבה.'); } },
+      { id: 'pay', label: 'להעביר ₪400 מיליון כפי שסוכם', hint: 'נאמנות ↑, ציבור ↓', resolve: (s, ev) => { const cat = BUDGET_PREF[ev.partyId!] ?? 'welfare'; fx(s, { budget: { [cat]: 0.4 }, groups: { center: -2 }, stability: 4 }); remember(s, ev.fromId!, 'favor', 'העביר את התקציב שסוכם', 18); return meh('התקציב הועבר והסיעה חזרה להצביע עם הקואליציה.', `₪400 מיליון לנושאים של ${s.parties[ev.partyId!].shortName}`); } },
+      { id: 'refuse', label: 'לסרב ולהציע לדון בתקציב הבא', resolve: (s, ev) => { remember(s, ev.fromId!, 'insult', 'סירב לקיים הסכם', -12); fx(s, { stability: -4 }); return bad('הסיעה הודיעה שתצביע לפי שיקול דעתה בשבועות הקרובים.'); } },
+      { id: 'meet', label: 'פגישה אישית לגישור', hint: '-3 הון', resolve: (s, ev) => { spend(s, 3); remember(s, ev.fromId!, 'favor', 'נפגש איתי', 8); return ok('סוכם על לוח זמנים להעברת התקציב. המשבר נדחה.'); } },
     ],
   },
   {
-    id: 'goat', level: 'normal',
-    weight: (s) => (s.government.coalition.includes(s.player.partyId) ? 0.7 : 0),
+    id: 'plenum_protest', level: 'normal',
+    weight: (s) => (s.government.coalition.includes(s.player.partyId) ? 0.6 : 0),
     make: (s) => {
       const opp = Object.values(s.parties).filter((p) => !s.government.coalition.includes(p.id) && p.seats > 0).sort((a, b) => b.seats - a.seats)[0];
-      return { icon: '🐐', title: 'עז במליאה', partyId: opp?.id, text: `ראש ${opp?.name ?? 'האופוזיציה'} הכניס עז לאולם המליאה. "היא מייצגת את הממשלה: אוכלת הכול ולא מייצרת כלום". העז אכלה את הצעת התקציב.` };
+      return { icon: '📢', title: 'מחאה סוערת במליאה', partyId: opp?.id, text: `חברי ${opp?.name ?? 'האופוזיציה'} עלו לדוכן והפריעו לנאום שלך במחאה על מדיניות הממשלה. יו״ר הכנסטון הוציא כמה מהם מהאולם.` };
     },
     options: [
-      { id: 'laugh', label: 'לצחוק ולהמשיך', resolve: (s) => { fx(s, { playerPopularity: 2 }); return ok('אמרת "לפחות העז קראה את ההצעה". מחיאות כפיים, גם מהאופוזיציה.'); } },
-      { id: 'ethics', label: 'תלונה לוועדת האתיקה', hint: '-2 הון', resolve: (s, ev) => { s.player.politicalCapital = clamp(s.player.politicalCapital - 2); if (ev.partyId) applyEffects(s, { partyMomentum: { [ev.partyId]: -2 } }); return meh('ועדת האתיקה השעתה את העז ליומיים.', 'תקדים: עז הושעתה מהכנסטון'); } },
-      { id: 'two', label: 'להביא שתי עזים מחר', hint: 'פופולריות ↑ מוניטין ↓↓', resolve: (s) => { fx(s, { playerPopularity: 4, playerReputation: -5 }); return meh('מליאת הכנסטון: 3 עזים, 41 ח״כים, אפס החלטות. יום רגיל.', 'מרוץ העזים בכנסטון מסלים'); } },
+      { id: 'calm', label: 'להמשיך את הנאום בשקט', resolve: (s) => { fx(s, { playerPopularity: 2, playerReputation: 1 }); return ok('המשכת בנאום בשקט ובאיפוק. גם פרשנים מהצד השני ציינו את זה.'); } },
+      { id: 'ethics', label: 'להגיש תלונה לוועדת האתיקה', hint: '-2 הון', resolve: (s, ev) => { spend(s, 2); if (ev.partyId) applyEffects(s, { partyMomentum: { [ev.partyId]: -2 } }); return meh('ועדת האתיקה תדון בתלונה.'); } },
+      { id: 'attack', label: 'להשיב בתקיפות', hint: 'בסיס ↑, מרכז ↓', resolve: (s) => { fx(s, { playerPopularity: 2, playerReputation: -3, groups: { center: -2 } }); return meh('חילופי הדברים החריפים עלו לכותרות.', 'סערה במליאה'); } },
     ],
   },
   {
-    id: 'fake_poll', level: 'normal',
+    id: 'fake_news', level: 'normal',
     weight: (s) => (isPartyLeader(s) ? 0.7 : 0),
-    make: (s) => ({ icon: '📉', title: 'סקר מזויף', text: `"סקר" שמראה את ${s.parties[s.player.partyId].name} ב-2 מנדטים מסתובב בכל קבוצות הווטסאפ. המקור: "חבר של בן דוד שעובד בסקרים".` }),
+    make: (s) => ({ icon: '📲', title: 'קמפיין מידע כוזב ברשתות', text: `סקר מפוברק ופוסטים כוזבים על ${s.parties[s.player.partyId].name} מופצים ברשתות על ידי חשבונות מזויפים. חלק מהחשבונות מזוהים כמופעלים מחו״ל.` }),
     options: [
-      { id: 'ignore', label: 'להתעלם', resolve: (s) => { applyEffects(s, { partyMomentum: { [s.player.partyId]: -2 } }); return meh('אמא שלך שלחה לך את הסקר. שלוש פעמים.'); } },
-      { id: 'counter', label: 'לפרסם סקר נגדי', hint: '₪1 מיליון מקופת המפלגה', resolve: (s) => { s.parties[s.player.partyId].funds -= 1; applyEffects(s, { partyMomentum: { [s.player.partyId]: 3 } }); return ok('הסקר שלכם הראה 34 מנדטים. גם הוא, כנראה, מזויף. אבל שלך.'); } },
-      { id: 'sue', label: 'לתבוע את "הבן דוד"', hint: '-3 הון', resolve: (s) => { s.player.politicalCapital = clamp(s.player.politicalCapital - 3); fx(s, { playerPopularity: -1 }); return bad('הבן דוד התגלה כבוט. הבוט נתן ראיון לערוץ 12.5.'); } },
+      { id: 'ignore', label: 'להתעלם', resolve: (s) => { applyEffects(s, { partyMomentum: { [s.player.partyId]: -2 } }); return meh('המידע הכוזב ממשיך להתפשט.'); } },
+      { id: 'counter', label: 'לפרסם תגובה ונתונים אמיתיים', hint: '₪1 מיליון מקופת המפלגה', resolve: (s) => { s.parties[s.player.partyId].funds -= 1; applyEffects(s, { partyMomentum: { [s.player.partyId]: 3 } }); return ok('התגובה המהירה עצרה את ההתפשטות.'); } },
+      { id: 'report', label: 'לפנות לוועדת הבחירות ולמערך הסייבר', hint: '-3 הון', resolve: (s) => { spend(s, 3); fx(s, { playerReputation: 2 }); return ok('החשבונות הוסרו, והפרשה סוקרה כניסיון התערבות זר.', 'ניסיון התערבות זרה בבחירות נחשף'); } },
     ],
   },
   {
-    id: 'heatwave', level: 'normal',
-    weight: (s) => (s.date.month >= 5 && s.date.month <= 9 ? 1.2 : 0.1),
-    make: () => ({ icon: '🥵', title: 'גל חום של 47 מעלות', text: 'המזגן בלשכה שלך הוא היחיד שעובד ברחוב. מישהו העלה סרטון של התור מחוץ לחלון.' }),
+    id: 'wildfires', level: 'normal',
+    weight: (s) => (s.date.month >= 5 && s.date.month <= 10 ? 1 : 0.1),
+    make: () => ({ icon: '🔥', title: 'שריפות ענק בהרי ירושלים', text: 'גל חום קיצוני הוביל לשריפות בהרי ירושלים ובכרמל. יישובים פונו, ומטוסי כיבוי מחו״ל בדרך.' }),
     options: [
-      { id: 'open', label: 'לפתוח את הלשכה לציבור', resolve: (s) => { fx(s, { playerPopularity: 4, groups: { elderly: 2 } }); return ok('180 אזרחים, 3 כלבים ופעיל אופוזיציה אחד ישנו אצלך. מגניב.', '"הלשכה הממוזגת": הפוליטיקאי שפתח את הדלתות'); } },
-      { id: 'blame', label: 'להאשים את משרד האנרגיה', resolve: (s) => { const m = s.government.ministries.find((x) => x.id === 'energy'); if (m?.ministerId && m.ministerId !== s.player.politicianId) remember(s, m.ministerId, 'insult', 'האשים אותי בגל החום', -10); fx(s, { playerPopularity: 1 }); return meh('"השמש היא אחריות משרד האנרגיה". שר האנרגיה: "השמש היא אחריות השמש".'); } },
-      { id: 'ignore', label: 'להוריד את התריס', resolve: (s) => { fx(s, { playerPopularity: -3 }); return bad('הצלם תפס אותך מוריד את התריס. התמונה תהיה על כרזות האופוזיציה.'); } },
+      { id: 'fund', allow: (s) => holds(s, 'national_security', 'interior', 'finance'), label: 'תקציב חירום לכבאות ולשיקום', hint: '₪1.2 מיליארד', resolve: (s) => { fx(s, { oneOffCost: 1.2, services: { security: 1 }, groups: { families: 2, periphery: 2 } }); return ok('המענה המהיר צומצם את הנזקים, והמפונים חזרו לבתיהם תוך ימים.', 'הממשלה אישרה תקציב חירום לנפגעי השריפות'); } },
+      { id: 'visit', label: 'להגיע למרכז הפינוי', hint: '-3 הון', resolve: (s) => { spend(s, 3); fx(s, { playerPopularity: 2 }); return meh('נפגשת עם המפונים ועם הכבאים.'); } },
+      { id: 'blame', label: 'לייחס אחריות למשרד האחראי', resolve: (s) => { const m = s.government.ministries.find((x) => x.id === 'national_security'); if (m?.ministerId && m.ministerId !== s.player.politicianId) remember(s, m.ministerId, 'insult', 'האשים אותי בשריפות', -10); fx(s, { playerPopularity: -1, stability: -2 }); return bad('הציבור לא אהב את חילופי ההאשמות בזמן אמת.'); } },
     ],
   },
   {
-    id: 'unicorn', level: 'normal',
-    weight: (s) => (s.economy.growth > 2.5 ? 0.7 : 0.2),
-    make: () => ({ icon: '🦄', title: 'אקזיט של 20 מיליארד', text: 'סטארטאפ צבריאני שמפתח "בלוקצ׳יין לחומוס" נמכר לענקית אמריקאית. המייסדים, בני 26, כבר בדרך לליסבון.' }),
+    id: 'exit', level: 'normal',
+    weight: (s) => (s.economy.growth > 2.5 ? 0.6 : 0.2),
+    make: () => ({ icon: '💡', title: 'אקזיט של מיליארדי דולרים', text: 'חברת סייבר ישמעאלית נמכרה לחברה אמריקאית בעסקה של מיליארדי דולרים. העסקה צפויה להכניס לקופת המדינה מיסים גבוהים.' }),
     options: [
-      { id: 'tax', allow: (s) => holds(s, 'finance'), label: 'מס אקזיטים מיוחד', hint: 'הכנסות ↑ הייטק ↓', resolve: (s) => { if (!isPM(s)) { fx(s, { playerPopularity: 1 }); return meh('הצעת. אף אחד לא שאל אותך.'); } fx(s, { revenue: 4, groups: { highIncome: -4, lowIncome: 2 }, economy: { growth: -0.1 } }); return meh('₪4 מיליארד לקופה. 30 סטארטאפים עברו לקפריסין "למטרות מזג אוויר".'); } },
-      { id: 'credit', label: 'לקחת קרדיט', resolve: (s) => { fx(s, { playerPopularity: 3 }); return ok('"זה בזכות המדיניות שלי". המייסדים: "מי זה?".', 'הפוליטיקאים מתחרים על הקרדיט לאקזיט'); } },
-      { id: 'selfie', label: 'להצטלם עם המייסדים', resolve: (s) => { fx(s, { groups: { youth: 2 }, playerPopularity: 1 }); return meh('הסלפי עלה. המייסדים מצמצמים עיניים. אחד מהם לובש קפוצ׳ון של מפלגה אחרת.'); } },
+      { id: 'invest', allow: (s) => holds(s, 'finance', 'science'), label: 'להשקיע חלק מההכנסות בחינוך טכנולוגי', hint: 'מדע ↑', resolve: (s) => { fx(s, { budget: { science: 1, education: 0.5 }, groups: { youth: 2, highIncome: 1 } }); return ok('תוכנית להכשרת צעירים מהפריפריה בתחומי הטכנולוגיה.'); } },
+      { id: 'credit', label: 'לברך ולציין את מדיניות הממשלה', resolve: (s) => { fx(s, { playerPopularity: 2 }); return meh('הברכה התקבלה, אבל פרשנים ציינו שהממשלה לא הייתה מעורבת.'); } },
+      { id: 'debt', allow: (s) => holds(s, 'finance'), label: 'להעביר את העודף להקטנת החוב', resolve: (s) => { fx(s, { revenue: 2, playerReputation: 2 }); return ok('חברות הדירוג ציינו לחיוב את האחריות הפיסקלית.'); } },
     ],
   },
   {
-    id: 'cablecar_shabbat', level: 'normal',
-    weight: () => 0.5,
-    make: () => ({ icon: '🚡', title: 'האם הרכבל עובד בשבת?', text: 'רכבל ירושלמה – שאף אחד לא נוסע בו – הפך למוקד המשבר הדתי-חילוני הגדול של העשור.' }),
+    id: 'shabbat_works', level: 'normal',
+    weight: () => 0.6,
+    make: () => ({ icon: '🚆', title: 'מחלוקת על עבודות רכבת בשבת', text: 'רכבת ישמעאל מתכננת עבודות תשתית דחופות בשבת, כדי לא לשבש את התנועה באמצע השבוע. המפלגות החרדיות מאיימות על יציבות הקואליציה.' }),
     options: [
-      { id: 'no', allow: (s) => holds(s, 'transport', 'interior'), label: 'לא בשבת', resolve: (s) => { fx(s, { groups: { haredim: 4, religious: 2, secular: -4 } }); return meh('הרכבל עומד בשבת. גם ביום ראשון, אגב, בגלל תקלה.'); } },
-      { id: 'yes', allow: (s) => holds(s, 'transport', 'interior'), label: 'כן בשבת', resolve: (s) => { fx(s, { groups: { secular: 4, youth: 2, haredim: -5 } }); return meh('הרכבל פעל בשבת. נסעו בו 4 תיירים ועיתונאי.', 'ההיסטוריה נכתבה: 4 נוסעים ברכבל בשבת'); } },
-      { id: 'committee', allow: (s) => holds(s, 'transport', 'interior'), label: 'ועדה משותפת לרבנים ומהנדסים', hint: '-2 הון', resolve: (s) => { s.player.politicalCapital = clamp(s.player.politicalCapital - 2); fx(s, { groups: { haredim: -1, secular: -1 } }); return meh('הוועדה המליצה על רכבל ש"נוסע לאט מאוד בשבת". כולם כועסים באותה מידה. הוגן.'); } },
+      { id: 'no', allow: (s) => holds(s, 'transport'), label: 'לדחות את העבודות לימי חול', hint: 'פקקים, חרדים ↑', resolve: (s) => { fx(s, { groups: { haredim: 4, religious: 2, secular: -3, center: -2 }, economy: { growth: -0.05 } }); return meh('העבודות יתבצעו בלילות באמצע השבוע. נוסעים רבים יתעכבו.'); } },
+      { id: 'yes', allow: (s) => holds(s, 'transport'), label: 'לאשר עבודות בשבת', hint: 'חילונים ↑, קואליציה ↓', resolve: (s) => { fx(s, { groups: { secular: 3, center: 2, haredim: -5 }, stability: s.government.coalition.some((p) => ['shas', 'utj'].includes(p)) ? -5 : 0 }); return meh('העבודות אושרו. המפלגות החרדיות שוקלות את צעדיהן.', 'סערה קואליציונית סביב עבודות בשבת'); } },
+      { id: 'compromise', allow: (s) => holds(s, 'transport'), label: 'פשרה: רק עבודות פיקוח נפש', hint: '-2 הון', resolve: (s) => { spend(s, 2); fx(s, { groups: { haredim: -1, secular: -1 } }); return meh('פשרה: בשבת יבוצעו רק עבודות בטיחות דחופות.'); } },
     ],
   },
   {
-    id: 'minister_gaffe', level: 'normal',
-    weight: (s) => (ministers(s).length ? 0.8 : 0),
+    id: 'minister_statement', level: 'normal',
+    weight: (s) => (ministers(s).length ? 0.7 : 0),
     make: (s) => {
       const p = pick(s, ministers(s));
-      const line = pick(s, ['"הפקקים הם סימן לכלכלה חזקה"', '"מי שרעב שיאכל קוטג׳ במבצע"', '"האינפלציה זה עניין של גישה"', '"הפריפריה? זה ליד אילתיה, לא?"', '"אני לא קורא דוחות, אני מרגיש אותם"']);
-      return { icon: '🎙️', title: 'פליטת פה בשידור חי', fromId: p.id, text: `${p.name} אמר בראיון: ${line}. המגישה פשוט שתקה 8 שניות.` };
+      return { icon: '🎙️', title: 'התבטאות שנויה במחלוקת של שר', fromId: p.id, text: `${p.name} התבטא בראיון באופן שנתפס כפוגעני כלפי ציבור שלם. דרישות להתנצלות מגיעות גם מתוך הקואליציה.` };
     },
     options: [
-      { id: 'defend', label: '"הוצא מהקשרו"', resolve: (s, ev) => { remember(s, ev.fromId!, 'favor', 'גיבה אותי', 8); fx(s, { playerPopularity: -2, playerReputation: -2 }); return bad('הקשר מלא פורסם. הוא היה גרוע יותר.'); } },
-      { id: 'distance', label: 'להסתייג', resolve: (s, ev) => { remember(s, ev.fromId!, 'insult', 'הסתייג ממני', -8); fx(s, { playerReputation: 2 }); return ok('"זו לא עמדת הממשלה". הוא כבר הקליט התנצלות. עם אותה פליטה.'); } },
-      { id: 'meme', label: 'להפוך את זה לבדיחה', resolve: (s) => { fx(s, { playerPopularity: 2, groups: { youth: 2 } }); return meh('ציוץ אחד שלך עם אימוג׳י של קוטג׳ – 200 אלף לייקים. הקואליציה פחות צוחקת.'); } },
+      { id: 'defend', label: '"הדברים הוצאו מהקשרם"', resolve: (s, ev) => { remember(s, ev.fromId!, 'favor', 'גיבה אותי', 8); fx(s, { playerPopularity: -2, playerReputation: -2 }); return bad('הראיון המלא פורסם, והביקורת התגברה.'); } },
+      { id: 'distance', label: 'להסתייג מהדברים', resolve: (s, ev) => { remember(s, ev.fromId!, 'insult', 'הסתייג ממני', -8); fx(s, { playerReputation: 2 }); return ok('"אלה אינם עמדות הממשלה". השר פרסם הבהרה.'); } },
+      { id: 'apology', label: 'לדרוש מהשר להתנצל', hint: '-2 הון', resolve: (s, ev) => { spend(s, 2); remember(s, ev.fromId!, 'insult', 'דרש ממני התנצלות', -5); fx(s, { playerReputation: 3, playerPopularity: 1 }); return ok('השר התנצל, והסערה שככה.'); } },
     ],
   },
   {
     id: 'rival_bloc', level: 'breaking',
-    weight: (s) => (isPartyLeader(s) && s.turn > 3 ? 0.5 : 0),
+    weight: (s) => (isPartyLeader(s) && s.turn > 1 ? 0.5 : 0),
     make: (s) => {
       const others = Object.values(s.parties).filter((p) => p.id !== s.player.partyId && p.seats > 0 && !s.alliances.some((a) => a.partyId === p.id));
       const a = others.sort((x, y) => y.seats - x.seats)[0];
       const b = others.filter((p) => p.id !== a?.id).sort((x, y) => Math.abs(x.ideology.economic - (a?.ideology.economic ?? 0)) - Math.abs(y.ideology.economic - (a?.ideology.economic ?? 0)))[0];
-      return { icon: '🤝', title: 'גוש חדש נגדך', partyId: a?.id, vars: { other: b?.id ?? '' }, text: `${a?.name} ו${b?.name} הודיעו על "ברית אסטרטגית לשחרור המדינה ממך". מסיבת עיתונאים משותפת, חיבוקים מביכים, אפס תוכנית.` };
+      return { icon: '🤝', title: 'גוש פוליטי חדש נגדך', partyId: a?.id, vars: { other: b?.id ?? '' }, text: `${a?.name} ו${b?.name} הודיעו על ברית פוליטית משותפת, במטרה למנוע ממך להרכיב את הממשלה הבאה.` };
     },
     options: [
-      { id: 'counter', label: 'להציע ברית למפלגה השנייה', hint: '-8 הון, 50%', resolve: (s, ev) => { s.player.politicalCapital = clamp(s.player.politicalCapital - 8); const other = String(ev.vars.other); if (other && chance(s, 0.5)) { s.alliances.push({ partyId: other, kind: 'votes', strength: 45, since: s.turn, demand: 'פירוק הגוש היריב' }); return ok(`${s.parties[other].name} עזבה את הגוש שעה אחרי ההכרזה. שיא עולמי.`, 'הגוש החדש התפרק אחרי 58 דקות'); } applyEffects(s, { partyMomentum: { [ev.partyId!]: 4, [other]: 3 } }); return bad('הם סירבו, והדליפו את ההצעה. הגוש רק התחזק.'); } },
-      { id: 'mock', label: 'ללעוג: "ברית הכישלונות"', resolve: (s, ev) => { applyEffects(s, { partyMomentum: { [ev.partyId!]: 3, [String(ev.vars.other)]: 2, [s.player.partyId]: 1 } }); fx(s, { playerPopularity: 2 }); return meh('הכינוי תפס. גם הגוש תפס – 3 מנדטים בסקר.'); } },
-      { id: 'ignore', label: 'להתעלם בהפגנתיות', resolve: (s, ev) => { applyEffects(s, { partyMomentum: { [ev.partyId!]: 4, [String(ev.vars.other)]: 3 } }); return bad('התעלמת. הם לא. הסקר הבא: מהפך?'); } },
+      { id: 'counter', label: 'להציע ברית למפלגה השנייה', hint: '-8 הון, 50%', resolve: (s, ev) => { spend(s, 8); const other = String(ev.vars.other); if (other && chance(s, 0.5)) { s.alliances.push({ partyId: other, kind: 'votes', strength: 45, since: s.turn, demand: 'פירוק הגוש היריב' }); return ok(`${s.parties[other].name} פרשה מהגוש ובחרה בתיאום איתך.`, 'הגוש החדש התפרק'); } applyEffects(s, { partyMomentum: { [ev.partyId!]: 4, [other]: 3 } }); return bad('ההצעה נדחתה ופורסמה. הגוש התחזק.'); } },
+      { id: 'criticize', label: 'לבקר: "ברית בלי תוכנית"', resolve: (s, ev) => { applyEffects(s, { partyMomentum: { [ev.partyId!]: 2, [String(ev.vars.other)]: 2, [s.player.partyId]: 1 } }); fx(s, { playerPopularity: 1 }); return meh('הביקורת סוקרה, אבל הגוש עלה מעט בסקרים.'); } },
+      { id: 'ignore', label: 'לא להגיב', resolve: (s, ev) => { applyEffects(s, { partyMomentum: { [ev.partyId!]: 4, [String(ev.vars.other)]: 3 } }); return bad('הגוש מתחזק בסקרים.'); } },
     ],
   },
 
   // ======================= EXTREME (BREAKING) =======================
   {
-    id: 'market_crash', level: 'extreme',
-    weight: (s) => (s.flags.drama_crash_cd ?? 0) > s.turn ? 0 : 0.12 + (deficitPct(s) > 4.5 ? 0.35 : 0) + (s.economy.growth < 1.2 ? 0.3 : 0) + tension(s) * 0.15,
-    make: () => ({ icon: '📉', title: 'קריסה בבורסה: -18% ביום אחד', text: 'הבורסה של צבריה צנחה 18%. "יום שני השחור-כחול". השקל מתרסק, המשקיעים בורחים, ובקבוצת הווטסאפ של ההייטקיסטים מישהו כתב רק "😶".' }),
+    id: 'terror_attack', level: 'extreme',
+    weight: (s) => ((s.flags.drama_terror_cd ?? 0) > s.turn ? 0 : 0.12 + (s.services.security.quality < 55 ? 0.15 : 0) + tension(s) * 0.05),
+    make: () => ({ icon: '🚨', title: 'פיגוע', text: 'פיגוע ירי בצומת מרכזי. יש הרוגים ופצועים. המחבל נוטרל. הציבור בהלם, והממשלה נדרשת להגיב.' }),
     options: [
-      { id: 'bailout', allow: (s) => holds(s, 'finance'), label: 'חבילת חילוץ של ₪15 מיליארד', hint: 'חוב ↑↑, הכלכלה נבלמת', resolve: (s) => { s.flags.drama_crash_cd = s.turn + 12; fx(s, { oneOffCost: 15, economy: { growth: -0.3, unemployment: 0.2 }, groups: { highIncome: 2, lowIncome: -3 } }); return meh('השוק התייצב. החוב זינק. מישהו יספר לנכדים שלנו.', 'הממשלה מזרימה ₪15 מיליארד לעצור את הקריסה'); } },
-      { id: 'nothing', allow: (s) => holds(s, 'finance'), label: '"השוק יתקן את עצמו"', hint: 'מיתון אפשרי', resolve: (s) => { s.flags.drama_crash_cd = s.turn + 12; fx(s, { economy: { growth: -1.8, unemployment: 1, inflation: -0.3 }, groups: { highIncome: -6, middleClass: -4, youth: -3 } }); startCrisis(s, 'layoffs', 3); return bad('השוק תיקן את עצמו – ישר לתוך מיתון. גל פיטורים בדרך.', 'מיתון: הממשלה בחרה לא להתערב'); } },
-      { id: 'blame', label: 'להאשים את האופוזיציה ואת "גורמים זרים"', hint: 'פופולריות קצרה, כלכלה סובלת', resolve: (s) => { s.flags.drama_crash_cd = s.turn + 12; fx(s, { economy: { growth: -1.2, unemployment: 0.6 }, playerPopularity: 2, playerReputation: -6, groups: { right: 2, left: -4, highIncome: -4 } }); return meh('הבסיס אהב. סוכנויות הדירוג – פחות.', '"גורמים זרים" הואשמו בקריסה. הגורמים הזרים מכחישים'); } },
+      { id: 'operation', allow: (s) => holds(s, 'defense', 'national_security'), label: 'מבצע מעצרים ממוקד', hint: '₪0.5B, ביטחון ↑', resolve: (s) => { s.flags.drama_terror_cd = s.turn + 3; fx(s, { oneOffCost: 0.5, services: { security: 3 }, groups: { right: 3, settlers: 2 }, stability: 3 }); return ok('כוחות הביטחון עצרו את המעורבים בתשתית. תחושת הביטחון השתפרה בהדרגה.', 'מבצע מעצרים בעקבות הפיגוע'); } },
+      { id: 'closure', allow: (s) => holds(s, 'defense'), label: 'סגר ונוכחות מוגברת', hint: 'ביטחון ↑, כלכלה ↓', resolve: (s) => { s.flags.drama_terror_cd = s.turn + 3; fx(s, { services: { security: 2 }, economy: { growth: -0.1 }, groups: { right: 2, arabs: -2, left: -2 } }); return meh('הסגר יימשך כמה ימים. ארגוני זכויות האדם מבקרים את הענישה הקולקטיבית.'); } },
+      { id: 'visit', label: 'לבקר את הפצועים ולחזק את המשפחות', hint: '-3 הון', resolve: (s) => { s.flags.drama_terror_cd = s.turn + 3; spend(s, 3); fx(s, { playerPopularity: 3, stability: 2 }); return ok('ביקרת בבית החולים ובבתי המשפחות.'); } },
+    ],
+  },
+  {
+    id: 'market_crash', level: 'extreme',
+    weight: (s) => ((s.flags.drama_crash_cd ?? 0) > s.turn ? 0 : 0.1 + (deficitPct(s) > 4.5 ? 0.35 : 0) + (s.economy.growth < 1.2 ? 0.3 : 0) + tension(s) * 0.15),
+    make: () => ({ icon: '📉', title: 'קריסה בבורסה', text: 'הבורסה בתל אביב צנחה ב-12% ביום אחד, והשקל נחלש בחדות. משקיעים זרים מוכרים, ובנק ישמעאל מתכנס לישיבת חירום.' }),
+    options: [
+      { id: 'bailout', allow: (s) => holds(s, 'finance'), label: 'חבילת סיוע של ₪15 מיליארד', hint: 'חוב ↑↑, יציבות', resolve: (s) => { s.flags.drama_crash_cd = s.turn + 4; fx(s, { oneOffCost: 15, economy: { growth: -0.3, unemployment: 0.2 }, groups: { highIncome: 2, lowIncome: -2 } }); return meh('השווקים התייצבו, אבל החוב הציבורי עלה משמעותית.', 'הממשלה מזרימה ₪15 מיליארד לייצוב השווקים'); } },
+      { id: 'nothing', allow: (s) => holds(s, 'finance'), label: 'לא להתערב', hint: 'סיכון למיתון', resolve: (s) => { s.flags.drama_crash_cd = s.turn + 4; fx(s, { economy: { growth: -1.8, unemployment: 1, inflation: -0.3 }, groups: { highIncome: -6, middleClass: -4, youth: -3 } }); startCrisis(s, 'layoffs', 3); return bad('השווקים המשיכו לרדת והמשק נכנס להאטה. גל פיטורים בדרך.', 'האטה כלכלית: הממשלה בחרה לא להתערב'); } },
+      { id: 'reassure', label: 'הודעה משותפת עם נגיד הבנק', hint: '-6 הון, 60%', resolve: (s) => { s.flags.drama_crash_cd = s.turn + 4; spend(s, 6); if (chance(s, 0.6)) { fx(s, { playerReputation: 4 }); return ok('ההודעה הרגיעה את השווקים. הירידות נעצרו.'); } fx(s, { economy: { growth: -0.8, unemployment: 0.4 } }); return bad('השווקים לא נרגעו. הירידות נמשכו עוד כמה ימים.'); } },
     ],
   },
   {
     id: 'general_strike', level: 'extreme',
-    weight: (s) => (s.flags.drama_strike_cd ?? 0) > s.turn ? 0 : 0.08 + Math.max(0, 48 - s.population.groups.publicSector.satisfaction) / 40 + (s.economy.inflation > 4 ? 0.25 : 0),
-    make: () => ({ icon: '🛑', title: 'שביתה כללית!', text: '"ההסתדרות של כולם" השביתה את המדינה: נמלים, בתי חולים, רכבות, בנקים – ואפילו המזנון בכנסטון. היו״ר הודיע: "אנחנו לא נשבור. רק את הכלכלה".' }),
+    weight: (s) => ((s.flags.drama_strike_cd ?? 0) > s.turn ? 0 : 0.08 + Math.max(0, 48 - s.population.groups.publicSector.satisfaction) / 40 + (s.economy.inflation > 4 ? 0.25 : 0)),
+    make: () => ({ icon: '🛑', title: 'שביתה כללית', text: 'ההסתדרות הכריזה על שביתה כללית: נמלים, נמל התעופה, משרדי ממשלה ובנקים מושבתים. יו״ר ההסתדרות: "השביתה תימשך עד שהממשלה תחזור לשולחן המשא ומתן."' }),
     options: [
-      { id: 'cave', allow: (s) => holds(s), label: 'להיכנע לדרישות', hint: 'עובדי ציבור ↑↑, גירעון ↑', resolve: (s) => { s.flags.drama_strike_cd = s.turn + 10; fx(s, { budget: { welfare: 2, education: 1.5, health: 1.5, government: 1 }, groups: { publicSector: 10, lowIncome: 2, highIncome: -2 } }); return meh('הסכם קיבוצי חדש. היו״ר יצא עם חיוך ועם שלוש מכוניות צמודות חדשות.', 'השביתה הסתיימה: הממשלה נכנעה'); } },
-      { id: 'orders', allow: (s) => holds(s), label: 'צווי ריתוק', hint: '-15 הון, 60% לשבור', resolve: (s) => { s.flags.drama_strike_cd = s.turn + 10; s.player.politicalCapital = clamp(s.player.politicalCapital - 15); if (chance(s, 0.6)) { fx(s, { groups: { publicSector: -8, highIncome: 3, right: 2 }, playerReputation: 3 }); return ok('בית הדין לעבודה אישר. המדינה חזרה לעבוד. הוועדים לא ישכחו.', 'צווי ריתוק שברו את השביתה'); } fx(s, { groups: { publicSector: -10 }, economy: { growth: -0.8 }, stability: -8 }); return bad('העובדים התעלמו מהצווים. התמונות מהנמל הריק – בכל העולם.'); } },
-      { id: 'wait', allow: (s) => holds(s), label: 'לחכות שיתעייפו', hint: 'הכלכלה משלמת', resolve: (s) => { s.flags.drama_strike_cd = s.turn + 10; fx(s, { economy: { growth: -1, unemployment: 0.3 }, groups: { families: -3, employees: -3, publicSector: -3 }, playerPopularity: -4 }); startCrisis(s, 'transport_strike', 2); return bad('שבועיים בלי רכבות. ההורים מאמינים שאתה אישית אחראי. הם צודקים.'); } },
+      { id: 'cave', allow: (s) => holds(s, 'finance', 'labor'), label: 'להיענות לדרישות', hint: 'עובדי ציבור ↑↑, גירעון ↑', resolve: (s) => { s.flags.drama_strike_cd = s.turn + 4; fx(s, { budget: { welfare: 2, education: 1.5, health: 1.5, government: 1 }, groups: { publicSector: 10, lowIncome: 2, highIncome: -2 } }); return meh('נחתם הסכם קיבוצי חדש. הגירעון יגדל.', 'השביתה הסתיימה: הממשלה נענתה לדרישות'); } },
+      { id: 'orders', allow: (s) => holds(s, 'finance', 'labor'), label: 'פנייה לבית הדין לעבודה', hint: '-15 הון, 60%', resolve: (s) => { s.flags.drama_strike_cd = s.turn + 4; spend(s, 15); if (chance(s, 0.6)) { fx(s, { groups: { publicSector: -8, highIncome: 3, right: 2 }, playerReputation: 3 }); return ok('בית הדין הורה על חזרה לעבודה ועל משא ומתן.', 'בית הדין לעבודה: לחזור לעבודה'); } fx(s, { groups: { publicSector: -10 }, economy: { growth: -0.8 }, stability: -8 }); return bad('בית הדין דחה את הבקשה. השביתה נמשכת.'); } },
+      { id: 'negotiate', allow: (s) => holds(s, 'finance', 'labor'), label: 'משא ומתן ופשרה', hint: 'עולה פחות, לוקח זמן', resolve: (s) => { s.flags.drama_strike_cd = s.turn + 4; fx(s, { budget: { welfare: 0.8, health: 0.6 }, economy: { growth: -0.3 }, groups: { publicSector: 4, families: -1 } }); return meh('אחרי שבוע הושגה פשרה. הנזק למשק מוגבל.'); } },
     ],
   },
   {
-    id: 'siege', level: 'extreme',
-    weight: (s) => (s.flags.drama_siege_cd ?? 0) > s.turn ? 0 : Math.max(0, tension(s) - 0.35) * 0.9,
+    id: 'mass_protest', level: 'extreme',
+    weight: (s) => ((s.flags.drama_siege_cd ?? 0) > s.turn ? 0 : Math.max(0, tension(s) - 0.35) * 0.9),
     make: (s) => {
       const g = angriestGroup(s);
-      return { icon: '🔥', title: 'מאות אלפים מקיפים את הכנסטון', vars: { group: g }, text: `${GROUP_BY_ID[g].emoji} ${GROUP_BY_ID[g].name} יצאו לרחובות. צמתים חסומים, תופים, שלט ענק עם הפרצוף שלך וקרניים. "לא נזוז עד שיקשיבו לנו!"` };
+      return { icon: '🪧', title: 'מחאה המונית', vars: { group: g }, text: `${GROUP_BY_ID[g].emoji} ${GROUP_BY_ID[g].name} יצאו להפגנה המונית מול הכנסטון ובצמתים ברחבי הארץ. המפגינים דורשים שינוי מיידי במדיניות.` };
     },
     options: [
-      { id: 'speech', label: 'לצאת אליהם ולנאום', hint: 'הימור: +10 או -10', resolve: (s, ev) => { s.flags.drama_siege_cd = s.turn + 8; const g = String(ev.vars.group) as GroupId; if (rand(s) < 0.4 + me(s).popularity / 200 + s.player.reputation / 300) { fx(s, { playerPopularity: 10, groups: { [g]: 8 } }); s.career.memorable.push('הנאום מול המפגינים'); return ok('"אני שומע אתכם". הם שמעו אותך. מישהו התחיל לשיר. רגע היסטורי.', 'הנאום מול ההמון: "אני שומע אתכם"'); } fx(s, { playerPopularity: -10, groups: { [g]: -4 }, stability: -5 }); return bad('זרקו עליך עגבנייה. המיקרופון נפל. העגבנייה – ויראלית.', 'העגבנייה שנשמעה בכל העולם'); } },
-      { id: 'give', allow: (s) => holds(s), label: 'להיענות לדרישה המרכזית', hint: 'עולה כסף, מרגיע', resolve: (s, ev) => { s.flags.drama_siege_cd = s.turn + 8; const g = String(ev.vars.group) as GroupId; const cat = GROUP_CAT[g] ?? 'welfare'; fx(s, { budget: { [cat]: 3 }, groups: { [g]: 9 }, stability: 3 }); return meh(`₪3 מיליארד ל${CATEGORY_BY_ID[cat].name}. ההפגנה התפזרה. המפגינים הבאים כבר בדרך – למדו שזה עובד.`, 'ההפגנה הסתיימה: הממשלה נענתה'); } },
-      { id: 'rain', allow: (s) => holds(s), label: 'לחכות שירד גשם', hint: '40% שזה עובד', resolve: (s, ev) => { s.flags.drama_siege_cd = s.turn + 8; const g = String(ev.vars.group) as GroupId; if (chance(s, 0.4)) return ok('ירד גשם. המפגינים הלכו הביתה. המטאורולוג קיבל עיטור.'); fx(s, { groups: { [g]: -7 }, stability: -8, playerPopularity: -5 }); return bad('שמש. 30 מעלות. המחאה גדלה פי שניים והביאה מנגלים.', 'המחאה הופכת לפסטיבל: אוהלים, מנגלים, דרישות'); } },
+      { id: 'speech', label: 'לפנות למפגינים ישירות', hint: 'הימור', resolve: (s, ev) => { s.flags.drama_siege_cd = s.turn + 3; const g = String(ev.vars.group) as GroupId; if (rand(s) < 0.4 + me(s).popularity / 200 + s.player.reputation / 300) { fx(s, { playerPopularity: 8, groups: { [g]: 7 } }); s.career.memorable.push('הנאום מול המפגינים'); return ok('הנאום הכן התקבל בכבוד. נציגי המחאה הסכימו להיפגש.', '"אני שומע אתכם": הנאום מול המפגינים'); } fx(s, { playerPopularity: -8, groups: { [g]: -4 }, stability: -5 }); return bad('המפגינים קטעו את הנאום. התמונות מהאירוע מופצות בביקורת.'); } },
+      { id: 'give', allow: (s) => holds(s, 'finance'), label: 'להיענות לדרישה המרכזית', hint: '₪3 מיליארד', resolve: (s, ev) => { s.flags.drama_siege_cd = s.turn + 3; const g = String(ev.vars.group) as GroupId; const cat = GROUP_CAT[g] ?? 'welfare'; fx(s, { budget: { [cat]: 3 }, groups: { [g]: 9 }, stability: 3 }); return meh(`₪3 מיליארד ל${CATEGORY_BY_ID[cat].name}. המחאה התפזרה, וקבוצות אחרות לומדות שמחאה עובדת.`, 'הממשלה נענתה לדרישות המפגינים'); } },
+      { id: 'dialogue', label: 'להקים צוות הידברות עם נציגי המחאה', hint: '-5 הון, 50%', resolve: (s, ev) => { s.flags.drama_siege_cd = s.turn + 3; spend(s, 5); const g = String(ev.vars.group) as GroupId; if (chance(s, 0.5)) { fx(s, { groups: { [g]: 4 }, stability: 2 }); return ok('הצוות הציג מתווה מוסכם, והמחאה נרגעה.'); } fx(s, { groups: { [g]: -5 }, stability: -6, playerPopularity: -4 }); return bad('נציגי המחאה פרשו מהשיחות, והמחאה התרחבה.', 'המחאה מתרחבת'); } },
     ],
   },
   {
     id: 'pm_hospital', level: 'extreme',
-    weight: (s) => (!isPM(s) && s.turn > 4 && (s.flags.drama_hosp_cd ?? 0) <= s.turn ? 0.18 : 0),
-    make: (s) => ({ icon: '🏥', title: 'ראש הממשלה אושפז', fromId: s.government.pmId, text: `${s.politicians[s.government.pmId]?.name} אושפז ל"בדיקות שגרתיות" בשתיים בלילה, עם 4 רופאים ו-12 יועצי תקשורת. ואקום שלטוני. כולם מחכים לראות מי זז ראשון.` }),
+    weight: (s) => (!isPM(s) && s.turn > 2 && (s.flags.drama_hosp_cd ?? 0) <= s.turn ? 0.15 : 0),
+    make: (s) => ({ icon: '🏥', title: 'ראש הממשלה אושפז', fromId: s.government.pmId, text: `${s.politicians[s.government.pmId]?.name} אושפז בלילה לבדיקות. מצבו מוגדר יציב, אבל במערכת הפוליטית כבר מדברים על היום שאחרי.` }),
     options: [
-      { id: 'grab', label: 'להציג את עצמך כ"כתובת היציבה"', hint: 'כוח ↑, ראש הממשלה יזכור', resolve: (s, ev) => { s.flags.drama_hosp_cd = s.turn + 15; const w = me(s).power > 40 ? chance(s, 0.6) : chance(s, 0.3); remember(s, ev.fromId!, 'betrayal', 'ניסה לרשת אותי מבית החולים', -25); if (w) { me(s).power = clamp(me(s).power + 12); fx(s, { playerPopularity: 5 }); return ok('התקשורת קוראת לך "המבוגר האחראי". ראש הממשלה צפה בזה מהמיטה.', 'בזמן האשפוז: כוכב חדש עולה'); } fx(s, { playerPopularity: -4 }); return bad('"חמדן", "לא היה לו סבלנות" – הכותרות לא סלחניות.'); } },
-      { id: 'flowers', label: 'זר פרחים וברכת החלמה', resolve: (s, ev) => { s.flags.drama_hosp_cd = s.turn + 15; remember(s, ev.fromId!, 'favor', 'שלח פרחים', 14); return ok('הוא חזר אחרי יומיים, שזוף. הזר שלך הוא היחיד שהוא זכר.'); } },
-      { id: 'leak', label: 'להדליף "שזה רציני"', hint: 'מסוכן', resolve: (s, ev) => { s.flags.drama_hosp_cd = s.turn + 15; const pmParty = s.politicians[ev.fromId!]?.partyId; if (pmParty) applyEffects(s, { partyMomentum: { [pmParty]: -6 } }); fx(s, { playerReputation: -5 }); if (chance(s, 0.4)) { remember(s, ev.fromId!, 'betrayal', 'הדליף על הבריאות שלי', -35); return bad('נחשפת כמדליף. ראש הממשלה, בריא לגמרי, הודיע: "נסגור חשבון".'); } return meh('הסקרים של ראש הממשלה צנחו. אף אחד לא יודע מי הדליף. כמעט אף אחד.'); } },
+      { id: 'grab', label: 'להציג את עצמך כמנהיג חלופי', hint: 'כוח ↑, ראש הממשלה יזכור', resolve: (s, ev) => { s.flags.drama_hosp_cd = s.turn + 5; const w = me(s).power > 40 ? chance(s, 0.6) : chance(s, 0.3); remember(s, ev.fromId!, 'betrayal', 'ניצל את האשפוז שלי', -25); if (w) { me(s).power = clamp(me(s).power + 12); fx(s, { playerPopularity: 5 }); return ok('פרשנים מציינים אותך כמי שמוכן להנהגה.', 'בזמן האשפוז: מועמד חדש להנהגה'); } fx(s, { playerPopularity: -4 }); return bad('המהלך נתפס כחסר רגישות.'); } },
+      { id: 'wishes', label: 'לאחל החלמה מהירה', resolve: (s, ev) => { s.flags.drama_hosp_cd = s.turn + 5; remember(s, ev.fromId!, 'favor', 'איחל החלמה', 14); return ok('ראש הממשלה חזר לעבודה כעבור ימים ספורים והודה לך על הפנייה.'); } },
+      { id: 'transparency', label: 'לדרוש שקיפות רפואית', hint: 'מוניטין ↑, יחסים ↓', resolve: (s, ev) => { s.flags.drama_hosp_cd = s.turn + 5; remember(s, ev.fromId!, 'insult', 'דרש לפרסם את מצבי הרפואי', -12); fx(s, { playerReputation: 3 }); return meh('לשכת ראש הממשלה פרסמה סיכום רפואי. בלשכה לא אהבו את הדרישה.'); } },
     ],
   },
   {
-    id: 'war_scare', level: 'extreme',
-    weight: (s) => (s.flags.drama_war_cd ?? 0) > s.turn ? 0 : 0.07 + (s.services.security.quality < 55 ? 0.2 : 0),
-    make: () => ({ icon: '🚨', title: 'פיצוץ בגבול הדמיוני', text: 'פיצוץ עז במתקן בגבול. הרמטכ״ל מבקש לגייס 100 אלף מילואימניקים "עכשיו". הבורסה ננעלת, הסופרים מתרוקנים מנייר טואלט, ובטלוויזיה – 14 פרשנים בו זמנית.' }),
+    id: 'border_escalation', level: 'extreme',
+    weight: (s) => ((s.flags.drama_war_cd ?? 0) > s.turn ? 0 : 0.07 + (s.services.security.quality < 55 ? 0.2 : 0)),
+    make: () => ({ icon: '🚀', title: 'הסלמה בגבול הצפון', text: 'ירי רקטות וכטב״מים לעבר יישובי הגליל. מערכת ההגנה האווירית יירטה את רובם, אך נגרמו נזקים. הרמטכ״ל מציג לקבינט כמה אפשרויות תגובה.' }),
     options: [
-      { id: 'full', allow: (s) => holds(s, 'defense'), label: 'גיוס מלא', hint: '₪4B, ביטחון ↑, כלכלה ↓', resolve: (s) => { s.flags.drama_war_cd = s.turn + 10; fx(s, { oneOffCost: 4, services: { security: 6 }, economy: { growth: -0.6 }, groups: { reservists: -5, right: 5, families: -2 }, stability: 6 }); return meh('100 אלף בשטח תוך 48 שעות. המתיחות נרגעה. המילואימניקים חזרו לעבודה ולהודעות "איפה היית?".', 'גיוס מילואים נרחב: המתיחות נרגעת'); } },
-      { id: 'partial', allow: (s) => holds(s, 'defense'), label: 'גיוס חלקי ומעקב', hint: '₪1.5B', resolve: (s) => { s.flags.drama_war_cd = s.turn + 10; fx(s, { oneOffCost: 1.5, services: { security: 2 }, groups: { right: -1 } }); if (chance(s, 0.35)) { startCrisis(s, 'border', 2); return bad('המתיחות לא נרגעה. משבר ביטחוני מתמשך.'); } return ok('הערכת המצב הייתה נכונה. הפרשנים התאכזבו.'); } },
-      { id: 'diplomacy', allow: (s) => holds(s, 'defense', 'foreign'), label: 'ערוץ דיפלומטי שקט', hint: '-10 הון, 50%', resolve: (s) => { s.flags.drama_war_cd = s.turn + 10; s.player.politicalCapital = clamp(s.player.politicalCapital - 10); if (chance(s, 0.5)) { fx(s, { groups: { left: 4, center: 2 }, playerReputation: 5 }); return ok('שיחה אחת בלילה, ושקט. אף אחד לא יודע מה נאמר. מושלם.', 'בכירים: "ערוץ שקט מנע הסלמה"'); } fx(s, { groups: { right: -6 }, services: { security: -4 } }); startCrisis(s, 'border', 3); return bad('הצד השני לא ענה לטלפון. הימין קורא לך "חלש".'); } },
+      { id: 'strike', allow: (s) => holds(s, 'defense'), label: 'תקיפה ממוקדת של חיל האוויר', hint: '₪1B, הרתעה ↑, סיכון להסלמה', resolve: (s) => { s.flags.drama_war_cd = s.turn + 4; fx(s, { oneOffCost: 1, services: { security: 4 }, groups: { right: 4, periphery: 2 }, stability: 4 }); if (chance(s, 0.3)) { startCrisis(s, 'border', 2); return bad('התקיפה הצליחה, אבל הצד השני הגיב בירי נוסף. ימי לחימה בצפון.'); } return ok('התקיפה פגעה במשגרים ובמפקדים. השקט חזר לגבול.', 'חיל האוויר תקף בתגובה לירי'); } },
+      { id: 'reserves', allow: (s) => holds(s, 'defense'), label: 'גיוס מילואים ותגבור הגבול', hint: '₪3B, כלכלה ↓', resolve: (s) => { s.flags.drama_war_cd = s.turn + 4; fx(s, { oneOffCost: 3, services: { security: 5 }, economy: { growth: -0.4 }, groups: { reservists: -4, right: 3, families: -2 }, stability: 5 }); return meh('עשרות אלפי משרתי מילואים גויסו. המתיחות ירדה, והמחיר הכלכלי והאישי ניכר.', 'גיוס מילואים בצפון'); } },
+      { id: 'mediation', allow: (s) => holds(s, 'defense', 'foreign'), label: 'מסר דרך מתווכים בינלאומיים', hint: '-10 הון, 50%', resolve: (s) => { s.flags.drama_war_cd = s.turn + 4; spend(s, 10); if (chance(s, 0.5)) { fx(s, { groups: { left: 3, center: 2 }, playerReputation: 5 }); return ok('בתיווך בינלאומי הושגה הבנה, והירי נפסק.', 'בתיווך בינלאומי: הירי נפסק'); } fx(s, { groups: { right: -5 }, services: { security: -3 } }); startCrisis(s, 'border', 2); return bad('התיווך נכשל, והירי נמשך. בימין מבקרים את ההססנות.'); } },
     ],
   },
   {
@@ -295,22 +326,22 @@ export const DRAMAS: DramaDef[] = [
     weight: (s) => (isPM(s) && s.government.stability < 55 && (s.flags.drama_revolt_cd ?? 0) <= s.turn ? 0.25 + (55 - s.government.stability) / 60 : 0),
     make: (s) => {
       const rebels = ministers(s).sort((a, b) => a.loyalty - b.loyalty).slice(0, 3);
-      return { icon: '⚔️', title: 'מרד בממשלה', vars: { ids: rebels.map((r) => r.id).join(',') }, text: `${rebels.map((r) => r.name).join(', ')} שלחו לך מכתב משותף: "או שינוי כיוון ותקציבים – או שאנחנו מפילים את הממשלה". המכתב הודלף לפני שהגיע אליך.` };
+      return { icon: '⚔️', title: 'מרד שרים', vars: { ids: rebels.map((r) => r.id).join(',') }, text: `${rebels.map((r) => r.name).join(', ')} פרסמו מכתב משותף: אם לא יהיה שינוי במדיניות ובתקציבים, הם יפעלו להפלת הממשלה.` };
     },
     options: [
-      { id: 'buy', label: 'לקנות אותם: ₪1B לכל אחד', resolve: (s, ev) => { s.flags.drama_revolt_cd = s.turn + 8; for (const id of String(ev.vars.ids).split(',').filter(Boolean)) { const m = s.government.ministries.find((x) => x.ministerId === id); const cat = m?.categories[0]; if (cat) fx(s, { budget: { [cat]: 1 } }); remember(s, id, 'deal', 'קיבל תקציב במרד', 15); } fx(s, { stability: 8, groups: { center: -2 } }); return meh('שקט. לעכשיו. המורדים כבר מתכננים את המרד הבא – הוא משתלם.', 'המרד נקנה: ₪3 מיליארד לשרים המורדים'); } },
-      { id: 'fire', label: 'לפטר את כולם', hint: 'מסוכן מאוד לקואליציה', resolve: (s, ev) => { s.flags.drama_revolt_cd = s.turn + 8; for (const id of String(ev.vars.ids).split(',').filter(Boolean)) { const p = s.politicians[id]; const m = s.government.ministries.find((x) => x.ministerId === id); if (m) m.ministerId = s.government.pmId; if (p) { p.ministryId = null; remember(s, id, 'fired', 'פוטר במרד', -35); } } fx(s, { stability: -12, playerPopularity: 3, playerReputation: 3 }); s.career.memorable.push('פיטר שלושה שרים בבת אחת'); return meh('"יום הסכינים הארוכות" של צבריה. הציבור מתרשם. השותפות – בפאניקה.', 'ראש הממשלה פיטר את המורדים'); } },
-      { id: 'elections', label: '"רוצים בחירות? בבקשה."', resolve: (s) => { s.flags.drama_revolt_cd = s.turn + 8; callEarlyElections(s, 'מרד שרים'); return meh('הכנסטון מתפזר. המורדים מגלים שבסקרים הם לא עוברים את אחוז החסימה.'); } },
+      { id: 'budgets', label: 'להעניק תוספות תקציב למשרדיהם', hint: '₪1B לכל משרד', resolve: (s, ev) => { s.flags.drama_revolt_cd = s.turn + 3; for (const id of String(ev.vars.ids).split(',').filter(Boolean)) { const m = s.government.ministries.find((x) => x.ministerId === id); const cat = m?.categories[0]; if (cat) fx(s, { budget: { [cat]: 1 } }); remember(s, id, 'deal', 'קיבל תקציב במרד', 15); } fx(s, { stability: 8, groups: { center: -2 } }); return meh('המשבר נרגע בינתיים, אבל נוצר תקדים: לחץ משתלם.', 'המשבר בממשלה נפתר בתוספות תקציב'); } },
+      { id: 'fire', label: 'להעביר אותם מתפקידם', hint: 'מסוכן לקואליציה', resolve: (s, ev) => { s.flags.drama_revolt_cd = s.turn + 3; for (const id of String(ev.vars.ids).split(',').filter(Boolean)) { const p = s.politicians[id]; const m = s.government.ministries.find((x) => x.ministerId === id); if (m) m.ministerId = s.government.pmId; if (p) { p.ministryId = null; remember(s, id, 'fired', 'פוטר במרד', -35); } } fx(s, { stability: -12, playerPopularity: 3, playerReputation: 3 }); s.career.memorable.push('פיטר שלושה שרים בבת אחת'); return meh('השרים הועברו מתפקידם. הציבור מתרשם מהנחישות; השותפות מודאגות.', 'ראש הממשלה פיטר את השרים המורדים'); } },
+      { id: 'elections', label: 'ללכת לבחירות', resolve: (s) => { s.flags.drama_revolt_cd = s.turn + 3; callEarlyElections(s, 'מרד שרים'); return meh('הכנסטון מתפזר. הבחירות יתקיימו בתוך כ-90 יום.'); } },
     ],
   },
   {
     id: 'phone_hack', level: 'extreme',
-    weight: (s) => (s.flags.drama_phone_cd ?? 0) > s.turn ? 0 : 0.1 + (s.services.security.quality < 50 ? 0.1 : 0),
-    make: () => ({ icon: '📱', title: 'הטלפון שלך נפרץ', text: 'האקרים אנונימיים: "יש לנו 6 שנים של הודעות. כולל אלה לאמא שלך וקבוצת הווטסאפ \'הנהגה – סודי ביותר\'". הפרסום – בעוד 48 שעות.' }),
+    weight: (s) => ((s.flags.drama_phone_cd ?? 0) > s.turn ? 0 : 0.1 + (s.services.security.quality < 50 ? 0.1 : 0)),
+    make: () => ({ icon: '📱', title: 'פריצה לטלפון שלך', text: 'קבוצת האקרים המזוהה עם מדינה עוינת טוענת שפרצה לטלפון שלך ומאיימת לפרסם התכתבויות פרטיות בתוך 48 שעות.' }),
     options: [
-      { id: 'first', label: 'לפרסם הכול בעצמך קודם', hint: 'כאב קטן עכשיו', resolve: (s) => { s.flags.drama_phone_cd = s.turn + 15; fx(s, { playerPopularity: -2, playerReputation: 5 }); return ok('הציבור גילה שאתה שולח לאמא מתכונים ומדבקות של חתולים. אהדה מפתיעה.', 'פרסם בעצמו: ההודעות המביכות ביותר – של אמא שלו'); } },
-      { id: 'court', label: 'צו איסור פרסום', hint: '-8 הון, 70%', resolve: (s) => { s.flags.drama_phone_cd = s.turn + 15; s.player.politicalCapital = clamp(s.player.politicalCapital - 8); if (chance(s, 0.7)) return ok('הצו התקבל. הכותרת היחידה: "פוליטיקאי מוציא צו איסור פרסום". כולם משערים.'); fx(s, { playerPopularity: -9 }); return bad('הצו נדחה. הכול פורסם. כולל "הוא חכם כמו כיסא פלסטיק".', 'פרסום: 6 שנים של הודעות'); } },
-      { id: 'deny', label: 'להכחיש הכול מראש', hint: 'הימור', resolve: (s) => { s.flags.drama_phone_cd = s.turn + 15; if (chance(s, 0.5)) return ok('ההאקרים התגלו כנער בן 15 שבלף. הוא קיבל הצעת עבודה ממשרד הביטחון.'); fx(s, { playerPopularity: -10, playerReputation: -6 }); return bad('הכחשת. ואז פורסם צילום מסך של ההכחשה – מהטלפון שלך – עם "לול" בסוף.'); } },
+      { id: 'cyber', label: 'לפנות למערך הסייבר הלאומי', hint: '-4 הון', resolve: (s) => { s.flags.drama_phone_cd = s.turn + 5; spend(s, 4); if (chance(s, 0.7)) { fx(s, { playerReputation: 2 }); return ok('מערך הסייבר זיהה את הפריצה ובלם את הפרסום. החומר שפורסם התגלה כמזויף.', 'מערך הסייבר: ניסיון השפעה זר נבלם'); } fx(s, { playerPopularity: -5 }); return bad('חלק מההתכתבויות פורסמו. רובן אישיות, אבל חלקן מביכות פוליטית.'); } },
+      { id: 'first', label: 'להקדים ולפרסם הודעה לציבור', hint: 'כאב קטן עכשיו', resolve: (s) => { s.flags.drama_phone_cd = s.turn + 5; fx(s, { playerPopularity: -1, playerReputation: 4 }); return ok('ההודעה הפומבית ניטרלה את האיום. הציבור הבין שמדובר בהתקפה זרה.'); } },
+      { id: 'ignore', label: 'להתעלם מהאיום', hint: 'הימור', resolve: (s) => { s.flags.drama_phone_cd = s.turn + 5; if (chance(s, 0.5)) return ok('האיום התגלה כבלוף.'); fx(s, { playerPopularity: -7, playerReputation: -4 }); return bad('ההתכתבויות פורסמו, והתגובה שלך התעכבה.'); } },
     ],
   },
   {
@@ -318,11 +349,11 @@ export const DRAMAS: DramaDef[] = [
     weight: (s) => (isPM(s) && coalitionSeats(s) < MAJORITY + 3 ? 0.6 : 0),
     make: (s) => {
       const p = pick(s, Object.values(s.politicians).filter((x) => x.active && !x.isPlayer && !s.government.coalition.includes(x.partyId) && s.parties[x.partyId]?.leaderId !== x.id));
-      return { icon: '🦘', title: 'ח״כ אופוזיציה מוכן לערוק', fromId: p?.id, text: `${p?.name} שולח הודעה בשתיים בלילה: "אני מוכן לעבור אליכם. תנאי קטן: משרד. כל משרד. אפילו האסטרטגי".` };
+      return { icon: '🔀', title: 'ח״כ אופוזיציה מוכן לעבור לקואליציה', fromId: p?.id, text: `${p?.name} פנה אליך בשקט: הוא מוכן לפרוש מסיעתו ולהצטרף לקואליציה, בתמורה לתפקיד בממשלה.` };
     },
     options: [
-      { id: 'accept', label: 'לקבל אותו (+1 מנדט לקואליציה)', hint: 'מרכז ↓, תקדים', resolve: (s, ev) => { const p = pol(s, ev); if (!p) return meh('הוא התחרט.'); const from = s.parties[p.partyId]; const to = s.parties[s.player.partyId]; from.memberIds = from.memberIds.filter((x) => x !== p.id); from.seats = Math.max(0, from.seats - 1); to.memberIds.push(p.id); to.seats += 1; p.partyId = to.id; remember(s, p.id, 'promise', 'משרד בממשלה', 10, s.turn + 6, 'role'); fx(s, { groups: { center: -3, left: -2 }, stability: 4 }); return meh(`${p.name} ערק. במפלגה הקודמת שלו כבר תולים את התמונה שלו – על לוח החצים.`, `עריקה: ${p.name} עובר לקואליציה תמורת "משרד כלשהו"`); } },
-      { id: 'refuse', label: 'לסרב ולהדליף', resolve: (s) => { fx(s, { playerReputation: 4, playerPopularity: 2 }); return ok('"אנחנו לא קונים ח״כים". נשמע טוב. בעיקר כי לא היה לך משרד פנוי.'); } },
+      { id: 'accept', label: 'לקבל אותו (+1 מנדט לקואליציה)', hint: 'מרכז ↓, הבטחה לתפקיד', resolve: (s, ev) => { const p = pol(s, ev); if (!p) return meh('הוא חזר בו.'); const from = s.parties[p.partyId]; const to = s.parties[s.player.partyId]; from.memberIds = from.memberIds.filter((x) => x !== p.id); from.seats = Math.max(0, from.seats - 1); to.memberIds.push(p.id); to.seats += 1; p.partyId = to.id; remember(s, p.id, 'promise', 'תפקיד בממשלה', 10, s.turn + 3, 'role'); fx(s, { groups: { center: -3, left: -2 }, stability: 4 }); return meh(`${p.name} עבר לקואליציה. בסיעתו הקודמת מאשימים אותו בבגידה בבוחרים.`, `${p.name} פורש מסיעתו ומצטרף לקואליציה`); } },
+      { id: 'refuse', label: 'לסרב', resolve: (s) => { fx(s, { playerReputation: 4, playerPopularity: 1 }); return ok('סירבת. "אנחנו לא בונים קואליציה על עריקות", אמרת.'); } },
     ],
   },
 ];

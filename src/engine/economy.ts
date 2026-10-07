@@ -46,7 +46,7 @@ export function creditRating(s: GameState): string {
   if (score >= 50) return 'A+';
   if (score >= 42) return 'A';
   if (score >= 34) return 'BBB';
-  return 'BB (זבל)';
+  return 'BB (דירוג ספקולטיבי)';
 }
 
 const ratio = (s: GameState, c: BudgetCategory) => s.budget.allocations[c] / Math.max(0.1, s.budget.needs[c]);

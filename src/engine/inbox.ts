@@ -41,27 +41,27 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
         applyDecision(s, { budget: { [cat!]: a } });
         remember(s, from!.id, 'favor', 'קיבל תוספת תקציב', opt === 'half' ? 5 : 12);
         s.career.moneyInvested += a;
-        return R(`${name} קיבל ₪${a.toFixed(1)}B`, 'approved', undefined, [{ icon: '😊', label: name, text: opt === 'half' ? 'חצי זה יותר מכלום.' : 'ידעתי שאפשר לסמוך עליך.', tone: 'good' }]);
+        return R(`${name} קיבל ₪${a.toFixed(1)}B`, 'approved', undefined, [{ icon: '😊', label: name, text: opt === 'half' ? 'אני מעריך את התוספת, גם אם חלקית.' : 'תודה. התוספת תורגש בשטח.', tone: 'good' }]);
       }
       remember(s, from!.id, 'ignored', 'סירבו לבקשת התקציב', -8);
-      return R('הבקשה נדחתה', 'rejected', undefined, [{ icon: '😒', label: name, text: 'רשמתי לפניי.', tone: 'bad' }]);
+      return R('הבקשה נדחתה', 'rejected', undefined, [{ icon: '😒', label: name, text: 'אני מאוכזב מההחלטה.', tone: 'bad' }]);
     }
     case 'resign_threat': {
       if (opt === 'give') {
         applyDecision(s, { budget: { [cat!]: amount } });
         remember(s, from!.id, 'favor', 'נכנעו לאיום שלו', 10);
-        return R(`${name} נשאר (בינתיים)`, 'approved', 'היועץ: "עכשיו כולם יודעים שאיומים עובדים."');
+        return R(`${name} נשאר (בינתיים)`, 'approved', 'השר נשאר, אבל שרים אחרים למדו שאיום בהתפטרות משתלם.');
       }
       if (opt === 'fire' || rand(s) < 0.55) {
         const m = s.government.ministries.find((x) => x.ministerId === from!.id);
         if (m) { m.ministerId = s.government.pmId; from!.ministryId = null; }
         remember(s, from!.id, 'fired', opt === 'fire' ? 'פוטר' : 'התפטר בכעס', -25);
         applyEffects(s, { stability: from!.partyId !== s.player.partyId ? -6 : -2 });
-        addNews(s, opt === 'fire' ? `${name} פוטר לפני שהספיק להתפטר` : `${name} התפטר בטריקת דלת`, 'bad', '🚪');
-        return R(opt === 'fire' ? `${name} פוטר` : `${name} התפטר`, 'info', 'התיק עבר אליך. אל תשכח למנות מחליף.');
+        addNews(s, opt === 'fire' ? `${name} פוטר מהממשלה` : `${name} התפטר מהממשלה`, 'bad', '🚪');
+        return R(opt === 'fire' ? `${name} פוטר` : `${name} התפטר`, 'info', 'התיק עבר לראש הממשלה עד שימונה מחליף.');
       }
       remember(s, from!.id, 'insult', 'קראו לבלוף שלו', -6);
-      return R(`${name} נשאר. הבלוף נחשף`, 'approved', 'הוא לא התפטר. הוא כן נעלב.');
+      return R(`${name} נשאר בתפקיד`, 'approved', 'הוא לא התפטר, אבל היחסים ביניכם נפגעו.');
     }
     case 'ultimatum': {
       const party = s.parties[from!.partyId];
@@ -78,15 +78,15 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
       }
       if (from!.loyalty < 40 || rand(s) < 0.4) {
         partyLeavesCoalition(s, party.id, 'ראש הממשלה זלזל בנו');
-        return R(`${party.name} עזבה את הקואליציה!`, 'rejected', 'בדוק אם עדיין יש לך רוב.');
+        return R(`${party.name} עזבה את הקואליציה!`, 'rejected', 'כדאי לבדוק אם לקואליציה עדיין יש רוב.');
       }
       remember(s, from!.id, 'insult', 'דחו את האולטימטום', -10);
-      return R(`${party.name} מאיימת, אבל נשארת`, 'info');
+      return R(`${party.name} נשארת בקואליציה, בינתיים`, 'info');
     }
     case 'demand_role': {
       if (opt === 'promise') {
         remember(s, from!.id, 'promise', s.player.role === 'candidate' ? 'מקום ריאלי' : 'משרד בממשלה', 6, s.turn + 6, 'role');
-        return R(`הבטחת ל${name}`, 'approved', 'הוא רשם את זה. ביומן. בטוש.');
+        return R(`הבטחת ל${name}`, 'approved', 'הוא יזכור את ההבטחה, ויצפה שתקיים אותה.');
       }
       remember(s, from!.id, 'ignored', 'סירבו לתת לו תפקיד', -10);
       return R(`${name} מאוכזב`, 'info');
@@ -112,7 +112,7 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
         me.power = clamp(me.power + 6);
         addNews(s, `${me.name} ניצח בפריימריז מול ${name}`, 'good', '👑');
         s.career.memorable.push(`הדף תיגר של ${name}`);
-        return R('ניצחת בפריימריז!', 'approved', `סיכויים היו ${Math.round(pWin * 100)}%`);
+        return R('ניצחת בפריימריז', 'approved', `הסיכוי היה ${Math.round(pWin * 100)}%`);
       }
       party.leaderId = from!.id;
       if (s.government.pmId === me.id) setGameOver(s, 'ousted', `הודחת בפריימריז על ידי ${name}`);
@@ -123,16 +123,16 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
       if (opt === 'accept') {
         applyDecision(s, { budget: { [cat!]: -amount } });
         remember(s, from!.id, 'support', 'הסכים לקיצוץ', 10);
-        return R(`קיצצת ₪${amount.toFixed(1)}B במשרד`, 'approved', 'ראש הממשלה מרוצה. העובדים במשרד – פחות.');
+        return R(`קיצצת ₪${amount.toFixed(1)}B במשרד`, 'approved', 'ראש הממשלה מרוצה. העובדים במשרד מודאגים.');
       }
       remember(s, from!.id, 'insult', 'סירב לקצץ', -10);
-      return R('סירבת לקצץ', 'info', 'ראש הממשלה זוכר. תמיד.');
+      return R('סירבת לקצץ', 'info', 'היחסים עם ראש הממשלה נפגעו.');
     }
     case 'pm_request_support': {
       if (opt === 'comply') {
         remember(s, from!.id, 'support', 'הגן על הממשלה באולפן', 9);
         applyEffects(s, { playerPopularity: s.government.approval > 45 ? 2 : -2, playerReputation: -1 });
-        return R('הגנת על הממשלה באולפן', 'approved', s.government.approval > 45 ? 'הלך טוב.' : 'המגישה הקשתה. מאוד.');
+        return R('הגנת על הממשלה באולפן', 'approved', s.government.approval > 45 ? 'הראיון עבר היטב.' : 'שאלות קשות על מצב הממשלה הקשו עליך.');
       }
       remember(s, from!.id, 'ignored', 'התחמק מהאולפן', -5);
       return R('התחמקת', 'info');
@@ -146,7 +146,7 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
       if (bill) bill.push -= 5;
       remember(s, from!.id, 'betrayal', 'מרד בהצבעה', -12);
       applyEffects(s, { playerPopularity: 3, playerReputation: 2 });
-      return R('מרדת בהצבעה', 'info', 'התקשורת אוהבת אותך היום. המנהיג פחות.');
+      return R('הצבעת נגד הקו', 'info', 'התקשורת מציגה אותך כעצמאי; המנהיג לא מרוצה.');
     }
     case 'cosponsor': {
       if (opt === 'accept') {
@@ -166,10 +166,10 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
         assignMinister(s, m.id, me.id);
         setRole(s, 'minister', `מונה ל${m.name}`);
         addNews(s, `${me.name} מונה ל${m.name}`, 'good', '🎉');
-        return R(`מונית ל${m.name}!`, 'approved', m.satire ? 'לפחות יש לשכה.' : 'עכשיו יש לך משרד. ותקציב. ובעיות.');
+        return R(`מונית ל${m.name}`, 'approved', 'עכשיו יש לך משרד, תקציב ואחריות.');
       }
       if (from) remember(s, from.id, 'insult', 'סירב לתפקיד', -4);
-      return R('סירבת להצעה', 'info', 'אומץ או טיפשות? נגלה.');
+      return R('סירבת להצעה', 'info');
     }
     case 'merger_offer': {
       if (opt === 'accept') {
@@ -191,7 +191,7 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
       return R('דחית את האיחוד', 'info');
     }
     case 'budget_review':
-      return R('התקציב מחכה לך במסך התקציב', 'info', 'יש לך עד סוף אפריל.');
+      return R('התקציב מחכה לך במסך התקציב', 'info', 'התקציב צריך לעבור עד המועד הקבוע בחוק.');
   }
   return null;
 }

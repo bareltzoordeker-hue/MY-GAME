@@ -23,7 +23,7 @@ export function newFiscalYear(s: GameState): void {
   if (isPM(s)) {
     addInbox(s, {
       kind: 'budget_review', title: `תקציב ${s.date.year} ממתין לאישור`, expiresTurn: s.turn + 1,
-      text: 'עדכן את חלוקת התקציב והגש לכנסטון. אם התקציב לא יעבור עד סוף אפריל – הממשלה נופלת.',
+      text: 'עדכן את חלוקת התקציב והגש לכנסטון. אם התקציב לא יאושר במועד הקבוע בחוק, הכנסטון יתפזר ויתקיימו בחירות.',
       options: [{ id: 'submit', label: 'להגיש עכשיו' }, { id: 'later', label: 'אעבור על התקציב קודם' }],
       defaultOptionId: 'submit', payload: {},
     });
@@ -115,7 +115,7 @@ export function simulateAIGovernment(s: GameState): void {
         addInbox(s, {
           kind: 'promotion_offer', title: `הצעה: ${weakest.name}`, fromId: pm.id, expiresTurn: s.turn + 2,
           text: `"${me.name}, אני רוצה אותך בממשלה. ${weakest.name} – שלך, אם אתה רוצה."`,
-          options: [{ id: 'accept', label: 'לקבל' }, { id: 'decline', label: 'לסרב (בינתיים)' }], defaultOptionId: 'decline',
+          options: [{ id: 'accept', label: 'לקבל' }, { id: 'decline', label: 'לסרב' }], defaultOptionId: 'decline',
           payload: { ministryId: weakest.id },
         });
       }

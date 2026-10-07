@@ -18,7 +18,7 @@ function kpis(s: GameState, m: Ministry): { l: string; v: string; good?: boolean
   if (ids.includes('education')) out.push({ l: 'תלמידים בכיתה', v: `${e.classSize}`, good: e.classSize < 30 }, { l: 'מחסור במורים', v: `${e.teacherShortage}`, good: e.teacherShortage < 2000 }, { l: 'ציון במבחן הבינ״ל', v: `${e.score}`, good: e.score > 500 }, { l: 'כיתות חדשות', v: `${e.classrooms}` });
   if (ids.includes('health')) out.push({ l: 'המתנה במיון', v: `${h.erWait} שעות`, good: h.erWait < 5 }, { l: 'מיטות ל-1000', v: `${h.bedsPer1000}`, good: h.bedsPer1000 > 2.2 }, { l: 'מחסור ברופאים', v: `${h.doctorShortage}` });
   if (ids.includes('finance')) out.push({ l: 'גירעון', v: `${deficitPct(s).toFixed(1)}%`, good: deficitPct(s) < 3 }, { l: 'חוב/תוצר', v: `${debtPct(s).toFixed(0)}%`, good: debtPct(s) < 70 }, { l: 'דירוג אשראי', v: s.economy.creditRating }, { l: 'הכנסות', v: `₪${s.economy.revenue.toFixed(0)}B` }, { l: 'מס הכנסה / מע״מ', v: `${s.economy.taxes.incomeTax.toFixed(0)}% / ${s.economy.taxes.vat.toFixed(0)}%` });
-  if (ids.includes('defense') || ids.includes('police')) out.push({ l: 'כשירות', v: `${s.services.security.metrics.readiness}%`, good: s.services.security.metrics.readiness > 65 }, { l: 'ימי מילואים בשנה', v: `${s.services.security.metrics.reserveDays}` });
+  if (ids.includes('defense') || ids.includes('national_security')) out.push({ l: 'כשירות', v: `${s.services.security.metrics.readiness}%`, good: s.services.security.metrics.readiness > 65 }, { l: 'ימי מילואים בשנה', v: `${s.services.security.metrics.reserveDays}` });
   if (ids.includes('housing')) out.push({ l: 'מחיר דירה ממוצע', v: `₪${s.services.housing.metrics.aptPrice}M` }, { l: 'שנות משכורת לדירה', v: `${s.services.housing.metrics.salaryYears}`, good: s.services.housing.metrics.salaryYears < 10 });
   if (ids.includes('welfare')) out.push({ l: 'שיעור עוני', v: `${s.services.welfare.metrics.poverty}%`, good: s.services.welfare.metrics.poverty < 18 });
   if (ids.includes('energy')) out.push({ l: 'סיכון להפסקות', v: `${s.services.energy.metrics.blackoutRisk}%`, good: s.services.energy.metrics.blackoutRisk < 30 }, { l: 'אנרגיה מתחדשת', v: `${s.services.energy.metrics.renewables}%` });
@@ -38,7 +38,7 @@ function MinistryActionsPanel({ m, p }: { m: Ministry; p: { ministryId: string }
         <button className={`btn btn-sm ${tab === 'all' ? 'btn-blue' : ''}`} onClick={() => setTab('all')} data-tip="כל הפעולות של המשרד">הכול</button>
         {cats.map((c) => (
           <button key={c} className={`btn btn-sm ${tab === c ? (c === 'extreme' ? 'btn-danger' : 'btn-blue') : ''}`} onClick={() => setTab(c)}
-            data-tip={c === 'extreme' ? 'צעדים קיצוניים: השפעה עצומה, תגובות קשות, ולפעמים בלי אישור ראש הממשלה' : `פעולות מסוג ${ACTION_CATS[c]}`}>{ACTION_CATS[c]}</button>
+            data-tip={c === 'extreme' ? 'צעדים חריגים: השפעה גדולה, תגובות חריפות, ולפעמים בלי אישור ראש הממשלה' : `פעולות מסוג ${ACTION_CATS[c]}`}>{ACTION_CATS[c]}</button>
         ))}
       </div>
       <div className="grid sm:grid-cols-2 gap-2">
@@ -50,7 +50,7 @@ function MinistryActionsPanel({ m, p }: { m: Ministry; p: { ministryId: string }
             </div>
             <span className="text-xs muted flex-1">{a.desc}</span>
             {a.outcomes && <span className="text-[10px]" style={{ color: 'var(--violet)' }}>🎲 התוצאה לא ידועה מראש</span>}
-            <ActionButton id="ministry_action" params={{ ...p, actionId: a.id }} className={`btn btn-sm ${a.cat === 'extreme' ? 'btn-danger' : 'btn-blue'}`}>{a.cat === 'extreme' ? 'לעשות את זה' : 'בצע'}</ActionButton>
+            <ActionButton id="ministry_action" params={{ ...p, actionId: a.id }} className={`btn btn-sm ${a.cat === 'extreme' ? 'btn-danger' : 'btn-blue'}`}>{a.cat === 'extreme' ? 'לבצע (צעד חריג)' : 'בצע'}</ActionButton>
           </div>
         ))}
       </div>

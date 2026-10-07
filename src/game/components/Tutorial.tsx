@@ -6,6 +6,8 @@ const KEY = 'hakise.tutorial.done';
 const isDone = () => { try { return localStorage.getItem(KEY) === '1'; } catch { return true; } };
 const markDone = () => { try { localStorage.setItem(KEY, '1'); } catch { /* ignore */ } };
 const RESET_EVENT = 'hakise:tutorial-reset';
+/** Turn the guided tutorial on (fresh) or off for the next game. */
+export const setTutorialEnabled = (on: boolean) => { if (on) resetTutorial(); else markDone(); };
 export const resetTutorial = () => { try { localStorage.removeItem(KEY); } catch { /* ignore */ } window.dispatchEvent(new Event(RESET_EVENT)); };
 
 const STEPS: { screen: ScreenId; title: string; text: string }[] = [

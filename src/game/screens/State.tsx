@@ -91,7 +91,7 @@ export function MapScreen() {
   const projects = s.projects.filter((p) => p.region === sel && p.status !== 'cancelled');
   return (
     <div className="space-y-4">
-      <ScreenHeader title="מפת צבריה" sub="בחר שכבת מידע ולחץ על אזור." right={<Tabs value={layer} onChange={setLayer} items={LAYERS.map((l) => ({ id: l.id, label: l.label }))} />} />
+      <ScreenHeader title="מפת ישמעאל" sub="בחר שכבת מידע ולחץ על אזור." right={<Tabs value={layer} onChange={setLayer} items={LAYERS.map((l) => ({ id: l.id, label: l.label }))} />} />
       <div className="grid md:grid-cols-[minmax(0,340px)_1fr] gap-4">
         <div className="card flex justify-center">
           <svg viewBox="40 0 220 600" style={{ width: '100%', maxWidth: 300, maxHeight: '70vh' }}>

@@ -7,7 +7,7 @@ import { LAW_BY_ID } from '../data/laws';
 import { MINISTRY_ACTIONS, type MinistryActionSpec } from '../data/ministryActions';
 import { EXTRA_MINISTRY_ACTIONS, GENERIC_MINISTER_ACTIONS } from '../data/ministryActionsPlus';
 import { startCrisis } from './crises';
-import { NEW_MINISTRY_TEMPLATES } from '../data/ministries';
+import { DOMAIN_NAMES } from '../data/ministries';
 import { PROJECT_BY_ID } from '../data/projects';
 import { PROMISE_BY_ID } from '../data/promises';
 import {
@@ -22,14 +22,15 @@ import { aiPmDecides } from './aiGovernment';
 import { setGameOver, setRole, syncRole } from './career';
 import { randomCaricature } from './newGame';
 import { addNews, applyEffects, logEvent, remember, scaleEffects } from './effects';
-import { callEarlyElections } from './elections';
+import { BUDGET_PREF, callEarlyElections } from './elections';
+import { addMonths, electionDate, inCampaign, monthsUntilElection } from './calendar';
 import { assignMinister, createMinistry, getMinistry, mergeMinistries, removeMinistry } from './government';
 import { partyStance, proposeBill, repealLaw, voteBudget } from './parliament';
 import { coalitionSeats } from './polls';
 import { cancelProject, startProject } from './projects';
 import { makePromise } from './promises';
 import { allyHurt } from './alliances';
-import { getCapabilities, isPM, isPartyLeader, ministryLawDomains, playerMinistry, turnsToElection } from './roles';
+import { getCapabilities, isPM, isPartyLeader, ministryLawDomains, playerMinistry } from './roles';
 
 export type Params = Record<string, string | number>;
 export type ActionCategory = 'economy' | 'government' | 'parliament' | 'ministry' | 'media' | 'party' | 'campaign' | 'career' | 'projects';
@@ -65,6 +66,8 @@ export interface ActionDef {
 const me = (s: GameState) => s.politicians[s.player.politicianId];
 const str = (p: Params, k: string) => String(p[k] ?? '');
 const num = (p: Params, k: string) => Number(p[k] ?? 0);
+/** "תור אחד" / "3 תורות" (a turn is 4 months, or 2 weeks during a campaign). */
+export const turnsText = (n: number) => (n === 1 ? 'תור אחד' : `${n} תורות`);
 
 /** Budget & tax changes automatically produce group reactions via the sensitivity matrices. */
 export function deriveGroupEffects(s: GameState, e: Effects): Partial<Record<GroupId, number>> {
@@ -111,7 +114,7 @@ function pmApproval(s: GameState, amount: number): RunResult | null {
   remember(s, pm.id, 'ignored', 'ביקש כסף בתקופה קשה', -2);
   return {
     status: 'rejected', title: 'ראש הממשלה דחה את הבקשה',
-    quip: `${pm.name}: "${pick(s, ['אין כסף. תתייעל.', 'לא עכשיו, יש בחירות באופק.', 'תחזור אליי אחרי התקציב.', 'אתה יודע מה הגירעון?'])}"`,
+    quip: `${pm.name}: "${pick(s, ['אין מקור תקציבי. צריך להתייעל במסגרת הקיימת.', 'לא בשלב הזה. הגירעון גבוה מדי.', 'נבחן את זה בתקציב הבא.'])}"`,
     people: [{ icon: '🪑', label: pm.name, text: 'דחה את הבקשה', tone: 'bad' }],
   };
 }
@@ -130,7 +133,7 @@ const def = (a: ActionDef) => { A.push(a); return a; };
 // ===== ECONOMY (PM) =====
 def({
   id: 'set_tax', title: 'שינוי מס', icon: '🧾', category: 'economy', level: 'medium', domain: 'finance',
-  description: 'לקחת עוד קצת מהעם. או להחזיר קצת, רגע לפני בחירות.',
+  description: 'העלאה או הורדה של מס. משנה את הכנסות המדינה ומשפיע על קבוצות שונות לפי סוג המס.',
   capital: (_s, p) => Math.round(Math.abs(num(p, 'delta')) * 5),
   unavailable: (s) => (getCapabilities(s).canSetTaxes ? null : 'רק ראש הממשלה קובע מסים'),
   estimate: (_s, p) => ({ taxes: { [str(p, 'tax')]: num(p, 'delta') } }),
@@ -140,13 +143,13 @@ def({
     const d = num(p, 'delta');
     applyDecision(s, { taxes: { [tax]: d }, stability: d > 0 ? -2 : 0, partyMomentum: { [s.player.partyId]: d > 0 ? -1.5 * d : 1 * -d } });
     addNews(s, d > 0 ? `הממשלה מעלה את ה${TAX_NAMES[tax]} ב-${d}%` : `הורדת ${TAX_NAMES[tax]}: ${Math.abs(d)}% פחות`, d > 0 ? 'bad' : 'good', '🧾');
-    return { title: `${TAX_NAMES[tax]} ${d > 0 ? '+' : ''}${d}%`, quip: d > 0 ? 'היועץ: "אף אחד לא אוהב מסים. חוץ מהאוצר."' : 'היועץ: "הציבור מרוצה. הגירעון פחות."' };
+    return { title: `${TAX_NAMES[tax]} ${d > 0 ? '+' : ''}${d}%`, quip: d > 0 ? 'ההכנסות יעלו, אבל הציבור ירגיש את זה בכיס.' : 'הציבור ירוויח, אבל ההכנסות יירדו והגירעון יגדל.' };
   },
 });
 
 def({
   id: 'adjust_budget', title: 'שינוי תקציב', icon: '💰', category: 'economy', level: 'medium',
-  description: 'להזיז מיליארדים בין משרדים כמו כיסאות בחתונה. מישהו תמיד נשאר בלי.',
+  description: 'הוספה או קיצוץ בסעיף תקציבי. משפיע על איכות השירות, על השר האחראי ועל הקבוצות שנשענות עליו.',
   capital: (_s, p) => (Math.abs(num(p, 'delta')) >= 3 ? 4 : 2),
   unavailable: (s) => (getCapabilities(s).canManageBudget ? null : 'רק ראש הממשלה מחלק את התקציב'),
   estimate: (_s, p) => ({ budget: { [str(p, 'category')]: num(p, 'delta') } }),
@@ -155,7 +158,6 @@ def({
     const cat = str(p, 'category') as BudgetCategory;
     const d = num(p, 'delta');
     applyDecision(s, { budget: { [cat]: d } });
-    // the responsible minister cares
     const m = s.government.ministries.find((x) => x.categories.includes(cat));
     const people: ReactionLine[] = [];
     if (m?.ministerId && m.ministerId !== s.player.politicianId) {
@@ -172,7 +174,7 @@ def({
 
 def({
   id: 'stimulus', title: 'חבילת גירוי כלכלי', icon: '🚀', category: 'economy', level: 'major', domain: 'economy',
-  description: '₪8 מיליארד ממריצים את הכלכלה עכשיו. החשבון יגיע לנכדים, שעוד לא מצביעים.', capital: 8, cooldown: 6,
+  description: '₪8 מיליארד חד-פעמיים להאצת הצמיחה ולהורדת האבטלה. מגדיל את החוב ועלול להעלות את האינפלציה.', capital: 8, cooldown: 3,
   unavailable: (s) => (getCapabilities(s).canManageBudget ? null : 'רק ראש הממשלה'),
   estimate: () => ({ oneOffCost: 8, economy: { growth: 0.8, unemployment: -0.4, inflation: 0.3 }, groups: { selfEmployed: 3, employees: 2, highIncome: 1 } }),
   needsMeeting: () => true,
@@ -185,8 +187,8 @@ def({
 });
 
 def({
-  id: 'austerity', title: 'תוכנית צנע', icon: '🪓', category: 'economy', level: 'major', domain: 'finance',
-  description: '3% קיצוץ לכולם חוץ מהביטחון, כי עם הביטחון לא מתעסקים. גם לא עם הלשכה שלך.', capital: 10, cooldown: 8,
+  id: 'austerity', title: 'תוכנית צנע', icon: '✂️', category: 'economy', level: 'major', domain: 'finance',
+  description: 'קיצוץ רוחבי של 3% בכל המשרדים האזרחיים (הביטחון לא נכלל). מקטין את הגירעון ופוגע בשירותים ובעובדי המדינה.', capital: 10, cooldown: 4,
   unavailable: (s) => (getCapabilities(s).canManageBudget ? null : 'רק ראש הממשלה'),
   estimate: (s) => ({ budget: Object.fromEntries((['education', 'health', 'welfare', 'transport', 'housing', 'infrastructure', 'government', 'culture', 'science'] as BudgetCategory[]).map((c) => [c, -s.budget.allocations[c] * 0.03])) }),
   needsMeeting: () => true,
@@ -199,13 +201,13 @@ def({
         remember(s, m.ministerId, 'insult', 'תוכנית הצנע קיצצה לו', -5);
       }
     }
-    addNews(s, 'תוכנית צנע: הממשלה מקצצת 3% בכל המשרדים', 'bad', '🪓');
+    addNews(s, 'תוכנית צנע: הממשלה מקצצת 3% בכל המשרדים האזרחיים', 'bad', '✂️');
   },
 });
 
 def({
   id: 'tax_enforcement', title: 'מבצע אכיפת מס', icon: '🔍', category: 'economy', level: 'simple', domain: 'finance',
-  description: 'פשיטה על קופסאות הנעליים של העצמאים. הדגים הגדולים בקפריסין, אז מתחילים מהקטנים.', capital: 4, cooldown: 4,
+  description: 'תגבור רשות המסים נגד העלמות והון שחור. מכניס כ-₪5 מיליארד; העצמאים והמגזר העסקי לא מרוצים.', capital: 4, cooldown: 2,
   unavailable: (s) => (getCapabilities(s).canManageBudget ? null : 'רק ראש הממשלה'),
   estimate: () => ({ revenue: 5, groups: { selfEmployed: -4, highIncome: -2, lowIncome: 1 } }),
   run: (s) => { applyDecision(s, { revenue: 5, groups: { selfEmployed: -4, highIncome: -2, lowIncome: 1 } }); },
@@ -213,8 +215,8 @@ def({
 
 def({
   id: 'submit_budget', title: 'הגשת התקציב לכנסטון', icon: '📒', category: 'economy', level: 'medium',
-  description: 'ההצבעה החשובה של השנה. כל שותף ייזכר פתאום שהוא צריך עוד מיליארד.', capital: 3,
-  unavailable: (s) => (!isPM(s) ? 'רק ראש הממשלה' : s.budget.passed ? 'התקציב השנתי כבר אושר' : null),
+  description: 'הצבעה על תקציב המדינה. אם התקציב נופל, הכנסטון מתפזר והולכים לבחירות.', capital: 3,
+  unavailable: (s) => (!isPM(s) ? 'רק ראש הממשלה' : s.government.caretaker ? 'ממשלת מעבר לא מגישה תקציב' : s.budget.passed ? 'התקציב השנתי כבר אושר' : null),
   run: (s) => {
     const v = voteBudget(s);
     s.budget.passed = true;
@@ -225,14 +227,14 @@ def({
       return { title: `התקציב אושר (${v.for}-${v.against})`, status: 'approved' };
     }
     callEarlyElections(s, 'התקציב נפל');
-    return { title: `התקציב נפל (${v.for}-${v.against})`, status: 'rejected', quip: 'זה אומר בחירות. תתחיל לחייך למצלמות.' };
+    return { title: `התקציב נפל (${v.for}-${v.against})`, status: 'rejected', quip: 'לפי החוק, הכנסטון מתפזר והבחירות יתקיימו בתוך כ-90 יום.' };
   },
 });
 
 // ===== GOVERNMENT (PM) =====
 def({
   id: 'appoint_minister', title: 'מינוי שר', icon: '🤝', category: 'government', level: 'simple', capital: 3,
-  description: 'לבחור בין מי שמבין בתחום לבין מי שמאיים לפרק את הקואליציה. רמז: לא הראשון.',
+  description: 'מינוי חבר קואליציה לתיק. מינוי מתיק ששויך בהסכם למפלגה אחרת פוגע ביציבות הקואליציה.',
   unavailable: (s, p) => {
     if (!getCapabilities(s).canManageGovernment) return 'רק ראש הממשלה ממנה שרים';
     const pol = s.politicians[str(p, 'politicianId')];
@@ -246,16 +248,16 @@ def({
     const prev = m.ministerId && m.ministerId !== s.government.pmId ? s.politicians[m.ministerId] : null;
     if (prev && prev.id !== pol.id) {
       remember(s, prev.id, 'fired', `הוחלף ב${m.name}`, -20);
-      people.push({ icon: '😠', label: prev.name, text: pick(s, ['לא אשכח את זה.', 'זה עוד לא נגמר.', 'אני הולך לאולפנים.']), tone: 'bad' });
+      people.push({ icon: '😠', label: prev.name, text: pick(s, ['אני מצטער על ההחלטה. היא לא עניינית.', 'אמשיך לשרת את הציבור מכל תפקיד.', 'ההחלטה מאכזבת.']), tone: 'bad' });
     }
     assignMinister(s, m.id, pol.id);
     remember(s, pol.id, 'appointed', `מונה ל${m.name}`, 15);
-    people.push({ icon: '😊', label: pol.name, text: pick(s, ['כבוד גדול. ואחריות. בעיקר כבוד.', 'לא אכזב! (כנראה)', 'סוף סוף מכירים בכישרון שלי.']), tone: 'good' });
+    people.push({ icon: '🙂', label: pol.name, text: pick(s, ['אני מודה על האמון ואפעל לטובת כלל הציבור.', 'זו אחריות גדולה. ניגש לעבודה כבר מחר.', 'אני מכיר את התחום ואדע לקדם אותו.']), tone: 'good' });
     if (m.agreementPartyId && m.agreementPartyId !== pol.partyId && s.government.coalition.includes(m.agreementPartyId)) {
       const lead = s.parties[m.agreementPartyId].leaderId;
       remember(s, lead, 'betrayal', `לקחת להם את ${m.name}`, -18);
       applyEffects(s, { stability: -6 });
-      people.push({ icon: '💢', label: s.parties[m.agreementPartyId].name, text: 'הפרת את ההסכם הקואליציוני!', tone: 'bad' });
+      people.push({ icon: '⚠️', label: s.parties[m.agreementPartyId].name, text: 'זו הפרה של ההסכם הקואליציוני.', tone: 'bad' });
       m.agreementPartyId = pol.partyId;
     }
     addNews(s, `${pol.name} מונה ל${m.name}`, 'neutral', '🤝');
@@ -264,8 +266,8 @@ def({
 });
 
 def({
-  id: 'fire_minister', title: 'פיטורי שר', icon: '🔥', category: 'government', level: 'medium', capital: 5,
-  description: 'שר עף, אויב נולד. התיק עובר אליך, עם כל הבעיות.',
+  id: 'fire_minister', title: 'פיטורי שר', icon: '📤', category: 'government', level: 'medium', capital: 5,
+  description: 'העברת שר מתפקידו. התיק עובר לראש הממשלה. השר ומפלגתו יזכרו את זה.',
   unavailable: (s, p) => {
     if (!getCapabilities(s).canManageGovernment) return 'רק ראש הממשלה';
     const m = getMinistry(s, str(p, 'ministryId'));
@@ -281,42 +283,41 @@ def({
     const lead = s.parties[min.partyId].leaderId;
     if (lead !== min.id) remember(s, lead, 'insult', `פיטרת את ${min.name} שלנו`, -8);
     applyEffects(s, { stability: min.partyId !== s.player.partyId ? -5 : -1, playerPopularity: min.popularity < 30 ? 2 : -1 });
-    addNews(s, `דרמה: ${min.name} פוטר מ${m.name}`, 'neutral', '🔥');
-    logEvent(s, '🔥', `פיטרת את ${min.name}`, 2, 'neutral', 'government');
-    return { title: `${min.name} פוטר`, people: [{ icon: '😡', label: min.name, text: pick(s, ['גיליתי על זה מהטלוויזיה!', 'אתה תצטער על זה.', 'אני מקים מפלגה חדשה. אולי.']), tone: 'bad' }] };
+    addNews(s, `${min.name} הועבר מתפקידו כ${m.name.replace('משרד ה', 'שר ה')}`, 'neutral', '📤');
+    logEvent(s, '📤', `פיטרת את ${min.name}`, 2, 'neutral', 'government');
+    return { title: `${min.name} פוטר`, people: [{ icon: '😠', label: min.name, text: pick(s, ['זו החלטה פוליטית ולא מקצועית.', 'למדתי על כך מהתקשורת. זה לא ראוי.', 'אשקול את צעדיי הבאים.']), tone: 'bad' }] };
   },
 });
 
 def({
   id: 'merge_ministries', title: 'איחוד משרדים', icon: '🧩', category: 'government', level: 'medium', capital: 8,
-  description: 'שני משרדים, מנכ״ל אחד, 400 עובדים שלא מבינים איפה החדר שלהם.',
+  description: 'מאחד שני משרדים לאחד. חוסך בהוצאות המנהלה; בטווח הקצר פוגע ביעילות ובעובדים.',
   unavailable: (s, p) => (!getCapabilities(s).canManageGovernment ? 'רק ראש הממשלה' : str(p, 'a') === str(p, 'b') ? 'בחר שני משרדים שונים' : null),
   run: (s, p) => {
     const merged = mergeMinistries(s, str(p, 'a'), str(p, 'b'));
     if (!merged) return { status: 'rejected', title: 'האיחוד נכשל' };
     applyDecision(s, { budget: { government: -0.4 }, groups: { center: 1, publicSector: -2 } });
-    addNews(s, `קם ${merged.name}. אף אחד לא יודע איפה הכניסה`, 'satire', '🧩');
-    return { title: `נוצר: ${merged.name}`, quip: 'בטווח הקצר: בלגן. בטווח הארוך: אולי חיסכון.' };
+    addNews(s, `הממשלה אישרה את הקמת ${merged.name}`, 'neutral', '🧩');
+    return { title: `נוצר: ${merged.name}`, quip: 'בטווח הקצר תהיה פגיעה ביעילות; בטווח הארוך צפוי חיסכון.' };
   },
 });
 
 def({
-  id: 'create_ministry', title: 'הקמת משרד', icon: '🏗️', category: 'government', level: 'simple', capital: 4,
-  description: 'עוד משרד, עוד לשכה, עוד נהג. ועוד שותף קואליציוני מחייך.',
+  id: 'create_ministry', title: 'הקמת משרד', icon: '🏛️', category: 'government', level: 'simple', capital: 4,
+  description: 'הקמת משרד ממשלתי חדש (מבין משרדים שהיו בעבר). מאפשר תיק נוסף לשותף קואליציוני; עולה בהוצאות מנהלה.',
   unavailable: (s) => (getCapabilities(s).canManageGovernment ? null : 'רק ראש הממשלה'),
   run: (s, p) => {
     const m = createMinistry(s, str(p, 'templateId'));
     if (!m) return { status: 'rejected', title: 'המשרד כבר קיים' };
     applyDecision(s, { groups: { center: -1.5, selfEmployed: -1, publicSector: 1 } });
-    const t = NEW_MINISTRY_TEMPLATES.find((x) => x.id === str(p, 'templateId'));
-    addNews(s, t?.satire ? `הוקם ${m.name}. תקציב: ₪300 מיליון. מטרה: לא ידועה` : `הוקם ${m.name}`, t?.satire ? 'satire' : 'neutral', m.icon);
-    return { title: `הוקם ${m.name}`, quip: 'עכשיו צריך למנות לו שר. יש לך מישהו לרצות?' };
+    addNews(s, `הוקם ${m.name}`, 'neutral', m.icon);
+    return { title: `הוקם ${m.name}`, quip: 'עכשיו צריך למנות לו שר.' };
   },
 });
 
 def({
   id: 'remove_ministry', title: 'סגירת משרד', icon: '🗑️', category: 'government', level: 'simple', capital: 4,
-  description: 'סוגרים משרד שאף אחד לא ידע שקיים. גם השר שלו לא.',
+  description: 'סגירת משרד שאינו מנהל שירות או תקציב. חוסך בהוצאות מנהלה; השר מאבד את תיקו.',
   unavailable: (s, p) => {
     if (!getCapabilities(s).canManageGovernment) return 'רק ראש הממשלה';
     const m = getMinistry(s, str(p, 'ministryId'));
@@ -326,37 +327,37 @@ def({
     const m = getMinistry(s, str(p, 'ministryId'))!;
     removeMinistry(s, m.id);
     applyDecision(s, { groups: { center: 1.5, selfEmployed: 1 } });
-    addNews(s, `${m.name} נסגר. איש לא הבחין`, 'satire', '🗑️');
+    addNews(s, `${m.name} נסגר; תחומי האחריות הועברו למשרדים אחרים`, 'neutral', '🗑️');
     return { title: `${m.name} נסגר` };
   },
 });
 
 def({
-  id: 'coalition_gift', title: 'כספים קואליציוניים', icon: '🎁', category: 'government', level: 'simple', capital: 0, cooldown: 3,
-  description: '₪1.5 מיליארד ״לצרכים ייעודיים״. כולם יודעים מה הייעוד: שקט.',
+  id: 'coalition_gift', title: 'כספים קואליציוניים', icon: '🎁', category: 'government', level: 'simple', capital: 0, cooldown: 2,
+  description: '₪1.5 מיליארד לנושאים שהשותפה דורשת. מחזק את היציבות והנאמנות; פוגע בתדמית ובאמון הציבור.',
   unavailable: (s, p) => (!isPM(s) ? 'רק ראש הממשלה' : !s.government.coalition.includes(str(p, 'partyId')) || str(p, 'partyId') === s.player.partyId ? 'בחר שותפה קואליציונית' : null),
   run: (s, p) => {
     const party = s.parties[str(p, 'partyId')];
-    const cat = (party.id === 'kugel' ? 'education' : party.id === 'givaa' ? 'housing' : 'welfare') as BudgetCategory;
-    applyDecision(s, { budget: { [cat]: 1.5 }, groups: { center: -1.5, secular: party.id === 'kugel' ? -2 : 0 }, stability: 5 });
+    const cat = BUDGET_PREF[party.id] ?? 'welfare';
+    applyDecision(s, { budget: { [cat]: 1.5 }, groups: { center: -1.5, secular: ['shas', 'utj'].includes(party.id) ? -2 : 0 }, stability: 5 });
     remember(s, party.leaderId, 'favor', 'כספים קואליציוניים', 14);
-    addNews(s, `₪1.5 מיליארד "כספים ייעודיים" ל${party.name}`, 'bad', '🎁');
-    return { title: `${party.name} קיבלה ₪1.5 מיליארד`, people: [{ icon: party.logo, label: s.politicians[party.leaderId]?.name ?? party.name, text: 'עכשיו אפשר לדבר.', tone: 'good' }] };
+    addNews(s, `₪1.5 מיליארד כספים קואליציוניים ל${party.name}`, 'bad', '🎁');
+    return { title: `${party.name} קיבלה ₪1.5 מיליארד`, people: [{ icon: party.logo, label: s.politicians[party.leaderId]?.name ?? party.name, text: 'זה מה שסוכם. נמשיך לתמוך בממשלה.', tone: 'good' }] };
   },
 });
 
 def({
   id: 'early_elections', title: 'הקדמת בחירות', icon: '🗳️', category: 'government', level: 'major', capital: 0,
-  description: 'לפזר את הכנסטון ולהמר על הסקרים. מה כבר יכול להשתבש? הכול.',
-  unavailable: (s) => (!isPM(s) ? 'רק ראש הממשלה' : turnsToElection(s) <= 3 ? 'הבחירות כבר קרובות' : null),
-  run: (s) => { callEarlyElections(s, 'ראש הממשלה פיזר את הכנסטון'); return { title: 'הכנסטון התפזר', quip: 'הימור. נקווה שהסקרים צודקים הפעם.' }; },
+  description: 'פיזור הכנסטון. הבחירות יתקיימו בתוך כ-90 יום, ועד אז הממשלה היא ממשלת מעבר.',
+  unavailable: (s) => (!isPM(s) ? 'רק ראש הממשלה' : monthsUntilElection(s) <= 6 ? 'הבחירות כבר קרובות' : null),
+  run: (s) => { callEarlyElections(s, 'ראש הממשלה פיזר את הכנסטון'); return { title: 'הכנסטון התפזר', quip: 'הבחירות בעוד כ-3 חודשים. עכשיו הכול תלוי בקמפיין.' }; },
 });
 
 // ===== PARLIAMENT =====
 def({
   id: 'propose_law', title: 'הגשת הצעת חוק', icon: '📝', category: 'parliament', level: 'medium',
-  description: 'כתבת חוק. עכשיו רק צריך 61 אנשים שלא סובלים אותך שיצביעו בעדו.',
-  capital: (s) => (isPM(s) ? 4 : 6), cooldown: 2,
+  description: 'הגשת חוק לכנסטון. הצעה ממשלתית עוברת ישר לוועדה; הצעה פרטית מתחילה בקריאה טרומית. כדי לעבור צריך רוב.',
+  capital: (s) => (isPM(s) ? 4 : 6), cooldown: 1,
   unavailable: (s, p) => {
     const lawId = str(p, 'lawId');
     if (!LAW_BY_ID[lawId]) return 'חוק לא קיים';
@@ -374,7 +375,7 @@ def({
     if (s.player.role === 'minister' && law.domain === playerMinistry(s)?.domain) {
       const ok = chance(s, clamp(0.3 + (s.politicians[s.government.pmId].loyalty - 50) / 100 + 0.2, 0.1, 0.85));
       gov = ok;
-      people.push({ icon: '🪑', label: 'ראש הממשלה', text: ok ? 'מאשר כהצעה ממשלתית.' : 'לא כהצעה ממשלתית. תגיש לבד.', tone: ok ? 'good' : 'bad' });
+      people.push({ icon: '🪑', label: 'ראש הממשלה', text: ok ? 'מאשר כהצעה ממשלתית.' : 'לא כהצעה ממשלתית. אפשר להגיש כהצעה פרטית.', tone: ok ? 'good' : 'bad' });
     }
     const bill = proposeBill(s, law.id, s.player.politicianId, gov, num(p, 'scale') === 0.5);
     if (!bill) return { status: 'rejected', title: 'לא ניתן להגיש' };
@@ -385,14 +386,13 @@ def({
 });
 
 def({
-  id: 'repeal_law', title: 'ביטול חוק', icon: '🧨', category: 'parliament', level: 'major', capital: 10, cooldown: 3,
-  description: 'מוחקים חוק שמישהו נלחם עליו שנתיים. הוא יזכור. לנצח.',
+  id: 'repeal_law', title: 'ביטול חוק', icon: '🧨', category: 'parliament', level: 'major', capital: 10, cooldown: 2,
+  description: 'ביטול חוק קיים. צריך רוב בכנסטון; המפלגות שקידמו את החוק יראו בזה בגידה.',
   unavailable: (s, p) => (!isPM(s) ? 'רק ראש הממשלה יכול לבטל חוק' : !s.activeLaws.includes(str(p, 'lawId')) ? 'החוק לא בתוקף' : null),
   needsMeeting: () => true,
   run: (s, p) => {
     const law = LAW_BY_ID[str(p, 'lawId')];
     const bill: Bill = { id: 'repeal', lawId: law.id, title: law.title, sponsorId: s.player.politicianId, isGovernment: true, stage: 'final', turnsInStage: 0, proposedTurn: s.turn, status: 'active', push: 0, modified: false };
-    // repealing needs a majority too: parties that love the law vote against the repeal
     let against = 0;
     for (const party of Object.values(s.parties)) {
       const st = partyStance(s, party, bill);
@@ -405,7 +405,7 @@ def({
     repealLaw(s, law);
     allyHurt(s, law.id);
     for (const pid of Object.keys(s.parties)) if (s.parties[pid].favoriteLaws.includes(law.id)) remember(s, s.parties[pid].leaderId, 'betrayal', `ביטלת את ${law.title}`, -15);
-    addNews(s, `${law.title} בוטל. ${pick(s, ['היוזמים מזועזעים', 'המתנגדים חוגגים', 'איש לא זוכר למה הוא עבר מלכתחילה'])}`, 'neutral', '🧨');
+    addNews(s, `הכנסטון ביטל את ${law.title}`, 'neutral', '🧨');
     logEvent(s, '🧨', `ביטלת את ${law.title}`, 2, 'neutral', 'law');
     return { title: `בוטל: ${law.title}`, subtitle: `${120 - against} תמכו בביטול` };
   },
@@ -413,18 +413,18 @@ def({
 
 def({
   id: 'push_bill', title: 'גיוס תמיכה להצעה', icon: '📣', category: 'parliament', level: 'simple', capital: 8, cooldown: 1,
-  description: 'שיחות טלפון, הבטחות לג׳ובים ועוגיות. בעיקר הבטחות.',
+  description: 'שיחות עם ח״כים ועם ראשי סיעות כדי להגדיל את התמיכה בהצעה (+25 לסיכויי המעבר).',
   unavailable: (s, p) => (s.bills.find((b) => b.id === str(p, 'billId') && b.status === 'active') ? null : 'ההצעה לא פעילה'),
   run: (s, p) => {
     const b = s.bills.find((x) => x.id === str(p, 'billId'))!;
     b.push += 25;
-    return { title: `התמיכה ב"${b.title}" עולה`, quip: 'כמה ח״כים קיבלו הבטחות. נקווה שלא יזכרו.' };
+    return { title: `התמיכה ב"${b.title}" עולה`, quip: 'ח״כים מתנדנדים קיבלו הסברים והבטחות לתיאום בהמשך.' };
   },
 });
 
 def({
   id: 'soften_bill', title: 'ריכוך הצעה', icon: '🧈', category: 'parliament', level: 'simple', capital: 2,
-  description: 'מורידים מהחוק את כל מה שהיה בו. נשארים שם יפה ותמונה לפרוטוקול.',
+  description: 'גרסה מתונה של החוק: יותר תמיכה, פחות השפעה.',
   unavailable: (s, p) => {
     const b = s.bills.find((x) => x.id === str(p, 'billId') && x.status === 'active');
     if (!b) return 'ההצעה לא פעילה';
@@ -434,13 +434,13 @@ def({
   run: (s, p) => {
     const b = s.bills.find((x) => x.id === str(p, 'billId'))!;
     b.modified = true;
-    return { title: `"${b.title}" רוכך`, quip: 'גרסה "מאוזנת". כלומר: אף אחד לא מרוצה לגמרי.' };
+    return { title: `"${b.title}" רוכך`, quip: 'הגרסה המתונה מגדילה את הסיכוי לרוב, אבל ההשפעה של החוק קטנה.' };
   },
 });
 
 def({
   id: 'vote_bill', title: 'הצבעה במליאה', icon: '🗳️', category: 'parliament', level: 'simple', capital: 0, cooldown: 1,
-  description: 'אצבע אחת, השלכות רבות. המנהיג שלך סופר.',
+  description: 'ההצבעה שלך על הצעת חוק. הצבעה נגד קו המפלגה פוגעת ביחסים עם המנהיג.',
   unavailable: (s, p) => (s.bills.find((b) => b.id === str(p, 'billId') && b.status === 'active') ? null : 'ההצעה לא פעילה'),
   run: (s, p) => {
     const b = s.bills.find((x) => x.id === str(p, 'billId'))!;
@@ -454,7 +454,7 @@ def({
     if (leader && !leader.isPlayer && forIt !== partyFor) {
       remember(s, leader.id, 'betrayal', `הצביע נגד הקו ב${b.title}`, -10);
       applyEffects(s, { playerPopularity: 2, playerReputation: 1 });
-      people.push({ icon: '😤', label: leader.name, text: 'מרד?! נדבר אחר כך.', tone: 'bad' });
+      people.push({ icon: '😤', label: leader.name, text: 'הצבעה נגד עמדת הסיעה. נדבר על זה.', tone: 'bad' });
     } else if (leader && !leader.isPlayer) {
       leader.loyalty = clamp(leader.loyalty + 2);
     }
@@ -463,8 +463,8 @@ def({
 });
 
 def({
-  id: 'no_confidence', title: 'הצעת אי-אמון', icon: '⚔️', category: 'parliament', level: 'major', capital: 15, cooldown: 6,
-  description: 'לנסות להפיל את הממשלה. בדרך כלל נכשל, תמיד מצטלם טוב.',
+  id: 'no_confidence', title: 'הצעת אי-אמון', icon: '⚔️', category: 'parliament', level: 'major', capital: 15, cooldown: 3,
+  description: 'ניסיון להפיל את הממשלה. מצליח רק אם יש רוב נגדה ושותפים בקואליציה מוכנים לערוק.',
   unavailable: (s) => (s.government.coalition.includes(s.player.partyId) ? 'אתה בקואליציה' : !isPartyLeader(s) ? 'רק מנהיג מפלגה' : null),
   run: (s) => {
     const seats = coalitionSeats(s);
@@ -477,17 +477,17 @@ def({
       callEarlyElections(s, 'הממשלה הפסידה בהצבעת אי-אמון');
       applyEffects(s, { partyMomentum: { [s.player.partyId]: 6 }, playerPopularity: 5 });
       s.career.memorable.push('הפיל את הממשלה בהצבעת אי-אמון');
-      return { title: 'הממשלה נפלה!', status: 'approved', quip: 'עכשיו צריך לנצח בבחירות. פרט קטן.' };
+      return { title: 'הממשלה נפלה', status: 'approved', quip: 'הכנסטון מתפזר. עכשיו צריך לנצח בבחירות.' };
     }
     applyEffects(s, { partyMomentum: { [s.player.partyId]: -2 } });
-    return { title: `אי-האמון נכשל (${govVotes} נגד)`, status: 'rejected', quip: 'לפחות היו כותרות.' };
+    return { title: `אי-האמון נכשל (${govVotes} נגד)`, status: 'rejected', quip: 'הקואליציה שמרה על רוב.' };
   },
 });
 
 // ===== PROJECTS =====
 def({
   id: 'start_project', title: 'השקת פרויקט', icon: '🏗️', category: 'projects', level: 'medium',
-  description: 'אבן פינה, סרט, בורקס. הפרויקט עצמו? נדבר אחרי הבחירות.', capital: 3,
+  description: 'פרויקט לאומי: עולה כסף לאורך זמן ומשפר שירות ואזור כשהוא מסתיים.', capital: 3,
   unavailable: (s, p) => {
     const d = PROJECT_BY_ID[str(p, 'defId')];
     if (!d) return 'פרויקט לא קיים';
@@ -506,20 +506,20 @@ def({
     }
     startProject(s, d.id, s.player.politicianId);
     applyDecision(s, { groups: scaleEffects({ groups: d.groups }, 0.4).groups, regionInvestment: { [d.region]: 5 } });
-    return { title: `יוצא לדרך: ${d.name}`, subtitle: `₪${d.cost}B · ${d.turns * 2} חודשים · ${REGION_BY_ID[d.region].name}`, quip: d.satire };
+    return { title: `יוצא לדרך: ${d.name}`, subtitle: `₪${d.cost}B · ${d.turns * 2} חודשים · ${REGION_BY_ID[d.region].name}`, quip: d.note };
   },
 });
 
 def({
   id: 'cancel_project', title: 'ביטול פרויקט', icon: '🛑', category: 'projects', level: 'simple', capital: 4,
-  description: 'חוסכים מיליארדים ומאכזבים אזור שלם. הם יזכרו את זה בקלפי.',
+  description: 'עצירת פרויקט שבביצוע. חוסך את יתרת העלות ופוגע באזור ובמי שיזם אותו.',
   unavailable: (s) => (getCapabilities(s).canStartProjects ? null : 'אין לך סמכות'),
   run: (s, p) => {
     const prj = s.projects.find((x) => x.id === str(p, 'projectId') && x.status === 'active');
     if (!prj || !cancelProject(s, prj.id)) return { status: 'rejected', title: 'לא נמצא' };
     applyDecision(s, { regionInvestment: { [prj.region]: -10 }, groups: { periphery: -2 } });
     if (prj.sponsorId !== s.player.politicianId) remember(s, prj.sponsorId, 'insult', `ביטלת את ${prj.name}`, -10);
-    addNews(s, `בוטל: ${prj.name}. התושבים: "ידענו"`, 'bad', '🛑');
+    addNews(s, `בוטל: ${prj.name}. התושבים מאוכזבים`, 'bad', '🛑');
     return { title: `${prj.name} בוטל` };
   },
 });
@@ -539,7 +539,7 @@ def({
     if (!isPM(s) && m.ministerId !== s.player.politicianId) return 'זה לא המשרד שלך';
     const spec = ministryActionSpecs(m).find((x) => x.id === str(p, 'actionId'));
     if (!spec) return 'פעולה לא קיימת';
-    if ((s.player.actionCooldowns[`m_${spec.id}`] ?? 0) > s.turn) return `זמין שוב בעוד ${(s.player.actionCooldowns[`m_${spec.id}`] - s.turn) * 2} חודשים`;
+    if ((s.player.actionCooldowns[`m_${spec.id}`] ?? 0) > s.turn) return `זמין שוב בעוד ${turnsText(s.player.actionCooldowns[`m_${spec.id}`] - s.turn)}`;
     return null;
   },
   estimate: (s, p) => {
@@ -558,20 +558,20 @@ def({
       // acting without the PM: it happens, but the PM and the coalition remember
       remember(s, pm.id, 'betrayal', `פעל על דעת עצמו: ${spec.title}`, -18);
       applyEffects(s, { stability: -5, playerReputation: -2, playerPopularity: 2 });
-      people.push({ icon: '🤬', label: pm.name, text: pick(s, ['מי אישר את זה?! אף אחד!', 'קראתי על זה בעיתון. בעיתון!', 'זה הסוף שלך בממשלה הזאת.', 'נדבר. בלשכה. עכשיו.']), tone: 'bad' });
+      people.push({ icon: '😠', label: pm.name, text: pick(s, ['הצעד לא תואם איתי ולא אושר בממשלה.', 'זו פעולה בניגוד לעקרון האחריות המשותפת.', 'אני שוקל את המשך כהונתך בממשלה.']), tone: 'bad' });
     } else {
       ask = needsPmApproval(s, eff);
       if (ask > 0) {
         const rej = pmApproval(s, ask);
         if (rej) return rej;
-        people.push({ icon: '🪑', label: pm.name, text: 'אישר. בחריקת שיניים.', tone: 'good' });
+        people.push({ icon: '🪑', label: pm.name, text: 'אושר, במסגרת התקציב הקיים.', tone: 'good' });
       }
     }
     applyDecision(s, eff);
     spec.mutate?.(s, m);
     if (spec.metric) s.services[spec.metric.service as keyof GameState['services']].metrics[spec.metric.key] = (s.services[spec.metric.service as keyof GameState['services']].metrics[spec.metric.key] ?? 0) + spec.metric.amount;
     if (!isPM(s)) applyEffects(s, { playerReputation: 1, playerPopularity: 1 });
-    let quip = spec.satire;
+    let quip = spec.note;
     let status: RunResult['status'] = 'approved';
     // random outcomes: the same action can go very differently
     if (spec.outcomes?.length) {
@@ -581,7 +581,7 @@ def({
       const oe = typeof o.effects === 'function' ? o.effects(s, m) : o.effects;
       if (oe) applyDecision(s, oe);
       if (o.crisis && !s.crises.some((c) => c.defId === o.crisis)) startCrisis(s, o.crisis);
-      if (o.headline) addNews(s, o.headline, o.tone === 'good' ? 'good' : o.tone === 'bad' ? 'bad' : 'satire', spec.icon);
+      if (o.headline) addNews(s, o.headline, o.tone === 'good' ? 'good' : o.tone === 'bad' ? 'bad' : 'neutral', spec.icon);
       quip = o.text;
       if (o.tone === 'bad') status = 'rejected';
     }
@@ -589,14 +589,14 @@ def({
     const budgetAdd = Object.values(eff.budget ?? {}).reduce((a, v) => a + Math.max(0, v ?? 0), 0);
     s.career.moneyInvested += budgetAdd;
     if (spec.cat === 'extreme') s.career.memorable.push(`${spec.title} (${m.name})`);
-    addNews(s, spec.satire ?? `${m.name}: ${spec.title}`, spec.satire ? 'satire' : 'neutral', spec.icon);
+    addNews(s, `${m.name}: ${spec.title}`, 'neutral', spec.icon);
     return { title: `${spec.icon} ${spec.title}`, subtitle: m.name, quip, people, status };
   },
 });
 
 def({
-  id: 'ministry_request_budget', title: 'בקשת תוספת תקציב', icon: '🙏', category: 'ministry', level: 'medium', capital: 4, cooldown: 3,
-  description: 'לבקש מראש הממשלה עוד כסף. הוא יגיד ״אין״. אולי ״אין, אבל״.',
+  id: 'ministry_request_budget', title: 'בקשת תוספת תקציב', icon: '🙏', category: 'ministry', level: 'medium', capital: 4, cooldown: 2,
+  description: 'בקשה מראש הממשלה לתוספת של כ-5% מצורכי המשרד. ראש הממשלה מחליט לפי הגירעון ולפי היחסים איתך.',
   unavailable: (s) => (s.player.role !== 'minister' ? 'רק שר' : !playerMinistry(s)?.categories.length ? 'למשרד שלך אין סעיף תקציבי' : null),
   run: (s) => {
     const m = playerMinistry(s)!;
@@ -607,13 +607,13 @@ def({
     applyDecision(s, { budget: { [cat]: amount } });
     s.career.moneyInvested += amount;
     addNews(s, `${me(s).name} השיג תוספת של ₪${amount}B ל${m.name}`, 'good', '💰');
-    return { title: `אושרה תוספת של ₪${amount} מיליארד`, status: 'approved', people: [{ icon: '🪑', label: s.politicians[s.government.pmId].name, text: 'אל תתרגל.', tone: 'neutral' }] };
+    return { title: `אושרה תוספת של ₪${amount} מיליארד`, status: 'approved', people: [{ icon: '🪑', label: s.politicians[s.government.pmId].name, text: 'מאושר. אני מצפה לראות תוצאות.', tone: 'neutral' }] };
   },
 });
 
 def({
-  id: 'ministry_efficiency', title: 'תוכנית התייעלות', icon: '⚙️', category: 'ministry', level: 'simple', capital: 4, cooldown: 4,
-  description: 'מילה מנומסת ל״כולם יעבדו קשה יותר ויכעסו עליך״.',
+  id: 'ministry_efficiency', title: 'תוכנית התייעלות', icon: '⚙️', category: 'ministry', level: 'simple', capital: 4, cooldown: 2,
+  description: 'יעילות המשרד +8 וביורוקרטיה -6. עובדי המדינה לא מרוצים.',
   unavailable: (s, p) => (ministryOf(s, p) && (isPM(s) || s.player.role === 'minister') ? null : 'אין משרד'),
   run: (s, p) => {
     const m = ministryOf(s, p)!;
@@ -625,21 +625,21 @@ def({
 });
 
 def({
-  id: 'ministry_union', title: 'פגישה עם הוועדים', icon: '🤝', category: 'ministry', level: 'simple', capital: 3, cooldown: 4,
-  description: 'ארוחת צהריים, שלושה תקנים ושנה בלי שביתות. קוראים לזה ״שלום תעשייתי״.',
+  id: 'ministry_union', title: 'הסכם עם ועד העובדים', icon: '🤝', category: 'ministry', level: 'simple', capital: 3, cooldown: 2,
+  description: 'הסכם שקט תעשייתי: מוריד את הסיכוי לשביתה בתחום המשרד לשנה.',
   unavailable: (s, p) => (ministryOf(s, p) && (isPM(s) || s.player.role === 'minister') ? null : 'אין משרד'),
   run: (s, p) => {
     const m = ministryOf(s, p)!;
-    s.flags[`calm_${m.id}`] = s.turn + 6;
-    for (const o of m.origins ?? []) s.flags[`calm_${o}`] = s.turn + 6;
+    s.flags[`calm_${m.id}`] = s.turn + 3;
+    for (const o of m.origins ?? []) s.flags[`calm_${o}`] = s.turn + 3;
     applyDecision(s, { groups: { publicSector: 2 } });
-    return { title: 'הוועד חתם על שקט תעשייתי', subtitle: 'סיכוי לשביתה בתחום ירד לשנה', quip: 'עלה לך רק ארוחת צהריים ושלושה תקנים.' };
+    return { title: 'נחתם הסכם שקט תעשייתי', subtitle: 'הסיכוי לשביתה בתחום ירד לשנה', quip: 'ההסכם כולל שיפורים בתנאי העבודה, בעלות נמוכה.' };
   },
 });
 
 def({
-  id: 'consult_experts', title: 'התייעצות עם אנשי מקצוע', icon: '🧑‍🔬', category: 'ministry', level: 'simple', capital: 1, cooldown: 2,
-  description: 'להקשיב לאנשים שמבינים, ואז לעשות מה שהסקרים אומרים.',
+  id: 'consult_experts', title: 'התייעצות עם אנשי מקצוע', icon: '🧑‍🔬', category: 'ministry', level: 'simple', capital: 1, cooldown: 1,
+  description: 'ישיבת עבודה עם מומחים בתחום: מומחיות +5 ומוניטין +1.',
   unavailable: () => null,
   run: (s, p) => {
     const m = ministryOf(s, p);
@@ -647,11 +647,10 @@ def({
     const pl = me(s);
     pl.expertise[domain] = clamp((pl.expertise[domain] ?? 20) + 5);
     applyEffects(s, { playerReputation: 1 });
-    return { title: 'למדת משהו חדש', subtitle: `מומחיות +5 (${domain})`, quip: 'המומחים מסכימים שצריך עוד מומחים.' };
+    return { title: 'למדת את התחום לעומק', subtitle: `מומחיות +5 (${DOMAIN_NAMES[domain] ?? domain})`, quip: 'ההבנה המקצועית תעזור לך בהחלטות הבאות ובראיונות.' };
   },
 });
 
-// ===== MEDIA & CAREER (everyone) =====
 // ===== MEDIA & CAREER: every appearance can go many ways, with real consequences =====
 interface Roll { w: number; text: string; tone: 'good' | 'bad' | 'neutral'; fx?: Effects; headline?: string; extra?: (s: GameState) => string | void }
 function rollOut(s: GameState, title: string, icon: string, list: Roll[]): RunResult {
@@ -661,7 +660,7 @@ function rollOut(s: GameState, title: string, icon: string, list: Roll[]): RunRe
   const o = pool.find((x) => (r -= x.w) <= 0) ?? pool[0];
   if (o.fx) applyDecision(s, o.fx);
   const more = o.extra?.(s);
-  if (o.headline) addNews(s, o.headline, o.tone === 'good' ? 'good' : o.tone === 'bad' ? 'bad' : 'satire', icon);
+  if (o.headline) addNews(s, o.headline, o.tone === 'good' ? 'good' : o.tone === 'bad' ? 'bad' : 'neutral', icon);
   return { title, status: o.tone === 'good' ? 'approved' : o.tone === 'bad' ? 'rejected' : 'info', quip: more ? `${o.text} ${more}` : o.text };
 }
 const randomGroup = (s: GameState): GroupId => pick(s, GROUPS.map((g) => g.id));
@@ -670,302 +669,252 @@ const rival = (s: GameState) => pick(s, Object.values(s.politicians).filter((p) 
 
 def({
   id: 'press_conference', title: 'מסיבת עיתונאים', icon: '🎙️', category: 'media', level: 'simple', capital: 3, cooldown: 1,
-  description: 'מיקרופון, דגל וחמש שאלות. כל אחת יכולה להתפוצץ.',
+  description: 'הצהרה ושאלות מהעיתונאים. המוניטין שלך משפיע על הסיכוי שזה ילך טוב.',
   unavailable: () => null,
   run: (s) => {
     const me0 = me(s);
     return rollOut(s, 'מסיבת עיתונאים', '🎙️', [
-      { w: 4 + s.player.reputation / 20, tone: 'good', text: 'ענית על כל השאלות בלי לענות על אף אחת. מקצוען.', fx: { playerPopularity: 4, partyMomentum: { [s.player.partyId]: 1 } } },
-      { w: 2.5, tone: 'bad', text: 'עיתונאית שאלה על "פרשת מכונות הקפה". גמגמת 11 שניות. ספרו.', fx: { playerPopularity: -4, playerReputation: -2 }, headline: `${me0.name} גמגם 11 שניות מול שאלה על מכונות הקפה` },
-      { w: 2, tone: 'neutral', text: 'בהתלהבות הכרזת על "תוכנית לאומית" שלא קיימת. עכשיו צריך להמציא אותה.', fx: { playerPopularity: 3, playerReputation: -3 }, extra: (x) => { const l = myLeader(x); if (l && !l.isPlayer) remember(x, l.id, 'insult', 'הכריז על תוכנית בלי לתאם', -6); return l && !l.isPlayer ? `${l.name} שמע על התוכנית מהטלוויזיה.` : ''; } },
-      { w: 1.2, tone: 'neutral', text: 'המיקרופון נפל, אתה תפסת אותו באוויר. הסרטון: 2 מיליון צפיות.', fx: { playerPopularity: 2, groups: { youth: 3 } }, headline: 'תפיסת המיקרופון של השנה' },
-      { w: 1.5, tone: 'bad', text: 'השמש סינוורה, אמרת "צבריה" עם ס׳. ממים לשבוע.', fx: { playerPopularity: -2, playerReputation: -1, groups: { youth: 2 } } },
+      { w: 4 + s.player.reputation / 20, tone: 'good', text: 'הצגת את העמדה בבהירות וענית על השאלות הקשות.', fx: { playerPopularity: 4, partyMomentum: { [s.player.partyId]: 1 } } },
+      { w: 2.5, tone: 'bad', text: 'שאלה על התנהלות המשרד תפסה אותך לא מוכן. התשובה נשמעה מתחמקת.', fx: { playerPopularity: -4, playerReputation: -2 }, headline: `${me0.name} התקשה להשיב לשאלות במסיבת העיתונאים` },
+      { w: 2, tone: 'neutral', text: 'הכרזת על תוכנית שעוד לא תואמה עם המפלגה. היא נשמעה טוב, אבל עכשיו צריך לממש אותה.', fx: { playerPopularity: 3, playerReputation: -3 }, extra: (x) => { const l = myLeader(x); if (l && !l.isPlayer) remember(x, l.id, 'insult', 'הכריז על תוכנית בלי לתאם', -6); return l && !l.isPlayer ? `${l.name} לא עודכן מראש.` : ''; } },
+      { w: 1.2, tone: 'good', text: 'תשובה חדה לשאלה קשה הופצה ברשתות והגיעה לקהלים צעירים.', fx: { playerPopularity: 2, groups: { youth: 3 } }, headline: `התשובה של ${me0.name} הופצה ברשתות` },
     ]);
   },
 });
 
 def({
-  id: 'tv_interview', title: 'ראיון באולפן', icon: '📺', category: 'media', level: 'simple', capital: 2, cooldown: 2,
-  description: 'מגישה קשוחה, שידור חי, אפס עריכה. המוניטין שלך משנה את הסיכויים.',
+  id: 'tv_interview', title: 'ראיון באולפן', icon: '📺', category: 'media', level: 'simple', capital: 2, cooldown: 1,
+  description: 'ראיון חי בטלוויזיה. יכול לחזק אותך מאוד או לייצר סערה. המוניטין משנה את הסיכויים.',
   unavailable: () => null,
   run: (s) => {
     const g = randomGroup(s);
     const r = rival(s);
     return rollOut(s, 'ראיון באולפן', '📺', [
-      { w: 3 + s.player.reputation / 15, tone: 'good', text: 'הברקת. המגישה אפילו חייכה. פעם ראשונה מאז 2019.', fx: { playerPopularity: 6, playerReputation: 2, partyMomentum: { [s.player.partyId]: 2 } }, headline: `${me(s).name} הבריק באולפן` },
-      { w: 3, tone: 'bad', text: `אמרת משהו על ${GROUP_BY_ID[g].name} שעדיף היה לא להגיד. הם לא שכחו.`, fx: { groups: { [g]: -7 }, playerPopularity: -3 }, headline: `סערה: ${me(s).name} התבטא נגד ${GROUP_BY_ID[g].name}` },
-      { w: r ? 2 : 0, tone: 'neutral', text: `תקפת את ${r?.name} בשידור. הוא כבר מתקשר לעורך דין.`, fx: { playerPopularity: 2 }, extra: (x) => { if (r) { remember(x, r.id, 'insult', 'תקף אותי באולפן', -12); x.politicians[r.id].popularity = clamp(x.politicians[r.id].popularity - 3); } } },
-      { w: 1.2, tone: 'neutral', text: 'יצאת מהאולפן באמצע הראיון בטריקת דלת. הבסיס מריע, המרכז מגלגל עיניים.', fx: { groups: { right: 3, center: -3 }, playerPopularity: 1 }, headline: `${me(s).name} עזב את האולפן באמצע שידור חי` },
-      { w: 1.5, tone: 'bad', text: 'המיקרופון נשאר פתוח אחרי הראיון. כולם שמעו מה אתה חושב על המנהיג שלך.', fx: { playerPopularity: -2 }, extra: (x) => { const l = myLeader(x); if (l && !l.isPlayer) remember(x, l.id, 'betrayal', 'נשמע מקלל אותי במיקרופון פתוח', -15); return l && !l.isPlayer ? `${l.name} שמע. ${l.name} זוכר.` : ''; }, headline: 'מיקרופון פתוח: מה הוא באמת חושב' },
+      { w: 3 + s.player.reputation / 15, tone: 'good', text: 'ראיון חזק: עמדות ברורות, נתונים מדויקים. גם מבקרים הודו שהיה משכנע.', fx: { playerPopularity: 6, playerReputation: 2, partyMomentum: { [s.player.partyId]: 2 } }, headline: `${me(s).name} בראיון: "יש לנו תוכנית"` },
+      { w: 3, tone: 'bad', text: `אמירה על ${GROUP_BY_ID[g].name} התפרשה כפוגענית. נציגיהם דורשים התנצלות.`, fx: { groups: { [g]: -7 }, playerPopularity: -3 }, headline: `סערה בעקבות דברי ${me(s).name} על ${GROUP_BY_ID[g].name}` },
+      { w: r ? 2 : 0, tone: 'neutral', text: `תקפת את ${r?.name} בשידור. הבסיס שלך מרוצה, היחסים ביניכם הורעו.`, fx: { playerPopularity: 2 }, extra: (x) => { if (r) { remember(x, r.id, 'insult', 'תקף אותי באולפן', -12); x.politicians[r.id].popularity = clamp(x.politicians[r.id].popularity - 3); } } },
+      { w: 1.2, tone: 'neutral', text: 'עימות חריף עם המראיין. הבסיס הימני מרוצה, מצביעי המרכז פחות.', fx: { groups: { right: 3, center: -3 }, playerPopularity: 1 }, headline: `עימות חריף באולפן עם ${me(s).name}` },
+      { w: 1.5, tone: 'bad', text: 'מיקרופון שנשאר פתוח אחרי הראיון קלט ביקורת שלך על מנהיג המפלגה.', fx: { playerPopularity: -2 }, extra: (x) => { const l = myLeader(x); if (l && !l.isPlayer) remember(x, l.id, 'betrayal', 'ביקר אותי במיקרופון פתוח', -15); return l && !l.isPlayer ? `${l.name} שמע את הדברים.` : ''; }, headline: 'מיקרופון פתוח חשף מתיחות במפלגה' },
     ]);
   },
 });
 
 def({
-  id: 'tweet_storm', title: 'ציוץ חריף', icon: '🐦', category: 'media', level: 'simple', capital: 0, cooldown: 1,
-  description: 'שלוש בלילה, אצבעות מהירות, שיקול דעת איטי.',
+  id: 'tweet_storm', title: 'פוסט חריף ברשתות', icon: '📱', category: 'media', level: 'simple', capital: 0, cooldown: 1,
+  description: 'הודעה חריפה ברשתות החברתיות. מגיעה מהר לצעירים; עלולה לייצר סערה.',
   unavailable: () => null,
   run: (s) => {
     const r = rival(s);
-    return rollOut(s, 'ציוץ חריף', '🐦', [
-      { w: 4, tone: 'good', text: 'הציוץ התפוצץ. 80 אלף שיתופים. אמא שלך שיתפה פעמיים.', fx: { playerPopularity: 5, groups: { youth: 3 } }, headline: `הציוץ של ${me(s).name} הפך לוויראלי` },
-      { w: 3, tone: 'bad', text: 'סערת רשת. מחקת. מישהו צילם מסך. תמיד מישהו מצלם מסך.', fx: { playerPopularity: -5, playerReputation: -3 }, headline: `${me(s).name} מחק ציוץ. צילום המסך כבר בכל מקום` },
-      { w: r ? 2 : 0, tone: 'neutral', text: `${r?.name} ענה לך. ועכשיו זו מלחמת ציוצים שכל המדינה עוקבת אחריה.`, fx: { playerPopularity: 2 }, extra: (x) => { if (r) { x.politicians[r.id].popularity = clamp(x.politicians[r.id].popularity + 2); remember(x, r.id, 'insult', 'מלחמת ציוצים', -8); } } },
-      { w: 1.5, tone: 'neutral', text: 'שגיאת כתיב בציוץ הפכה לסלוגן. המפלגה כבר מדפיסה חולצות.', fx: { playerPopularity: 2, partyMomentum: { [s.player.partyId]: 2 } } },
+    return rollOut(s, 'פוסט ברשתות', '📱', [
+      { w: 4, tone: 'good', text: 'הפוסט הופץ באופן נרחב והגיע לקהלים חדשים.', fx: { playerPopularity: 5, groups: { youth: 3 } }, headline: `הפוסט של ${me(s).name} הופץ באופן נרחב` },
+      { w: 3, tone: 'bad', text: 'הפוסט עורר ביקורת חריפה ונמחק. צילומי המסך ממשיכים להסתובב.', fx: { playerPopularity: -5, playerReputation: -3 }, headline: `${me(s).name} מחק פוסט אחרי ביקורת` },
+      { w: r ? 2 : 0, tone: 'neutral', text: `${r?.name} הגיב, והוויכוח ביניכם עלה לכותרות.`, fx: { playerPopularity: 2 }, extra: (x) => { if (r) { x.politicians[r.id].popularity = clamp(x.politicians[r.id].popularity + 2); remember(x, r.id, 'insult', 'עימות ברשתות', -8); } } },
     ]);
   },
 });
 
 def({
-  id: 'attack_opponent', title: 'מתקפה על יריב', icon: '🥊', category: 'media', level: 'simple', capital: 4, cooldown: 2,
-  description: 'מכה מתחת לחגורה. לפעמים היא חוזרת אליך.',
+  id: 'attack_opponent', title: 'מתקפה על יריב', icon: '🥊', category: 'media', level: 'simple', capital: 4, cooldown: 1,
+  description: 'ביקורת ישירה על יריב פוליטי. כשאתה חזק ממנו זה עובד; אחרת זה עלול לחזור אליך.',
   unavailable: (s, p) => (s.politicians[str(p, 'politicianId')]?.active ? null : 'בחר יריב'),
   run: (s, p) => {
     const t = s.politicians[str(p, 'politicianId')];
     remember(s, t.id, 'insult', 'תקף אותי בתקשורת', -14);
     const strong = (me(s).popularity - t.popularity) / 100;
     const res = rollOut(s, `מתקפה על ${t.name}`, '🥊', [
-      { w: 4 + strong * 6, tone: 'good', text: `${t.name} מתגונן בכל האולפנים. בדיוק מה שרצית.`, fx: { playerPopularity: 3, partyMomentum: { [s.player.partyId]: 2, [t.partyId]: -3 } }, extra: (x) => { x.politicians[t.id].popularity = clamp(x.politicians[t.id].popularity - 7); } },
-      { w: 2.5, tone: 'bad', text: `הציבור ריחם על ${t.name}. ממש. הוא קיבל עוגה מאלמנה בפריפריה.`, fx: { playerPopularity: -4, partyMomentum: { [t.partyId]: 3 } }, extra: (x) => { x.politicians[t.id].popularity = clamp(x.politicians[t.id].popularity + 4); }, headline: `גל אהדה ל${t.name} אחרי המתקפה` },
-      { w: 1.5, tone: 'bad', text: `${t.name} הגיש תביעת לשון הרע. ₪2 מיליון. עורך הדין שלך כבר מחייך.`, fx: { playerCapital: -6, playerReputation: -3 }, headline: `${t.name} תובע את ${me(s).name}` },
-      { w: 1.5, tone: 'neutral', text: `${t.name} חשף בתגובה סרטון שלך שר קריוקי ב-2008. תיקו.`, fx: { playerPopularity: -1, groups: { youth: 2 } }, extra: (x) => { x.politicians[t.id].popularity = clamp(x.politicians[t.id].popularity - 2); } },
+      { w: 4 + strong * 6, tone: 'good', text: `${t.name} נאלץ להתגונן, והשיח עבר לנושאים שלך.`, fx: { playerPopularity: 3, partyMomentum: { [s.player.partyId]: 2, [t.partyId]: -3 } }, extra: (x) => { x.politicians[t.id].popularity = clamp(x.politicians[t.id].popularity - 7); } },
+      { w: 2.5, tone: 'bad', text: `המתקפה נתפסה כבוטה מדי, ו${t.name} זכה לגל אהדה.`, fx: { playerPopularity: -4, partyMomentum: { [t.partyId]: 3 } }, extra: (x) => { x.politicians[t.id].popularity = clamp(x.politicians[t.id].popularity + 4); }, headline: `גל אהדה ל${t.name} אחרי המתקפה` },
+      { w: 1.5, tone: 'bad', text: `${t.name} הגיש תביעת לשון הרע. ההליך יגזול זמן ותשומת לב.`, fx: { playerCapital: -6, playerReputation: -3 }, headline: `${t.name} תובע את ${me(s).name} בגין לשון הרע` },
     ]);
-    return { ...res, people: [{ icon: '😠', label: t.name, text: pick(s, ['אני זוכר את זה.', 'תראה אותי בבחירות.', 'שקרן! (גם אני, אבל בכל זאת)']), tone: 'bad' }] };
+    return { ...res, people: [{ icon: '😠', label: t.name, text: pick(s, ['המתקפה הזו מוכיחה שאין לו תשובות עניניות.', 'הציבור יידע לשפוט.', 'לא אגיב ברמה הזו.']), tone: 'bad' }] };
   },
 });
 
 def({
-  id: 'visit_region', title: 'סיור באזור', icon: '🚐', category: 'media', level: 'simple', capital: 2, cooldown: 2,
-  description: 'חומוס, לחיצות ידיים ומצלמות. מה שיקרה שם – יגיע לחדשות.',
+  id: 'visit_region', title: 'סיור באזור', icon: '🚐', category: 'media', level: 'simple', capital: 2, cooldown: 1,
+  description: 'ביקור בשטח: פגישות עם תושבים וראשי רשויות. משפר את שביעות הרצון באזור, אם הסיור עובר בהצלחה.',
   unavailable: (_s, p) => (REGION_BY_ID[str(p, 'regionId') as keyof typeof REGION_BY_ID] ? null : 'בחר אזור'),
   run: (s, p) => {
     const r = REGION_BY_ID[str(p, 'regionId') as keyof typeof REGION_BY_ID];
-    const per = ['north', 'negev', 'eilat', 'hills'].includes(r.id);
+    const per = ['north', 'negev', 'eilat', 'judea_samaria'].includes(r.id);
     const st = s.population.regions[r.id];
     return rollOut(s, `סיור ב${r.name}`, '🚐', [
-      { w: 4, tone: 'good', text: `קיבלו אותך בחום ב${r.name}. סבתא מקומית האכילה אותך בכוח.`, fx: { playerPopularity: 3, groups: per ? { periphery: 3 } : { center: 2 } }, extra: () => { st.satisfaction = clamp(st.satisfaction + 5); } },
-      { w: 2.5, tone: 'bad', text: `בוז ב${r.name}: "איפה הייתם 4 שנים?!". מישהו זרק עגבנייה. החטיא. בקושי.`, fx: { playerPopularity: -4 }, extra: () => { st.satisfaction = clamp(st.satisfaction - 2); }, headline: `${me(s).name} קיבל בוז ב${r.name}` },
-      { w: 2, tone: 'neutral', text: `הבטחת על המקום "כביש חדש תוך שנה". אף אחד לא האמין, כולם צילמו.`, fx: { playerPopularity: 2, playerReputation: -2, regionInvestment: { [r.id]: 4 } } },
-      { w: 1.2, tone: 'bad', text: 'החומוס היה... שונה. בילית את הערב בשירותים של תחנת דלק.', fx: { playerCapital: -3 }, headline: 'השר והחומוס: סיפור שלא נגמר טוב' },
-      { w: 1.5, tone: 'good', text: `גילית בעיה אמיתית ב${r.name} ודחפת לפתרון. מוזר, אבל זה עבד.`, fx: { playerReputation: 5, playerPopularity: 3, regionInvestment: { [r.id]: 6 } } },
+      { w: 4, tone: 'good', text: `התושבים ב${r.name} קיבלו אותך בחום והציגו את הבעיות שלהם.`, fx: { playerPopularity: 3, groups: per ? { periphery: 3 } : { center: 2 } }, extra: () => { st.satisfaction = clamp(st.satisfaction + 5); } },
+      { w: 2.5, tone: 'bad', text: `מפגינים ב${r.name} האשימו את הממשלה בהזנחת האזור.`, fx: { playerPopularity: -4 }, extra: () => { st.satisfaction = clamp(st.satisfaction - 2); }, headline: `קריאות מחאה נגד ${me(s).name} ב${r.name}` },
+      { w: 2, tone: 'neutral', text: 'התחייבת על המקום לפרויקט תשתית. התושבים יבדקו אם זה יקרה.', fx: { playerPopularity: 2, playerReputation: -2, regionInvestment: { [r.id]: 4 } } },
+      { w: 1.5, tone: 'good', text: `זיהית בעיה אמיתית ב${r.name} ודחפת לפתרון מהיר.`, fx: { playerReputation: 5, playerPopularity: 3, regionInvestment: { [r.id]: 6 } } },
     ]);
   },
 });
 
 def({
   id: 'committee_work', title: 'עבודת ועדה', icon: '📑', category: 'career', level: 'simple', capital: 0, cooldown: 1,
-  description: 'משעמם, אבל בונה מומחיות ומוניטין. ולפעמים מתגלה שערורייה.',
-  unavailable: (s) => (s.player.role === 'pm' ? 'אין לך זמן לוועדות' : null),
+  description: 'עבודה מעמיקה בוועדה: מומחיות +6 וכוח פוליטי +2. לפעמים מתגלים ליקויים שעולים לכותרות.',
+  unavailable: (s) => (s.player.role === 'pm' ? 'ראש הממשלה לא חבר בוועדות' : null),
   run: (s, p) => {
     const domain = (str(p, 'domain') || 'economy') as Domain;
     const pl = me(s);
     pl.expertise[domain] = clamp((pl.expertise[domain] ?? 20) + 6);
     pl.power = clamp(pl.power + 2);
     const victim = pick(s, Object.values(s.politicians).filter((x) => x.active && !x.isPlayer && x.ministryId));
-    return rollOut(s, 'יום ארוך בוועדה', '📑', [
-      { w: 5, tone: 'good', text: 'קראת 400 עמודים. אף אחד אחר לא קרא. מומחיות +6.', fx: { playerReputation: 3 } },
-      { w: victim ? 1.5 : 0, tone: 'good', text: `בדיון גילית ש${victim?.name} העביר תקציב לחברה של גיסו. כותרת ראשית!`, fx: { playerReputation: 6, playerPopularity: 4 }, extra: (x) => { if (victim) remember(x, victim.id, 'insult', 'חשף אותי בוועדה', -15); }, headline: `נחשף בוועדה: תקציב ממשלתי עבר לחברה של גיס השר` },
-      { w: 1.5, tone: 'bad', text: 'נרדמת בשידור חי מערוץ הכנסטון. מישהו הוסיף מוזיקה של ערש.', fx: { playerPopularity: -3, groups: { youth: 2 } }, headline: 'ח״כ נרדם בוועדה; הסרטון הפך ללהיט' },
-      { w: 1.5, tone: 'neutral', text: 'צעקת על יו״ר הוועדה. הוא הוציא אותך. התקשורת אהבה.', fx: { playerPopularity: 2, playerReputation: 1 } },
+    return rollOut(s, 'עבודת ועדה', '📑', [
+      { w: 5, tone: 'good', text: 'למדת לעומק את החומר המקצועי וקידמת תיקונים לחקיקה.', fx: { playerReputation: 3 } },
+      { w: victim ? 1.5 : 0, tone: 'good', text: `בדיון התגלו ליקויים בהתנהלות המשרד של ${victim?.name}. הממצאים עלו לכותרות.`, fx: { playerReputation: 6, playerPopularity: 4 }, extra: (x) => { if (victim) remember(x, victim.id, 'insult', 'חשף ליקויים במשרד שלי', -15); }, headline: 'דיון בוועדה חשף ליקויים בהתנהלות משרד ממשלתי' },
+      { w: 1.5, tone: 'neutral', text: 'עימות חריף עם יו״ר הוועדה הסתיים בהוצאתך מהדיון.', fx: { playerPopularity: 2, playerReputation: -1 } },
     ]);
   },
 });
 
 def({
-  id: 'reality_show', title: 'להשתתף בריאליטי "השרדות: כנסטון"', icon: '🏝️', category: 'media', level: 'medium', capital: 5, cooldown: 12,
-  description: 'אי בודד, 12 פוליטיקאים, ואף אחד לא יודע לבשל אורז.',
-  unavailable: (s) => (s.player.role === 'pm' ? 'ראש ממשלה לא נוסע לאי. בדרך כלל.' : null),
-  run: (s) => rollOut(s, 'השרדות: כנסטון', '🏝️', [
-    { w: 3, tone: 'good', text: 'ניצחת! בנית מחסה, הדחת שלושה שרים, ובכית בגמר. אומה מתאהבת.', fx: { playerPopularity: 12, playerReputation: -5, groups: { youth: 5 } }, headline: `${me(s).name} זכה בהשרדות: כנסטון` },
-    { w: 3, tone: 'bad', text: 'הודחת ראשון. אחרי שאכלת את כל הבננות של השבט.', fx: { playerPopularity: -6, playerReputation: -4 }, headline: 'הודח ראשון מהאי: "הוא אכל את כל הבננות"' },
-    { w: 2, tone: 'neutral', text: 'ריב ענק על קוקוס הפך לפרק הנצפה בשנה. אתה בפנים, אבל בלי כבוד.', fx: { playerPopularity: 4, playerReputation: -6 } },
-  ]),
-});
-
-def({
-  id: 'protest_speech', title: 'לנאום בהפגנה', icon: '📢', category: 'media', level: 'simple', capital: 3, cooldown: 3,
-  description: 'קהל, מגפון ותחושת שליחות. באופוזיציה – חובה. בקואליציה – מסוכן.',
+  id: 'protest_speech', title: 'נאום בהפגנה', icon: '📢', category: 'media', level: 'simple', capital: 3, cooldown: 2,
+  description: 'נאום בעצרת. חיזוק מול הבסיס; אם אתה בקואליציה ומדובר בהפגנה נגד הממשלה, ראש הממשלה יזכור.',
   unavailable: () => null,
   run: (s) => {
     const inGov = s.government.coalition.includes(s.player.partyId);
     const lean = me(s).ideology.security > 0 ? 'right' : 'left';
     return rollOut(s, 'נאום בהפגנה', '📢', [
-      { w: 4, tone: 'good', text: 'הקהל צעק את השם שלך. הפעם בהתלהבות.', fx: { playerPopularity: 5, groups: { [lean]: 4 }, partyMomentum: { [s.player.partyId]: 2 } }, extra: (x) => { if (inGov) { remember(x, x.government.pmId, 'insult', 'נאם בהפגנה נגד הממשלה', -12); return 'ראש הממשלה צפה. מהבונקר.'; } } },
-      { w: 2, tone: 'bad', text: 'הקהל לא זיהה אותך. מישהו שאל אם אתה מהמשטרה.', fx: { playerPopularity: -3 } },
-      { w: 1.5, tone: 'bad', text: 'ההפגנה התדרדרה לעימות עם המשטרה. אתה בתמונה, בדיוק באמצע.', fx: { playerPopularity: -2, playerReputation: -4, groups: { right: lean === 'right' ? 2 : -3, left: lean === 'left' ? 2 : -3 } }, headline: 'עימותים בהפגנה; ח״כ צולם באמצע' },
+      { w: 4, tone: 'good', text: 'הנאום התקבל בהתלהבות והופץ בתקשורת.', fx: { playerPopularity: 5, groups: { [lean]: 4 }, partyMomentum: { [s.player.partyId]: 2 } }, extra: (x) => { if (inGov) { remember(x, x.government.pmId, 'insult', 'נאם בהפגנה נגד הממשלה', -12); return 'ראש הממשלה לא אהב את זה.'; } } },
+      { w: 2, tone: 'bad', text: 'ההפגנה הייתה קטנה והנאום כמעט לא סוקר.', fx: { playerPopularity: -1 } },
+      { w: 1.5, tone: 'bad', text: 'ההפגנה הסתיימה בעימותים עם המשטרה, ואתה צולמת במקום.', fx: { playerPopularity: -2, playerReputation: -4, groups: { right: lean === 'right' ? 2 : -3, left: lean === 'left' ? 2 : -3 } }, headline: 'עימותים בהפגנה; ח״כ נכח במקום' },
     ]);
   },
 });
 
 def({
-  id: 'leak_rival', title: 'להדליף חומר מביך על יריב', icon: '🗂️', category: 'media', level: 'simple', capital: 4, cooldown: 4,
-  description: 'מעטפה חומה, עיתונאי ידיד, ומשפט "גורם בכיר".',
+  id: 'leak_rival', title: 'הדלפת מידע על יריב', icon: '🗂️', category: 'media', level: 'simple', capital: 4, cooldown: 2,
+  description: 'העברת מידע מביך על יריב לתקשורת. עלול להיחשף, ואז זה פוגע בך קשות.',
   unavailable: (s, p) => (s.politicians[str(p, 'politicianId')]?.active ? null : 'בחר יריב'),
   run: (s, p) => {
     const t = s.politicians[str(p, 'politicianId')];
     return rollOut(s, `הדלפה על ${t.name}`, '🗂️', [
-      { w: 4, tone: 'good', text: `${t.name} מבלה את השבוע בהכחשות. אף אחד לא יודע שזה אתה.`, extra: (x) => { x.politicians[t.id].popularity = clamp(x.politicians[t.id].popularity - 9); }, headline: `חשיפה: הפרשה המביכה של ${t.name}` },
-      { w: 3, tone: 'bad', text: 'העיתונאי חשף את המקור. אותך. "לא הייתה לו ברירה". הייתה לו.', fx: { playerReputation: -8, playerPopularity: -4 }, extra: (x) => { remember(x, t.id, 'betrayal', 'הדליף עליי', -25); }, headline: `${me(s).name} הוא המקור להדלפה על ${t.name}` },
-      { w: 1.5, tone: 'neutral', text: 'החומר התגלה כמשעמם. "הוא אוכל פיצה עם אננס". חצי מדינה בעדו עכשיו.', extra: (x) => { x.politicians[t.id].popularity = clamp(x.politicians[t.id].popularity + 3); } },
+      { w: 4, tone: 'good', text: `${t.name} עסוק בהכחשות. המקור לא נחשף.`, extra: (x) => { x.politicians[t.id].popularity = clamp(x.politicians[t.id].popularity - 9); }, headline: `פרסום: חשדות נגד ${t.name}` },
+      { w: 3, tone: 'bad', text: 'זהות המקור נחשפה. הפגיעה במוניטין שלך קשה.', fx: { playerReputation: -8, playerPopularity: -4 }, extra: (x) => { remember(x, t.id, 'betrayal', 'הדליף עליי', -25); }, headline: `${me(s).name} נחשף כמקור ההדלפה על ${t.name}` },
+      { w: 1.5, tone: 'neutral', text: 'החומר התגלה כחסר משמעות, והציבור ריחם על היריב.', extra: (x) => { x.politicians[t.id].popularity = clamp(x.politicians[t.id].popularity + 3); } },
     ]);
   },
 });
 
 def({
-  id: 'write_book', title: 'לכתוב ספר: "אני והכיסא"', icon: '📕', category: 'media', level: 'medium', capital: 4, cooldown: 16,
-  description: 'זיכרונות, סודות, וכמה חשבונות פתוחים.',
+  id: 'write_book', title: 'פרסום ספר', icon: '📕', category: 'media', level: 'medium', capital: 4, cooldown: 6,
+  description: 'ספר על דרכך ועל השקפת עולמך. עשוי לחזק אותך; פרקים על עמיתים עלולים לפגוע ביחסים.',
   unavailable: () => null,
-  run: (s) => rollOut(s, 'הספר יצא', '📕', [
-    { w: 3, tone: 'good', text: 'רב מכר! אפילו קראו אותו. חלקים ממנו.', fx: { playerPopularity: 5, playerReputation: 3 }, headline: '"אני והכיסא" – רב המכר של העונה' },
-    { w: 3, tone: 'bad', text: 'הפרק על ישיבות הממשלה גרם לשלושה שרים לא לדבר איתך.', fx: { stability: -5, playerPopularity: 2 }, extra: (x) => { for (const m of Object.values(x.politicians).filter((q) => q.ministryId && !q.isPlayer).slice(0, 3)) remember(x, m.id, 'betrayal', 'כתב עליי בספר', -10); }, headline: 'הספר של השר חושף: "בישיבות הממשלה אוכלים בורקס ולא מחליטים"' },
-    { w: 2, tone: 'bad', text: 'נמכרו 140 עותקים. 120 קנתה המפלגה.', fx: { playerPopularity: -2 } },
+  run: (s) => rollOut(s, 'הספר יצא לאור', '📕', [
+    { w: 3, tone: 'good', text: 'הספר התקבל היטב והוביל לסדרת ראיונות.', fx: { playerPopularity: 5, playerReputation: 3 }, headline: `הספר של ${me(s).name} ברשימת רבי המכר` },
+    { w: 3, tone: 'bad', text: 'פרק על ישיבות הממשלה עורר כעס בקרב שלושה שרים.', fx: { stability: -5, playerPopularity: 2 }, extra: (x) => { for (const m of Object.values(x.politicians).filter((q) => q.ministryId && !q.isPlayer).slice(0, 3)) remember(x, m.id, 'betrayal', 'כתב עליי בספר', -10); }, headline: 'ספר חדש חושף מתיחות בממשלה' },
+    { w: 2, tone: 'neutral', text: 'הספר לא עורר עניין רב.', fx: { playerPopularity: -1 } },
   ]),
 });
 
 def({
-  id: 'charity_photo', title: 'צילום בהתנדבות בבית תמחוי', icon: '🍲', category: 'media', level: 'simple', capital: 1, cooldown: 3,
-  description: 'סינר, מצקת, צלם. 12 דקות של נתינה.',
+  id: 'charity_photo', title: 'ביקור התנדבותי', icon: '🍲', category: 'media', level: 'simple', capital: 1, cooldown: 1,
+  description: 'ביקור והתנדבות בארגון סיוע. מחזק את הקשר עם השכבות החלשות, אם זה נתפס כאמיתי.',
   unavailable: () => null,
-  run: (s) => rollOut(s, 'התנדבות מצולמת', '🍲', [
-    { w: 5, tone: 'good', text: 'תמונה מרגשת. אנשים התרגשו. בעיקר הצלם.', fx: { playerPopularity: 3, groups: { lowIncome: 2 } } },
-    { w: 3, tone: 'bad', text: 'מתנדבת חשפה שעזבת אחרי 12 דקות, כולל הצילומים.', fx: { playerPopularity: -4, groups: { lowIncome: -3 } }, headline: 'ההתנדבות של השר: 12 דקות, 40 תמונות' },
-    { w: 1.5, tone: 'neutral', text: 'שפכת מרק על ראש עיר. הוא חייך. אחר כך הוא לא חייך.', fx: { playerPopularity: 1 } },
+  run: (s) => rollOut(s, 'ביקור התנדבותי', '🍲', [
+    { w: 5, tone: 'good', text: 'שוחחת עם המתנדבים ועם הנזקקים ולמדת על הצרכים בשטח.', fx: { playerPopularity: 3, groups: { lowIncome: 2 } } },
+    { w: 3, tone: 'bad', text: 'הביקור נתפס כאירוע יחסי ציבור קצר, והביקורת התפרסמה.', fx: { playerPopularity: -3, groups: { lowIncome: -2 } }, headline: 'ביקורת: ביקור קצר לצורכי צילום' },
   ]),
 });
 
-// ===== PM: national drama =====
+// ===== PM: national measures =====
 def({
-  id: 'state_emergency', title: 'להכריז מצב חירום לאומי', icon: '🚨', category: 'government', level: 'major', capital: 10, cooldown: 16,
-  description: 'הכנסטון מתכנס בזום, ההחלטות עוברות בלי דיון. מאוד יעיל. מאוד מפחיד.',
+  id: 'state_emergency', title: 'הכרזה על מצב מיוחד בעורף', icon: '🚨', category: 'government', level: 'major', capital: 10, cooldown: 6,
+  description: 'סמכויות חירום לפיקוד העורף ולממשלה. מגביר יציבות ומוכנות; פוגע באמון של קבוצות שחוששות מפגיעה בדמוקרטיה.',
   unavailable: (s) => (isPM(s) ? null : 'רק ראש הממשלה'),
   run: (s) => {
-    applyDecision(s, { stability: 12, playerReputation: -6, groups: { left: -10, center: -6, right: 3, elderly: 2 } });
-    addNews(s, 'מצב חירום לאומי! הכנסטון יתכנס בזום. מומלץ לא לשאול למה', 'bad', '🚨');
-    return { title: 'מצב חירום הוכרז', quip: 'הסיבה הרשמית: "המצב". הסיבה האמיתית: גם "המצב".' };
+    applyDecision(s, { stability: 12, playerReputation: -4, services: { security: 3 }, groups: { left: -8, liberals: -6, center: -3, right: 3, elderly: 2 } });
+    addNews(s, 'הממשלה הכריזה על מצב מיוחד בעורף', 'bad', '🚨');
+    return { title: 'הוכרז מצב מיוחד בעורף', quip: 'ארגוני זכויות האדם יעקבו אחר השימוש בסמכויות.' };
   },
 });
 
 def({
-  id: 'cabinet_purge', title: 'לטהר את הממשלה', icon: '🧹', category: 'government', level: 'major', capital: 12, cooldown: 16,
-  description: 'כל שר עם נאמנות מתחת ל-40 – בחוץ. בבת אחת. בשידור חי.',
+  id: 'cash_handout', title: 'מענק סיוע חד-פעמי לכל משק בית', icon: '💵', category: 'government', level: 'major', capital: 6, cooldown: 8,
+  description: '₪10 מיליארד מענק חד-פעמי. משפר את מצב הרוח ומגדיל את החוב והאינפלציה. לפני בחירות ייתפס כמהלך פוליטי.',
   unavailable: (s) => (isPM(s) ? null : 'רק ראש הממשלה'),
   run: (s) => {
-    const victims = s.government.ministries.filter((m) => m.ministerId && m.ministerId !== s.player.politicianId && s.politicians[m.ministerId].loyalty < 40);
-    for (const m of victims) {
-      const p = s.politicians[m.ministerId!];
-      p.ministryId = null;
-      m.ministerId = s.government.pmId;
-      remember(s, p.id, 'fired', 'טוהר מהממשלה', -35);
-    }
-    applyDecision(s, { stability: -4 * victims.length, playerPopularity: 2 + victims.length, playerReputation: 2 });
-    addNews(s, `"ליל הסכינים הקצרות": ראש הממשלה פיטר ${victims.length} שרים`, 'bad', '🧹');
-    s.career.memorable.push(`טיהר ${victims.length} שרים בלילה אחד`);
-    return { title: `${victims.length} שרים פוטרו`, subtitle: victims.map((m) => m.name).join(', ') || 'אף אחד – כולם נאמנים. מחשיד.', quip: 'עכשיו אתה מחזיק בעשרה תיקים. בהצלחה עם ישיבות הבוקר.' };
+    const pre = monthsUntilElection(s) <= 6;
+    applyDecision(s, { oneOffCost: 10, economy: { inflation: 0.7, growth: 0.3 }, playerPopularity: pre ? 4 : 6, playerReputation: pre ? -4 : 0, groups: Object.fromEntries(GROUPS.map((g) => [g.id, 4])) as Partial<Record<GroupId, number>> });
+    addNews(s, pre ? 'מענק חד-פעמי לכל משק בית; האופוזיציה: "שוחד בחירות"' : 'הממשלה אישרה מענק סיוע חד-פעמי לכל משק בית', pre ? 'bad' : 'neutral', '💵');
+    return { title: 'אושר מענק חד-פעמי', quip: `בנק ישמעאל מזהיר מלחץ אינפלציוני.${pre ? ' האופוזיציה טוענת שזה מהלך בחירות.' : ''}` };
   },
 });
 
 def({
-  id: 'cash_handout', title: 'מענק ₪1,000 לכל אזרח לפני הבחירות', icon: '💵', category: 'government', level: 'major', capital: 6, cooldown: 24,
-  description: '₪10 מיליארד מהקופה לכיס של כל אחד. מקרה לגמרי שזה לפני הבחירות.',
-  unavailable: (s) => (isPM(s) ? null : 'רק ראש הממשלה'),
-  run: (s) => {
-    applyDecision(s, { oneOffCost: 10, economy: { inflation: 0.7, growth: 0.3 }, playerPopularity: 7, groups: Object.fromEntries(GROUPS.map((g) => [g.id, 4])) as Partial<Record<GroupId, number>> });
-    addNews(s, 'כל אזרח יקבל ₪1,000. "אין קשר לבחירות", הבהירו בלשכה', 'satire', '💵');
-    return { title: 'כל אזרח קיבל ₪1,000', quip: 'הקניונים חוגגים. בנק צבריה פחות.' };
-  },
-});
-
-def({
-  id: 'birthday_holiday', title: 'יום חופש לאומי ביום ההולדת שלך', icon: '🎂', category: 'government', level: 'simple', capital: 3, cooldown: 24,
-  description: 'מצעד, זיקוקים ועוגה ממלכתית.',
-  unavailable: (s) => (isPM(s) ? null : 'רק ראש הממשלה'),
-  run: (s) => {
-    applyDecision(s, { economy: { growth: -0.1 }, groups: { employees: 3, students: 3, selfEmployed: -5, left: -3 }, playerPopularity: 1, playerReputation: -3 });
-    return { title: 'הוכרז "יום הכיסא"', quip: 'בעלי העסקים פתחו בכל זאת. עם שלט "חוגגים בלי".' };
-  },
-});
-
-def({
-  id: 'nation_address', title: 'נאום לאומה בפריים טיים', icon: '🎥', category: 'government', level: 'simple', capital: 4, cooldown: 4,
-  description: '20 דקות, דגל, ומבט עמוק למצלמה.',
+  id: 'nation_address', title: 'נאום לאומה', icon: '🎥', category: 'government', level: 'simple', capital: 4, cooldown: 1,
+  description: 'נאום בשידור חי בפריים טיים. יכול לאחד ולחזק, או להיתפס כנאום פוליטי.',
   unavailable: (s) => (isPM(s) ? null : 'רק ראש הממשלה'),
   run: (s) => rollOut(s, 'נאום לאומה', '🎥', [
-    { w: 4, tone: 'good', text: 'נאום מרגש. אפילו אנשי האופוזיציה הנהנו. בטעות.', fx: { playerPopularity: 5, stability: 3 }, headline: 'נאום ראש הממשלה ריגש את האומה' },
-    { w: 3, tone: 'bad', text: 'הנאום נמשך 58 דקות. הרייטינג ירד מ-30% ל-4%.', fx: { playerPopularity: -3 }, headline: 'הנאום שלא נגמר: 58 דקות, אפס חדשות' },
-    { w: 1.5, tone: 'neutral', text: 'הטלפרומפטר נתקע. אילתרת 6 דקות על ילדותך. מוזר, אבל נגע ללב.', fx: { playerPopularity: 2, playerReputation: -1 } },
+    { w: 4, tone: 'good', text: 'נאום מאחד וממלכתי. גם מבקרים הודו שהטון היה נכון.', fx: { playerPopularity: 5, stability: 3 }, headline: 'נאום ראש הממשלה לאומה: "נעבור את זה יחד"' },
+    { w: 3, tone: 'bad', text: 'הנאום נתפס כנאום בחירות, והופץ בעיקר בביקורת.', fx: { playerPopularity: -3 }, headline: 'ביקורת: נאום פוליטי בפריים טיים' },
+    { w: 1.5, tone: 'neutral', text: 'הנאום עבר בלי הדים מיוחדים.', fx: { playerPopularity: 1 } },
   ]),
 });
 
 def({
-  id: 'postpone_elections', title: 'לדחות את הבחירות "בגלל המצב"', icon: '⏸️', category: 'government', level: 'major', capital: 15, cooldown: 30,
-  description: 'שנה נוספת על הכיסא. בג״ץ, הרחוב והאופוזיציה – פחות מתלהבים.',
-  unavailable: (s) => (!isPM(s) ? 'רק ראש הממשלה' : turnsToElection(s) > 8 ? 'עוד מוקדם לדחות – הבחירות רחוקות' : null),
+  id: 'postpone_elections', title: 'הצעה לדחיית הבחירות', icon: '⏸️', category: 'government', level: 'major', capital: 15, cooldown: 12,
+  description: 'הארכת כהונת הכנסטון בשנה. לפי חוק היסוד צריך רוב של 80 ח״כים. גם אם עובר – צפויה מחאה ועתירות לבג״ץ.',
+  unavailable: (s) => (!isPM(s) ? 'רק ראש הממשלה' : monthsUntilElection(s) > 8 ? 'הבחירות עוד רחוקות' : s.government.caretaker ? 'ממשלת מעבר' : null),
   run: (s) => {
-    applyDecision(s, { groups: { left: -15, center: -12, secular: -6, right: 2 }, stability: -10, playerReputation: -12 });
+    applyDecision(s, { groups: { left: -12, liberals: -10, center: -8, secular: -4, right: 1 }, stability: -8, playerReputation: -10 });
+    const support = coalitionSeats(s) + Math.round(rand(s) * 14);
+    if (support < 80) {
+      addNews(s, `ההצעה לדחיית הבחירות נפלה: ${support} תומכים, נדרשו 80`, 'bad', '⏸️');
+      return { title: 'ההצעה נפלה', status: 'rejected', subtitle: `${support} תומכים מתוך 80 הנדרשים`, quip: 'הבחירות יתקיימו במועדן.' };
+    }
     if (!s.crises.some((c) => c.defId === 'cost_protest')) startCrisis(s, 'cost_protest', 3);
     if (rand(s) < 0.4) {
       applyEffects(s, { playerPopularity: -8 });
-      addNews(s, 'בג״ץ ביטל את דחיית הבחירות. ראש הממשלה: "שופטים לא נבחרים!"', 'bad', '⚖️');
-      return { title: 'בג״ץ ביטל את הדחייה', status: 'rejected', quip: 'הבחירות במועדן. והמחאה – גם.' };
+      addNews(s, 'בג״ץ ביטל את חוק דחיית הבחירות', 'bad', '⚖️');
+      return { title: 'בג״ץ ביטל את הדחייה', status: 'rejected', quip: 'הבחירות יתקיימו במועדן, והמחאה נמשכת.' };
     }
-    s.elections.scheduledTurn += 6;
-    addNews(s, 'הבחירות נדחו בשנה "בגלל המצב". המצב: ראש הממשלה בסקרים', 'bad', '⏸️');
+    s.elections.date = addMonths(electionDate(s), 12);
+    addNews(s, 'הכנסטון אישר ברוב של 80 את דחיית הבחירות בשנה', 'bad', '⏸️');
     s.career.memorable.push('דחה את הבחירות בשנה');
-    return { title: 'הבחירות נדחו בשנה', quip: 'דמוקרטיה זה כמו טלוויזיה: אפשר לעשות לה השהיה.' };
+    return { title: 'הבחירות נדחו בשנה', quip: 'המהלך עבר, אבל המחיר הציבורי כבד.' };
   },
 });
 
 def({
-  id: 'media_enemy', title: 'להכריז על התקשורת "אויבת העם"', icon: '📵', category: 'government', level: 'medium', capital: 5, cooldown: 12,
-  description: 'מי שלא איתך – נגדך. ובעיקר העיתונאים.',
-  unavailable: (s) => (isPM(s) ? null : 'רק ראש הממשלה'),
+  id: 'declare_war_pm', title: 'מבצע צבאי רחב', icon: '💥', category: 'government', level: 'major', capital: 12, cooldown: 8,
+  description: 'מבצע צבאי רחב באישור הקבינט. מגייס מילואים ופוגע בכלכלה; בתחילה הציבור מתלכד, בהמשך נשאלות שאלות.',
+  unavailable: (s) => (!isPM(s) ? 'רק ראש הממשלה' : s.crises.some((c) => c.defId === 'war') ? 'כבר מתנהלת מלחמה' : null),
   run: (s) => {
-    applyDecision(s, { groups: { right: 5, settlers: 2, left: -10, center: -5 }, playerReputation: -6, playerPopularity: 2 });
-    addNews(s, 'ראש הממשלה הכריז על התקשורת "אויבת העם". התקשורת: "אנחנו מסקרים את זה"', 'bad', '📵');
-    return { title: 'התקשורת הוכרזה "אויבת העם"', quip: 'מחר כל הכותרות יעסקו בך. בדיוק כמו שרצית.' };
-  },
-});
-
-def({
-  id: 'declare_war_pm', title: 'להכריז מלחמה', icon: '💥', category: 'government', level: 'major', capital: 12, cooldown: 30,
-  description: 'הסקרים בשמיים, הכלכלה בבור, והמילואימניקים בשטח.',
-  unavailable: (s) => (!isPM(s) ? 'רק ראש הממשלה' : s.crises.some((c) => c.defId === 'war') ? 'כבר יש מלחמה' : null),
-  run: (s) => {
-    applyDecision(s, { oneOffCost: 4, economy: { growth: -0.9, unemployment: 0.3 }, groups: { right: 8, settlers: 6, reservists: -8, families: -4, left: -10 }, stability: 10, playerPopularity: 7 });
+    applyDecision(s, { oneOffCost: 4, economy: { growth: -0.9, unemployment: 0.3 }, groups: { right: 6, settlers: 5, reservists: -8, families: -4, left: -8 }, stability: 10, playerPopularity: 5 });
     startCrisis(s, 'war', 3);
-    s.career.memorable.push('הכריז מלחמה');
-    return { title: 'מלחמה!', quip: 'אפקט "התלכדות סביב הדגל": הסקרים עולים לחודשיים. אחר כך מגיעה ועדת חקירה.' };
+    s.career.memorable.push('הוביל מבצע צבאי רחב');
+    return { title: 'יצא לדרך מבצע צבאי רחב', quip: 'משרתי המילואים גויסו. העורף נערך, והכלכלה תושפע בחודשים הקרובים.' };
   },
 });
 
+// ===== CAREER =====
 def({
-  id: 'network', title: 'קפה עם פוליטיקאי', icon: '☕', category: 'career', level: 'simple', capital: 5, cooldown: 1,
-  description: 'אספרסו כפול, חיוכים מזויפים ונאמנות זמנית.',
+  id: 'network', title: 'פגישה אישית עם פוליטיקאי', icon: '☕', category: 'career', level: 'simple', capital: 5, cooldown: 1,
+  description: 'שיחה אישית לחיזוק הקשר. משפרת את היחסים ואת הנאמנות (פחות עם בעלי אגו גבוה).',
   unavailable: (s, p) => (s.politicians[str(p, 'politicianId')]?.active && str(p, 'politicianId') !== s.player.politicianId ? null : 'בחר פוליטיקאי'),
   run: (s, p) => {
     const t = s.politicians[str(p, 'politicianId')];
     const gain = randInt(s, 6, 12) - Math.round(t.personality.ego * 4);
-    remember(s, t.id, 'support', 'שתינו קפה', gain);
+    remember(s, t.id, 'support', 'פגישה אישית', gain);
     me(s).power = clamp(me(s).power + 1);
-    return { title: `קפה עם ${t.name}`, subtitle: `נאמנות +${Math.round(gain * 0.6)}`, people: [{ icon: '☕', label: t.name, text: pick(s, ['נעים מאוד. אתה משלם?', 'אני זוכר חברים.', 'בוא נדבר על העתיד. שלי.']), tone: 'good' }] };
+    return { title: `פגישה עם ${t.name}`, subtitle: `יחסים +${Math.round(gain * 0.6)}`, people: [{ icon: '☕', label: t.name, text: pick(s, ['שיחה טובה. נמשיך להיות בקשר.', 'אני מעריך את הפנייה.', 'יש בינינו הרבה מן המשותף.']), tone: 'good' }] };
   },
 });
 
 def({
-  id: 'support_leader', title: 'גיבוי פומבי למנהיג', icon: '🙌', category: 'career', level: 'simple', capital: 0, cooldown: 3,
-  description: 'להגיד בטלוויזיה שהמנהיג גאון. גם כשהוא לא.',
+  id: 'support_leader', title: 'גיבוי פומבי למנהיג', icon: '🙌', category: 'career', level: 'simple', capital: 0, cooldown: 2,
+  description: 'הצהרת תמיכה במנהיג המפלגה. משפרת את היחסים איתו; קצת פוגעת בעצמאות שלך בעיני הציבור.',
   unavailable: (s) => (isPartyLeader(s) ? 'אתה המנהיג' : null),
   run: (s) => {
     const l = s.politicians[s.parties[s.player.partyId].leaderId];
     remember(s, l.id, 'support', 'גיבה אותי בתקשורת', 12);
     applyEffects(s, { playerReputation: -1 });
-    return { title: `גיבית את ${l.name}`, people: [{ icon: '😌', label: l.name, text: 'זה נאמנות. אני זוכר.', tone: 'good' }] };
+    return { title: `גיבית את ${l.name}`, people: [{ icon: '🙂', label: l.name, text: 'אני מעריך את הגיבוי.', tone: 'good' }] };
   },
 });
 
 def({
-  id: 'ask_position', title: 'לבקש תפקיד', icon: '🙋', category: 'career', level: 'simple', capital: 3, cooldown: 4,
-  description: 'לדפוק על הדלת של המנהיג ולהזכיר לו שאתה קיים. הוא שכח.',
+  id: 'ask_position', title: 'בקשת תפקיד', icon: '🙋', category: 'career', level: 'simple', capital: 3, cooldown: 2,
+  description: 'פנייה למנהיג בבקשה לתפקיד. מצליחה אם הוא סומך עליך (נאמנות 58+), יש לך כוח (32+) ומוניטין (40+).',
   unavailable: (s) => (s.player.role !== 'mk' ? 'כבר יש לך תפקיד' : isPartyLeader(s) ? 'אתה המנהיג' : null),
   run: (s) => {
     const leader = s.politicians[s.parties[s.player.partyId].leaderId];
@@ -974,15 +923,15 @@ def({
     const ok = leader.loyalty > 58 && pl.power > 32 && s.player.reputation > 40;
     if (!ok) {
       leader.loyalty = clamp(leader.loyalty - 3);
-      return { title: 'לא עכשיו', status: 'rejected', people: [{ icon: '🤨', label: leader.name, text: 'תוכיח את עצמך קודם.', tone: 'bad' }] };
+      return { title: 'הבקשה נדחתה', status: 'rejected', people: [{ icon: '🤨', label: leader.name, text: 'עוד לא הגיע הזמן. תוכיח את עצמך בעבודה.', tone: 'bad' }] };
     }
     if (inGov) {
-      const free = s.government.ministries.filter((m) => (m.agreementPartyId === pl.partyId && (!m.ministerId || m.ministerId === s.government.pmId)) || m.satire);
+      const free = s.government.ministries.filter((m) => m.agreementPartyId === pl.partyId && (!m.ministerId || m.ministerId === s.government.pmId));
       const target = free[0];
       if (target) {
         assignMinister(s, target.id, pl.id);
         setRole(s, 'minister', `מונה ל${target.name}`);
-        return { title: `מונית ל${target.name}!`, status: 'approved', quip: target.satire ? 'זה המשרד לנושאים אסטרטגיים כלליים. לפחות יש נהג.' : undefined };
+        return { title: `מונית ל${target.name}`, status: 'approved' };
       }
     }
     pl.committee = 'ועדת הכספים';
@@ -993,8 +942,8 @@ def({
 });
 
 def({
-  id: 'run_primaries', title: 'קריאת תיגר על ההנהגה', icon: '⚔️', category: 'career', level: 'major', capital: 20, cooldown: 8,
-  description: 'סכין בגב, בחיוך, בשידור חי. מנצחים – הכיסא שלך. מפסידים – נתראה בפודקאסט.',
+  id: 'run_primaries', title: 'התמודדות על ראשות המפלגה', icon: '⚔️', category: 'career', level: 'major', capital: 20, cooldown: 4,
+  description: 'התמודדות מול המנהיג המכהן. הסיכוי נקבע לפי הכוח, הפופולריות ותמיכת חברי המפלגה. הפסד יעלה ביוקר.',
   unavailable: (s) => (isPartyLeader(s) ? 'אתה כבר המנהיג' : me(s).power < 35 ? 'צריך לפחות 35 כוח פוליטי' : null),
   run: (s) => {
     const party = s.parties[s.player.partyId];
@@ -1010,7 +959,7 @@ def({
       pl.power = clamp(pl.power + 15);
       s.player.listRank = 1;
       s.career.memorable.push(`ניצח בפריימריז ב${party.name}`);
-      addNews(s, `רעידת אדמה: ${pl.name} ניצח את ${leader.name} בפריימריז`, 'good', '👑');
+      addNews(s, `${pl.name} ניצח את ${leader.name} בבחירות לראשות ${party.name}`, 'good', '👑');
       if (s.government.pmId === leader.id) {
         s.government.pmId = pl.id;
         if (pl.ministryId) { const m = getMinistry(s, pl.ministryId); if (m) m.ministerId = pl.id; }
@@ -1018,20 +967,20 @@ def({
         s.career.governmentsFormed += 1;
       }
       syncRole(s);
-      return { title: 'ניצחת בפריימריז!', status: 'approved', subtitle: `אתה ${s.player.role === 'pm' ? 'ראש הממשלה' : 'מנהיג ' + party.name}` };
+      return { title: 'ניצחת בפריימריז', status: 'approved', subtitle: `אתה ${s.player.role === 'pm' ? 'ראש הממשלה' : 'יו״ר ' + party.name}` };
     }
     remember(s, leader.id, 'betrayal', 'ניסה להדיח אותי', -35);
     pl.power = clamp(pl.power - 15);
     s.flags.failed_primaries = s.turn;
-    addNews(s, `${pl.name} הובס בפריימריז. ${leader.name}: "נסגור חשבון"`, 'bad', '💀');
+    addNews(s, `${pl.name} הפסיד בבחירות לראשות ${party.name}`, 'bad', '🗳️');
     s.career.failures.push(`הפסיד בפריימריז ב${party.name}`);
-    return { title: 'הפסדת בפריימריז', status: 'rejected', subtitle: `סיכויי הניצחון היו ${Math.round(pWin * 100)}%`, quip: 'המנהיג לא שוכח. בכלל.' };
+    return { title: 'הפסדת בפריימריז', status: 'rejected', subtitle: `סיכויי הניצחון היו ${Math.round(pWin * 100)}%`, quip: 'היחסים עם המנהיג נפגעו קשות.' };
   },
 });
 
 def({
-  id: 'switch_party', title: 'מעבר מפלגה', icon: '🦘', category: 'career', level: 'major', capital: 15, cooldown: 12,
-  description: 'אידיאולוגיה זה זמני. מקום ריאלי – זה נצחי.',
+  id: 'switch_party', title: 'מעבר מפלגה', icon: '🔀', category: 'career', level: 'major', capital: 15, cooldown: 6,
+  description: 'מעבר למפלגה אחרת. חברי המפלגה הקודמת יראו בזה בגידה; במפלגה החדשה תקבל מקום לפי כוחך.',
   unavailable: (s, p) => (isPartyLeader(s) ? 'מנהיג לא עוזב את המפלגה שלו' : !s.parties[str(p, 'partyId')] || str(p, 'partyId') === s.player.partyId ? 'בחר מפלגה אחרת' : null),
   run: (s, p) => {
     const from = s.parties[s.player.partyId];
@@ -1051,15 +1000,15 @@ def({
     from.seats = Math.max(0, from.seats - 1);
     to.seats += 1;
     s.career.memorable.push(`עבר מ${from.name} ל${to.name}`);
-    addNews(s, `${pl.name} עובר ל${to.name}. ב${from.name}: "בוגד"`, 'bad', '🦘');
+    addNews(s, `${pl.name} עובר ל${to.name}`, 'neutral', '🔀');
     syncRole(s);
-    return { title: `ברוך הבא ל${to.name}`, subtitle: `מקום ${s.player.listRank} ברשימה (בינתיים)` };
+    return { title: `הצטרפת ל${to.name}`, subtitle: `מקום ${s.player.listRank} ברשימה (עד הפריימריז)` };
   },
 });
 
 def({
   id: 'resign', title: 'התפטרות', icon: '🚪', category: 'career', level: 'major', capital: 0,
-  description: 'לחזור ״למשפחה״. המשפחה כבר החליפה מנעול.',
+  description: 'פרישה מהחיים הפוליטיים. המשחק מסתיים.',
   unavailable: () => null,
   run: (s) => {
     setGameOver(s, 'resigned', 'התפטרת');
@@ -1069,8 +1018,8 @@ def({
 
 // ===== PARTY (leader) =====
 def({
-  id: 'rename_party', title: 'מיתוג מחדש', icon: '🎨', category: 'party', level: 'simple', capital: 3, cooldown: 6,
-  description: 'שם חדש, לוגו חדש, אותם אנשים בדיוק. כמו תמיד.',
+  id: 'rename_party', title: 'מיתוג מחדש', icon: '🎨', category: 'party', level: 'simple', capital: 3, cooldown: 3,
+  description: 'שם, סמל וצבע חדשים למפלגה. יכול לתת תנופה, או לבלבל את המצביעים.',
   unavailable: (s, p) => (!getCapabilities(s).canManageParty ? 'רק מנהיג המפלגה' : str(p, 'name').trim().length < 2 ? 'שם קצר מדי' : null),
   run: (s, p) => {
     const party = s.parties[s.player.partyId];
@@ -1079,73 +1028,74 @@ def({
     party.shortName = party.name.slice(0, 14);
     if (str(p, 'logo')) party.logo = str(p, 'logo');
     if (str(p, 'color')) party.color = str(p, 'color');
-    party.momentum = clamp(party.momentum + (rand(s) < 0.5 ? 3 : -2), -40, 40);
-    addNews(s, `${old} היא מעכשיו "${party.name}". הסקרים מבולבלים`, 'satire', party.logo);
-    return { title: `"${party.name}"`, quip: 'המיתוג עלה 2 מיליון. הלוגו – אימוג׳י.' };
+    const up = rand(s) < 0.5;
+    party.momentum = clamp(party.momentum + (up ? 3 : -2), -40, 40);
+    addNews(s, `${old} משנה את שמה ל"${party.name}"`, 'neutral', party.logo);
+    return { title: `"${party.name}"`, quip: up ? 'המיתוג החדש התקבל היטב.' : 'חלק מהמצביעים מתקשים לזהות את המפלגה בשמה החדש.' };
   },
 });
 
 def({
   id: 'promote_member', title: 'קידום חבר מפלגה', icon: '⬆️', category: 'party', level: 'simple', capital: 3, cooldown: 1,
-  description: 'מקום טוב ברשימה = חבר נאמן. לחודשיים.',
+  description: 'קידום בתוך המפלגה: כוחו +6 ונאמנותו עולה. שאר החברים קצת מקנאים.',
   unavailable: (s, p) => (!getCapabilities(s).canManageParty ? 'רק מנהיג המפלגה' : s.politicians[str(p, 'politicianId')]?.partyId !== s.player.partyId ? 'רק חברי המפלגה' : null),
   run: (s, p) => {
     const t = s.politicians[str(p, 'politicianId')];
     t.power = clamp(t.power + 6);
-    remember(s, t.id, 'favor', 'קודם ברשימה', 12);
+    remember(s, t.id, 'favor', 'קודם במפלגה', 12);
     for (const id of s.parties[s.player.partyId].memberIds) if (id !== t.id && !s.politicians[id].isPlayer) s.politicians[id].loyalty = clamp(s.politicians[id].loyalty - 1.5);
-    return { title: `${t.name} קודם`, people: [{ icon: '😄', label: t.name, text: 'ידעתי שאתה מעריך אותי!', tone: 'good' }] };
+    return { title: `${t.name} קודם`, people: [{ icon: '🙂', label: t.name, text: 'תודה על האמון. לא אאכזב.', tone: 'good' }] };
   },
 });
 
 def({
-  id: 'demote_member', title: 'הורדה ברשימה', icon: '⬇️', category: 'party', level: 'simple', capital: 3, cooldown: 1,
-  description: 'מסר ברור לכולם. והוא כבר מחפש מפלגה אחרת.',
+  id: 'demote_member', title: 'הורדת חבר מפלגה', icon: '⬇️', category: 'party', level: 'simple', capital: 3, cooldown: 1,
+  description: 'הורדה בתוך המפלגה: כוחו -8. הוא עלול לחפש מפלגה אחרת.',
   unavailable: (s, p) => (!getCapabilities(s).canManageParty ? 'רק מנהיג המפלגה' : s.politicians[str(p, 'politicianId')]?.partyId !== s.player.partyId ? 'רק חברי המפלגה' : null),
   run: (s, p) => {
     const t = s.politicians[str(p, 'politicianId')];
     t.power = clamp(t.power - 8);
-    remember(s, t.id, 'insult', 'הורד ברשימה', -20);
-    return { title: `${t.name} הורד ברשימה`, people: [{ icon: '😤', label: t.name, text: 'תזכור את היום הזה.', tone: 'bad' }] };
+    remember(s, t.id, 'insult', 'הורד במפלגה', -20);
+    return { title: `${t.name} הורד`, people: [{ icon: '😤', label: t.name, text: 'ההחלטה לא הוגנת.', tone: 'bad' }] };
   },
 });
 
 def({
-  id: 'expel_member', title: 'הוצאה מהמפלגה', icon: '🚫', category: 'party', level: 'medium', capital: 8, cooldown: 4,
-  description: 'זורקים אותו החוצה. הוא לוקח איתו מנדט ופודקאסט.',
+  id: 'expel_member', title: 'הוצאה מהמפלגה', icon: '🚫', category: 'party', level: 'medium', capital: 8, cooldown: 2,
+  description: 'הוצאת חבר מהסיעה. המפלגה מאבדת מנדט; אם הוא היה לא נאמן, הלכידות עולה.',
   unavailable: (s, p) => (!getCapabilities(s).canManageParty ? 'רק מנהיג המפלגה' : s.politicians[str(p, 'politicianId')]?.partyId !== s.player.partyId || str(p, 'politicianId') === s.player.politicianId ? 'רק חברי המפלגה' : null),
   run: (s, p) => {
     const t = s.politicians[str(p, 'politicianId')];
     const party = s.parties[s.player.partyId];
     party.memberIds = party.memberIds.filter((id) => id !== t.id);
     t.active = false;
-    t.quirk = 'הוצא מהמפלגה. עכשיו יש לו פודקאסט.';
+    t.quirk = 'הוצא מהסיעה.';
     if (t.ministryId) { const m = getMinistry(s, t.ministryId); if (m) m.ministerId = s.government.pmId; t.ministryId = null; }
     party.seats = Math.max(1, party.seats - 1);
     party.cohesion = clamp(party.cohesion + (t.loyalty < 40 ? 8 : -6));
-    addNews(s, `${t.name} הוצא מ${party.name}`, 'neutral', '🚫');
-    return { title: `${t.name} בחוץ`, subtitle: `המפלגה ירדה ל-${party.seats} מנדטים בכנסטון` };
+    addNews(s, `${t.name} הוצא מסיעת ${party.name}`, 'neutral', '🚫');
+    return { title: `${t.name} הוצא מהסיעה`, subtitle: `לסיעה ${party.seats} מנדטים בכנסטון` };
   },
 });
 
 def({
-  id: 'recruit_star', title: 'גיוס כוכב', icon: '🌟', category: 'party', level: 'medium', capital: 10, cooldown: 6,
-  description: 'מגייסים סלב שלא יודע מה זו ועדת כספים. הוותיקים כבר מחדדים סכינים.',
+  id: 'recruit_star', title: 'גיוס מועמד חיצוני', icon: '🌟', category: 'party', level: 'medium', capital: 10, cooldown: 3,
+  description: 'צירוף איש מקצוע מוכר לרשימה (₪2 מיליון מקופת המפלגה). מוסיף תנופה; הוותיקים חוששים לירידה ברשימה.',
   unavailable: (s) => (!getCapabilities(s).canManageParty ? 'רק מנהיג המפלגה' : s.parties[s.player.partyId].funds < 2 ? 'אין מספיק כסף במפלגה' : null),
   run: (s) => {
     const party = s.parties[s.player.partyId];
     const kinds = [
-      { t: 'אלוף במילואים', d: 'defense' as Domain }, { t: 'כלכלנית בכירה', d: 'economy' as Domain }, { t: 'מגיש טלוויזיה', d: 'media' as Domain },
-      { t: 'מנהלת בית חולים', d: 'health' as Domain }, { t: 'מנכ״ל הייטק', d: 'science' as Domain }, { t: 'מנהלת בית ספר', d: 'education' as Domain },
+      { t: 'אלוף במילואים', d: 'defense' as Domain }, { t: 'כלכלנית בכירה', d: 'economy' as Domain }, { t: 'עיתונאי ותיק', d: 'media' as Domain },
+      { t: 'מנהלת בית חולים', d: 'health' as Domain }, { t: 'מנכ״ל חברת טכנולוגיה', d: 'science' as Domain }, { t: 'מנהלת בית ספר', d: 'education' as Domain },
     ];
     const k = pick(s, kinds);
     const id = newId(s, 'pol');
     const gender = rand(s) < 0.5 ? 'f' : 'm';
     const pol: Politician = {
-      id, name: `${pick(s, gender === 'f' ? ['נועה', 'מיכל', 'רוני', 'שירה'] : ['גיא', 'עומר', 'אורי', 'יואב'])} ${pick(s, ['כוכבי', 'זוהר', 'פריים-טיים', 'מגנטי'])}`,
+      id, name: `${pick(s, gender === 'f' ? ['נועה', 'מיכל', 'רונית', 'שירה', 'ענת', 'הדס'] : ['גיא', 'עומר', 'אורי', 'יואב', 'עמית', 'אלון'])} ${pick(s, ['ברק', 'שמעוני', 'לוין', 'אזולאי', 'רוזן', 'חדד', 'פרידמן', 'מזרחי'])}`,
       gender, partyId: party.id, ministryId: null, committee: null, mainDomain: k.d, expertise: { [k.d]: 82 }, power: 40, loyalty: 70,
       popularity: 62, experience: 0, personality: { ego: 0.8, ambition: 0.9, honesty: 0.6, aggression: 0.4 }, ideology: { ...party.ideology },
-      memory: [], relationships: {}, caricature: randomCaricature(s, gender, party.id), quirk: `${k.t} לשעבר. מגיע עם יחצ״נית.`, cooldownUntil: s.turn + 4,
+      memory: [], relationships: {}, caricature: randomCaricature(s, gender, party.id), quirk: `${k.t}. מועמד/ת חדש/ה בפוליטיקה (דמות בדיונית).`, cooldownUntil: s.turn + 2,
       isPlayer: false, active: true, ambitionTarget: 'משרד בכיר',
     };
     s.politicians[id] = pol;
@@ -1153,26 +1103,26 @@ def({
     party.funds -= 2;
     applyEffects(s, { partyMomentum: { [party.id]: 5 } });
     for (const mid of party.memberIds) if (mid !== id && !s.politicians[mid].isPlayer) s.politicians[mid].loyalty = clamp(s.politicians[mid].loyalty - 2);
-    addNews(s, `${party.name} מגייסת: ${pol.name}, ${k.t}`, 'good', '🌟');
-    return { title: `הצטרף/ה: ${pol.name}`, subtitle: k.t, quip: 'הוותיקים במפלגה כבר מחשבים מי יורד ברשימה.' };
+    addNews(s, `${party.name} מצרפת לרשימה: ${pol.name}, ${k.t}`, 'good', '🌟');
+    return { title: `הצטרף/ה: ${pol.name}`, subtitle: k.t, quip: 'חברי המפלגה הוותיקים חוששים לירידה ברשימה.' };
   },
 });
 
 def({
-  id: 'fundraise', title: 'גיוס תרומות', icon: '💵', category: 'party', level: 'simple', capital: 2, cooldown: 2,
-  description: 'ערב התרמה חוקי לגמרי. לגמרי. תפסיקו לשאול.',
+  id: 'fundraise', title: 'גיוס תרומות', icon: '💵', category: 'party', level: 'simple', capital: 2, cooldown: 1,
+  description: 'אירוע התרמה במסגרת חוק מימון מפלגות. הסכום תלוי בפופולריות שלך.',
   unavailable: (s) => (!getCapabilities(s).canManageParty ? 'רק מנהיג המפלגה' : null),
   run: (s) => {
     const party = s.parties[s.player.partyId];
     const amount = round1(1.5 + me(s).popularity / 30 + rand(s));
     party.funds += amount;
-    return { title: `גויסו ₪${amount} מיליון`, quip: 'כל התרומות דווחו. כן, גם הקרפ מהמזנון.' };
+    return { title: `גויסו ₪${amount} מיליון`, quip: 'כל התרומות דווחו למבקר המדינה, בהתאם לחוק.' };
   },
 });
 
 def({
-  id: 'party_line', title: 'שינוי קו המפלגה', icon: '🧭', category: 'party', level: 'medium', capital: 6, cooldown: 6,
-  description: 'אתמול ימין, היום מרכז, מחר מה שהסקר אומר.',
+  id: 'party_line', title: 'שינוי קו המפלגה', icon: '🧭', category: 'party', level: 'medium', capital: 6, cooldown: 3,
+  description: 'הזזת המפלגה על אחד הצירים (ימין-שמאל, ליברלי-סוציאליסטי, דתי-חילוני). מושך קבוצות חדשות ומרחיק אחרות.',
   unavailable: (s) => (!getCapabilities(s).canManageParty ? 'רק מנהיג המפלגה' : null),
   run: (s, p) => {
     const axis = str(p, 'axis') as keyof Ideology;
@@ -1181,8 +1131,8 @@ def({
     party.ideology[axis] = clamp(party.ideology[axis] + dir * 0.2, -1, 1);
     me(s).ideology[axis] = party.ideology[axis];
     const map: Record<keyof Ideology, [GroupId[], GroupId[]]> = {
-      economic: [['highIncome', 'selfEmployed'], ['lowIncome', 'publicSector']],
-      security: [['right', 'settlers', 'reservists'], ['left']],
+      economic: [['highIncome', 'selfEmployed', 'liberals'], ['lowIncome', 'publicSector', 'socialists']],
+      security: [['right', 'settlers', 'reservists'], ['left', 'arabs']],
       religion: [['religious', 'haredim'], ['secular']],
     };
     const [up, down] = dir > 0 ? map[axis] : [map[axis][1], map[axis][0]];
@@ -1192,7 +1142,7 @@ def({
       const m = s.politicians[id];
       if (!m.isPlayer && Math.abs(m.ideology[axis] - party.ideology[axis]) > 0.4) remember(s, id, 'insult', 'שינה את הקו', -6);
     }
-    const names = { economic: ['ימינה כלכלית', 'שמאלה כלכלית'], security: ['ניצית יותר', 'יונית יותר'], religion: ['מסורתית יותר', 'חילונית יותר'] };
+    const names = { economic: ['לכיוון ליברלי', 'לכיוון סוציאליסטי'], security: ['ימינה', 'שמאלה'], religion: ['לכיוון דתי', 'לכיוון חילוני'] };
     addNews(s, `${party.name} זזה ${names[axis][dir > 0 ? 0 : 1]}`, 'neutral', '🧭');
     return { title: `המפלגה זזה ${names[axis][dir > 0 ? 0 : 1]}` };
   },
@@ -1201,21 +1151,21 @@ def({
 // ===== CAMPAIGN =====
 def({
   id: 'campaign_rally', title: 'כנס בחירות', icon: '📢', category: 'campaign', level: 'simple', capital: 2, cooldown: 1,
-  description: 'במה, דגלים ונאום. חצי מהקהל הגיע בשביל הסנדוויצ׳ים.',
-  unavailable: (s) => (!getCapabilities(s).canCampaign ? 'רק מנהיג מפלגה' : turnsToElection(s) > 8 ? 'מוקדם מדי לקמפיין (8 תורות לפני בחירות)' : s.parties[s.player.partyId].funds < 1.5 ? 'אין כסף במפלגה' : null),
+  description: 'כנס תומכים (₪1.5 מיליון מקופת המפלגה). קמפיין +2 ופופולריות +1.',
+  unavailable: (s) => (!getCapabilities(s).canCampaign ? 'רק מנהיג מפלגה' : monthsUntilElection(s) > 6 ? 'הקמפיין מתחיל חצי שנה לפני הבחירות' : s.parties[s.player.partyId].funds < 1.5 ? 'אין כסף במפלגה' : null),
   run: (s) => {
     const party = s.parties[s.player.partyId];
     party.funds -= 1.5;
     addCampaign(s, party.id, 2);
     applyEffects(s, { playerPopularity: 1 });
-    return { title: 'כנס מוצלח', subtitle: 'קמפיין +2', quip: 'אלפים הגיעו. חלקם בשביל הסנדוויצ׳ים.' };
+    return { title: 'כנס מוצלח', subtitle: 'קמפיין +2', quip: 'אלפי תומכים הגיעו, והכנס סוקר בתקשורת.' };
   },
 });
 
 def({
   id: 'campaign_ads', title: 'קמפיין פרסום', icon: '🖼️', category: 'campaign', level: 'simple', capital: 1, cooldown: 1,
-  description: 'שלטי חוצות עם הפרצוף שלך, מחויך מדי. ₪4 מיליון.',
-  unavailable: (s) => (!getCapabilities(s).canCampaign ? 'רק מנהיג מפלגה' : turnsToElection(s) > 8 ? 'מוקדם מדי לקמפיין' : s.parties[s.player.partyId].funds < 4 ? 'אין כסף במפלגה' : null),
+  description: 'שלטי חוצות, דיגיטל ותשדירים (₪4 מיליון). קמפיין +4, עם תשואה פוחתת.',
+  unavailable: (s) => (!getCapabilities(s).canCampaign ? 'רק מנהיג מפלגה' : monthsUntilElection(s) > 6 ? 'הקמפיין מתחיל חצי שנה לפני הבחירות' : s.parties[s.player.partyId].funds < 4 ? 'אין כסף במפלגה' : null),
   run: (s) => {
     const party = s.parties[s.player.partyId];
     party.funds -= 4;
@@ -1225,24 +1175,24 @@ def({
 });
 
 def({
-  id: 'debate', title: 'עימות טלוויזיוני', icon: '🎤', category: 'campaign', level: 'medium', capital: 4, cooldown: 4,
-  description: 'שעה של צעקות. מי שמגמגם פחות – מנצח.',
-  unavailable: (s) => (!getCapabilities(s).canCampaign ? 'רק מנהיג מפלגה' : turnsToElection(s) > 4 ? 'עימותים רק בחצי השנה לפני הבחירות' : null),
+  id: 'debate', title: 'עימות טלוויזיוני', icon: '🎤', category: 'campaign', level: 'medium', capital: 4, cooldown: 2,
+  description: 'עימות מול מועמדים אחרים. ניצחון: קמפיין +5; הפסד: קמפיין -3. הסיכוי תלוי במוניטין ובפופולריות.',
+  unavailable: (s) => (!getCapabilities(s).canCampaign ? 'רק מנהיג מפלגה' : !inCampaign(s) ? 'עימותים מתקיימים רק בתקופת הבחירות' : null),
   run: (s) => {
     const win = rand(s) < 0.35 + s.player.reputation / 250 + me(s).popularity / 300;
     const party = s.parties[s.player.partyId];
     addCampaign(s, party.id, win ? 5 : -3);
-    addNews(s, win ? `${me(s).name} ניצח בעימות` : `${me(s).name} גמגם בעימות; הממים כבר ברשת`, win ? 'good' : 'bad', '🎤');
-    return { title: win ? 'ניצחת בעימות!' : 'העימות לא הלך טוב', status: win ? 'approved' : 'rejected' };
+    addNews(s, win ? `פרשנים: ${me(s).name} ניצח בעימות` : `פרשנים: ${me(s).name} התקשה בעימות`, win ? 'good' : 'bad', '🎤');
+    return { title: win ? 'ניצחת בעימות' : 'העימות לא הלך טוב', status: win ? 'approved' : 'rejected' };
   },
 });
 
 def({
-  id: 'seek_endorsement', title: 'התחייבות להמליץ', icon: '✍️', category: 'campaign', level: 'medium', capital: 8, cooldown: 2,
-  description: 'מנהיג אחר מבטיח להמליץ עליך לנשיא. הבטחות פוליטיות תקפות עד הבוקר.',
+  id: 'seek_endorsement', title: 'התחייבות להמליץ', icon: '✍️', category: 'campaign', level: 'medium', capital: 8, cooldown: 1,
+  description: 'מנהיג מפלגה אחרת מתחייב להמליץ עליך לנשיא אחרי הבחירות. הסיכוי תלוי בקרבה האידיאולוגית וביחסים.',
   unavailable: (s, p) => {
     if (!isPartyLeader(s)) return 'רק מנהיג מפלגה';
-    if (turnsToElection(s) > 8) return 'רק בשנה וחצי שלפני הבחירות';
+    if (monthsUntilElection(s) > 12) return 'רק בשנה שלפני הבחירות';
     const party = s.parties[str(p, 'partyId')];
     if (!party || party.id === s.player.partyId) return 'בחר מפלגה אחרת';
     if ((s.flags[`endorse_${party.id}`] ?? -1) === s.elections.scheduledTurn) return 'כבר התחייבו לך';
@@ -1258,16 +1208,16 @@ def({
       s.flags[`endorse_${party.id}`] = s.elections.scheduledTurn;
       remember(s, leader.id, 'deal', 'התחייב להמליץ עליך', 6);
       addNews(s, `${leader.name}: "אחרי הבחירות נמליץ על ${me(s).name}"`, 'good', '✍️');
-      return { title: `${party.name} התחייבה להמליץ עליך`, status: 'approved', subtitle: `סיכוי היה ${Math.round(chanceOk * 100)}%`, quip: 'התחייבות בפוליטיקה תקפה עד שהיא לא.' };
+      return { title: `${party.name} התחייבה להמליץ עליך`, status: 'approved', subtitle: `הסיכוי היה ${Math.round(chanceOk * 100)}%`, quip: 'התחייבות פומבית, אבל המבחן האמיתי יהיה אחרי התוצאות.' };
     }
     leader.loyalty = clamp(leader.loyalty - 3);
-    return { title: `${leader.name} לא מתחייב`, status: 'rejected', subtitle: `סיכוי היה ${Math.round(chanceOk * 100)}%`, people: [{ icon: party.logo, label: leader.name, text: 'נראה אחרי הבחירות.', tone: 'neutral' }] };
+    return { title: `${leader.name} לא מתחייב`, status: 'rejected', subtitle: `הסיכוי היה ${Math.round(chanceOk * 100)}%`, people: [{ icon: party.logo, label: leader.name, text: 'נחליט אחרי הבחירות.', tone: 'neutral' }] };
   },
 });
 
 def({
   id: 'make_promise', title: 'הבטחת בחירות', icon: '🤞', category: 'campaign', level: 'simple', capital: 2,
-  description: 'להבטיח עכשיו, להתנצל אחר כך. כמו כולם.',
+  description: 'התחייבות פומבית. מושכת מצביעים עכשיו; אם לא תקיים אותה, הציבור יזכור.',
   unavailable: (s, p) => (!getCapabilities(s).canMakePromises ? 'הבטחות רק כמנהיג מפלגה, בשנה שלפני הבחירות' : !PROMISE_BY_ID[str(p, 'promiseId')] ? 'בחר הבטחה' : null),
   run: (s, p) => {
     const r = makePromise(s, str(p, 'promiseId'));
@@ -1298,7 +1248,7 @@ export function checkAction(s: GameState, id: string, p: Params = {}): string | 
   const r = a.unavailable(s, p);
   if (r) return r;
   const cd = cooldownLeft(s, id, p);
-  if (cd > 0) return `זמין שוב בעוד ${cd * 2} חודשים`;
+  if (cd > 0) return `זמין שוב בעוד ${turnsText(cd)}`;
   if (actionCapital(s, id, p) > s.player.politicalCapital) return 'אין מספיק הון פוליטי';
   return null;
 }
@@ -1329,7 +1279,7 @@ export function buildReaction(prev: GameState, next: GameState, rr: RunResult, a
   const groups: ReactionLine[] = deltas.map(({ g, d }) => ({ icon: g.emoji, label: g.name, text: `${N.groupReaction(next, g.id, d)} (${d > 0 ? '+' : ''}${d.toFixed(1)})`, tone: d > 0.4 ? 'good' : d < -0.4 ? 'bad' : 'neutral' }));
   if (!groups.length && a.category !== 'media' && a.category !== 'career') {
     const g = GROUP_BY_ID.youth;
-    groups.push({ icon: g.emoji, label: g.name, text: 'לא ממש מעניין אותי כרגע.', tone: 'neutral' });
+    groups.push({ icon: g.emoji, label: g.name, text: 'ההחלטה לא משפיעה עליהם ישירות.', tone: 'neutral' });
   }
 
   const people = [...(rr.people ?? [])];
@@ -1423,7 +1373,7 @@ export function prepareMeeting(s: GameState, id: string, p: Params): Meeting {
   const spend = Object.values(e.budget ?? {}).reduce((x, y) => x + (y ?? 0), 0) + (e.oneOffCost ?? 0);
   const advisor = deficitPct(s) > 4 && spend > 0
     ? `אני ממליץ לקחת בחשבון שהגירעון כבר ${deficitPct(s).toFixed(1)}%.`
-    : participants.filter((x) => x.stance < -0.1).length >= 2 ? 'אני ממליץ לא להתחיל מלחמה בתוך הממשלה.' : 'נראה שיש רוב. אבל אל תסמוך על אף אחד.';
+    : participants.filter((x) => x.stance < -0.1).length >= 2 ? 'שני שרים או יותר מתנגדים. כדאי לשכנע, לרכך או להתפשר לפני ההצבעה.' : 'נראה שיש רוב בממשלה להצעה.';
   return { actionId: id, params: p, participants, scale: 1, persuaded: 0, advisor };
 }
 
@@ -1432,7 +1382,7 @@ export type MeetingChoice = 'approve' | 'persuade' | 'deal' | 'modify' | 'vote' 
 export function meetingStep(s0: GameState, m: Meeting, choice: MeetingChoice): { state: GameState; meeting: Meeting | null; result: ActionResult | null } {
   const s = clone(s0);
   const opp = m.participants.filter((x) => x.stance < -0.1);
-  if (choice === 'reject') return { state: s0, meeting: null, result: { state: s0, reaction: { title: 'ההצעה נגנזה', status: 'info', stats: [], groups: [], people: [], quip: 'אולי בפעם אחרת.' } } };
+  if (choice === 'reject') return { state: s0, meeting: null, result: { state: s0, reaction: { title: 'ההצעה נגנזה', status: 'info', stats: [], groups: [], people: [], quip: 'ההצעה לא הועלתה להצבעה. אפשר להעלות אותה שוב בהמשך.' } } };
   if (choice === 'persuade') {
     if (s.player.politicalCapital < 8) return { state: s0, meeting: m, result: null };
     s.player.politicalCapital -= 8;
@@ -1441,7 +1391,7 @@ export function meetingStep(s0: GameState, m: Meeting, choice: MeetingChoice): {
       const pol = s.politicians[x.id];
       const flip = rand(s) < 0.35 + pol.loyalty / 200;
       const stance = flip ? 0.3 : x.stance + 0.15;
-      return { ...x, stance, bubble: flip ? pick(s, ['טוב, שכנעת אותי. הפעם.', 'בסדר. אבל זה רשום אצלי.', 'אוקיי, אני איתך.']) : pick(s, ['עדיין לא.', 'נחמד שניסית.', 'תביא משהו טוב יותר.']) };
+      return { ...x, stance, bubble: flip ? pick(s, ['השתכנעתי. אתמוך.', 'בסדר, אתמוך הפעם.', 'הנימוקים משכנעים.']) : pick(s, ['עדיין לא שוכנעתי.', 'אני נשאר בעמדתי.', 'צריך הצעה טובה יותר.']) };
     });
     return { state: s, meeting: { ...m, participants: parts, persuaded: m.persuaded + 1 }, result: null };
   }
@@ -1452,12 +1402,12 @@ export function meetingStep(s0: GameState, m: Meeting, choice: MeetingChoice): {
       const cat = min?.categories[0];
       if (cat) applyDecision(s, { budget: { [cat]: 0.8 } });
       remember(s, x.id, 'deal', 'קיבל תוספת תמורת תמיכה', 6);
-      return { ...x, stance: 0.4, bubble: cat ? 'עם עוד ₪800 מיליון? אני בפנים.' : 'עסקה זו עסקה.' };
+      return { ...x, stance: 0.4, bubble: cat ? 'עם תוספת של ₪800 מיליון למשרד, אתמוך.' : 'מקובל עליי.' };
     });
     return { state: s, meeting: { ...m, participants: parts }, result: null };
   }
   if (choice === 'modify') {
-    const parts = m.participants.map((x) => ({ ...x, stance: x.stance + 0.35, bubble: x.stance + 0.35 > -0.1 ? 'גרסה מרוככת? אפשר לחיות עם זה.' : x.bubble }));
+    const parts = m.participants.map((x) => ({ ...x, stance: x.stance + 0.35, bubble: x.stance + 0.35 > -0.1 ? 'בגרסה המתונה אפשר לתמוך.' : x.bubble }));
     return { state: s, meeting: { ...m, participants: parts, scale: 0.5, params: { ...m.params, scale: 0.5 } }, result: null };
   }
   const params = { ...m.params, ...(m.scale !== 1 ? { scale: m.scale } : {}) };

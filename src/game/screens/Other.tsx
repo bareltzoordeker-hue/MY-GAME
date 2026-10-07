@@ -12,7 +12,6 @@ import { DOMAIN_NAMES } from '../../data/ministries';
 import { ROLE_NAMES } from '../../engine/roles';
 import { serialize, deserialize, saveGame } from '../../engine/persistence/save';
 import type { Domain } from '../../types/game';
-import { getLlmKey, setLlmKey } from '../../engine/ai/llm';
 import { resetTutorial } from '../components/Tutorial';
 import { DecideButton } from '../components/Overlay';
 import { AdSlot } from '../components/Fx';
@@ -21,11 +20,11 @@ import { ActionButton, Empty, Explain, Meter, ScreenHeader, Section, Tabs } from
 
 export function NewsScreen() {
   const s = useGame((x) => x.game)!;
-  const [f, setF] = useState<'all' | 'bad' | 'good' | 'satire'>('all');
+  const [f, setF] = useState<'all' | 'bad' | 'good' | 'neutral'>('all');
   const items = s.news.filter((n) => f === 'all' || n.tone === f);
   return (
     <div className="space-y-4">
-      <ScreenHeader title="חדשות" sub="כותרות בלבד. אף אחד לא קורא את הכתבה." right={<Tabs value={f} onChange={setF} items={[{ id: 'all', label: 'הכול' }, { id: 'bad', label: 'רעות' }, { id: 'good', label: 'טובות' }, { id: 'satire', label: 'סאטירה' }]} />} />
+      <ScreenHeader title="חדשות" sub="כותרות מהתקשורת על מה שקרה בתורות האחרונים." right={<Tabs value={f} onChange={setF} items={[{ id: 'all', label: 'הכול' }, { id: 'bad', label: 'רעות' }, { id: 'good', label: 'טובות' }, { id: 'neutral', label: 'כלליות' }]} />} />
       <div className="grid md:grid-cols-2 gap-3">
         <div className="md:col-span-2"><AdSlot slot="news" seed={s.turn + 2} /></div>
         {items.map((n) => (
@@ -67,7 +66,7 @@ export function ProjectsScreen() {
           <div key={d.id} className="inset flex flex-col gap-1">
             <b className="text-sm">{d.icon} {d.name}</b>
             <span className="text-xs muted">{REGION_BY_ID[d.region].name} · ₪{d.cost}B · {d.turns * 2} חודשים · איכות +{d.bonus}</span>
-            {d.satire && <span className="text-xs" style={{ color: 'var(--gold)' }}>{d.satire}</span>}
+            {d.note && <span className="text-xs muted">{d.note}</span>}
             <ActionButton id="start_project" params={{ defId: d.id }} className="btn btn-sm btn-blue mt-1">השקה</ActionButton>
           </div>
         ))}{!avail.length && <div className="text-sm muted">אין פרויקטים פתוחים בתחום שלך.</div>}</div>
@@ -235,7 +234,6 @@ export function SaveScreen() {
         </div>
         {msg && <div className="bad text-sm">{msg}</div>}
       </div>
-      <LlmSettings />
       <div className="card flex items-center justify-between gap-2">
         <span className="text-sm">🎓 מדריך המשחק</span>
         <button className="btn btn-sm" onClick={() => { resetTutorial(); useGame.getState().setScreen('dashboard'); }}>הצג שוב</button>
@@ -246,23 +244,6 @@ export function SaveScreen() {
         <a className="btn btn-sm" href="/accessibility/" data-tip="הצהרת הנגישות של האתר">♿ הצהרת נגישות</a>
         <a className="btn btn-sm" href="/privacy/" data-tip="מדיניות הפרטיות">מדיניות פרטיות</a>
       </div>
-    </div>
-  );
-}
-
-function LlmSettings() {
-  const [key, setKey] = useState(getLlmKey());
-  const [saved, setSaved] = useState(false);
-  return (
-    <div className="card space-y-2">
-      <div className="h-title">🤖 דיאלוגים חיים עם Claude (לא חובה)</div>
-      <p className="text-sm muted">בלי מפתח המשחק משתמש בתבניות טקסט מקומיות. עם מפתח API משלך, פוליטיקאים יגיבו בטקסט שנוצר על ידי Claude (מודל claude-opus-5-5). המפתח נשמר רק בדפדפן הזה ונשלח רק ל-Anthropic. ה-AI כותב טקסט בלבד ולא משנה מספרים.</p>
-      <div className="flex gap-2 flex-wrap">
-        <input type="password" aria-label="מפתח API של Claude" className="flex-1" style={{ background: 'var(--bg2)', border: '1px solid var(--line2)', color: 'var(--text)', borderRadius: 10, padding: '9px 12px' }} placeholder="sk-ant-..." value={key} onChange={(e) => { setKey(e.target.value); setSaved(false); }} />
-        <button className="btn btn-sm btn-blue" onClick={() => { setLlmKey(key.trim()); setSaved(true); }}>שמור</button>
-        <button className="btn btn-sm" onClick={() => { setLlmKey(''); setKey(''); setSaved(true); }}>הסר</button>
-      </div>
-      {saved && <div className="text-xs good">נשמר. פתח כרטיס של פוליטיקאי במסך המפלגה ולחץ "מה הוא חושב עכשיו?".</div>}
     </div>
   );
 }

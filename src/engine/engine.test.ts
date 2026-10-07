@@ -15,6 +15,15 @@ import { CRISES } from '../data/crises';
 import { resolveDrama, fire } from './drama';
 import { DRAMAS } from './dramaEvents';
 import { proposeAlliance, breakAlliance } from './alliances';
+import { addMonths } from './calendar';
+import { PARTIES } from '../data/parties';
+
+/** Moves the next election far away, so turns are regular 4-month turns (no campaign). */
+function normalTime(s: GameState): GameState {
+  s.elections.date = addMonths(s.date, 40);
+  s.elections.scheduledTurn = 99;
+  return s;
+}
 
 describe('drama & alliances', () => {
   it('every dramatic event can be created and every option resolves without breaking the state', () => {
@@ -39,22 +48,22 @@ describe('drama & alliances', () => {
   });
   it('a pending drama blocks the turn', () => {
     const s = createGame(cfg('pm'));
-    fire(s, 'salad_war');
+    fire(s, 'podcast');
     expect(advanceTurn(s)).toBe(s);
   });
   it('alliances give vote support and can be broken', () => {
     let s = createGame(cfg('candidate'));
     s.player.politicalCapital = 100;
-    s.politicians[s.parties.generals.leaderId].loyalty = 95;
-    for (let i = 0; i < 6 && !s.alliances.length; i++) s = proposeAlliance(s, 'generals', 'bloc').state;
+    s.politicians[s.parties.democrats.leaderId].loyalty = 95;
+    for (let i = 0; i < 6 && !s.alliances.length; i++) s = proposeAlliance(s, 'democrats', 'bloc').state;
     expect(s.alliances.length).toBe(1);
-    const b = breakAlliance(s, 'generals');
+    const b = breakAlliance(s, 'democrats');
     expect(b.state.alliances.length).toBe(0);
   });
 });
 
 const cfg = (role: Role, extra: Partial<NewGameConfig> = {}): NewGameConfig => ({
-  playerName: 'טסט טסטי', gender: 'm', role, partyId: role === 'candidate' ? 'yesh' : 'kise', ministryId: 'transport', difficulty: 'normal', seed: 1234, ...extra,
+  playerName: 'טסט טסטי', gender: 'm', role, partyId: role === 'candidate' ? 'yashar' : role === 'minister' ? undefined : 'likud', ministryId: 'transport', difficulty: 'normal', seed: 1234, ...extra,
 });
 
 function assertSane(s: GameState) {
@@ -97,12 +106,14 @@ describe('world creation', () => {
   it('initial polls match initial seats (calibration)', () => {
     const s = createGame(cfg('pm'));
     const last = s.polls[0];
-    expect(Math.abs(last.shares.kise - (32 / 120) * 100)).toBeLessThan(0.5);
+    const total = PARTIES.reduce((a, p) => a + p.poll, 0);
+    for (const p of PARTIES) expect(Math.abs(last.shares[p.id] - (p.poll / total) * 100)).toBeLessThan(0.3);
+    expect(last.seats.likud).toBe(34); // outgoing Knesset
   });
   it('the advisor recommends one of the real options', async () => {
     const { adviseDrama, screenAdvice } = await import('./advisorPlus');
     const s = createGame(cfg('pm'));
-    fire(s, 'sushi');
+    fire(s, 'minister_expenses');
     const rec = adviseDrama(s)!;
     expect(s.drama!.options.map((o) => o.id)).toContain(rec.bestId);
     for (const sc of ['dashboard', 'budget', 'economy', 'government', 'parliament', 'laws', 'party', 'ministry', 'map', 'projects', 'polls', 'career']) {
@@ -126,9 +137,9 @@ describe('economy & budget', () => {
     expect(r.reaction?.groups.length).toBeGreaterThan(0);
   });
   it('increasing education budget raises spending, deficit and education quality over time', () => {
-    const s = createGame(cfg('pm'));
+    const s = normalTime(createGame(cfg('pm')));
     const r = performAction(s, 'adjust_budget', { category: 'education', delta: 5 });
-    expect(r.state.budget.allocations.education).toBeCloseTo(95);
+    expect(r.state.budget.allocations.education).toBeCloseTo(s.budget.allocations.education + 5);
     expect(deficitPct(r.state)).toBeGreaterThan(deficitPct(s));
     let a = r.state;
     let b = s;
@@ -152,7 +163,7 @@ describe('polls & seats', () => {
 
 describe('parliament', () => {
   it('a government bill can pass and enacts the law', () => {
-    let s = createGame(cfg('pm'));
+    let s = normalTime(createGame(cfg('pm')));
     proposeBill(s, 'reservist_benefits', 'player', true);
     for (let i = 0; i < 4; i++) {
       if (s.drama) s = resolveDrama(s, s.drama.options[0].id).state;
@@ -167,8 +178,9 @@ describe('parliament', () => {
     const bill = proposeBill(s, 'draft_exemption', 'player', true)!;
     bill.stage = 'final';
     const v = computeVote(s, bill);
-    expect(v.byParty.yesh).toBe('against');
-    expect(v.byParty.kugel).toBe('for');
+    expect(v.byParty.yashar).toBe('against');
+    expect(v.byParty.utj).toBe('for');
+    expect(v.byParty.shas).toBe('for');
   });
 });
 
@@ -202,14 +214,14 @@ describe('role-appropriate decisions', () => {
     expect(checkAction(mk, 'adjust_budget', { category: 'health', delta: 1 })).not.toBeNull();
     expect(checkAction(mk, 'start_project', { defId: 'classrooms' })).not.toBeNull();
   });
-  it('every ministry has at least 20 actions, and every one of them runs cleanly', async () => {
+  it('every ministry has at least 14 actions, and every one of them runs cleanly', async () => {
     const { ministryActionSpecs } = await import('./decisions');
     const { MINISTRIES } = await import('../data/ministries');
     for (const def of MINISTRIES) {
       const base = createGame(cfg('minister', { ministryId: def.id }));
       const m = base.government.ministries.find((x) => x.id === def.id)!;
       const specs = ministryActionSpecs(m);
-      expect(specs.length).toBeGreaterThanOrEqual(20);
+      expect(specs.length, def.id).toBeGreaterThanOrEqual(14);
       for (const spec of specs) {
         const s = createGame(cfg('minister', { ministryId: def.id, seed: 7 }));
         s.player.politicalCapital = 100;
@@ -222,8 +234,8 @@ describe('role-appropriate decisions', () => {
   it('media and PM drama actions run cleanly', () => {
     const ids: [string, Record<string, string | number>][] = [
       ['press_conference', {}], ['tv_interview', {}], ['tweet_storm', {}], ['visit_region', { regionId: 'negev' }], ['protest_speech', {}],
-      ['write_book', {}], ['charity_photo', {}], ['state_emergency', {}], ['cabinet_purge', {}], ['cash_handout', {}], ['birthday_holiday', {}],
-      ['nation_address', {}], ['media_enemy', {}], ['declare_war_pm', {}],
+      ['write_book', {}], ['charity_photo', {}], ['state_emergency', {}], ['cash_handout', {}],
+      ['nation_address', {}], ['declare_war_pm', {}],
     ];
     for (let seed = 1; seed <= 6; seed++) {
       for (const [id, p] of ids) {
@@ -236,8 +248,8 @@ describe('role-appropriate decisions', () => {
     }
     const mk = createGame(cfg('mk'));
     mk.player.politicalCapital = 100;
-    for (const id of ['reality_show', 'leak_rival', 'attack_opponent']) {
-      const r = performAction(mk, id, { politicianId: 'pol_1' });
+    for (const id of ['leak_rival', 'attack_opponent', 'tweet_storm']) {
+      const r = performAction(mk, id, { politicianId: 'yashar_1' });
       assertSane(r.state);
     }
   });
@@ -288,10 +300,10 @@ describe('meetings & inbox', () => {
   });
   it('inbox options change the state', () => {
     const s = createGame(cfg('pm'));
-    const minister = s.government.ministries.find((m) => m.id === 'health')!.ministerId!;
-    s.inbox.push({ id: 'x', kind: 'minister_budget', title: 't', text: 't', fromId: minister, createdTurn: 0, expiresTurn: 5, options: [], defaultOptionId: 'refuse', payload: { category: 'health', amount: 2 } });
+    const minister = s.government.ministries.find((m) => m.id === 'transport')!.ministerId!;
+    s.inbox.push({ id: 'x', kind: 'minister_budget', title: 't', text: 't', fromId: minister, createdTurn: 0, expiresTurn: 5, options: [], defaultOptionId: 'refuse', payload: { category: 'transport', amount: 2 } });
     const r = resolveInbox(s, 'x', 'approve');
-    expect(r.state.budget.allocations.health).toBeCloseTo(s.budget.allocations.health + 2);
+    expect(r.state.budget.allocations.transport).toBeCloseTo(s.budget.allocations.transport + 2);
     expect(r.state.inbox.length).toBe(0);
   });
 });
@@ -300,7 +312,8 @@ describe('elections & coalition', () => {
   it('player formateur can negotiate and form a government', () => {
     const s = createGame(cfg('pm'));
     startNegotiation(s);
-    for (const id of ['kugel', 'givaa', 'beitenu', 'generals', 'gimlaim', 'yesh']) {
+    for (const id of ['otzma', 'rzp', 'shas', 'utj', 'bluewhite', 'yb', 'together']) {
+      if (!s.elections.negotiation!.offers[id]) continue;
       if (negotiationSeats(s) >= 63) break;
       for (let t = 0; t < 3 && s.elections.negotiation!.offers[id].status === 'pending'; t++) negotiate(s, id, 'accept');
     }
@@ -357,7 +370,7 @@ function autoPlay(s: GameState, turns: number): GameState {
     }
     const tries: [string, Record<string, string | number>][] = [
       ['press_conference', {}], ['committee_work', { domain: 'economy' }], ['adjust_budget', { category: 'health', delta: 0.5 }],
-      ['propose_law', { lawId: 'digital_gov' }], ['ministry_action', { actionId: 'night_buses' }], ['campaign_rally', {}], ['network', { politicianId: 'pol_2' }],
+      ['propose_law', { lawId: 'digital_gov' }], ['ministry_action', { actionId: 'tra_buses' }], ['campaign_rally', {}], ['network', { politicianId: 'likud_2' }],
     ];
     for (const [id, p] of tries) if (ACTIONS[id] && !checkAction(s, id, p)) s = performAction(s, id, p).state;
     if (s.elections.phase === 'negotiation') {
@@ -384,8 +397,8 @@ describe('long simulation', () => {
       });
     }
   }
-  it('runs 12 months idle and the economy actually moves', () => {
-    let s = createGame(cfg('pm'));
+  it('runs two years idle and the economy actually moves', () => {
+    let s = normalTime(createGame(cfg('pm')));
     const gdp0 = s.economy.gdp;
     for (let i = 0; i < 6; i++) {
       if (s.drama) s = resolveDrama(s, s.drama.options[0].id).state;
