@@ -254,6 +254,8 @@ async function apply(): Promise<void> {
   }
   await load(lang);
   if (getLang() !== lang) return;
+  // switching between two translated languages (ar <-> en): go back to the Hebrew source first
+  restore(document.body);
   walk(document.body, lang);
   startObserver();
 }
