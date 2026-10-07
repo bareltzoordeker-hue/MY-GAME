@@ -568,6 +568,8 @@ export interface Alliance {
 }
 
 export interface GameState {
+  /** which cast the game is played with: the real parties and politicians, or the fictional one */
+  cast?: 'real' | 'fictional';
   /** date the career started (for career length) */
   startDate?: GameDate;
   drama: DramaEvent | null; // pending dramatic event — must be resolved before advancing

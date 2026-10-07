@@ -1,6 +1,7 @@
 import { MINISTRIES } from '../data/ministries';
 import { PARTIES, SKINS, SUITS } from '../data/parties';
 import { PEOPLE, type PersonDef } from '../data/people';
+import { getCast, setCast, type Cast } from '../data/cast';
 import { CATEGORIES, DIFFICULTIES, GROUPS, REGIONS, SERVICES } from '../data/world';
 import type {
   BudgetCategory, CaricatureSpec, Difficulty, Domain, GameState, GroupId, Politician, PopulationGroup, RegionId, Role, Service, ServiceId,
@@ -15,6 +16,8 @@ import { serviceDrivers, updateMetrics } from './services';
 import { pushHistory } from './history';
 
 export interface NewGameConfig {
+  /** real or fictional parties and politicians (default: whatever is selected now) */
+  cast?: Cast;
   /** play as this real person (id from data/people) */
   personId?: string;
   /** or play your own character, who takes the list slot of `replaceId` */
@@ -140,6 +143,7 @@ export function roleOf(s: GameState, politicianId: string): Role {
 const POLL_TOTAL = PARTIES.reduce((a, p) => a + p.poll, 0);
 
 export function createGame(cfg: NewGameConfig): GameState {
+  setCast(cfg.cast ?? getCast());
   const seed = cfg.seed ?? Math.floor(Math.random() * 2 ** 31);
   const diff = DIFFICULTIES[cfg.difficulty];
 
@@ -147,6 +151,7 @@ export function createGame(cfg: NewGameConfig): GameState {
   const needs = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.initial * diff.needFactor])) as Record<BudgetCategory, number>;
 
   const s: GameState = {
+    cast: getCast(),
     version: 2,
     seed,
     rngState: seed,

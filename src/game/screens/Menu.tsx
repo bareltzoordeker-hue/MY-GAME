@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
+import { savedCast, setCast, type Cast } from '../../data/cast';
 import { LANGS, getLang, setLang, t } from '../../shared/i18n';
 import { useGame } from '../store/gameStore';
 import { PARTIES } from '../../data/parties';
@@ -73,6 +74,9 @@ export function NewGame({ onBack }: { onBack: () => void }) {
   const [look, setLook] = useState(LOOKS[0]);
   const [difficulty, setDifficulty] = useState<Difficulty>('normal');
   const [guide, setGuide] = useState(true);
+  const [cast, setCastState] = useState<Cast>(savedCast());
+  const pickCast = (c: Cast) => { setCast(c); setCastState(c); setPartyId((p) => p); setPersonId(null); };
+  useEffect(() => { setCast(cast); }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const party = PARTIES.find((p) => p.id === partyId)!;
   const roster = PEOPLE.filter((p) => p.party === partyId).sort((a, b) => (a.rank || 999) - (b.rank || 999));
@@ -82,8 +86,8 @@ export function NewGame({ onBack }: { onBack: () => void }) {
   const start = () => {
     if (!chosen) return;
     setTutorialEnabled(guide);
-    if (mode === 'real') newGame({ personId: chosen.id, difficulty });
-    else newGame({ custom: { name: name.trim() || (gender === 'f' ? 'דנה כהן' : 'דני כהן'), gender, look: look.spec, replaceId: chosen.id }, difficulty });
+    if (mode === 'real') newGame({ personId: chosen.id, difficulty, cast });
+    else newGame({ custom: { name: name.trim() || (gender === 'f' ? 'דנה כהן' : 'דני כהן'), gender, look: look.spec, replaceId: chosen.id }, difficulty, cast });
   };
   const steps = [t('wiz.path'), t('wiz.list'), mode === 'real' ? t('wiz.politician') : t('wiz.replace'), t('wiz.settings')];
 
@@ -101,6 +105,17 @@ export function NewGame({ onBack }: { onBack: () => void }) {
           <div className="rise">
             <h1 className="screen-title mb-1">{t('wiz.howEnter')}</h1>
             <p className="h-sub mb-4">{t('wiz.howEnterSub')}</p>
+            <div className="label mb-1">{t('wiz.cast')}</div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+              <button className={`card card-hover text-right ${cast === 'real' ? 'card-selected' : ''}`} aria-pressed={cast === 'real'} data-tip={t('wiz.castRealDesc')} onClick={() => pickCast('real')}>
+                <div className="font-black">{t('wiz.castReal')}</div>
+                <p className="muted text-xs mt-1">{t('wiz.castRealDesc')}</p>
+              </button>
+              <button className={`card card-hover text-right ${cast === 'fictional' ? 'card-selected' : ''}`} aria-pressed={cast === 'fictional'} data-tip={t('wiz.castFictionDesc')} onClick={() => pickCast('fictional')}>
+                <div className="font-black">{t('wiz.castFiction')}</div>
+                <p className="muted text-xs mt-1">{t('wiz.castFictionDesc')}</p>
+              </button>
+            </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button className={`card card-hover text-right ${mode === 'real' ? 'card-selected' : ''}`} onClick={() => { setMode('real'); setStep(1); }}>
                 <div className="text-xl font-black">{t('wiz.real')}</div>

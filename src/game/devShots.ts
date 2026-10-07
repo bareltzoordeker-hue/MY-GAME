@@ -17,7 +17,7 @@ export function runShotMode(): void {
     localStorage.setItem('hakise.consent.v1', JSON.stringify({ ads: 'denied', at: new Date().toISOString() }));
   } catch { /* ignore */ }
   const st = useGame.getState();
-  st.newGame({ personId: q.get('person') ?? 'likud_1', difficulty: 'normal', seed: Number(q.get('seed') ?? 7) });
+  st.newGame({ personId: q.get('person') ?? 'likud_1', difficulty: 'normal', seed: Number(q.get('seed') ?? 7), cast: q.get('cast') === 'fictional' ? 'fictional' : 'real' });
   let g = useGame.getState().game!;
   if (q.get('campaign') !== '0') g = performAction(g, 'start_campaign', { strategy: 'security', t1: 'reservists', t2: 'right', budget: 'mid', slogan: 'ביטחון קודם לכל' }).state;
   const turns = Number(q.get('turns') ?? 0);

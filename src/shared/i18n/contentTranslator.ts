@@ -7,6 +7,7 @@
 import { LANG_EVENT, getLang, type Lang } from './index';
 import { PATTERNS as BASE_PATTERNS, type Pattern } from './patterns';
 import { EXTRA_PATTERNS } from './patterns.extra';
+import { CAST_EVENT, castDictionary, getCast } from '../../data/cast';
 
 // most specific (longest fixed text) first, so a general "{0} seats" never shadows a full sentence
 const PATTERNS: Pattern[] = [...BASE_PATTERNS, ...EXTRA_PATTERNS].sort(
@@ -18,6 +19,14 @@ const ATTRS = ['data-tip', 'aria-label', 'placeholder', 'title', 'alt'] as const
 
 type Dict = Record<string, string>;
 const dicts: Partial<Record<Lang, Dict>> = {};
+const base: Partial<Record<Lang, Dict>> = {};
+
+/** The dictionary in use: the content dictionary plus, in a fictional game, the made-up names. */
+function rebuild(lang: Lang): void {
+  const b = base[lang];
+  if (!b || lang === 'he') return;
+  dicts[lang] = getCast() === 'fictional' ? { ...b, ...castDictionary()[lang] } : b;
+}
 
 interface Compiled { re: RegExp; idx: number; num: boolean[] }
 let compiled: Compiled[] | null = null;
@@ -243,7 +252,8 @@ function startObserver(): void {
 
 export async function load(lang: Lang): Promise<void> {
   if (lang === 'he' || dicts[lang]) return;
-  dicts[lang] = (await (lang === 'en' ? import('./content.en') : import('./content.ar'))).default;
+  base[lang] = (await (lang === 'en' ? import('./content.en') : import('./content.ar'))).default;
+  rebuild(lang);
 }
 
 async function apply(): Promise<void> {
@@ -264,5 +274,6 @@ async function apply(): Promise<void> {
 export function initContentTranslation(): void {
   if (typeof window === 'undefined') return;
   window.addEventListener(LANG_EVENT, () => { void apply(); });
+  window.addEventListener(CAST_EVENT, () => { rebuild(getLang()); void apply(); });
   if (getLang() !== 'he') void apply();
 }

@@ -11,6 +11,7 @@ import { markRead, sendChat } from '../../engine/chat';
 import { resolveCrisis, startCrisis } from '../../engine/crises';
 import { abandonMandate, finalizeCoalition, negotiate } from '../../engine/elections';
 import { deleteSave, loadGame, saveGame } from '../../engine/persistence/save';
+import { setCast } from '../../data/cast';
 import { CRISES } from '../../data/crises';
 import { resolveDrama } from '../../engine/drama';
 import { breakAlliance, proposeAlliance } from '../../engine/alliances';
@@ -86,6 +87,7 @@ export const useGame = create<Store>((set, get) => ({
   continueGame: () => {
     const g = loadGame();
     if (!g) return false;
+    setCast(g.cast ?? 'real');
     set({ game: g, screen: 'dashboard', reactions: [], meeting: null, briefingOpen: false, saveStatus: 'saved' });
     return true;
   },
