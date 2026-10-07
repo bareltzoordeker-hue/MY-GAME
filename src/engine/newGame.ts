@@ -322,6 +322,7 @@ function setupPlayer(s: GameState, cfg: NewGameConfig): void {
   }
   delete s.politicians[old.id];
   s.politicians.player = me;
+  s.player.personId = cfg.custom ? undefined : slot.id;
   const swap = (id: string) => (id === old.id ? 'player' : id);
   for (const party of Object.values(s.parties)) {
     party.memberIds = party.memberIds.map(swap);

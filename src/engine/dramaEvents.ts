@@ -257,6 +257,51 @@ export const DRAMAS: DramaDef[] = [
     ],
   },
 
+  // ======================= SCANDALS & INVESTIGATIONS =======================
+  {
+    id: 'aide_investigation', level: 'normal',
+    weight: (s) => 0.35 + (s.player.reputation < 40 ? 0.2 : 0),
+    make: () => ({ icon: '🔎', title: 'יועץ בכיר בלשכתך נחקר', text: 'המשטרה חקרה באזהרה יועץ בכיר בלשכתך בחשד לקבלת טובות הנאה מאיש עסקים. אין חשד נגדך, אבל התקשורת שואלת מה ידעת.' }),
+    options: [
+      { id: 'suspend', label: 'להשעות את היועץ עד סוף החקירה', hint: 'מוניטין ↑, צוות נחלש', resolve: (s) => { fx(s, { playerReputation: 4 }); me(s).power = clamp(me(s).power - 2); return ok('השעית את היועץ והודעת על שיתוף פעולה מלא עם החקירה.', 'היועץ הושעה עד לסיום החקירה'); } },
+      { id: 'back', label: 'לגבות אותו', hint: 'סיכון אם יתברר שהחשד מבוסס', resolve: (s) => { if (chance(s, 0.4)) { startCrisis(s, 'scandal', 2); fx(s, { playerReputation: -7, playerPopularity: -4 }); return bad('החקירה התרחבה, והגיבוי שנתת נראה עכשיו כטעות.', 'החקירה נגד היועץ מתרחבת'); } fx(s, { playerReputation: -1 }); return meh('החקירה נסגרה מחוסר ראיות. הגיבוי שלך הוכח כנכון, אבל חלק מהציבור נשאר חשדן.'); } },
+      { id: 'transparency', label: 'לפרסם את יומן הלשכה ולהזמין בדיקה', hint: '-3 הון', resolve: (s) => { spend(s, 3); fx(s, { playerReputation: 5, playerPopularity: 1 }); return ok('השקיפות הרגיעה את הסערה. פרשנים ציינו את הצעד לחיוב.'); } },
+    ],
+  },
+  {
+    id: 'conflict_of_interest', level: 'normal',
+    weight: (s) => (s.player.role === 'minister' || isPM(s) ? 0.35 : 0.1),
+    make: () => ({ icon: '📑', title: 'חשד לניגוד עניינים', text: 'תחקיר עיתונאי חושף שקרוב משפחה שלך מחזיק מניות בחברה שזכתה במכרז של משרד ממשלתי. אתה לא היית מעורב בהחלטה.' }),
+    options: [
+      { id: 'recuse', label: 'הסדר ניגוד עניינים מול היועמ״ש', hint: 'מוניטין ↑', resolve: (s) => { fx(s, { playerReputation: 4 }); return ok('חתמת על הסדר ניגוד עניינים, והנושא ירד מסדר היום.'); } },
+      { id: 'deny', label: 'להכחיש כל קשר', resolve: (s) => { if (chance(s, 0.35)) { fx(s, { playerReputation: -6, playerPopularity: -3 }); return bad('נחשפו מסמכים נוספים. ההכחשה הפכה לבעיה בפני עצמה.', 'מסמכים חדשים בפרשת ניגוד העניינים'); } fx(s, { playerReputation: -1 }); return meh('הסיפור נשכח אחרי כמה ימים.'); } },
+      { id: 'attack', label: 'לתקוף את התחקיר כ"רדיפה פוליטית"', hint: 'בסיס ↑, מרכז ↓', resolve: (s) => { fx(s, { groups: { right: 2, center: -3, liberals: -3 }, playerReputation: -3 }); return meh('הבסיס התגייס לצדך; מצביעי המרכז פחות.'); } },
+    ],
+  },
+  {
+    id: 'minister_investigation', level: 'breaking',
+    weight: (s) => (isPM(s) && ministers(s).some((p) => p.personality.honesty < 0.4) ? 0.35 : 0),
+    make: (s) => {
+      const p = pick(s, ministers(s).filter((x) => x.personality.honesty < 0.4).concat(ministers(s)).slice(0, 4));
+      return { icon: '🚔', title: 'שר בממשלה נחקר', fromId: p.id, text: `המשטרה פתחה בחקירה נגד ${p.name} בחשד להפרת אמונים במינויים במשרד. ${p.name} מכחיש כל עבירה. האופוזיציה דורשת שיפרוש.` };
+    },
+    options: [
+      { id: 'suspend', label: 'להשעות אותו מתפקידו עד סוף החקירה', hint: 'מוניטין ↑, מפלגתו כועסת', resolve: (s, ev) => { const p = pol(s, ev); if (p?.ministryId) { const m = s.government.ministries.find((x) => x.id === p.ministryId); if (m) m.ministerId = s.government.pmId; p.ministryId = null; } if (p) remember(s, p.id, 'fired', 'הושעה בחקירה', -20); fx(s, { playerReputation: 5, stability: -4 }); return ok('השר הושעה. התיק הועבר זמנית לראש הממשלה.', 'ראש הממשלה השעה את השר הנחקר'); } },
+      { id: 'keep', label: 'להשאיר אותו ("חזקת החפות")', hint: 'יציבות נשמרת, מוניטין ↓', resolve: (s, ev) => { if (ev.fromId) remember(s, ev.fromId, 'favor', 'השאיר אותי בתפקיד', 10); fx(s, { playerReputation: -3, groups: { center: -2, liberals: -2 } }); return meh('השר נשאר בתפקיד. ארגוני מנהל תקין עתרו לבג״ץ.'); } },
+      { id: 'ag', label: 'להמתין לחוות דעת היועמ״ש', hint: '-2 הון', resolve: (s) => { spend(s, 2); return meh('היועמ״ש תגיש חוות דעת בתור הבא. בינתיים הסערה נמשכת.'); } },
+    ],
+  },
+  {
+    id: 'pm_trial', level: 'normal',
+    weight: (s) => (s.player.personId === 'likud_1' && !s.flags.trial_done ? 0.6 : 0),
+    make: () => ({ icon: '⚖️', title: 'המשפט בתיקים 1000, 2000 ו-4000', text: 'בית המשפט המחוזי קבע ימי חקירה נגדית רצופים בעדותך. אתה מכחיש את כל ההאשמות, ועד להכרעה עומדת לך חזקת החפות. השאלה היא איך לשלב את הדיונים עם ניהול המדינה.' }),
+    options: [
+      { id: 'testify', label: 'להעיד כמתוכנן', hint: '-6 הון (זמן)', resolve: (s) => { spend(s, 6); fx(s, { playerReputation: 1 }); return meh('העדת כמתוכנן. הדיונים גזלו זמן ניכר מסדר היום של הממשלה.'); } },
+      { id: 'postpone', label: 'לבקש דחייה בשל אירועים ביטחוניים ומדיניים', hint: 'בית המשפט יחליט', resolve: (s) => { if (chance(s, 0.5)) return ok('בית המשפט נעתר לחלק מהבקשה וקיצר את ימי הדיונים.'); fx(s, { groups: { center: -2, liberals: -2 }, playerReputation: -2 }); return bad('הבקשה נדחתה. מבקרים טוענים שזה ניסיון למשוך זמן.'); } },
+      { id: 'speak', label: 'לדבר בפומבי נגד ניהול ההליך', hint: 'בסיס ↑, מרכז ↓', resolve: (s) => { fx(s, { groups: { right: 3, left: -4, center: -2, liberals: -3 }, playerReputation: -3 }); return meh('הבסיס התגייס לצדך. מבקרים טוענים שהדברים פוגעים באמון במערכת המשפט.'); } },
+    ],
+  },
+
   // ======================= EXTREME (BREAKING) =======================
   {
     id: 'terror_attack', level: 'extreme',

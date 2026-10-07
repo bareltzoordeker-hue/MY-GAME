@@ -438,6 +438,8 @@ export interface Player {
   reputation: number; // 0..100 — seriousness / expertise image
   actionCooldowns: Record<string, number>; // actionId -> turn available
   listRank: number;
+  /** the real person the player plays (roster id), if any */
+  personId?: string;
 }
 
 export interface CareerStats {

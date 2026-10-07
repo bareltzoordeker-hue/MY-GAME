@@ -12,6 +12,7 @@ import type { Briefing, GameState } from '../types/game';
 import { clamp, clone, debtPct, deficitPct } from '../utils';
 import { newFiscalYear, processBudgetDeadline, simulateAIGovernment } from './aiGovernment';
 import { processCommitments } from './coalitionDeals';
+import { advisorTips } from './advisor';
 import { driftRelations } from './relations';
 import { campaignTick } from './campaign';
 import { worldTick } from './security';
@@ -153,9 +154,13 @@ function buildBriefing(s: GameState, b: Snap): Briefing {
   const lines = s.turnLog
     .slice()
     .sort((x, y) => y.importance - x.importance)
-    .slice(0, 6)
+    .slice(0, 10)
     .map((e) => ({ icon: e.icon, text: e.text, tone: e.tone }));
   if (!lines.length) lines.push({ icon: '📋', text: 'תקופה שקטה יחסית. אין אירועים חריגים.', tone: 'neutral' });
+  if (!s.gameOver) {
+    const next = advisorTips(s)[0];
+    if (next) lines.push({ icon: '🧭', text: `מה דורש תשומת לב: ${next.text}`, tone: 'neutral' });
+  }
   const now = snapshot(s);
   return {
     turn: s.turn,
