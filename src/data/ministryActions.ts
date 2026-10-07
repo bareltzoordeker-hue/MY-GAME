@@ -16,9 +16,9 @@ export interface MinistryOutcome {
   tone?: 'good' | 'bad' | 'neutral';
 }
 
-export type ActionCat = 'policy' | 'law' | 'appoint' | 'media' | 'budget' | 'extreme';
+export type ActionCat = 'policy' | 'law' | 'appoint' | 'media' | 'budget' | 'extreme' | 'war';
 export const ACTION_CATS: Record<ActionCat, string> = {
-  policy: '📋 מדיניות', law: '📜 תקנות וחקיקה', appoint: '🪪 מינויים', media: '📣 הסברה', budget: '💰 תקציב', extreme: '⚠️ צעדים חריגים',
+  policy: '📋 מדיניות', law: '📜 תקנות וחקיקה', appoint: '🪪 מינויים', media: '📣 הסברה', budget: '💰 תקציב', extreme: '⚠️ צעדים חריגים', war: '⚔️ שעת חירום',
 };
 
 export interface MinistryActionSpec {

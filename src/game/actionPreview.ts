@@ -12,7 +12,7 @@ export function actionPreview(game: GameState, id: string, p: Params): string {
   let gamble = false;
   if (id === 'ministry_action') {
     const m = p.ministryId ? getMinistry(game, String(p.ministryId)) : playerMinistry(game);
-    const spec = m && ministryActionSpecs(m).find((x) => x.id === p.actionId);
+    const spec = m && ministryActionSpecs(m, game).find((x) => x.id === p.actionId);
     if (spec) { what = spec.desc; gamble = !!spec.outcomes?.length; }
   }
   const lines: string[] = [];

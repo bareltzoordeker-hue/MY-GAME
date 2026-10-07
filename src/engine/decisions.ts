@@ -6,6 +6,7 @@ import { N } from './ai/narrative';
 import { LAW_BY_ID } from '../data/laws';
 import { MINISTRY_ACTIONS, type MinistryActionSpec } from '../data/ministryActions';
 import { EXTRA_MINISTRY_ACTIONS, GENERIC_MINISTER_ACTIONS } from '../data/ministryActionsPlus';
+import { WAR_ACTIONS, atWar } from '../data/warActions';
 import { startCrisis } from './crises';
 import { DOMAIN_NAMES } from '../data/ministries';
 import { PROJECT_BY_ID } from '../data/projects';
@@ -97,9 +98,12 @@ function ministryOf(s: GameState, p: Params): Ministry | undefined {
   return p.ministryId ? getMinistry(s, str(p, 'ministryId')) : playerMinistry(s);
 }
 
-function ministryActionSpecs(m: Ministry): MinistryActionSpec[] {
-  const own = (m.origins ?? [m.id]).flatMap((id) => [...(MINISTRY_ACTIONS[id] ?? []), ...(EXTRA_MINISTRY_ACTIONS[id] ?? [])]);
-  return [...own, ...GENERIC_MINISTER_ACTIONS];
+/** The actions a ministry offers. Wartime actions are listed only while a war is on (pass the state), and are always found by id. */
+export function ministryActionSpecs(m: Ministry, s?: GameState): MinistryActionSpec[] {
+  const ids = m.origins ?? [m.id];
+  const own = ids.flatMap((id) => [...(MINISTRY_ACTIONS[id] ?? []), ...(EXTRA_MINISTRY_ACTIONS[id] ?? [])]);
+  const war = ids.flatMap((id) => WAR_ACTIONS[id] ?? []);
+  return [...own, ...(s && !atWar(s) ? [] : war), ...GENERIC_MINISTER_ACTIONS];
 }
 
 /** A minister (not PM) asking for money must get the PM's approval. */
@@ -546,6 +550,7 @@ def({
     if (!isPM(s) && m.ministerId !== s.player.politicianId) return 'זה לא המשרד שלך';
     const spec = ministryActionSpecs(m).find((x) => x.id === str(p, 'actionId'));
     if (!spec) return 'פעולה לא קיימת';
+    if (spec.cat === 'war' && !atWar(s)) return 'פעולה זמינה רק בשעת מלחמה';
     if ((s.player.actionCooldowns[`m_${spec.id}`] ?? 0) > s.turn) return `זמין שוב בעוד ${turnsText(s.player.actionCooldowns[`m_${spec.id}`] - s.turn)}`;
     return null;
   },
@@ -1571,7 +1576,6 @@ def({
 });
 
 export const ACTIONS: Record<string, ActionDef> = Object.fromEntries(A.map((a) => [a.id, a]));
-export { ministryActionSpecs };
 
 export function actionCapital(s: GameState, id: string, p: Params): number {
   const a = ACTIONS[id];

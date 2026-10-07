@@ -1,5 +1,6 @@
 // DEV ONLY: "?shot=<screen>&person=<id>" opens a ready game on a screen, for the marketing screenshots.
 // Imported dynamically under import.meta.env.DEV, so it never ships in the production build.
+import { startCrisis } from '../engine/crises';
 import { useGame, type ScreenId } from './store/gameStore';
 import { advanceTurn } from '../engine/turn';
 import { resolveDrama } from '../engine/drama';
@@ -46,3 +47,11 @@ export function runShotMode(): void {
 };
 /** DEV ONLY: window.__ids() lists politician ids of the running game. */
 (window as unknown as { __ids: () => string[] }).__ids = () => Object.keys(useGame.getState().game?.politicians ?? {});
+/** DEV ONLY: window.__war() starts the war crisis in the running game. */
+(window as unknown as { __war: () => void }).__war = () => {
+  const g = useGame.getState().game;
+  if (!g) return;
+  const s = structuredClone(g);
+  startCrisis(s, 'war');
+  useGame.setState({ game: s });
+};

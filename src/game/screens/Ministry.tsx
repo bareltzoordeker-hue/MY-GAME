@@ -3,6 +3,7 @@ import { useGame } from '../store/gameStore';
 import { ACTION_CATS, type ActionCat } from '../../data/ministryActions';
 import { PROJECTS } from '../../data/projects';
 import { ministryActionSpecs } from '../../engine/decisions';
+import { atWar } from '../../data/warActions';
 import { isPM, playerMinistry } from '../../engine/roles';
 import { fundingRatio } from '../../engine/services';
 import type { GameState, Ministry } from '../../types/game';
@@ -28,22 +29,25 @@ function kpis(s: GameState, m: Ministry): { l: string; v: string; good?: boolean
 }
 
 function MinistryActionsPanel({ m, p }: { m: Ministry; p: { ministryId: string } }) {
-  const all = ministryActionSpecs(m);
+  const s = useGame((x) => x.game)!;
+  const all = ministryActionSpecs(m, s);
+  const war = atWar(s);
   const cats = (Object.keys(ACTION_CATS) as ActionCat[]).filter((c) => all.some((a) => (a.cat ?? 'policy') === c));
-  const [tab, setTab] = useState<ActionCat | 'all'>('all');
+  const [tab, setTab] = useState<ActionCat | 'all'>(war ? 'war' : 'all');
   const list = tab === 'all' ? all : all.filter((a) => (a.cat ?? 'policy') === tab);
   return (
     <Section title={`פעולות המשרד (${all.length})`} icon="⚡">
+      {war && <div className="inset mb-3 text-sm" style={{ borderColor: '#f0b429', background: '#fff8e6' }}>⚔️ <b>שעת חירום.</b> במלחמה נפתחות למשרד פעולות מיוחדות, בלשונית "שעת חירום". כל אחת מחליפה בין ביטחון לחיי היומיום, והן נעלמות כשהמלחמה מסתיימת.</div>}
       <div className="flex flex-wrap gap-1.5 mb-3">
         <button className={`btn btn-sm ${tab === 'all' ? 'btn-blue' : ''}`} onClick={() => setTab('all')} data-tip="כל הפעולות של המשרד">הכול</button>
         {cats.map((c) => (
           <button key={c} className={`btn btn-sm ${tab === c ? (c === 'extreme' ? 'btn-danger' : 'btn-blue') : ''}`} onClick={() => setTab(c)}
-            data-tip={c === 'extreme' ? 'צעדים חריגים: השפעה גדולה, תגובות חריפות, ולפעמים בלי אישור ראש הממשלה' : `פעולות מסוג ${ACTION_CATS[c]}`}>{ACTION_CATS[c]}</button>
+            data-tip={c === 'extreme' ? 'צעדים חריגים: השפעה גדולה, תגובות חריפות, ולפעמים בלי אישור ראש הממשלה' : c === 'war' ? 'פעולות שמופיעות רק בזמן מלחמה: מגבילות את החיים האזרחיים כדי להגן על האוכלוסייה' : `פעולות מסוג ${ACTION_CATS[c]}`}>{ACTION_CATS[c]}</button>
         ))}
       </div>
       <div className="grid sm:grid-cols-2 gap-2">
         {list.map((a) => (
-          <div key={a.id} className="inset flex flex-col gap-1" style={a.cat === 'extreme' ? { borderColor: '#ffb3c0', background: '#fff5f7' } : undefined}>
+          <div key={a.id} className="inset flex flex-col gap-1" style={a.cat === 'extreme' ? { borderColor: '#ffb3c0', background: '#fff5f7' } : a.cat === 'war' ? { borderColor: '#f0b429', background: '#fff8e6' } : undefined}>
             <div className="flex items-start justify-between gap-1">
               <b className="text-sm">{a.icon} {a.title}</b>
               {a.rogue && <span className="chip chip-bad" data-tip="פעולה על דעת עצמך: קורה גם בלי אישור, אבל ראש הממשלה והקואליציה לא יסלחו">⚠️ בלי אישור</span>}
