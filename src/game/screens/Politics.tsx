@@ -278,7 +278,7 @@ export function PartyScreen() {
               {AXES.map((a) => (
                 <div key={a.k} className="flex items-center gap-2 text-xs">
                   <ActionButton id="party_line" params={{ axis: a.k, dir: -1 }} className="btn btn-sm">◀ {a.neg}</ActionButton>
-                  <div className="flex-1 relative h-2 rounded-full" style={{ background: '#ece9ff' }}><div className="absolute w-3 h-3 -top-0.5 rounded-full" style={{ background: party.color, right: `${(1 - (party.ideology[a.k] + 1) / 2) * 100}%` }} /></div>
+                  <div className="flex-1 relative h-2 rounded-full" style={{ background: '#e8edf5' }}><div className="absolute w-3 h-3 -top-0.5 rounded-full" style={{ background: party.color, right: `${(1 - (party.ideology[a.k] + 1) / 2) * 100}%` }} /></div>
                   <ActionButton id="party_line" params={{ axis: a.k, dir: 1 }} className="btn btn-sm">{a.pos} ▶</ActionButton>
                 </div>
               ))}
@@ -343,7 +343,7 @@ export function PollsScreen() {
         <Section title="מנדטים בסקר" icon="📊">
           <div style={{ height: 260 }} dir="ltr">
             <ResponsiveContainer><BarChart data={data} layout="vertical" margin={{ left: 10 }}>
-              <XAxis type="number" stroke="#5d5a85" fontSize={11} /><YAxis type="category" dataKey="name" stroke="#5d5a85" fontSize={11} width={80} />
+              <XAxis type="number" stroke="#4a5872" fontSize={11} /><YAxis type="category" dataKey="name" stroke="#4a5872" fontSize={11} width={80} />
               <Tooltip contentStyle={tooltipStyle} /><Bar dataKey="seats" radius={[0, 6, 6, 0]}>{data.map((d) => <Cell key={d.name} fill={d.color} />)}</Bar>
             </BarChart></ResponsiveContainer>
           </div>
@@ -351,7 +351,7 @@ export function PollsScreen() {
         <Section title="מגמות" icon="📈">
           <div style={{ height: 260 }} dir="ltr">
             <ResponsiveContainer><LineChart data={trend}>
-              <CartesianGrid stroke="#ece9ff" /><XAxis dataKey="t" stroke="#5d5a85" fontSize={11} /><YAxis stroke="#5d5a85" fontSize={11} />
+              <CartesianGrid stroke="#e8edf5" /><XAxis dataKey="t" stroke="#4a5872" fontSize={11} /><YAxis stroke="#4a5872" fontSize={11} />
               <Tooltip contentStyle={tooltipStyle} />
               <Line dataKey="gov" name="שביעות רצון מהממשלה" stroke="#ffc53d" dot={false} strokeWidth={2} />
               <Line dataKey="me" name="הפופולריות שלך" stroke="#5b8cff" dot={false} strokeWidth={2} />

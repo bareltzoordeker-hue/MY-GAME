@@ -9,7 +9,7 @@ export function Explain({ k, className = '' }: { k: string; className?: string }
   return (
     <button
       className={`inline-flex items-center justify-center w-4 h-4 rounded-full text-[10px] font-bold ${className}`}
-      style={{ background: '#ece9ff', color: 'var(--muted)', border: 0, cursor: 'help' }}
+      style={{ background: '#e8edf5', color: 'var(--muted)', border: 0, cursor: 'help' }}
       onClick={(e) => { e.stopPropagation(); explain(k); }}
       aria-label="מה זה אומר?"
       data-tip="מה זה אומר?"

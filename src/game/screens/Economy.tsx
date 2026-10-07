@@ -45,9 +45,9 @@ export function EconomyScreen() {
         <div style={{ height: 240 }} dir="ltr">
           <ResponsiveContainer>
             <LineChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-              <CartesianGrid stroke="#ece9ff" />
-              <XAxis dataKey="t" stroke="#5d5a85" fontSize={11} />
-              <YAxis stroke="#5d5a85" fontSize={11} />
+              <CartesianGrid stroke="#e8edf5" />
+              <XAxis dataKey="t" stroke="#4a5872" fontSize={11} />
+              <YAxis stroke="#4a5872" fontSize={11} />
               <Tooltip contentStyle={tooltipStyle} />
               {lines[chart].map((l) => <Line key={l.k} type="monotone" dataKey={l.k} name={l.n} stroke={l.c} strokeWidth={2.5} dot={false} />)}
             </LineChart>
@@ -61,7 +61,7 @@ export function EconomyScreen() {
             {drivers.filter((d) => Math.abs(d.value) >= 0.01).map((d) => (
               <div key={d.label} className="flex items-center gap-2 text-sm">
                 <span className="w-32 shrink-0">{d.label}</span>
-                <div className="flex-1 h-2 relative rounded-full" style={{ background: '#ece9ff' }}>
+                <div className="flex-1 h-2 relative rounded-full" style={{ background: '#e8edf5' }}>
                   <div className="absolute top-0 h-2 rounded-full" style={{ [d.value >= 0 ? 'right' : 'left']: '50%', width: `${Math.min(50, Math.abs(d.value) * 12)}%`, background: d.value >= 0 ? 'var(--good)' : 'var(--bad)' }} />
                 </div>
                 <span className={`num w-12 text-left font-bold ${d.value >= 0 ? 'good' : 'bad'}`}>{d.value > 0 ? '+' : ''}{d.value.toFixed(2)}</span>
@@ -143,10 +143,10 @@ export function BudgetScreen() {
         <div style={{ height: 220 }} dir="ltr">
           <ResponsiveContainer>
             <BarChart data={chartData} margin={{ top: 4, right: 4, left: -20, bottom: 0 }}>
-              <XAxis dataKey="name" stroke="#5d5a85" fontSize={10} interval={0} angle={-30} textAnchor="end" height={50} />
-              <YAxis stroke="#5d5a85" fontSize={11} />
+              <XAxis dataKey="name" stroke="#4a5872" fontSize={10} interval={0} angle={-30} textAnchor="end" height={50} />
+              <YAxis stroke="#4a5872" fontSize={11} />
               <Tooltip contentStyle={tooltipStyle} formatter={(v: number, n: string) => [`₪${v}B`, n === 'v' ? 'מוקצה' : 'נדרש']} />
-              <Bar dataKey="need" fill="#ddd6ff" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="need" fill="#d6deea" radius={[4, 4, 0, 0]} />
               <Bar dataKey="v" radius={[4, 4, 0, 0]}>
                 {chartData.map((d) => <Cell key={d.name} fill={d.r >= 1 ? '#2bd47d' : d.r > 0.92 ? '#ffb020' : '#ff5d6c'} />)}
               </Bar>

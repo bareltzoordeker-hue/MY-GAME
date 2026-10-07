@@ -193,3 +193,22 @@ p { margin: 0; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   }
+
+/* ============================================================
+   v2 formal theme for the site: navy & muted gold, no tilt.
+   ============================================================ */
+:root {
+  --bg: #f3f5f9; --ink: #14213d; --muted: #4a5872; --line: rgba(20, 33, 61, 0.12);
+  --violet: #2856a3; --violet-d: #1b3f7a; --surface-2: #f6f8fb;
+  --orange: #a8741a; --orange-d: #7d5612; --yellow: #e2b04a; --radius: 16px;
+}
+.btn-play { --b: linear-gradient(180deg, #e8b85a, #d39e3a); --bd: #9a6c18; --fg: #1b1300; }
+.logo-badge { background: transparent; color: #fff; box-shadow: none; transform: none; border-bottom: .08em solid var(--yellow); border-radius: 0; padding: 0 .05em .08em; }
+.hero-shot .frame { transform: none; }
+.site-header { background: rgba(15, 31, 61, .95); }
+.hero { background: radial-gradient(800px 500px at 90% -10%, rgba(40, 86, 163, .55) 0%, transparent 60%), linear-gradient(120deg, #0f1f3d, #17305a 55%, #1f3f73); }
+.page-hero { background: linear-gradient(120deg, #0f1f3d, #17305a 55%, #1f3f73); }
+.cta { background: linear-gradient(120deg, #0f1f3d, #17305a 55%, #1f3f73); box-shadow: 0 30px 60px -30px rgba(15, 31, 61, .8); border-radius: 20px; }
+.site-footer { background: #0b1730; }
+.eyebrow { background: #e3e9f3; }
+.card .ic { background: linear-gradient(145deg, #3463b3, #1b3f7a); box-shadow: 0 3px 0 #0f2547; }

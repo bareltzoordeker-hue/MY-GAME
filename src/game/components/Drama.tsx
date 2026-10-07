@@ -31,7 +31,7 @@ export function DramaModal() {
             <span>🚨 מבזק</span><span className="text-sm opacity-90">{d.level === 'extreme' ? 'אירוע חמור' : 'אירוע מתגלגל'}</span>
           </div>
         ) : (
-          <div className="px-4 py-1.5 flex items-center justify-between" style={{ background: 'linear-gradient(90deg, #6c4dff, #b04dff)', color: '#fff' }}>
+          <div className="px-4 py-1.5 flex items-center justify-between" style={{ background: 'linear-gradient(90deg, #17305a, #1f3f73)', color: '#fff' }}>
             <span>📰 בינתיים, בישמעאל…</span>
             <span className="text-xs opacity-80">נדרשת החלטה</span>
           </div>
