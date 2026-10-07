@@ -15,6 +15,7 @@ import { processCommitments } from './coalitionDeals';
 import { advisorTips } from './advisor';
 import { driftRelations } from './relations';
 import { campaignTick } from './campaign';
+import { chatTick } from './chat';
 import { worldTick } from './security';
 import { evaluateGameOver, setGameOver, syncRole, updateCareer } from './career';
 import { generateInitiatives, simulateCharacters } from './characters';
@@ -61,6 +62,7 @@ export function advanceTurn(s0: GameState): GameState {
   processCommitments(s);
   driftRelations(s);
   campaignTick(s);
+  chatTick(s);
   worldTick(s, days / 30.4);
 
   // budget cycle (new fiscal year when the calendar crosses into January)

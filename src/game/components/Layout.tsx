@@ -7,6 +7,7 @@ import { canAdvance } from '../../engine/turn';
 import { coalitionSeats } from '../../engine/polls';
 import { getCapabilities } from '../../engine/roles';
 import { daysBetween, electionCountdown, electionDate, monthsUntilElection, nextTurnDate, spanText } from '../../engine/calendar';
+import { unreadTotal } from '../../engine/chat';
 import { dateL, spanL, t } from '../../shared/i18n';
 import type { Key } from '../../shared/i18n/dict';
 import { Caricature } from '../../shared/components/Caricature';
@@ -29,6 +30,7 @@ export const NAV: NavItem[] = [
   { id: 'parliament', icon: '🏟️', label: 'כנסטון', tip: '120 המושבים, הצעות חוק בדיון וצפי הצבעה' },
   { id: 'laws', icon: '📜', label: 'חוקים', tip: 'הגשת חוקים חדשים וביטול חוקים קיימים' },
   { id: 'relations', icon: '🕸️', label: 'מפת יחסים', tip: 'היחסים בין המפלגות ובינך לבין חברי הכנסטון: פגישות, אירועים משותפים, תמיכה הדדית, הסכמי עודפים ואיחודים' },
+  { id: 'chat', icon: '💬', label: 'שיחות', tip: 'כתיבה חופשית לשרים וליו״רי מפלגות: איומים, הבטחות, בקשות וחיזוק קשרים. חיפוש לפי שם', badge: (s) => unreadTotal(s) },
   { id: 'party', icon: '🎌', label: 'מפלגה ובריתות', tip: 'המפלגה שלך, הקמפיין, הבטחות בחירות ובריתות עם מפלגות אחרות' },
   { id: 'projects', icon: '🏗️', label: 'פרויקטים', tip: 'פרויקטים לאומיים: כבישים, רכבות, בתי חולים. לוקחים זמן ועולים כסף' },
   { id: 'crises', icon: '🚨', label: 'משברים', tip: 'משברים פעילים ודרכי הטיפול בהם, ויומן האירועים', badge: (s) => s.crises.length },

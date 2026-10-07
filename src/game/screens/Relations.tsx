@@ -58,6 +58,7 @@ function PersonRow({ s, p }: { s: GameState; p: Politician }) {
         <span className="chip shrink-0" style={{ color: p.loyalty >= 55 ? 'var(--good)' : p.loyalty <= 35 ? 'var(--bad)' : undefined }} data-tip="היחס שלו אליך (0–100)">❤️ {p.loyalty.toFixed(0)}</span>
       </div>
       <div className="flex gap-1 flex-wrap mt-2">
+        <button className="btn btn-sm btn-blue" onClick={() => useGame.getState().openChat(p.id)}>💬 שיחה</button>
         <ActionButton id="network" params={{ politicianId: p.id }} className="btn btn-sm">☕ פגישה</ActionButton>
         <ActionButton id="joint_event" params={{ politicianId: p.id }} className="btn btn-sm">🤝 אירוע משותף</ActionButton>
         <ActionButton id="mutual_support" params={{ politicianId: p.id }} className="btn btn-sm">🔁 תמיכה הדדית</ActionButton>

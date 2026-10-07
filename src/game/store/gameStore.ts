@@ -7,6 +7,7 @@ import {
   actionNeedsMeeting, meetingStep, performAction, prepareMeeting, type Meeting, type MeetingChoice, type Params,
 } from '../../engine/decisions';
 import { resolveInbox } from '../../engine/inbox';
+import { markRead, sendChat } from '../../engine/chat';
 import { resolveCrisis, startCrisis } from '../../engine/crises';
 import { abandonMandate, finalizeCoalition, negotiate } from '../../engine/elections';
 import { deleteSave, loadGame, saveGame } from '../../engine/persistence/save';
@@ -16,7 +17,7 @@ import { breakAlliance, proposeAlliance } from '../../engine/alliances';
 
 export type ScreenId =
   | 'dashboard' | 'state' | 'economy' | 'budget' | 'population' | 'parliament' | 'government' | 'party' | 'ministry'
-  | 'news' | 'polls' | 'projects' | 'laws' | 'crises' | 'map' | 'advisor' | 'career' | 'save' | 'relations' | 'security';
+  | 'news' | 'polls' | 'projects' | 'laws' | 'crises' | 'map' | 'advisor' | 'career' | 'save' | 'relations' | 'security' | 'chat';
 
 interface Store {
   game: GameState | null;
@@ -30,6 +31,9 @@ interface Store {
   debugOpen: boolean;
   ministryView: string | null;
   focusKey: string | null;
+  chatWith: string | null;
+  openChat: (id: string | null) => void;
+  sendChat: (id: string, text: string) => void;
   goTo: (screen: ScreenId, focus?: string) => void;
   clearFocus: () => void;
 
@@ -89,6 +93,17 @@ export const useGame = create<Store>((set, get) => ({
   wipeSave: () => { deleteSave(); set({ saveStatus: 'idle' }); },
   setScreen: (screen) => { set({ screen }); window.scrollTo?.({ top: 0 }); },
   setMinistryView: (ministryView) => set({ ministryView }),
+  chatWith: null,
+  openChat: (id) => {
+    const g = get().game;
+    if (id && g) { const s = clone(g); markRead(s, id); set({ game: s, chatWith: id, screen: 'chat' }); } else set({ chatWith: id, screen: 'chat' });
+  },
+  sendChat: (id, text) => {
+    const g = get().game;
+    if (!g) return;
+    const s = clone(g);
+    if (sendChat(s, id, text)) set({ game: s, saveStatus: persist(s) });
+  },
 
   act: (id, params = {}) => {
     const g = get().game;

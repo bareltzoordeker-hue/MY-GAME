@@ -27,6 +27,8 @@ export function deserialize(raw: string): GameState | null {
     s.drama ??= null;
     s.alliances ??= [];
     s.partyRelations ??= {};
+    s.chats ??= {};
+    s.chatUnread ??= {};
     return s;
   } catch {
     return null;

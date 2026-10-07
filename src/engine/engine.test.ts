@@ -535,3 +535,33 @@ describe('speeches (v2)', () => {
     expect(r.reaction?.people.length).toBeGreaterThan(0);
   });
 });
+
+describe('chat (v2)', () => {
+  it('reads intent, registers tracked promises, and changes relations', async () => {
+    const { detectIntent, sendChat, matchLaw, searchPoliticians, chatContacts } = await import('./chat');
+    expect(detectIntent('אם לא תתמוך אפרסם את זה')).toBe('threat');
+    expect(detectIntent('אני מבטיח לך תיק')).toBe('promise');
+    expect(detectIntent('אני מתנצל')).toBe('apology');
+    expect(detectIntent('אתה שקרן')).toBe('insult');
+    expect(matchLaw('חוק השוויון בנטל והגיוס')?.id).toBe('draft_equality');
+    const s = createGame(cfg('pm'));
+    expect(searchPoliticians(s, 'כץ').length).toBeGreaterThan(0);
+    const target = chatContacts(s).find((p) => p.id !== 'player' && p.partyId !== 'likud')!;
+    const before = target.loyalty;
+    sendChat(s, target.id, 'אני מבטיח לקדם את חוק השוויון בנטל');
+    expect(s.politicians[target.id].memory.some((m) => m.kind === 'promise' && m.ref === 'draft_equality')).toBe(true);
+    expect(s.chats![target.id].length).toBe(2);
+    sendChat(s, target.id, 'אתה שקרן');
+    expect(s.politicians[target.id].loyalty).toBeLessThan(before + 10);
+    // after three messages the same turn the conversation cools down without changes
+    for (let i = 0; i < 4; i++) sendChat(s, target.id, 'תודה רבה');
+    expect(s.chats![target.id].at(-1)!.text).toContain('בתור הבא');
+  });
+  it('politicians write to the player on their own across turns', async () => {
+    let s = normalTime(createGame(cfg('pm', { seed: 11 })));
+    for (const p of Object.values(s.politicians)) if (!p.isPlayer) p.loyalty = 20;
+    for (let i = 0; i < 6; i++) { if (s.drama) s = resolveDrama(s, s.drama.options[0].id).state; s = advanceTurn(normalTime(s)); }
+    const unread = Object.values(s.chatUnread ?? {}).reduce((a, b) => a + b, 0);
+    expect(unread).toBeGreaterThan(0);
+  });
+});

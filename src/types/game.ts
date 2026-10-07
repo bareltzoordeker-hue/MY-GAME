@@ -270,6 +270,16 @@ export interface Government {
   agreements?: Commitment[];
 }
 
+export interface ChatMsg {
+  from: 'me' | 'them';
+  text: string;
+  turn: number;
+  /** a short note about what the message changed */
+  hint?: string;
+  /** the politician wrote first */
+  proactive?: boolean;
+}
+
 export interface WorldState {
   fronts: Record<string, { threat: number; status: 'quiet' | 'tension' | 'fighting' | 'ceasefire'; ceasefireUntil?: number; incidents: number }>;
   units: Record<string, { readiness: number }>;
@@ -552,6 +562,9 @@ export interface GameState {
   startDate?: GameDate;
   drama: DramaEvent | null; // pending dramatic event — must be resolved before advancing
   alliances: Alliance[];
+  /** chat history per politician, and unread counts */
+  chats?: Record<string, ChatMsg[]>;
+  chatUnread?: Record<string, number>;
   /** security fronts, forces and the diplomatic track */
   world?: WorldState;
   /** the player party's election campaign (set when the campaign opens) */

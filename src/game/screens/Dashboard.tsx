@@ -83,7 +83,7 @@ function Cabinet() {
         {pm && (
           <button onClick={() => setScreen('government')} data-tip={`${pm.name} – ראש הממשלה · ${pm.quirk}`}>
             <Caricature spec={pm.caricature} size={78} tie={s.parties[pm.partyId]?.color} mood="good" />
-            <span className="text-xs font-bold">{pm.isPlayer ? 'אתה' : pm.name.split(' ')[0]}</span>
+            <span className="text-xs font-bold text-center leading-tight">{pm.name}{pm.isPlayer && ' (אתה)'}</span>
             <span className="chip chip-gold" style={{ fontSize: '.65rem' }}>רה״מ</span>
           </button>
         )}
@@ -92,7 +92,7 @@ function Cabinet() {
           return (
             <button key={p.id} onClick={() => setScreen('government')} data-tip={`${p.name} · ${m.name} · ${s.parties[p.partyId]?.shortName} · נאמנות ${p.loyalty.toFixed(0)} · ${p.quirk}`}>
               <Caricature spec={p.caricature} size={62} tie={s.parties[p.partyId]?.color} mood={mood} />
-              <span className="text-[11px] font-bold">{p.isPlayer ? 'אתה' : p.name.split(' ')[0]}</span>
+              <span className="text-[11px] font-bold text-center leading-tight">{p.name}{p.isPlayer && ' (אתה)'}</span>
               <span className="text-[10px] muted">{m.icon}</span>
             </button>
           );

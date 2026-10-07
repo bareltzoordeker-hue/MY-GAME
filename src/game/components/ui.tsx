@@ -58,7 +58,7 @@ export function PolName({ p, s, size = 36, sub }: { p: Politician; s: GameState;
     <div className="flex items-center gap-2 min-w-0">
       <Caricature spec={p.caricature} size={size} tie={party?.color} />
       <div className="min-w-0">
-        <div className="font-bold text-sm truncate">{p.name}{p.isPlayer && <span className="chip chip-gold mr-1">אתה</span>}</div>
+        <div className="font-bold text-sm leading-tight">{p.name}{p.isPlayer && <span className="chip chip-gold mr-1">אתה</span>}</div>
         <div className="text-xs muted truncate">{sub ?? party?.name}</div>
       </div>
     </div>
