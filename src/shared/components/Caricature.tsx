@@ -39,6 +39,7 @@ export function Caricature({ spec, size = 64, tie, mood, still }: { spec: Carica
           <circle cx="25" cy="56" r={earR} fill={s.skin} stroke="rgba(0,0,0,.18)" strokeWidth="1.5" />
           <circle cx="95" cy="56" r={earR} fill={s.skin} stroke="rgba(0,0,0,.18)" strokeWidth="1.5" />
           {s.hair === 'long' && <path d="M22 48 Q18 92 34 96 L86 96 Q102 92 98 48 Q92 10 60 10 Q28 10 22 48Z" fill={hairC} />}
+          {s.hair === 'scarf' && <path d="M18 52 Q14 100 36 104 L84 104 Q106 100 102 52 Q96 6 60 6 Q24 6 18 52Z" fill={hairC} />}
           <ellipse cx="60" cy="53" rx="36" ry="40" fill={s.skin} stroke="rgba(0,0,0,.2)" strokeWidth="1.5" />
           <ellipse cx="60" cy="53" rx="36" ry="40" fill={`url(#sk${seed})`} />
           {s.beard === 'stubble' && <path d="M30 63 Q34 92 60 94 Q86 92 90 63 Q80 79 60 81 Q40 79 30 63Z" fill={hairC} opacity=".35" />}
@@ -50,6 +51,8 @@ export function Caricature({ spec, size = 64, tie, mood, still }: { spec: Carica
           {s.hair === 'spiky' && <path d="M24 42 L30 13 L41 31 L49 7 L58 27 L66 5 L74 27 L85 10 L89 31 L98 18 L96 44 Q60 27 24 42Z" fill={hairC} />}
           {s.hair === 'bun' && <g fill={hairC}><circle cx="60" cy="8" r="12" /><path d="M24 48 Q26 14 60 14 Q94 14 96 48 Q80 27 60 27 Q40 27 24 48Z" /></g>}
           {s.hair === 'long' && <path d="M24 48 Q26 14 60 14 Q94 14 96 48 Q78 25 60 27 Q42 25 24 48Z" fill={hairC} />}
+          {s.hair === 'scarf' && <path d="M23 50 Q24 12 60 12 Q96 12 97 50 Q92 30 60 28 Q28 30 23 50Z" fill={hairC} stroke="rgba(0,0,0,.15)" strokeWidth="1.2" />}
+          {s.hair === 'short' && <path d="M25 44 Q27 13 60 13 Q93 13 95 44 Q86 27 60 25 Q34 27 25 44Z" fill={hairC} />}
           {s.hair === 'kippah' && <g><path d="M28 44 Q28 14 60 14 Q92 14 92 44 Q60 31 28 44Z" fill={hairC} /><ellipse cx="62" cy="15" rx="16" ry="6.5" fill="#2b4fa8" /></g>}
           {s.hair === 'hat' && <g fill="#111"><ellipse cx="60" cy="26" rx="48" ry="8.5" /><path d="M30 26 Q30 -2 60 -2 Q90 -2 90 26Z" /><rect x="30" y="18" width="60" height="5" fill="#333" /></g>}
           {s.hair === 'beret' && <g><path d="M22 33 Q32 3 72 7 Q100 11 96 31 Q60 23 22 33Z" fill="#7a1f2f" /><circle cx="85" cy="20" r="4.5" fill="#ffc53d" /></g>}
@@ -77,5 +80,5 @@ export function Caricature({ spec, size = 64, tie, mood, still }: { spec: Carica
 }
 
 export const ADVISOR_SPEC: CaricatureSpec = {
-  skin: '#e8b48a', hair: 'spiky', hairColor: '#111827', glasses: true, beard: 'stubble', nose: 0.6, mouth: 'smirk', suit: '#0f172a', brows: 'flat', ears: 0.4,
+  skin: '#e8b48a', hair: 'comb', hairColor: '#4b5563', glasses: true, beard: 'none', nose: 0.5, mouth: 'smile', suit: '#1e293b', brows: 'flat', ears: 0.4,
 };

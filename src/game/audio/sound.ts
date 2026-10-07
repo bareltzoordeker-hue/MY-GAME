@@ -1,5 +1,5 @@
 // Synthesised sound (Web Audio) — no audio files needed.
-// Effects + a cheeky "political march" loop. Both can be muted; the choice is remembered.
+// Restrained interface sounds + a calm ambient score. Both can be muted; the choice is remembered.
 
 type Sfx = 'hover' | 'click' | 'good' | 'bad' | 'info' | 'turn' | 'alarm' | 'breaking' | 'cash' | 'gavel' | 'news' | 'stamp';
 
@@ -70,21 +70,20 @@ function noise(start: number, dur: number, vol = 0.2, hp = 800) {
 export function play(s: Sfx): void {
   if (!prefs.sfx) return;
   switch (s) {
-    case 'hover': tone(1500, 0, 0.025, 'sine', 0.025); break;
-    case 'click': tone(700, 0, 0.05, 'square', 0.05, 1100); break;
-    case 'good': [523, 659, 784, 1047].forEach((f, i) => tone(f, i * 0.07, 0.14, 'square', 0.07)); break;
-    case 'bad': tone(330, 0, 0.18, 'sawtooth', 0.08); tone(220, 0.16, 0.35, 'sawtooth', 0.08, 140); break; // sad trombone-ish
-    case 'info': tone(660, 0, 0.08, 'triangle', 0.08); tone(880, 0.08, 0.1, 'triangle', 0.08); break;
-    case 'turn': noise(0, 0.35, 0.12, 1500); tone(200, 0, 0.35, 'triangle', 0.06, 600); break; // page flip + whoosh
-    case 'alarm': for (let i = 0; i < 3; i++) { tone(880, i * 0.36, 0.18, 'square', 0.07); tone(660, i * 0.36 + 0.18, 0.18, 'square', 0.07); } break;
-    case 'breaking': [0, 0.14, 0.28].forEach((t) => tone(1046, t, 0.1, 'square', 0.09)); tone(523, 0.45, 0.5, 'sawtooth', 0.08, 392); noise(0.45, 0.3, 0.06); break;
-    case 'cash': tone(1318, 0, 0.06, 'square', 0.06); tone(1760, 0.06, 0.2, 'square', 0.06); noise(0, 0.08, 0.05, 4000); break;
-    case 'gavel': noise(0, 0.07, 0.35, 200); tone(120, 0, 0.12, 'sine', 0.2, 60); noise(0.18, 0.07, 0.35, 200); tone(120, 0.18, 0.12, 'sine', 0.2, 60); break;
-    case 'news': [784, 988, 1175, 988].forEach((f, i) => tone(f, i * 0.09, 0.09, 'triangle', 0.07)); break;
-    case 'stamp': noise(0, 0.12, 0.4, 150); tone(90, 0, 0.15, 'sine', 0.25, 50); break;
+    case 'hover': tone(1400, 0, 0.02, 'sine', 0.015); break;
+    case 'click': tone(880, 0, 0.05, 'sine', 0.04); break;
+    case 'good': [523, 659, 784].forEach((f, i) => tone(f, i * 0.09, 0.35, 'sine', 0.05)); break;
+    case 'bad': tone(392, 0, 0.4, 'sine', 0.05); tone(311, 0.12, 0.55, 'sine', 0.05); break;
+    case 'info': tone(660, 0, 0.18, 'sine', 0.045); tone(880, 0.1, 0.22, 'sine', 0.035); break;
+    case 'turn': noise(0, 0.25, 0.04, 2500); tone(220, 0, 0.5, 'sine', 0.04, 330); break;
+    case 'alarm': for (let i = 0; i < 2; i++) tone(740, i * 0.45, 0.35, 'sine', 0.06, 620); break;
+    case 'breaking': [0, 0.18].forEach((t) => tone(880, t, 0.14, 'sine', 0.06)); tone(440, 0.4, 0.6, 'sine', 0.05); break;
+    case 'cash': tone(1046, 0, 0.12, 'sine', 0.04); tone(1318, 0.08, 0.2, 'sine', 0.035); break;
+    case 'gavel': noise(0, 0.05, 0.2, 300); tone(130, 0, 0.14, 'sine', 0.12, 80); break;
+    case 'news': [659, 784, 988].forEach((f, i) => tone(f, i * 0.11, 0.16, 'sine', 0.04)); break;
+    case 'stamp': noise(0, 0.08, 0.15, 250); tone(110, 0, 0.14, 'sine', 0.1, 70); break;
   }
 }
-
 
 // ---------- "blah blah" voices (gibberish speech, Animal-Crossing style) ----------
 export interface Voice { pitch: number; wave: OscillatorType; speed: number }
@@ -107,29 +106,42 @@ export function babble(text: string, v: Voice): number {
   return Math.round(syll * step * 1000) + 120;
 }
 
-// ---------- background music: cheeky "cabinet march" ----------
-// C – Am – F – G progression, oom-pah bass, arpeggio, light drums.
+// ---------- background music: calm ambient score ----------
+// Slow minor progression (Dm – Bb – F – C) on soft sine pads, with a sparse melody.
 let musicTimer: number | null = null;
 let step = 0;
-const CHORDS = [[262, 330, 392], [220, 262, 330], [175, 220, 262], [196, 247, 294]];
-const LEAD = [523, 0, 587, 659, 0, 587, 523, 494, 440, 0, 494, 523, 587, 0, 523, 0, 392, 0, 440, 494, 0, 523, 587, 659, 698, 0, 659, 587, 523, 0, 494, 0];
-function kick(t = 0) { const c = ac(); if (!c || !master) return; const o = c.createOscillator(); const g = c.createGain(); o.frequency.setValueAtTime(140, c.currentTime + t); o.frequency.exponentialRampToValueAtTime(45, c.currentTime + t + 0.12); g.gain.setValueAtTime(0.18, c.currentTime + t); g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + t + 0.15); o.connect(g).connect(master); o.start(c.currentTime + t); o.stop(c.currentTime + t + 0.16); }
+const CHORDS = [[147, 175, 220], [117, 147, 175], [175, 220, 262], [131, 165, 196]];
+const MELODY = [587, 0, 523, 0, 466, 0, 440, 0, 523, 0, 587, 0, 698, 0, 659, 0];
+function pad(freq: number, dur: number, vol: number) {
+  const c = ac();
+  if (!c || !master) return;
+  for (const detune of [-4, 4]) {
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = 'sine';
+    o.frequency.value = freq;
+    o.detune.value = detune;
+    g.gain.setValueAtTime(0.0001, c.currentTime);
+    g.gain.exponentialRampToValueAtTime(vol, c.currentTime + dur * 0.35);
+    g.gain.exponentialRampToValueAtTime(0.0001, c.currentTime + dur);
+    o.connect(g).connect(master);
+    o.start();
+    o.stop(c.currentTime + dur + 0.05);
+  }
+}
 function musicTick() {
   if (!prefs.music) return;
-  const bar = Math.floor(step / 8) % CHORDS.length;
-  const chord = CHORDS[bar];
-  const beat = step % 8;
-  if (beat % 4 === 0) { tone(chord[0] / 2, 0, 0.22, 'triangle', 0.07); kick(); }
-  if (beat % 4 === 2) { chord.forEach((f) => tone(f, 0, 0.12, 'square', 0.012)); noise(0, 0.05, 0.035, 6000); }
-  if (beat % 2 === 1) noise(0, 0.03, 0.02, 9000);
-  const lead = LEAD[step % LEAD.length];
-  if (lead) tone(lead, 0.01, 0.16, 'square', 0.018);
+  const chord = CHORDS[Math.floor(step / 2) % CHORDS.length];
+  if (step % 2 === 0) chord.forEach((f) => pad(f, 3.4, 0.018));
+  const m = MELODY[step % MELODY.length];
+  if (m) tone(m, 0.2, 1.2, 'sine', 0.012);
   step++;
 }
 export function startMusic() {
   if (musicTimer !== null || !prefs.music) return;
   if (!ac()) return;
-  musicTimer = window.setInterval(musicTick, 150);
+  musicTick();
+  musicTimer = window.setInterval(musicTick, 1700);
 }
 export function stopMusic() {
   if (musicTimer !== null) window.clearInterval(musicTimer);

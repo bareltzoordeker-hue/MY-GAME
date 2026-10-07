@@ -121,7 +121,7 @@ function SoundToggles() {
   return (
     <div className="flex gap-1">
       <button className="btn btn-sm" data-tip="אפקטים קוליים וקולות של פוליטיקאים: הפעלה או השתקה" aria-label="אפקטים קוליים" onClick={() => { setSfx(!p.sfx); setP(soundPrefs()); }}>{p.sfx ? '🔊' : '🔇'}</button>
-      <button className="btn btn-sm" data-tip="מוזיקת רקע: מארש קבינט קומי" aria-label="מוזיקת רקע" onClick={() => { setMusic(!p.music); setP(soundPrefs()); }} style={p.music ? { background: 'var(--yellow)' } : undefined}>🎺</button>
+      <button className="btn btn-sm" data-tip="מוזיקת רקע שקטה: הפעלה או השתקה" aria-label="מוזיקת רקע" onClick={() => { setMusic(!p.music); setP(soundPrefs()); }} style={p.music ? { background: 'var(--yellow)' } : undefined}>🎵</button>
     </div>
   );
 }
