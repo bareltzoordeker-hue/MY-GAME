@@ -25,6 +25,7 @@ import { addNews, applyEffects, logEvent, remember, scaleEffects } from './effec
 import { BUDGET_PREF, callEarlyElections } from './elections';
 import { addMonths, daysBetween, electionDate, inCampaign, monthsUntilElection } from './calendar';
 import { BUDGETS, STRATEGY_BY_ID, issueSalience, startCampaign } from './campaign';
+import { TOPIC_BY_ID, VENUES, deliverSpeech, type Tone, type Venue } from './speech';
 import { CHANNEL_BY_ID, FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type ChannelId, type FrontId, type UnitId } from '../data/security';
 import { cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, unitTraining, type CbmKind } from './security';
 import { assignMinister, createMinistry, getMinistry, mergeMinistries, removeMinistry } from './government';
@@ -1472,6 +1473,23 @@ def({
     applyDecision(s, { oneOffCost: 0.3 });
     const o = unitTraining(s, str(p, 'unitId') as UnitId);
     return { title: o.title, subtitle: o.text };
+  },
+});
+
+// ===== SPEECHES =====
+def({
+  id: 'give_speech', title: 'נאום', icon: '🎤', category: 'media', level: 'simple', capital: 3, cooldown: 1,
+  description: 'נאום לציבור: הבמה, הנושא, העמדה והטון קובעים מי יאהב את הדברים ומי יתנגד.',
+  unavailable: (s, p) => {
+    if (!VENUES[str(p, 'venue') as Venue]) return 'בחר במה';
+    if (!TOPIC_BY_ID[str(p, 'topic')]) return 'בחר נושא';
+    if (str(p, 'venue') === 'ceremony' && !isPM(s) && s.player.role !== 'minister') return 'בטקס ממלכתי נואמים ראש הממשלה והשרים';
+    if (str(p, 'venue') === 'plenum' && s.government.caretaker && s.elections.phase === 'none') return 'הכנסטון התפזר – אין דיוני מליאה עד הבחירות';
+    return null;
+  },
+  run: (s, p) => {
+    const o = deliverSpeech(s, { venue: str(p, 'venue') as Venue, topic: str(p, 'topic'), stance: num(p, 'stance'), tone: (str(p, 'tone') || 'statesman') as Tone, audience: (str(p, 'audience') || '') as GroupId | '', words: num(p, 'words') });
+    return { title: o.title, quip: o.text, people: o.lines };
   },
 });
 

@@ -8,6 +8,7 @@ import { MinistryScreen } from './screens/Ministry';
 import { NewsScreen, ProjectsScreen, CrisesScreen, AdvisorScreen, CareerScreen, SaveScreen, DebugPanel } from './screens/Other';
 import { BriefingModal, ConfirmModal, ExplainModal, GameOverScreen, MeetingModal, ReactionModal } from './components/Modals';
 import { CoalitionModal } from './screens/Coalition';
+import { SpeechModal } from './components/SpeechModal';
 import { CampaignStartModal, ElectionNightModal } from './screens/Campaign';
 import { Tutorial } from './components/Tutorial';
 import { DramaModal, SoundManager } from './components/Drama';
@@ -64,6 +65,7 @@ export default function App() {
       <ElectionNightModal />
       <ReactionModal />
       <ExplainModal />
+      <SpeechModal />
       <ConfirmModal />
       <AdvisorFab />
       <FocusManager />

@@ -521,3 +521,17 @@ describe('security & diplomacy (v2)', () => {
     }
   });
 });
+
+describe('speeches (v2)', () => {
+  it('the generator writes a full speech and delivering it moves groups and draws reactions', async () => {
+    const { writeSpeech } = await import('./speech');
+    let i = 0;
+    const text = writeSpeech({ venue: 'tv', topic: 'judicial', stance: 0.9, tone: 'combative', audience: 'right' }, () => ((i++ * 0.37) % 1));
+    expect(text.split(/\s+/).length).toBeGreaterThan(30);
+    const s = createGame(cfg('pm', { seed: 3 }));
+    const r = performAction(s, 'give_speech', { venue: 'tv', topic: 'judicial', stance: 0.9, tone: 'combative', audience: 'right', words: 80 });
+    expect(r.state.population.groups.right.satisfaction).toBeGreaterThan(s.population.groups.right.satisfaction);
+    expect(r.state.population.groups.left.satisfaction).toBeLessThan(s.population.groups.left.satisfaction);
+    expect(r.reaction?.people.length).toBeGreaterThan(0);
+  });
+});

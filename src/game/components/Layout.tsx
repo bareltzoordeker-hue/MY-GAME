@@ -11,6 +11,7 @@ import { Caricature } from '../../shared/components/Caricature';
 import { setMusic, setSfx, soundPrefs } from '../audio/sound';
 import { Explain } from './ui';
 import { HowToPlayButton } from './HowToPlay';
+import { openSpeech } from './SpeechModal';
 
 interface NavItem { id: ScreenId; icon: string; label: string; tip?: string; show?: (s: GameState) => boolean; badge?: (s: GameState) => number }
 export const NAV: NavItem[] = [
@@ -104,6 +105,7 @@ export function Header({ onMenu }: { onMenu: () => void }) {
         <span className="hidden md:inline text-[11px] muted" data-tip={saveStatus === 'failed' ? 'השמירה נכשלה – המשחק עדיין בזיכרון, ננסה שוב בתור הבא' : 'שמירה אוטומטית בסוף כל תור'}>
           {saveStatus === 'saved' ? '💾 נשמר' : saveStatus === 'failed' ? '⚠️ לא נשמר' : ''}
         </span>
+        <button className="btn btn-sm" onClick={openSpeech} data-tip="כתיבת נאום ונשיאתו: בטלוויזיה, במליאה, בכנס או ברשתות" aria-label="נאום">🎤<span className="hidden lg:inline"> נאום</span></button>
         <SoundToggles />
         <button className="btn btn-primary" onClick={endTurn} disabled={!!blocked} data-tip={blocked ?? `הזמן מתקדם ב${span} (עד ${dateLabel(next, true)}): הכלכלה, הציבור והפוליטיקאים מגיבים`}>
           <span className="hidden xl:inline">התור הבא: {span}</span><span className="xl:hidden">{span} ⏭</span> <span className="hidden xl:inline">⏭</span>
