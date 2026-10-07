@@ -13,6 +13,7 @@ import { clamp, clone, debtPct, deficitPct } from '../utils';
 import { newFiscalYear, processBudgetDeadline, simulateAIGovernment } from './aiGovernment';
 import { processCommitments } from './coalitionDeals';
 import { driftRelations } from './relations';
+import { campaignTick } from './campaign';
 import { evaluateGameOver, setGameOver, syncRole, updateCareer } from './career';
 import { generateInitiatives, simulateCharacters } from './characters';
 import { generateCrises, tickCrises } from './crises';
@@ -57,6 +58,7 @@ export function advanceTurn(s0: GameState): GameState {
   expireInbox(s);
   processCommitments(s);
   driftRelations(s);
+  campaignTick(s);
 
   // budget cycle (new fiscal year when the calendar crosses into January)
   if (s.date.year > prevDate.year) newFiscalYear(s);
@@ -75,7 +77,7 @@ export function advanceTurn(s0: GameState): GameState {
     simulateCharacters(s);
     simulateAlliances(s);
     simulateGovernment(s);
-    simulateParliament(s);
+    if (!(s.government.caretaker && s.elections.phase === 'none')) simulateParliament(s); // a dissolved Knesseton does not legislate
   }
 
   // discrete events: once per turn, with chance scaled to the turn's length

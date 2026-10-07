@@ -270,6 +270,17 @@ export interface Government {
   agreements?: Commitment[];
 }
 
+export interface CampaignState {
+  /** day number of the election this campaign is for */
+  electionDay: number;
+  strategy: 'security' | 'economy' | 'social' | 'identity' | 'change' | 'stability';
+  targets: GroupId[];
+  budget: 'low' | 'mid' | 'high';
+  slogan: string;
+  negativeHits: number;
+  internalPoll?: { turn: number; seats: number; low: number; high: number; topIssue: string };
+}
+
 export interface Commitment {
   id: string;
   partyId: string;
@@ -526,6 +537,8 @@ export interface GameState {
   startDate?: GameDate;
   drama: DramaEvent | null; // pending dramatic event — must be resolved before advancing
   alliances: Alliance[];
+  /** the player party's election campaign (set when the campaign opens) */
+  campaign?: CampaignState;
   /** party-to-party relations, key "a|b" (sorted), -100..100 */
   partyRelations?: Record<string, number>;
   version: number;

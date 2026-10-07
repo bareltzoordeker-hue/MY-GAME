@@ -16,6 +16,7 @@ import { coalitionSeats } from './polls';
 import { getCapabilities, isPartyLeader, isPM, ministryLawDomains, playerMinistry } from './roles';
 import { fundingRatio } from './services';
 import { monthsUntilElection } from './calendar';
+import { needsCampaignStart } from './campaign';
 
 /** How good a state is for the player (career survival first). */
 export function scoreState(s: GameState): number {
@@ -135,7 +136,8 @@ export function screenAdvice(s: GameState, screen: string): AdviceTip[] {
         if (best) out.push(`הגוש הכי משתלם עכשיו: ${best.p.name} (${best.p.seats} מנדטים, ${Math.round(best.c * 100)}% סיכוי). גוש = המלצה עליך לנשיא.`, 'party', `alliance:${best.p.id}`);
         const rebel = s.parties[s.player.partyId].memberIds.map((id) => s.politicians[id]).filter((p) => p && !p.isPlayer && p.active).sort((a, b) => a.loyalty - b.loyalty)[0];
         if (rebel) out.push(`שים עין על ${rebel.name} – נאמנות ${rebel.loyalty.toFixed(0)}, כוח ${rebel.power.toFixed(0)}. קידום במפלגה ישפר את נאמנותו.`, 'party', `promote_member:${rebel.id}`);
-        if (monthsUntilElection(s) <= 6) out.push('תקופת בחירות: כנסים ופרסום מעלים תמיכה, אבל עם תשואה פוחתת. התחייבויות להמליץ חשובות להרכבת הממשלה.', 'party', 'campaign_rally');
+        if (needsCampaignStart(s)) out.push('הקמפיין עוד לא נפתח: בחר אסטרטגיה בנושא שבוער בציבור, קהלי יעד ותקציב.', 'party', 'start_campaign');
+        else if (monthsUntilElection(s) <= 6) out.push('תקופת בחירות: כנסים ופרסום מעלים תמיכה, אבל עם תשואה פוחתת. התחייבויות להמליץ חשובות להרכבת הממשלה.', 'party', 'campaign_rally');
       } else out.push(`אתה במקום ${s.player.listRank} ברשימה. כדי לטפס: כוח פוליטי. ועדות, ראיונות וגיבוי למנהיג בונים אותו.`, 'career', 'committee_work');
       break;
     }

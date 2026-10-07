@@ -16,6 +16,7 @@ import type { GameState, Ideology, Politician } from '../../types/game';
 import { Caricature } from '../../shared/components/Caricature';
 import { AlliancesSection } from './Alliances';
 import { DEMAND_ICON } from './Coalition';
+import { CampaignPanel } from './Campaign';
 import { dayNumber, spanText } from '../../engine/calendar';
 import { ActionButton, Empty, Explain, Meter, PartyChip, PolName, ScreenHeader, Section, Tabs } from '../components/ui';
 
@@ -258,7 +259,7 @@ export function PartyScreen() {
   const members = party.memberIds.map((id) => s.politicians[id]).filter((p) => p?.active).sort((a, b) => b.power - a.power);
   return (
     <div className="space-y-4">
-      <ScreenHeader title={`${party.logo} ${party.name}`} sub={`"${party.slogan}" · ${party.seats} מנדטים · מנהיג: ${s.politicians[party.leaderId]?.name}`} />
+      <ScreenHeader title={`${party.logo} ${party.name}`} sub={`${party.slogan ? `"${party.slogan}" · ` : ''}${party.seats} מנדטים בכנסטון · יו״ר: ${s.politicians[party.leaderId]?.name}`} />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         <div className="card card-tight"><div className="label">סקר</div><div className="text-2xl font-black num">{s.polls[s.polls.length - 1].seats[party.id]}</div></div>
         <div className="card card-tight"><div className="label flex gap-1">לכידות <Explain k="cohesion" /></div><div className="text-2xl font-black num">{party.cohesion.toFixed(0)}</div></div>
@@ -287,11 +288,8 @@ export function PartyScreen() {
               <ActionButton id="fundraise" className="btn btn-sm">💵 תרומות</ActionButton>
             </div>
           </Section>
-          <Section title="קמפיין והבטחות" icon="📢">
+          <Section title="המלצות והבטחות" icon="✍️">
             <div className="flex gap-2 flex-wrap">
-              <ActionButton id="campaign_rally" className="btn btn-sm">📢 כנס</ActionButton>
-              <ActionButton id="campaign_ads" className="btn btn-sm">🖼️ פרסום</ActionButton>
-              <ActionButton id="debate" className="btn btn-sm">🎤 עימות</ActionButton>
               <ActionButton id="no_confidence" className="btn btn-sm btn-danger">⚔️ אי-אמון</ActionButton>
             </div>
             <div className="label mt-3 mb-1">התחייבויות להמליץ עליך אחרי הבחירות</div>
@@ -309,6 +307,7 @@ export function PartyScreen() {
           </Section>
         </div>
       )}
+      {caps.canManageParty && <CampaignPanel s={s} />}
       <AlliancesSection />
       <Section title="חברי המפלגה" icon="👥">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">

@@ -22,6 +22,7 @@ import { PARTIES } from '../data/parties';
 function normalTime(s: GameState): GameState {
   s.elections.date = addMonths(s.date, 40);
   s.elections.scheduledTurn = 99;
+  s.government.caretaker = false; // a sitting Knesseton (the real start is a dissolved one)
   return s;
 }
 
@@ -187,7 +188,7 @@ describe('parliament', () => {
 
 describe('role-appropriate decisions', () => {
   it('a defense minister cannot propose an education law, but can propose a defense law', () => {
-    const s = createGame(cfg('minister', { ministryId: 'defense' }));
+    const s = normalTime(createGame(cfg('minister', { ministryId: 'defense' })));
     expect(checkAction(s, 'propose_law', { lawId: 'free_daycare' })).toBe('לא בתחום האחריות של המשרד שלך');
     expect(checkAction(s, 'propose_law', { lawId: 'reservist_benefits' })).toBeNull();
   });
@@ -459,5 +460,28 @@ describe('coalition deals (v2)', () => {
     const v = computeVote(s, bill);
     expect(v.byParty.utj).toBe('against');
     expect(v.byParty.shas).toBe('against');
+  });
+});
+
+describe('campaign (v2)', () => {
+  it('a party leader opens the campaign, and campaign actions raise the boost', async () => {
+    const { needsCampaignStart } = await import('./campaign');
+    const s0 = createGame(cfg('candidate'));
+    expect(needsCampaignStart(s0)).toBe(true);
+    const r = performAction(s0, 'start_campaign', { strategy: 'security', t1: 'reservists', t2: 'right', budget: 'mid', slogan: 'ביטחון קודם לכל' });
+    const s = r.state;
+    expect(s.campaign?.strategy).toBe('security');
+    expect(needsCampaignStart(s)).toBe(false);
+    const b0 = s.elections.campaignBoost[s.player.partyId] ?? 0;
+    s.player.politicalCapital = 100;
+    const r2 = performAction(s, 'field_campaign', {});
+    expect(r2.state.elections.campaignBoost[s.player.partyId]).toBeGreaterThan(b0);
+    const r3 = performAction(r2.state, 'internal_poll', {});
+    expect(r3.state.campaign?.internalPoll?.seats).toBeGreaterThan(0);
+  });
+  it('a dissolved Knesseton does not legislate', () => {
+    const s = createGame(cfg('pm'));
+    expect(s.government.caretaker).toBe(true);
+    expect(checkAction(s, 'propose_law', { lawId: 'reservist_benefits' })).toContain('הכנסטון התפזר');
   });
 });

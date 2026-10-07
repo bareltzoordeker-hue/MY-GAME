@@ -1,6 +1,8 @@
 import type { GameState } from '../../types/game';
 
 export const SAVE_KEY = 'hakise.autosave.v1';
+/** v2 = real parties, real calendar. Saves from the first version cannot be migrated and are ignored. */
+export const SAVE_VERSION = 2;
 
 export interface SaveMeta { name: string; role: string; turn: number; date: string; party: string; savedAt: number }
 
@@ -11,18 +13,20 @@ const storage = (): StorageLike | null => {
 };
 
 export function serialize(s: GameState): string {
-  return JSON.stringify({ v: 1, savedAt: Date.now(), state: s });
+  return JSON.stringify({ v: SAVE_VERSION, savedAt: Date.now(), state: s });
 }
 
 export function deserialize(raw: string): GameState | null {
   try {
     const obj = JSON.parse(raw) as { v?: number; state?: GameState };
     const s = obj.state;
+    if ((obj.v ?? 1) < SAVE_VERSION || (s?.version ?? 1) < SAVE_VERSION) return null;
     if (!s || typeof s.turn !== 'number' || !s.player || !s.economy || !s.parties || !s.politicians || !s.government || !s.date) return null;
     if (!s.politicians[s.player.politicianId] || !s.parties[s.player.partyId]) return null;
     // migrate older saves
     s.drama ??= null;
     s.alliances ??= [];
+    s.partyRelations ??= {};
     return s;
   } catch {
     return null;

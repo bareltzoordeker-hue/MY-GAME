@@ -15,7 +15,7 @@ import {
 } from '../data/world';
 import { chance, pick, rand, randInt } from './rng';
 import type {
-  ActionResult, Bill, BudgetCategory, Domain, Effects, GameState, GroupId, Ideology, Ministry, Politician, Reaction, ReactionLine, Taxes,
+  ActionResult, Bill, BudgetCategory, CampaignState, Domain, Effects, GameState, GroupId, Ideology, Ministry, Politician, Reaction, ReactionLine, Taxes,
 } from '../types/game';
 import { clamp, clone, deficitPct, newId, round1 } from '../utils';
 import { aiPmDecides } from './aiGovernment';
@@ -23,10 +23,11 @@ import { setGameOver, setRole, syncRole } from './career';
 import { randomCaricature } from './newGame';
 import { addNews, applyEffects, logEvent, remember, scaleEffects } from './effects';
 import { BUDGET_PREF, callEarlyElections } from './elections';
-import { addMonths, electionDate, inCampaign, monthsUntilElection } from './calendar';
+import { addMonths, daysBetween, electionDate, inCampaign, monthsUntilElection } from './calendar';
+import { BUDGETS, STRATEGY_BY_ID, issueSalience, startCampaign } from './campaign';
 import { assignMinister, createMinistry, getMinistry, mergeMinistries, removeMinistry } from './government';
 import { ideologyDistance, partyStance, proposeBill, repealLaw, voteBudget } from './parliament';
-import { coalitionSeats } from './polls';
+import { coalitionSeats, computeShares, seatsFromShares } from './polls';
 import { cancelProject, startProject } from './projects';
 import { makePromise } from './promises';
 import { allyHurt } from './alliances';
@@ -366,6 +367,7 @@ def({
     if (s.bills.some((b) => b.lawId === lawId && b.status === 'active')) return 'כבר בדיון בכנסטון';
     const domains = ministryLawDomains(s);
     if (domains && !domains.includes(LAW_BY_ID[lawId].domain)) return 'לא בתחום האחריות של המשרד שלך';
+    if (s.government.caretaker && s.elections.phase === 'none') return 'הכנסטון התפזר – אין חקיקה עד אחרי הבחירות';
     return null;
   },
   needsMeeting: (s, p) => isPM(s) && LAW_BY_ID[str(p, 'lawId')]?.level === 'major',
@@ -1275,6 +1277,108 @@ def({
   },
 });
 
+// ===== ELECTION CAMPAIGN (v2) =====
+const campaignGate = (s: GameState, cost = 0): string | null => {
+  if (!getCapabilities(s).canCampaign) return 'רק יו״ר מפלגה מנהל קמפיין';
+  if (!inCampaign(s)) return 'הקמפיין מתחיל 4 חודשים לפני הבחירות';
+  if (s.parties[s.player.partyId].funds < cost) return `אין מספיק כסף בקופת המפלגה (נדרש ₪${cost} מיליון)`;
+  return null;
+};
+
+def({
+  id: 'start_campaign', title: 'פתיחת הקמפיין', icon: '🚩', category: 'campaign', level: 'medium', capital: 0,
+  description: 'בחירת אסטרטגיה, קהלי יעד, תקציב וסיסמה לקמפיין הבחירות.',
+  unavailable: (s, p) => (!getCapabilities(s).canCampaign ? 'רק יו״ר מפלגה' : !inCampaign(s) ? 'הקמפיין עוד לא התחיל' : !STRATEGY_BY_ID[str(p, 'strategy') as keyof typeof STRATEGY_BY_ID] ? 'בחר אסטרטגיה' : null),
+  run: (s, p) => {
+    const strategy = str(p, 'strategy') as CampaignState['strategy'];
+    const targets = [str(p, 't1'), str(p, 't2')].filter((g) => GROUP_BY_ID[g as GroupId]) as GroupId[];
+    const budget = (['low', 'mid', 'high'].includes(str(p, 'budget')) ? str(p, 'budget') : 'mid') as CampaignState['budget'];
+    const slogan = str(p, 'slogan').trim().slice(0, 40) || STRATEGY_BY_ID[strategy].slogans[0];
+    startCampaign(s, strategy, targets, budget, slogan);
+    const sal = issueSalience(s)[strategy];
+    return { title: `הקמפיין יצא לדרך: "${slogan}"`, subtitle: `${STRATEGY_BY_ID[strategy].name} · תקציב ${BUDGETS[budget].name}`, quip: sal >= 0.9 ? 'הנושא שבחרת בוער כרגע בציבור. האסטרטגיה צפויה להיות אפקטיבית.' : sal <= 0.4 ? 'הנושא שבחרת לא בראש סדר היום כרגע. ההשפעה תהיה מוגבלת, אלא אם המצב ישתנה.' : 'הנושא שבחרת מעניין חלק מהציבור.' };
+  },
+});
+
+def({
+  id: 'field_campaign', title: 'חוגי בית ודלת לדלת', icon: '🚪', category: 'campaign', level: 'simple', capital: 2, cooldown: 1,
+  description: 'פעילים ומתנדבים בשטח (₪0.5 מיליון). קמפיין +1.5, ובקהלי היעד שלך גם יותר.',
+  unavailable: (s) => campaignGate(s, 0.5),
+  run: (s) => {
+    const party = s.parties[s.player.partyId];
+    party.funds -= 0.5;
+    addCampaign(s, party.id, 1.5);
+    const t = s.campaign?.targets ?? [];
+    applyDecision(s, { playerPopularity: 1, groups: Object.fromEntries(t.map((g) => [g, 1.5])) as Partial<Record<GroupId, number>> });
+    return { title: 'אלפי פעילים בשטח', subtitle: 'קמפיין +1.5', quip: 'עבודת שטח בונה תמיכה יציבה, במיוחד בקרב מצביעים מתלבטים.' };
+  },
+});
+
+def({
+  id: 'negative_ad', title: 'קמפיין שלילי נגד מפלגה יריבה', icon: '📉', category: 'campaign', level: 'simple', capital: 3, cooldown: 1,
+  description: 'תשדירים נגד מפלגה יריבה (₪2 מיליון). פוגע בה – אבל ב-35% מהמקרים הוא חוזר אליך כבומרנג.',
+  unavailable: (s, p) => campaignGate(s, 2) ?? (!s.parties[str(p, 'partyId')] || str(p, 'partyId') === s.player.partyId ? 'בחר מפלגה יריבה' : null),
+  run: (s, p) => {
+    const party = s.parties[s.player.partyId];
+    const t = s.parties[str(p, 'partyId')];
+    party.funds -= 2;
+    shiftPartyRelation(s, party.id, t.id, -8);
+    if (s.campaign) s.campaign.negativeHits += 1;
+    if (rand(s) < 0.35 + (s.campaign?.negativeHits ?? 0) * 0.05) {
+      addCampaign(s, party.id, -2);
+      applyEffects(s, { playerReputation: -3, partyMomentum: { [t.id]: 1 } });
+      addNews(s, `ביקורת על הקמפיין השלילי של ${party.name}`, 'bad', '📉');
+      return { title: 'הקמפיין השלילי חזר כבומרנג', status: 'rejected', quip: 'הציבור ראה בו התקפה לא הוגנת. ככל שמשתמשים בזה יותר – הסיכון עולה.' };
+    }
+    applyEffects(s, { partyMomentum: { [t.id]: -4 } });
+    addCampaign(s, party.id, 1);
+    return { title: `הקמפיין נגד ${t.name} פגע`, status: 'approved', quip: `${t.name} נאלצת להתגונן.` };
+  },
+});
+
+def({
+  id: 'internal_poll', title: 'סקר פנימי', icon: '📋', category: 'campaign', level: 'simple', capital: 1, cooldown: 1,
+  description: 'סקר מעמיק של המפלגה (₪0.3 מיליון): הערכה מדויקת של המנדטים ושל הנושא שהכי מעסיק את הבוחרים.',
+  unavailable: (s) => (!isPartyLeader(s) ? 'רק יו״ר מפלגה' : s.parties[s.player.partyId].funds < 0.3 ? 'אין מספיק כסף בקופה' : null),
+  run: (s) => {
+    const party = s.parties[s.player.partyId];
+    party.funds -= 0.3;
+    const seats = seatsFromShares(computeShares(s, 0))[party.id] ?? 0;
+    const sal = issueSalience(s);
+    const top = (Object.entries(sal) as [CampaignState['strategy'], number][]).sort((a, b) => b[1] - a[1])[0][0];
+    if (s.campaign) s.campaign.internalPoll = { turn: s.turn, seats, low: Math.max(0, seats - 2), high: seats + 2, topIssue: top };
+    return { title: `הסקר הפנימי: ${Math.max(0, seats - 2)}–${seats + 2} מנדטים`, subtitle: `הנושא הבוער: ${STRATEGY_BY_ID[top].name}`, quip: s.campaign && s.campaign.strategy !== top ? `האסטרטגיה שלך (${STRATEGY_BY_ID[s.campaign.strategy].name}) לא תואמת את מה שמעסיק את הבוחרים כרגע.` : 'האסטרטגיה שלך תואמת את מה שמעסיק את הבוחרים.' };
+  },
+});
+
+def({
+  id: 'public_endorsement', title: 'תמיכה פומבית של אישיות ציבורית', icon: '🎖️', category: 'campaign', level: 'simple', capital: 3, cooldown: 2,
+  description: 'אישיות ציבורית מוכרת (אלוף במילואים, כלכלנית, אמן) מודיעה על תמיכה במפלגה. קמפיין +2.',
+  unavailable: (s) => campaignGate(s),
+  run: (s) => {
+    const kinds = [
+      { who: 'אלוף במילואים', g: { reservists: 3, right: 1 } }, { who: 'כלכלנית בכירה', g: { middleClass: 2, highIncome: 2 } },
+      { who: 'אמן ידוע', g: { youth: 3, secular: 1 } }, { who: 'רב מוכר', g: { religious: 3, haredim: 1 } }, { who: 'ראש עיר בפריפריה', g: { periphery: 3 } },
+    ];
+    const k = pick(s, kinds);
+    addCampaign(s, s.player.partyId, 2);
+    applyDecision(s, { groups: k.g as Partial<Record<GroupId, number>> });
+    addNews(s, `${k.who} מודיע/ה על תמיכה ב${s.parties[s.player.partyId].name}`, 'good', '🎖️');
+    return { title: `${k.who} תומך/ת בך`, subtitle: 'קמפיין +2' };
+  },
+});
+
+def({
+  id: 'gotv', title: 'הוצאת מצביעים ביום הבחירות', icon: '🗳️', category: 'campaign', level: 'simple', capital: 3, cooldown: 1,
+  description: 'הסעות, מוקדים טלפוניים ופעילים בקלפיות (₪2 מיליון). רק בשבועיים האחרונים. קמפיין +3.',
+  unavailable: (s) => campaignGate(s, 2) ?? (daysBetween(s.date, electionDate(s)) > 15 ? 'רק בשבועיים האחרונים לפני הבחירות' : null),
+  run: (s) => {
+    s.parties[s.player.partyId].funds -= 2;
+    addCampaign(s, s.player.partyId, 3);
+    return { title: 'מערך יום הבחירות מוכן', subtitle: 'קמפיין +3', quip: 'אחוז ההצבעה בקרב התומכים שלך צפוי לעלות.' };
+  },
+});
+
 // ===== CAMPAIGN =====
 def({
   id: 'campaign_rally', title: 'כנס בחירות', icon: '📢', category: 'campaign', level: 'simple', capital: 2, cooldown: 1,
@@ -1404,14 +1508,14 @@ export function buildReaction(prev: GameState, next: GameState, rr: RunResult, a
   const deltas = GROUPS.map((g) => ({ g, d: next.population.groups[g.id].satisfaction - prev.population.groups[g.id].satisfaction }))
     .filter((x) => Math.abs(x.d) >= 0.4).sort((x, y) => Math.abs(y.d) - Math.abs(x.d)).slice(0, 5);
   const groups: ReactionLine[] = deltas.map(({ g, d }) => ({ icon: g.emoji, label: g.name, text: `${N.groupReaction(next, g.id, d)} (${d > 0 ? '+' : ''}${d.toFixed(1)})`, tone: d > 0.4 ? 'good' : d < -0.4 ? 'bad' : 'neutral' }));
-  if (!groups.length && a.category !== 'media' && a.category !== 'career') {
+  if (!groups.length && !['media', 'career', 'campaign', 'party'].includes(a.category)) {
     const g = GROUP_BY_ID.youth;
     groups.push({ icon: g.emoji, label: g.name, text: 'ההחלטה לא משפיעה עליהם ישירות.', tone: 'neutral' });
   }
 
   const people = [...(rr.people ?? [])];
   // everyone has an opinion: a rival and a voice of "the people" react to every decision
-  if (people.length < 3 && a.id !== 'drama') people.push(...N.chorus(next, (rr.status ?? 'approved') !== 'rejected').slice(0, 3 - people.length));
+  if (people.length < 3 && a.id !== 'drama') people.push(...N.chorus(next, (rr.status ?? 'approved') !== 'rejected', a.category).slice(0, 3 - people.length));
   if (deficitPct(next) > 4.5 && dSpend > 0.5) {
     people.push({ icon: '🧠', label: 'היועץ', text: `${N.advisorTone(next)} הגירעון כבר ${deficitPct(next).toFixed(1)}%.`, tone: 'bad' });
   }

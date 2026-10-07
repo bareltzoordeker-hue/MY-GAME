@@ -117,7 +117,8 @@ export const N = {
   },
 
   /** Reactions to a decision: the main rival and a few public voices. */
-  chorus(s: GameState, good: boolean): { icon: string; label: string; text: string; tone: 'good' | 'bad' | 'neutral' }[] {
+  chorus(s: GameState, good: boolean, category = ''): { icon: string; label: string; text: string; tone: 'good' | 'bad' | 'neutral' }[] {
+    const political = ['campaign', 'party', 'media', 'career'].includes(category);
     const me = s.politicians[s.player.politicianId];
     const inGov = s.government.coalition.includes(s.player.partyId);
     const oppLeader = Object.values(s.parties).filter((p) => !s.government.coalition.includes(p.id) && p.seats > 0 && p.id !== s.player.partyId).sort((a, b) => b.seats - a.seats)[0];
@@ -127,9 +128,11 @@ export const N = {
     if (rival && rival.id !== me.id) {
       out.push({
         icon: '🗣️', label: rival.name, tone: good ? 'neutral' : 'bad',
-        text: pick(s, good
-          ? ['ההחלטה מאוחרת, אבל נבחן אותה לגופה.', 'השאלה היא אם זה ייושם בפועל.', 'נדרוש לראות מקור תקציבי.']
-          : ['ההחלטה מוכיחה שאין כאן תוכנית.', 'הציבור ישלם את המחיר.', 'נפעל נגד המהלך בכנסטון.']),
+        text: pick(s, political
+          ? (good ? ['הבוחרים יכריעו בקלפי, לא במסיבות עיתונאים.', 'נראה מה יישאר מזה ביום הבחירות.'] : ['עוד מהלך שמוכיח שאין להם תוכנית אמיתית.', 'הציבור לא קונה את זה.'])
+          : good
+            ? ['ההחלטה מאוחרת, אבל נבחן אותה לגופה.', 'השאלה היא אם זה ייושם בפועל.', 'נדרוש לראות מקור תקציבי.']
+            : ['ההחלטה מוכיחה שאין כאן תוכנית.', 'הציבור ישלם את המחיר.', 'נפעל נגד המהלך בכנסטון.']),
       });
     }
     const voices = [
@@ -137,7 +140,10 @@ export const N = {
       { icon: '📈', label: 'כלכלן', good: ['ההשפעה הכלכלית חיובית בטווח הארוך.', 'צעד אחראי מבחינה פיסקלית.'], bad: ['יש לכך מחיר תקציבי שלא קיבל מענה.', 'ההחלטה מגדילה את אי-הוודאות הכלכלית.'] },
       { icon: '🧑‍🤝‍🧑', label: 'קול מהציבור', good: ['סוף סוף החלטה שמרגישים בשטח.', 'מקווים שזה יגיע גם אלינו.'], bad: ['מרגישים שאף אחד לא מקשיב לנו.', 'שוב החלטות בלי לשאול את הציבור.'] },
     ];
-    const v = pick(s, voices);
+    const pool = political
+      ? [voices[0], { icon: '📊', label: 'סוקר', good: ['המהלך עשוי להזיז מתלבטים.', 'יש לזה פוטנציאל בקרב קהלי היעד.'], bad: ['לא צפוי שינוי משמעותי בסקרים.', 'המהלך עלול להרחיק מצביעים מהמרכז.'] }]
+      : voices;
+    const v = pick(s, pool);
     out.push({ icon: v.icon, label: v.label, text: pick(s, good ? v.good : v.bad), tone: 'neutral' });
     return out;
   },
