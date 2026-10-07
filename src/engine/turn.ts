@@ -14,6 +14,7 @@ import { newFiscalYear, processBudgetDeadline, simulateAIGovernment } from './ai
 import { processCommitments } from './coalitionDeals';
 import { driftRelations } from './relations';
 import { campaignTick } from './campaign';
+import { worldTick } from './security';
 import { evaluateGameOver, setGameOver, syncRole, updateCareer } from './career';
 import { generateInitiatives, simulateCharacters } from './characters';
 import { generateCrises, tickCrises } from './crises';
@@ -59,6 +60,7 @@ export function advanceTurn(s0: GameState): GameState {
   processCommitments(s);
   driftRelations(s);
   campaignTick(s);
+  worldTick(s, days / 30.4);
 
   // budget cycle (new fiscal year when the calendar crosses into January)
   if (s.date.year > prevDate.year) newFiscalYear(s);

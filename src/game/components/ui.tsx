@@ -36,9 +36,11 @@ export function Stat({ icon, label, value, delta, goodWhenUp = true, k, sub, ton
   );
 }
 
-export function Meter({ value, max = 100, color, h = 7 }: { value: number; max?: number; color?: string; h?: number }) {
+/** invert: high values are bad (threat, risk). */
+export function Meter({ value, max = 100, color, h = 7, invert = false }: { value: number; max?: number; color?: string; h?: number; invert?: boolean }) {
   const pct = Math.max(0, Math.min(100, (value / max) * 100));
-  const c = color ?? (pct > 60 ? 'var(--good)' : pct > 38 ? 'var(--warn)' : 'var(--bad)');
+  const good = invert ? 100 - pct : pct;
+  const c = color ?? (good > 60 ? 'var(--good)' : good > 38 ? 'var(--warn)' : 'var(--bad)');
   return <div className="bar" style={{ height: h }}><i style={{ width: `${pct}%`, background: c }} /></div>;
 }
 

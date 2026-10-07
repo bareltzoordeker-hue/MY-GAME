@@ -270,6 +270,19 @@ export interface Government {
   agreements?: Commitment[];
 }
 
+export interface WorldState {
+  fronts: Record<string, { threat: number; status: 'quiet' | 'tension' | 'fighting' | 'ceasefire'; ceasefireUntil?: number; incidents: number }>;
+  units: Record<string, { readiness: number }>;
+  channels: Record<string, number>;
+  relations: Record<string, number>;
+  /** Judea and Samaria under the Oslo Accords, % of the area */
+  areas: { A: number; B: number; C: number };
+  casualties: { soldiers: number; civilians: number };
+  operations: { id: string; opId: string; front: string; turn: number }[];
+  measures: string[];
+  normalized: string[];
+}
+
 export interface CampaignState {
   /** day number of the election this campaign is for */
   electionDay: number;
@@ -537,6 +550,8 @@ export interface GameState {
   startDate?: GameDate;
   drama: DramaEvent | null; // pending dramatic event — must be resolved before advancing
   alliances: Alliance[];
+  /** security fronts, forces and the diplomatic track */
+  world?: WorldState;
   /** the player party's election campaign (set when the campaign opens) */
   campaign?: CampaignState;
   /** party-to-party relations, key "a|b" (sorted), -100..100 */

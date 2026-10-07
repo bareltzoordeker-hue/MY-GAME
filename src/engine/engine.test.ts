@@ -485,3 +485,39 @@ describe('campaign (v2)', () => {
     expect(checkAction(s, 'propose_law', { lawId: 'reservist_benefits' })).toContain('הכנסטון התפזר');
   });
 });
+
+describe('security & diplomacy (v2)', () => {
+  it('the PM runs a targeted strike, the threat drops, and the world ticks cleanly', () => {
+    const s = createGame(cfg('pm'));
+    s.player.politicalCapital = 100;
+    const before = s.world!.fronts.lebanon.threat;
+    const r = performAction(s, 'security_operation', { opId: 'targeted_strike', front: 'lebanon' });
+    expect(r.reaction?.status).not.toBe(undefined);
+    expect(r.state.world!.fronts.lebanon.threat).toBeLessThan(before);
+    let t = r.state;
+    for (let i = 0; i < 4; i++) { if (t.drama) t = resolveDrama(t, t.drama.options[0].id).state; t = advanceTurn(normalTime(t)); assertSane(t); }
+  });
+  it('big operations need the cabinet; MKs cannot launch operations', () => {
+    const s = createGame(cfg('pm', { seed: 5 }));
+    s.player.politicalCapital = 100;
+    const r = performAction(s, 'security_operation', { opId: 'wide_ground', front: 'gaza' });
+    expect(r.reaction?.title).toBeTruthy();
+    assertSane(r.state);
+    const mk = createGame(cfg('mk'));
+    expect(checkAction(mk, 'security_operation', { opId: 'targeted_strike', front: 'gaza' })).not.toBeNull();
+  });
+  it('confidence-building and land transfers change the map and anger the right', () => {
+    for (let seed = 1; seed <= 4; seed++) {
+      const s = createGame(cfg('pm', { seed }));
+      s.player.politicalCapital = 100;
+      const r = performAction(s, 'diplomacy', { kind: 'transfer', from: 'C' });
+      if (r.reaction?.status === 'approved') {
+        expect(r.state.world!.areas.C).toBe(58);
+        expect(r.state.population.groups.settlers.satisfaction).toBeLessThan(s.population.groups.settlers.satisfaction);
+      }
+      assertSane(r.state);
+      const c = performAction(s, 'diplomacy', { kind: 'cbm', cbm: 'permits' });
+      assertSane(c.state);
+    }
+  });
+});

@@ -25,6 +25,8 @@ import { addNews, applyEffects, logEvent, remember, scaleEffects } from './effec
 import { BUDGET_PREF, callEarlyElections } from './elections';
 import { addMonths, daysBetween, electionDate, inCampaign, monthsUntilElection } from './calendar';
 import { BUDGETS, STRATEGY_BY_ID, issueSalience, startCampaign } from './campaign';
+import { CHANNEL_BY_ID, FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type ChannelId, type FrontId, type UnitId } from '../data/security';
+import { cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, unitTraining, type CbmKind } from './security';
 import { assignMinister, createMinistry, getMinistry, mergeMinistries, removeMinistry } from './government';
 import { ideologyDistance, partyStance, proposeBill, repealLaw, voteBudget } from './parliament';
 import { coalitionSeats, computeShares, seatsFromShares } from './polls';
@@ -1376,6 +1378,100 @@ def({
     s.parties[s.player.partyId].funds -= 2;
     addCampaign(s, s.player.partyId, 3);
     return { title: 'מערך יום הבחירות מוכן', subtitle: 'קמפיין +3', quip: 'אחוז ההצבעה בקרב התומכים שלך צפוי לעלות.' };
+  },
+});
+
+// ===== SECURITY & DIPLOMACY (v2) =====
+/** A minister (not PM) needs the PM's approval for a security or diplomatic move. hawkish: +1 escalation, -1 concession. */
+function pmSecurityApproval(s: GameState, hawkish: number): RunResult | null {
+  if (isPM(s)) return null;
+  const pm = s.politicians[s.government.pmId];
+  const ok = rand(s) < clamp(0.35 + (pm.loyalty - 50) / 90 + pm.ideology.security * hawkish * 0.35, 0.05, 0.92);
+  if (ok) return null;
+  remember(s, pm.id, 'ignored', 'ביקש לאשר מהלך ביטחוני-מדיני', -2);
+  return { status: 'rejected', title: 'ראש הממשלה לא אישר', people: [{ icon: '🪑', label: pm.name, text: hawkish > 0 ? 'לא בשלב הזה. הסיכון גבוה מדי.' : 'זה לא תואם את מדיניות הממשלה.', tone: 'bad' }] };
+}
+
+def({
+  id: 'security_operation', title: 'מבצע צבאי', icon: '🎖️', category: 'government', level: 'major', capital: (_s, p) => (OPERATION_BY_ID[str(p, 'opId')]?.needsCabinet ? 8 : 4),
+  description: 'תכנון מבצע בחזית מסוימת. מבצעים גדולים דורשים אישור הקבינט המדיני-ביטחוני.',
+  unavailable: (s, p) => {
+    const role = securityRole(s);
+    if (!role || role === 'foreign') return 'רק ראש הממשלה ושר הביטחון';
+    const op = OPERATION_BY_ID[str(p, 'opId')];
+    const front = str(p, 'front') as FrontId;
+    if (!op) return 'בחר סוג מבצע';
+    if (!op.fronts.includes(front)) return 'המבצע לא מתאים לחזית הזו';
+    if ((s.flags[`op_${front}`] ?? -1) >= s.turn) return 'כבר בוצע מבצע בחזית הזו בתור הנוכחי';
+    return null;
+  },
+  run: (s, p) => {
+    const op = OPERATION_BY_ID[str(p, 'opId')];
+    const front = str(p, 'front') as FrontId;
+    const rej = pmSecurityApproval(s, 1);
+    if (rej) return rej;
+    let lines: ReactionLine[] = [];
+    if (op.needsCabinet) {
+      const v = cabinetVote(s, 1, op.risk);
+      lines = v.lines;
+      if (!v.passed) return { status: 'rejected', title: `הקבינט דחה את המבצע (${v.yes}-${v.no})`, subtitle: `${op.name} – ${FRONT_BY_ID[front].name}`, people: lines };
+    }
+    s.flags[`op_${front}`] = s.turn;
+    const o = executeOperation(s, op, front);
+    return { status: o.success ? 'approved' : 'rejected', title: o.headline, subtitle: op.needsCabinet ? 'באישור הקבינט המדיני-ביטחוני' : undefined, quip: o.text, people: [...o.lines, ...lines].slice(0, 6) };
+  },
+});
+
+def({
+  id: 'diplomacy', title: 'מהלך מדיני', icon: '🕊️', category: 'government', level: 'major',
+  capital: (_s, p) => ({ channel_secret: 2, channel_open: 3, ceasefire: 6, cbm: 5, transfer: 12, normalize: 10 } as Record<string, number>)[str(p, 'kind')] ?? 4,
+  description: 'ערוצי הידברות, הפסקות אש בתיווך, צעדים בוני אמון, העברת שטחים ונורמליזציה.',
+  unavailable: (s, p) => {
+    const role = securityRole(s);
+    if (!role) return 'רק ראש הממשלה, שר הביטחון ושר החוץ';
+    const kind = str(p, 'kind');
+    if (!['channel_secret', 'channel_open', 'ceasefire', 'cbm', 'transfer', 'normalize'].includes(kind)) return 'בחר מהלך';
+    if ((kind === 'channel_secret' || kind === 'channel_open' || kind === 'ceasefire') && !CHANNEL_BY_ID[str(p, 'channel') as ChannelId]) return 'בחר ערוץ';
+    if (kind === 'ceasefire' && !FRONT_BY_ID[str(p, 'front') as FrontId]) return 'בחר חזית';
+    if (kind === 'ceasefire' && !['egypt', 'qatar', 'usa', 'jordan'].includes(str(p, 'channel'))) return 'הפסקת אש מושגת בתיווך מצרים, קטאר, ירדן או ארה״ב';
+    if ((s.flags[`dip_${kind}`] ?? -1) >= s.turn) return 'כבר בוצע מהלך כזה בתור הנוכחי';
+    return null;
+  },
+  run: (s, p) => {
+    const kind = str(p, 'kind');
+    s.flags[`dip_${kind}`] = s.turn;
+    const concession = kind === 'cbm' || kind === 'transfer' || kind === 'normalize';
+    const rej = concession ? pmSecurityApproval(s, -1) : null;
+    if (rej) return rej;
+    let lines: ReactionLine[] = [];
+    if (kind === 'transfer' || kind === 'cbm') {
+      const v = cabinetVote(s, -1, kind === 'transfer' ? 1 : 0.3);
+      lines = v.lines;
+      if (!v.passed) return { status: 'rejected', title: `הקבינט דחה את המהלך (${v.yes}-${v.no})`, people: lines };
+    }
+    const o = kind === 'channel_secret' || kind === 'channel_open' ? openChannel(s, str(p, 'channel') as ChannelId, kind === 'channel_open')
+      : kind === 'ceasefire' ? mediatedCeasefire(s, str(p, 'front') as FrontId, str(p, 'channel') as ChannelId)
+        : kind === 'cbm' ? confidenceMeasure(s, (str(p, 'cbm') || 'permits') as CbmKind)
+          : kind === 'transfer' ? transferArea(s, str(p, 'from') === 'B' ? 'B' : 'C')
+            : normalization(s, 'saudi');
+    return { status: o.ok ? 'approved' : 'rejected', title: o.title, quip: o.text, people: [...(o.lines ?? []), ...lines].slice(0, 6) };
+  },
+});
+
+def({
+  id: 'unit_training', title: 'אימון והצטיידות של יחידה', icon: '🏋️', category: 'government', level: 'simple', capital: 2,
+  description: 'אימון מרוכז והשלמת ציוד: כשירות היחידה +15 (₪0.3 מיליארד).',
+  unavailable: (s, p) => {
+    const role = securityRole(s);
+    if (role !== 'pm' && role !== 'defense') return 'רק ראש הממשלה ושר הביטחון';
+    if (!UNIT_BY_ID[str(p, 'unitId') as UnitId]) return 'בחר יחידה';
+    return (s.flags[`train_${str(p, 'unitId')}`] ?? -1) >= s.turn ? 'היחידה כבר באימון בתור הנוכחי' : null;
+  },
+  run: (s, p) => {
+    s.flags[`train_${str(p, 'unitId')}`] = s.turn;
+    applyDecision(s, { oneOffCost: 0.3 });
+    const o = unitTraining(s, str(p, 'unitId') as UnitId);
+    return { title: o.title, subtitle: o.text };
   },
 });
 

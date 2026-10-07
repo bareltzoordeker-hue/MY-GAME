@@ -10,6 +10,7 @@ import { dayNumber, turnsUntilElection } from './calendar';
 import { refreshFiscals } from './economy';
 import { computeApproval, groupTargetRaw } from './population';
 import { computeShares, seatsFromShares } from './polls';
+import { initWorld } from './security';
 import { serviceDrivers, updateMetrics } from './services';
 import { pushHistory } from './history';
 
@@ -192,6 +193,7 @@ export function createGame(cfg: NewGameConfig): GameState {
     nextId: 1000,
     drama: null,
     alliances: [],
+    world: initWorld(),
   };
 
   // ---------------- parties ----------------

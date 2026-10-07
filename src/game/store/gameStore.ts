@@ -16,7 +16,7 @@ import { breakAlliance, proposeAlliance } from '../../engine/alliances';
 
 export type ScreenId =
   | 'dashboard' | 'state' | 'economy' | 'budget' | 'population' | 'parliament' | 'government' | 'party' | 'ministry'
-  | 'news' | 'polls' | 'projects' | 'laws' | 'crises' | 'map' | 'advisor' | 'career' | 'save' | 'relations';
+  | 'news' | 'polls' | 'projects' | 'laws' | 'crises' | 'map' | 'advisor' | 'career' | 'save' | 'relations' | 'security';
 
 interface Store {
   game: GameState | null;

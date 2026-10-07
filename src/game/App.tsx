@@ -25,6 +25,7 @@ const ParliamentScreen = lazy(() => loadPolitics().then((m) => ({ default: m.Par
 const LawsScreen = lazy(() => loadPolitics().then((m) => ({ default: m.LawsScreen })));
 const PartyScreen = lazy(() => loadPolitics().then((m) => ({ default: m.PartyScreen })));
 const PollsScreen = lazy(() => loadPolitics().then((m) => ({ default: m.PollsScreen })));
+const SecurityScreen = lazy(() => import('./screens/Security').then((m) => ({ default: m.SecurityScreen })));
 const RelationsScreen = lazy(() => import('./screens/Relations').then((m) => ({ default: m.RelationsScreen })));
 
 export default function App() {
@@ -43,7 +44,7 @@ export default function App() {
     dashboard: <Dashboard />, state: <StateScreen />, economy: <EconomyScreen />, budget: <BudgetScreen />, population: <PopulationScreen />,
     parliament: <ParliamentScreen />, government: <GovernmentScreen />, party: <PartyScreen />, ministry: <MinistryScreen />, news: <NewsScreen />,
     polls: <PollsScreen />, projects: <ProjectsScreen />, laws: <LawsScreen />, crises: <CrisesScreen />, map: <MapScreen />, advisor: <AdvisorScreen />,
-    career: <CareerScreen />, save: <SaveScreen />, relations: <RelationsScreen />,
+    career: <CareerScreen />, save: <SaveScreen />, relations: <RelationsScreen />, security: <SecurityScreen />,
   } as const;
 
   return (

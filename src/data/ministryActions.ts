@@ -110,9 +110,9 @@ export const MINISTRY_ACTIONS: Record<string, MinistryActionSpec[]> = {
         out(4, 'neutral', 'השיחות נמשכות. הצד השני דורש התקדמות בסוגיה הפלסטינית.', { playerReputation: 1 }),
         out(3, 'bad', 'השיחות הודלפו ונעצרו בעקבות ביקורת בעולם הערבי.', { playerReputation: -2 }),
       ] }),
-    act('policy', 'for_us_visit', '🇺🇸', 'ביקור עבודה בוושינגטון', 'פגישות בקונגרס ובממשל לחיזוק הסיוע הביטחוני ותיאום מדיני.', 3, 2, { playerReputation: 3, groups: { center: 2, right: 1 } },
+    act('policy', 'for_us_visit', '🤝', 'ביקור עבודה בוושינגטון', 'פגישות בקונגרס ובממשל לחיזוק הסיוע הביטחוני ותיאום מדיני.', 3, 2, { playerReputation: 3, groups: { center: 2, right: 1 } },
       { note: 'הביקור חיזק את התיאום עם הממשל האמריקאי.' }),
-    act('policy', 'for_europe', '🇪🇺', 'שיחות לשדרוג הסכם הסחר עם האיחוד האירופי', 'חיזוק הקשרים הכלכליים והמחקריים עם אירופה. האיחוד מציב תנאים מדיניים.', 4, 4,
+    act('policy', 'for_europe', '🌍', 'שיחות לשדרוג הסכם הסחר עם האיחוד האירופי', 'חיזוק הקשרים הכלכליים והמחקריים עם אירופה. האיחוד מציב תנאים מדיניים.', 4, 4,
       { economy: { growth: 0.15 }, groups: { highIncome: 2, students: 2, liberals: 2 } }),
     act('policy', 'for_un', '🏛️', 'מערכה דיפלומטית באו״ם', 'פעילות לבלימת החלטות נגד ישמעאל במוסדות הבינלאומיים.', 3, 2, {},
       { outcomes: [
@@ -379,7 +379,7 @@ export const MINISTRY_ACTIONS: Record<string, MinistryActionSpec[]> = {
     act('policy', 'ng_resilience', '💪', 'מרכזי חוסן קהילתיים', 'ליווי נפשי לתושבי קו העימות.', 2, 3, { budget: { health: 0.2 }, groups: { periphery: 3, families: 2 } }),
   ],
   aliyah: [
-    act('policy', 'ali_france', '🇫🇷', 'קמפיין עלייה מצרפת ומארה״ב', 'מענקי קליטה ומסלולי תעסוקה לעולים.', 2, 3, { budget: { welfare: 0.3 }, groups: { olim: 3, right: 1 }, economy: { growth: 0.03 } }),
+    act('policy', 'ali_france', '✈️', 'קמפיין עלייה מצרפת ומארה״ב', 'מענקי קליטה ומסלולי תעסוקה לעולים.', 2, 3, { budget: { welfare: 0.3 }, groups: { olim: 3, right: 1 }, economy: { growth: 0.03 } }),
     act('policy', 'ali_licenses', '🩺', 'הכרה מהירה ברישיונות מקצועיים', 'רופאים, מהנדסים ואחיות עולים יעבדו מהר יותר במקצועם.', 2, 3, { groups: { olim: 4 }, serviceBonus: { health: 1 } }),
     act('policy', 'ali_housing', '🏠', 'דיור לעולים בפריפריה', 'מרכזי קליטה ודירות מסובסדות.', 2, 3, { budget: { housing: 0.2 }, groups: { olim: 3, periphery: 1 } }),
     act('policy', 'ali_ethiopia', '🧳', 'העלאת בני הקהילה האתיופית הממתינים', 'השלמת עליית הממתינים לאיחוד משפחות.', 3, 4, { budget: { welfare: 0.3 }, groups: { olim: 3, religious: 1, liberals: 1 } }),
