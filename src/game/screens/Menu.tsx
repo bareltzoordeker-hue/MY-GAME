@@ -32,7 +32,7 @@ export function MainMenu({ onNew }: { onNew: () => void }) {
       <div className="w-full max-w-4xl grid md:grid-cols-2 gap-6 items-center">
         <div className="rise">
           <div className="text-7xl float">🪑</div>
-          <h1 className="text-5xl md:text-6xl font-black mt-3" style={{ letterSpacing: '-0.03em' }}>ממשלת ישמעל</h1>
+          <h1 className="text-5xl md:text-6xl font-black mt-3" style={{ letterSpacing: '-0.03em' }}>ממשלת ישמעאל</h1>
           <p className="text-lg mt-2" style={{ color: 'var(--gold)' }}>סימולטור פוליטי סאטירי</p>
           <p className="muted mt-4 leading-relaxed">
             ברוכים הבאים ל{COUNTRY}: מדינה בדיונית לגמרי, עם {PARLIAMENT} של 120 חברים, תשע מפלגות, תקציב של חצי טריליון ואף אחד שמקשיב.
@@ -151,7 +151,7 @@ export function NewGame({ onBack }: { onBack: () => void }) {
             <div className="card space-y-4">
               <div>
                 <div className="label mb-1">השם שלך</div>
-                <input type="text" className="w-full" maxLength={24} placeholder={gender === 'f' ? 'דנה פוליטיקאית' : 'דני פוליטיקאי'} value={name} onChange={(e) => setName(e.target.value)} />
+                <input type="text" aria-label="השם שלך" className="w-full" maxLength={24} placeholder={gender === 'f' ? 'דנה פוליטיקאית' : 'דני פוליטיקאי'} value={name} onChange={(e) => setName(e.target.value)} />
               </div>
               <div className="flex gap-2">
                 <button className={`btn btn-sm ${gender === 'm' ? 'btn-blue' : ''}`} onClick={() => setGender('m')}>פוליטיקאי</button>
@@ -171,7 +171,7 @@ export function NewGame({ onBack }: { onBack: () => void }) {
               {leaderRole && (
                 <div>
                   <div className="label mb-1">שם חדש למפלגה (לא חובה)</div>
-                  <input type="text" className="w-full" maxLength={30} placeholder={PARTIES.find((p) => p.id === partyId)?.name} value={partyName} onChange={(e) => setPartyName(e.target.value)} />
+                  <input type="text" aria-label="שם חדש למפלגה" className="w-full" maxLength={30} placeholder={PARTIES.find((p) => p.id === partyId)?.name} value={partyName} onChange={(e) => setPartyName(e.target.value)} />
                 </div>
               )}
               <div>

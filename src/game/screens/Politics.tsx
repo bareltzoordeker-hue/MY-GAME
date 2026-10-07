@@ -88,12 +88,13 @@ export function GovernmentScreen() {
                 {min ? <div className="mt-2"><PolName p={min} s={s} size={32} sub={`${s.parties[min.partyId]?.shortName} · מומחיות ${(min.expertise[m.domain] ?? 20).toFixed(0)} · נאמנות ${min.loyalty.toFixed(0)}`} /></div> : <div className="text-xs muted mt-2">פנוי</div>}
                 {pm && (
                   <div className="flex gap-1 flex-wrap mt-2">
-                    <select data-focus={`appoint:${m.id}`} data-tip="מינוי שר חדש למשרד: המספרים מראים מומחיות בתחום וכוח פוליטי" className="text-xs" style={{ padding: '4px 6px' }} value="" onChange={(e) => e.target.value && useGame.getState().act('appoint_minister', { ministryId: m.id, politicianId: e.target.value })}>
+                    <select aria-label={`מינוי שר ל${m.name}`} data-focus={`appoint:${m.id}`} data-tip="מינוי שר חדש למשרד: המספרים מראים מומחיות בתחום וכוח פוליטי" className="text-xs" style={{ padding: '4px 6px' }} value="" onChange={(e) => e.target.value && useGame.getState().act('appoint_minister', { ministryId: m.id, politicianId: e.target.value })}>
                       <option value="">מנה שר…</option>
                       {cands.filter((c) => c.id !== m.ministerId).sort((x, y) => (y.expertise[m.domain] ?? 20) - (x.expertise[m.domain] ?? 20)).map((c) => (
                         <option key={c.id} value={c.id}>{c.name} ({s.parties[c.partyId].shortName}) · מומחיות {(c.expertise[m.domain] ?? 20).toFixed(0)} · כוח {c.power.toFixed(0)}</option>
                       ))}
                     </select>
+                    {min && min.id !== s.player.politicianId && <ActionButton id="network" params={{ politicianId: min.id }} className="btn btn-sm">☕</ActionButton>}
                     {min && min.id !== s.player.politicianId && <ActionButton id="fire_minister" params={{ ministryId: m.id }} className="btn btn-sm btn-danger" confirm={`לפטר את ${min.name}? הוא יזכור.`}>🔥</ActionButton>}
                     {!m.services.length && !m.categories.length && m.id !== 'finance' && <ActionButton id="remove_ministry" params={{ ministryId: m.id }} className="btn btn-sm">🗑️</ActionButton>}
                   </div>
@@ -117,9 +118,9 @@ export function GovernmentScreen() {
       {pm && (
         <Section title="מבנה הממשלה" icon="🧩">
           <div className="flex flex-wrap gap-2 items-center">
-            <select value={a} onChange={(e) => setA(e.target.value)}><option value="">משרד א׳</option>{s.government.ministries.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
+            <select aria-label="משרד ראשון לאיחוד" value={a} onChange={(e) => setA(e.target.value)}><option value="">משרד א׳</option>{s.government.ministries.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
             <span>+</span>
-            <select value={b} onChange={(e) => setB(e.target.value)}><option value="">משרד ב׳</option>{s.government.ministries.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
+            <select aria-label="משרד שני לאיחוד" value={b} onChange={(e) => setB(e.target.value)}><option value="">משרד ב׳</option>{s.government.ministries.map((m) => <option key={m.id} value={m.id}>{m.name}</option>)}</select>
             <ActionButton id="merge_ministries" params={{ a, b }} className="btn btn-sm btn-blue">🧩 איחוד</ActionButton>
           </div>
           <div className="flex flex-wrap gap-2 mt-3">
@@ -251,8 +252,8 @@ export function PartyScreen() {
         <div className="grid lg:grid-cols-2 gap-4">
           <Section title="מיתוג וקו" icon="🎨">
             <div className="flex gap-2 flex-wrap">
-              <input type="text" value={name} onChange={(e) => setName(e.target.value)} maxLength={32} className="flex-1" />
-              <input type="text" value={logo} onChange={(e) => setLogo(e.target.value)} maxLength={4} style={{ width: 60 }} />
+              <input type="text" aria-label="שם המפלגה" value={name} onChange={(e) => setName(e.target.value)} maxLength={32} className="flex-1" />
+              <input type="text" aria-label="סמל המפלגה (אימוג׳י)" value={logo} onChange={(e) => setLogo(e.target.value)} maxLength={4} style={{ width: 60 }} />
               <ActionButton id="rename_party" params={{ name, logo }} className="btn btn-sm">שמור</ActionButton>
             </div>
             <div className="space-y-2 mt-3">
@@ -293,7 +294,7 @@ export function PartyScreen() {
       )}
       <AlliancesSection />
       <Section title="חברי המפלגה" icon="👥">
-        <div className="grid md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {members.map((p) => (
             <PolCard key={p.id} p={p} s={s} extra={caps.canManageParty && !p.isPlayer && <>
               <ActionButton id="promote_member" params={{ politicianId: p.id }} className="btn btn-sm">⬆️</ActionButton>
@@ -304,7 +305,7 @@ export function PartyScreen() {
         </div>
       </Section>
       <Section title="פוליטיקאים אחרים" icon="🎭">
-        <div className="grid md:grid-cols-2 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {Object.values(s.politicians).filter((p) => p.active && p.partyId !== party.id && s.parties[p.partyId]?.leaderId === p.id).map((p) => <PolCard key={p.id} p={p} s={s} />)}
         </div>
       </Section>

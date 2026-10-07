@@ -1,4 +1,4 @@
-# ARCHITECTURE — ממשלת ישמעל
+# ARCHITECTURE — ממשלת ישמעאל
 
 ```
 UI (React, src/game)  ──►  store (zustand)  ──►  engine (pure TS, src/engine)  ──►  GameState

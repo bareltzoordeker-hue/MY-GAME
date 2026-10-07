@@ -13,7 +13,7 @@ import { resolveDrama } from './drama';
 import { resolveInbox } from './inbox';
 import { partyStance } from './parliament';
 import { coalitionSeats } from './polls';
-import { getCapabilities, isPartyLeader, isPM, playerMinistry, turnsToElection } from './roles';
+import { getCapabilities, isPartyLeader, isPM, ministryLawDomains, playerMinistry, turnsToElection } from './roles';
 import { fundingRatio } from './services';
 
 /** How good a state is for the player (career survival first). */
@@ -99,7 +99,8 @@ export function screenAdvice(s: GameState, screen: string): AdviceTip[] {
         if (def > 4) out.push(`הגירעון ${def.toFixed(1)}%. אם צריך כסף – אכיפת מס עדיפה על העלאת מע״מ, שפוגעת בעניים ובמשפחות.`, 'economy', 'tax_enforcement');
         else out.push(`יש לך מרווח: גירעון ${def.toFixed(1)}%. ${under.c.name} מקבל רק ${(under.r * 100).toFixed(0)}% מהצורך – שם כל שקל מורגש.`, 'budget', `adjust_budget:${under.c.id}:+`);
         out.push(`הורדת מס הכנסה = מעמד הביניים מחייך, אבל כל 1% עולה בערך ₪${(s.economy.gdp * 0.0052).toFixed(0)}B בשנה.`, 'economy', 'set_tax:incomeTax:-');
-      } else out.push('את התקציב מחלק ראש הממשלה. אתה יכול לבקש תוספת – הסיכוי עולה כשהוא אוהב אותך והגירעון נמוך.', 'budget', 'ministry_request_budget');
+      } else if (s.player.role === 'minister') out.push('את התקציב מחלק ראש הממשלה. אתה יכול לבקש תוספת – הסיכוי עולה כשהוא אוהב אותך והגירעון נמוך.', 'budget', 'ministry_request_budget');
+      else out.push('את התקציב מחלק ראש הממשלה, ושרים יכולים לבקש תוספת למשרד שלהם. כחבר כנסטון – ההשפעה שלך עוברת דרך ועדות ותקשורת.');
       if (s.economy.inflation > 4) out.push(`אינפלציה ${s.economy.inflation.toFixed(1)}%: גירעון גבוה מדליק אותה. בנק צבריה יעלה ריבית – וזה יאט צמיחה.`);
       break;
     }
@@ -109,14 +110,15 @@ export function screenAdvice(s: GameState, screen: string): AdviceTip[] {
       const angryMin = Object.values(s.politicians).filter((p) => p.ministryId && !p.isPlayer && p.active).sort((a, b) => a.loyalty - b.loyalty)[0];
       if (isPM(s)) {
         if (weak) out.push(`${weak.p.name} ב${weak.m.name} עם מומחיות ${(weak.p.expertise[weak.m.domain] ?? 20).toFixed(0)} בלבד. מינוי מקצועי ישפר את השירות – אבל המפלגה שלו תיעלב.`, 'government', `appoint:${weak.m.id}`);
-        if (angryMin) out.push(`${angryMin.name} (נאמנות ${angryMin.loyalty.toFixed(0)}) הוא המועמד הבא למרד. קפה איתו יכול להרגיע.`, 'party', `network:${angryMin.id}`);
+        if (angryMin) out.push(`${angryMin.name} (נאמנות ${angryMin.loyalty.toFixed(0)}) הוא המועמד הבא למרד. קפה איתו יכול להרגיע.`, 'government', `network:${angryMin.id}`);
         out.push(`יש לך ${coalitionSeats(s)} מנדטים. מתחת ל-61 – שני תורות והממשלה נופלת.`);
       } else out.push(`ראש הממשלה ${s.politicians[s.government.pmId]?.name} מתייחס אליך ב-${s.politicians[s.government.pmId]?.loyalty.toFixed(0)}. מעל 55 – הוא יאשר לך בקשות.`);
       break;
     }
     case 'parliament': case 'laws': {
       const party = s.parties[s.player.partyId];
-      const good = LAWS.filter((l) => !s.activeLaws.includes(l.id) && !s.bills.some((b) => b.lawId === l.id && b.status === 'active'))
+      const domains = ministryLawDomains(s); // a minister may only propose laws in his ministry's domains – same filter as the laws screen
+      const good = LAWS.filter((l) => !s.activeLaws.includes(l.id) && !s.bills.some((b) => b.lawId === l.id && b.status === 'active') && (!domains || domains.includes(l.domain)))
         .map((l) => ({ l, st: partyStance(s, party, { id: 'x', lawId: l.id, title: l.title, sponsorId: s.player.politicianId, isGovernment: isPM(s), stage: 'final', turnsInStage: 0, proposedTurn: 0, status: 'active', push: 0, modified: false }), help: l.groups[angry.id] ?? 0 }))
         .sort((a, b) => b.help + b.st * 5 - (a.help + a.st * 5))[0];
       if (good) out.push(`${GROUP_BY_ID[angry.id].name} הכי כועסים עכשיו. "${good.l.title}" ישמח אותם${good.st > 0.3 ? ' והמפלגה שלך בעד' : ''}.`, 'laws', `propose_law:${good.l.id}`);
@@ -154,7 +156,13 @@ export function screenAdvice(s: GameState, screen: string): AdviceTip[] {
       break;
     }
     case 'projects': {
-      const p = PROJECTS.find((d) => d.service === worstSvc.id && !s.projects.some((x) => x.defId === d.id && x.status !== 'cancelled'));
+      // only projects the player may launch: PM – all, minister – his ministry's (same rule as the projects screen)
+      const myMin = playerMinistry(s);
+      const mine = (ministry: string) => s.player.role === 'pm' || (s.player.role === 'minister' && !!myMin && (myMin.origins ?? [myMin.id]).includes(ministry));
+      const p = caps.canStartProjects
+        ? PROJECTS.find((d) => d.service === worstSvc.id && mine(d.ministry) && !s.projects.some((x) => x.defId === d.id && x.status !== 'cancelled'))
+        : undefined;
+      if (!caps.canStartProjects) out.push('פרויקטים משיקים ראש הממשלה והשרים. כחבר כנסטון – ביקור באזור מוזנח ודרישה בתקשורת מקדמים פרויקט לאזור שלך.', 'career');
       if (p) out.push(`"${p.name}" ישפר את השירות הכי חלש. ${p.turns * 2} חודשים – ${p.turns * 2 <= turnsToElection(s) * 2 ? 'יספיק לגזור סרט לפני הבחירות' : 'לא יסתיים לפני הבחירות, אבל יופיע בתוכנית'}.`, 'projects', `start_project:${p.id}`);
       out.push('פרויקטים במשרדים ביורוקרטיים מתעכבים יותר. תתייעל קודם – תחנוך אחר כך.');
       break;
@@ -172,7 +180,7 @@ export function screenAdvice(s: GameState, screen: string): AdviceTip[] {
       out.push(r === 'mk' ? `צעד הבא: יו״ר ועדה או שר. צריך כוח ~40 ומוניטין ~45. יש לך ${me.power.toFixed(0)} ו-${s.player.reputation.toFixed(0)}.`
         : r === 'minister' ? 'כשר: הישג במשרד + יחסים טובים עם המנהיג = הדרך לראשות המפלגה. פריימריז דורשים כוח 35 לפחות – ועדיף 60.'
           : r === 'candidate' ? 'כמועמד: בריתות-גוש והתחייבויות להמליץ שוות יותר מעוד כנס. מספרים בכנסטון מנצחים בחירות.'
-            : 'כראש ממשלה: שמור על 61 ועל שביעות רצון מעל 18%. כל השאר זה רעש.', 'career', r === 'mk' ? 'committee_work' : r === 'minister' ? 'run_primaries' : r === 'candidate' ? 'seek_endorsement' : 'press_conference');
+            : 'כראש ממשלה: שמור על 61 ועל שביעות רצון מעל 18%. כל השאר זה רעש.', r === 'candidate' ? 'party' : 'career', r === 'mk' ? 'committee_work' : r === 'minister' ? 'run_primaries' : r === 'candidate' ? 'seek_endorsement' : 'press_conference');
       break;
     }
     default: break;

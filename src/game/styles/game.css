@@ -1,6 +1,8 @@
 /* Tailwind scans src/ for class names (the Vite root is pages/, which has no Tailwind classes). */
 @import "tailwindcss" source("../../");
+@import "../../shared/styles/fonts.css";
 @import "../../shared/styles/tokens.css";
+@import "../../shared/styles/a11y.css";
 
 /* ============================================================
    "×”×›×™×¡×" â€” bright political-cartoon game UI.
@@ -14,7 +16,7 @@
   --panel2: #f7f5ff;
   --panel3: #ebe7ff;
   --text: #1d1b3a;
-  --dim: #8e8bb3;
+  --dim: #6b6896; /* 5:1 on white – readable at small sizes */
   --line2: rgba(60, 50, 140, 0.22);
   --gold: #ff7a1a;       /* accent = orange */
   --gold2: #d95a00;
@@ -195,6 +197,8 @@ button, input, select { font-family: inherit; }
 input[type=text], input[type=password], select { background: #fff; border: 2px solid #ddd6ff; color: var(--ink); border-radius: 12px; padding: 9px 12px; font-size: .95rem; outline: none; font-weight: 500; transition: border-color .15s, box-shadow .15s; }
 /* A <select> sizes itself to its longest option; never let that push the layout past the screen. */
 select { max-width: 100%; min-width: 0; text-overflow: ellipsis; }
+/* Grid items may shrink below their content width, so long names or button rows never push a screen wider than the phone. */
+.grid > * { min-width: 0; }
 input[type=text]:focus, input[type=password]:focus, select:focus { border-color: var(--violet); box-shadow: 0 0 0 4px rgba(108, 77, 255, .18); }
 input[type=range] { accent-color: var(--violet); }
 

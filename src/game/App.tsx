@@ -11,6 +11,7 @@ import { CoalitionModal } from './screens/Coalition';
 import { Tutorial } from './components/Tutorial';
 import { DramaModal, SoundManager } from './components/Drama';
 import { AdvisorFab, FocusManager, TipLayer } from './components/Overlay';
+import { Disclaimer } from './components/Disclaimer';
 
 // The chart screens pull in Recharts (~⅓ of the bundle), so they load as a separate chunk,
 // prefetched in the background as soon as a game is running.
@@ -32,7 +33,7 @@ export default function App() {
   useEffect(() => { if (running) { loadEconomy(); loadPolitics(); } }, [running]);
 
   if (!game) {
-    return <><SoundManager /><TipLayer />{creating ? <NewGame onBack={() => setCreating(false)} /> : <MainMenu onNew={() => setCreating(true)} />}</>;
+    return <><SoundManager /><TipLayer /><Disclaimer />{creating ? <NewGame onBack={() => setCreating(false)} /> : <MainMenu onNew={() => setCreating(true)} />}</>;
   }
   if (game.gameOver) return <><SoundManager /><GameOverScreen /></>;
 

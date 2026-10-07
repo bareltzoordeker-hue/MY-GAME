@@ -4,6 +4,12 @@ import { screenAdvice, suggestNextMove, type AdviceTip } from '../../engine/advi
 import { ADVISOR } from '../../data/world';
 import { Caricature, ADVISOR_SPEC } from '../../shared/components/Caricature';
 import { babble, play, voiceFor } from '../audio/sound';
+import type { GameState } from '../../types/game';
+import { ACTIONS, actionCapital, checkAction, type Params } from '../../engine/decisions';
+import { CATEGORY_BY_ID, REGION_BY_ID, TAX_NAMES } from '../../data/world';
+import { LAW_BY_ID } from '../../data/laws';
+import { PROJECT_BY_ID } from '../../data/projects';
+import { NAV } from './Layout';
 
 /** Common labels that don't carry their own data-tip. Every button explains itself. */
 const FALLBACK: Record<string, string> = {
@@ -62,13 +68,62 @@ export function TipLayer() {
 
 const ADVISOR_VOICE = voiceFor('m', 7, 0.4);
 
-/** The button that turns advice into action: jump to the screen and light up the exact button. */
+/** Which parameter an advice focus key ("action:param:sign") carries, per action. */
+const FOCUS_PARAM: Record<string, string> = {
+  network: 'politicianId', promote_member: 'politicianId', visit_region: 'regionId', propose_law: 'lawId', push_bill: 'billId',
+  start_project: 'defId', adjust_budget: 'category', set_tax: 'tax', seek_endorsement: 'partyId', ministry_action: 'actionId',
+};
+
+/** Turns an advice tip into an honest button: what it does, what it costs, and why it can't be done right now. */
+export function describeTip(s: GameState, tip: AdviceTip): { label: string; hint: string; blocked: string | null } {
+  const nav = NAV.find((n) => n.id === tip.screen);
+  const toScreen = nav ? `${nav.icon} למסך ${nav.label}` : '📍 למסך המתאים';
+  if (!tip.focus) return { label: toScreen, hint: `פותח את מסך ${nav?.label ?? ''}. ההחלטה עצמה – שם`, blocked: null };
+  const [id, raw, sign] = tip.focus.split(':');
+  if (id === 'appoint') {
+    const m = s.government.ministries.find((x) => x.id === raw);
+    return { label: `🪑 מינוי שר ל${m?.name ?? 'משרד'}`, hint: 'פותח את מסך הממשלה ומסמן את בחירת השר למשרד הזה', blocked: null };
+  }
+  if (id === 'alliance') {
+    const p = s.parties[raw];
+    return { label: `🤝 גוש עם ${p?.shortName ?? 'מפלגה'}`, hint: 'פותח את מסך המפלגה ומסמן את הצעת הברית', blocked: null };
+  }
+  const def = ACTIONS[id];
+  if (!def) return { label: toScreen, hint: `פותח את מסך ${nav?.label ?? ''}`, blocked: null };
+  const params: Params = {};
+  const key = FOCUS_PARAM[id];
+  if (key && raw) params[key] = raw;
+  if (id === 'adjust_budget' || id === 'set_tax') params.delta = sign === '-' ? -1 : 1;
+  if (id === 'committee_work') params.domain = s.politicians[s.player.politicianId].mainDomain;
+  let target = '';
+  if (key === 'politicianId') target = s.politicians[raw]?.name ?? '';
+  else if (key === 'regionId') target = REGION_BY_ID[raw as keyof typeof REGION_BY_ID]?.name ?? '';
+  else if (key === 'lawId') target = LAW_BY_ID[raw]?.title ?? '';
+  else if (key === 'billId') target = s.bills.find((b) => b.id === raw)?.title ?? '';
+  else if (key === 'defId') target = PROJECT_BY_ID[raw]?.name ?? '';
+  else if (key === 'partyId') target = s.parties[raw]?.shortName ?? '';
+  let label = `${def.icon} ${def.title}${target ? `: ${target}` : ''}`;
+  if (id === 'adjust_budget') label = `💰 ${sign === '-' ? 'קיצוץ' : 'תוספת'} תקציב: ${CATEGORY_BY_ID[raw as keyof typeof CATEGORY_BY_ID]?.name ?? ''}`;
+  if (id === 'set_tax') label = `🧾 ${sign === '-' ? 'הורדת' : 'העלאת'} ${TAX_NAMES[raw as keyof typeof TAX_NAMES] ?? 'מס'}`;
+  // a ministry action without a specific id lights up the ministry's actions list: check the generic availability only
+  const blocked = id === 'ministry_action' && !raw ? null : checkAction(s, id, params);
+  const cost = blocked ? 0 : actionCapital(s, id, params);
+  const hint = [def.description, cost ? `עולה ${cost} הון פוליטי` : '', `לוקח אותך למסך ${nav?.label ?? ''} ומסמן את הכפתור`].filter(Boolean).join(' · ');
+  return { label, hint, blocked };
+}
+
+/** The button that turns advice into action: says exactly what it does, jumps to the screen and lights up the button. */
 export function DecideButton({ tip, small = true }: { tip: AdviceTip; small?: boolean }) {
   const goTo = useGame((x) => x.goTo);
-  if (!tip.screen) return null;
+  const s = useGame((x) => x.game);
+  if (!tip.screen || !s) return null;
+  const d = describeTip(s, tip);
   return (
-    <button className={`btn ${small ? 'btn-sm' : ''} btn-primary`} data-tip="לוקח אותך למסך הנכון ומסמן את הכפתור שמבצע את ההחלטה. נשאר רק ללחוץ"
-      onClick={() => goTo(tip.screen as ScreenId, tip.focus)}>✅ קבל החלטה</button>
+    <span className="inline-flex flex-col items-start gap-0.5">
+      <button className={`btn ${small ? 'btn-sm' : ''} ${d.blocked ? '' : 'btn-primary'}`} data-tip={d.blocked ? `⛔ ${d.blocked}` : d.hint}
+        onClick={() => goTo(tip.screen as ScreenId, tip.focus)}>{d.label}</button>
+      {d.blocked && <span className="text-[11px] muted">⛔ {d.blocked}</span>}
+    </span>
   );
 }
 

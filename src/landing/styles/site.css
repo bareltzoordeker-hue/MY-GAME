@@ -1,9 +1,11 @@
 /* ============================================================
-   ממשלת ישמעל — marketing site (landing + info pages).
+   ממשלת ישמעאל — marketing site (landing + info pages).
    Same visual language as the game: Rubik, violet/orange, chunky 3D buttons,
    bobble-head caricatures. Plain CSS, no framework, no JS.
    ============================================================ */
+@import "../../shared/styles/fonts.css";
 @import "../../shared/styles/tokens.css";
+@import "../../shared/styles/a11y.css";
 
 :root {
   /* shared: --bg --ink --muted --line --violet --violet-d --pink --font (see shared/styles/tokens.css) */
@@ -30,14 +32,14 @@ body {
   overflow-x: hidden;
 }
 img { max-width: 100%; height: auto; display: block; }
-a { color: var(--violet); }
+a { color: var(--violet-d); } /* darker violet: 4.5:1+ on the light backgrounds */
 h1, h2, h3 { line-height: 1.15; text-wrap: balance; margin: 0; }
 p { margin: 0; }
 :focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; border-radius: 8px; }
 
 .wrap { width: 100%; max-width: var(--max); margin-inline: auto; padding-inline: 20px; }
 .section { padding-block: clamp(56px, 9vw, 104px); }
-.eyebrow { display: inline-block; font-size: .85rem; font-weight: 800; letter-spacing: .04em; color: var(--violet); background: #e8e2ff; padding: 4px 12px; border-radius: 999px; margin-bottom: 14px; }
+.eyebrow { display: inline-block; font-size: .85rem; font-weight: 800; letter-spacing: .04em; color: var(--violet-d); background: #e8e2ff; padding: 4px 12px; border-radius: 999px; margin-bottom: 14px; }
 .h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 900; letter-spacing: -.02em; }
 .lead { color: var(--muted); font-size: clamp(1.02rem, 1.6vw, 1.15rem); max-width: 62ch; margin-top: 12px; }
 
@@ -153,6 +155,8 @@ p { margin: 0; }
 .site-footer .brand { font-size: 1.05rem; }
 .site-footer nav { display: flex; flex-wrap: wrap; gap: 6px 20px; }
 .site-footer a { color: rgba(255, 255, 255, .85); text-decoration: none; font-weight: 600; }
+.site-footer .link-btn { background: none; border: 0; padding: 0; font: inherit; color: rgba(255, 255, 255, .85); font-weight: 600; cursor: pointer; }
+.site-footer a:hover, .site-footer .link-btn:hover { color: #fff; text-decoration: underline; }
 .site-footer a:hover { color: #fff; text-decoration: underline; }
 .site-footer .fine { flex-basis: 100%; font-size: .85rem; color: rgba(255, 255, 255, .55); }
 

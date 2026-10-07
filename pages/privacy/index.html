@@ -3,58 +3,65 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>מדיניות פרטיות – ממשלת ישמעל</title>
-    <meta name="description" content="מדיניות הפרטיות של המשחק ממשלת ישמעל: אין הרשמה, השמירה נעשית בדפדפן שלכם, והאתר מציג פרסומות של Google AdSense." />
+    <title>מדיניות פרטיות – ממשלת ישמעאל</title>
+    <meta name="description" content="מדיניות הפרטיות של המשחק ממשלת ישמעאל: אין הרשמה, השמירה נעשית בדפדפן שלכם, והאתר מציג פרסומות של Google AdSense." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/src/landing/styles/site.css" />
+    <script src="/consent-defaults.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7498446818280929" crossorigin="anonymous"></script>
   </head>
   <body>
+    <a class="skip-link" href="#main">דלג לתוכן הראשי</a>
     <header class="site-header"><div class="wrap">
-      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="34" height="34" /><span>ממשלת ישמעל</span></a>
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="34" height="34" /><span>ממשלת ישמעאל</span></a>
       <nav class="nav" aria-label="ניווט ראשי"><a href="/#what">מה זה</a><a href="/how-to-play/">איך משחקים</a><a href="/about/">אודות</a></nav>
       <a class="btn btn-play" href="/game/">שחק עכשיו</a>
     </div></header>
-    <main>
-      <section class="page-hero"><div class="wrap"><h1>מדיניות פרטיות</h1><p>הגרסה הקצרה: אנחנו לא אוספים עליכם כלום בעצמנו. האתר מציג פרסומות של Google, ועליהן יש פירוט למטה.</p></div></section>
+    <main id="main">
+      <section class="page-hero"><div class="wrap"><h1>מדיניות פרטיות</h1><p>איזה מידע נשמר, איפה, ומה אפשר לעשות איתו.</p></div></section>
       <div class="wrap"><article class="prose">
-        <h2>מה נאסף</h2>
-        <p>אין הרשמה, אין חשבונות משתמש, ואין שרת שמקבל מידע מהמשחק. המשחק רץ כולו בדפדפן שלכם.</p>
+        <h2>מי אנחנו</h2>
+        <p>האתר memsheletismael.netlify.app והמשחק "ממשלת ישמעאל" מופעלים על ידי יוצרי ממשלת ישמעאל ("אנחנו"). לכל שאלה בנושא פרטיות: <a href="mailto:balkeryyyy@gmail.com">balkeryyyy@gmail.com</a>.</p>
+        <h2>מה אנחנו אוספים</h2>
+        <p>אין באתר הרשמה, אין חשבונות משתמש ואין שרת שמקבל מידע מהמשחק. המשחק רץ כולו בדפדפן שלכם, ואנחנו לא אוספים ולא שומרים מידע אישי עליכם.</p>
         <h2>מה נשמר בדפדפן שלכם</h2>
-        <p>המשחק משתמש ב-<code>localStorage</code> של הדפדפן כדי לזכור את הדברים הבאים, במכשיר שלכם בלבד:</p>
+        <p>המשחק שומר את הפרטים הבאים ב-<code>localStorage</code> של הדפדפן, במכשיר שלכם בלבד. המידע לא נשלח אלינו:</p>
         <ul>
           <li>המשחק השמור (<code>hakise.autosave.v1</code>) – נשמר אוטומטית בסוף כל תור.</li>
-          <li>הגדרות סאונד ומוזיקה (<code>hakise.sound</code>).</li>
-          <li>האם כבר ראיתם את המדריך (<code>hakise.tutorial.done</code>).</li>
-          <li>מפתח API של Claude, רק אם הכנסתם כזה בעצמכם במסך ההגדרות (<code>hakise.llm.key</code>).</li>
+          <li>הגדרות סאונד ומוזיקה (<code>hakise.sound</code>) והגדרות נגישות (<code>hakise.a11y</code>).</li>
+          <li>האם כבר ראיתם את המדריך ואת הודעת הפתיחה (<code>hakise.tutorial.done</code>, <code>hakise.disclaimer.v1</code>).</li>
+          <li>הבחירה שלכם לגבי עוגיות (<code>hakise.consent.v1</code>).</li>
+          <li>מפתח API של Claude – רק אם הכנסתם כזה בעצמכם במסך ההגדרות (<code>hakise.llm.key</code>).</li>
         </ul>
-        <p>המידע הזה לא נשלח אלינו. אפשר למחוק אותו בכל רגע דרך ניקוי נתוני האתר בדפדפן.</p>
+        <p>אפשר למחוק את כל המידע הזה בכל רגע דרך ניקוי נתוני האתר בדפדפן.</p>
+        <h2>פרסומות ועוגיות (Google AdSense)</h2>
+        <p>האתר מציג פרסומות באמצעות Google AdSense. ספקי צד שלישי, כולל Google, עשויים להשתמש בעוגיות ובמזהים כדי להציג פרסומות ולמדוד אותן, כולל פרסומות מותאמות אישית על סמך ביקורים קודמים שלכם באתר זה ובאתרים אחרים.</p>
+        <ul>
+          <li><b>הסכמה:</b> בכניסה הראשונה מופיעה הודעת עוגיות. בלי הסכמה שלכם מוצגות פרסומות לא מותאמות אישית בלבד. אפשר לשנות את הבחירה בכל רגע דרך הקישור "הגדרות עוגיות" בתחתית כל דף.</li>
+          <li>אפשר לבטל פרסום מותאם אישית ב<a href="https://adssettings.google.com" rel="noopener">הגדרות המודעות של Google</a>, או לבטל עוגיות של ספקי צד שלישי דרך <a href="https://www.aboutads.info/choices/" rel="noopener">aboutads.info</a>.</li>
+          <li>מידע נוסף: <a href="https://policies.google.com/technologies/partner-sites" rel="noopener">איך Google משתמשת במידע מאתרים שמשתמשים בשירותים שלה</a>.</li>
+        </ul>
+        <p>אין באתר עוגיות שלנו ואין כלי אנליטיקס.</p>
         <h2>שירותים חיצוניים</h2>
         <ul>
-          <li><b>Google AdSense:</b> פרסומות שנטענות משרתי Google (ראו פירוט בהמשך).</li>
-          <li><b>Google Fonts:</b> הפונט Rubik נטען משרתי Google. כמו בכל בקשה לאתר, Google מקבלת את כתובת ה-IP שלכם ואת פרטי הדפדפן. <a href="https://policies.google.com/privacy" rel="noopener">מדיניות הפרטיות של Google</a>.</li>
-          <li><b>Claude (אופציונלי):</b> אם בחרתם להכניס מפתח API משלכם, טקסטים קצרים על דמויות במשחק נשלחים ישירות מהדפדפן שלכם ל-Anthropic. בלי מפתח – שום דבר לא נשלח.</li>
+          <li><b>Google AdSense</b> – כמפורט למעלה. Google עשויה לעבד מידע בשרתים מחוץ לישראל.</li>
+          <li><b>Netlify</b> – אחסון האתר. כמו כל שרת, הוא מקבל את כתובת ה-IP ואת פרטי הדפדפן כדי להגיש את הדפים.</li>
+          <li><b>Claude (אופציונלי)</b> – אם הכנסתם מפתח API משלכם, טקסטים קצרים על דמויות במשחק נשלחים ישירות מהדפדפן שלכם ל-Anthropic. בלי מפתח – דבר לא נשלח.</li>
         </ul>
-        <h2>פרסומות ועוגיות (Google AdSense)</h2>
-        <p>האתר מציג פרסומות באמצעות Google AdSense. אין באתר עוגיות שלנו ואין כלי אנליטיקס, אבל ספקי צד שלישי, כולל Google, משתמשים בעוגיות כדי להציג פרסומות על סמך ביקורים קודמים שלכם באתר הזה או באתרים אחרים.</p>
-        <ul>
-          <li>השימוש של Google בעוגיות פרסום מאפשר לה ולשותפיה להציג לכם פרסומות על סמך הביקורים שלכם באתר זה ו/או באתרים אחרים באינטרנט.</li>
-          <li>אפשר לבטל פרסום מותאם אישית ב<a href="https://adssettings.google.com" rel="noopener">הגדרות המודעות של Google</a>, או לבטל עוגיות של ספקי צד שלישי דרך <a href="https://www.aboutads.info/choices/" rel="noopener">aboutads.info</a>.</li>
-          <li>מידע נוסף: <a href="https://policies.google.com/technologies/ads" rel="noopener">איך Google משתמשת בעוגיות בפרסום</a>.</li>
-        </ul>
+        <p>הגופן של האתר נטען מהאתר עצמו, ולא משרתים חיצוניים.</p>
+        <h2>הזכויות שלכם</h2>
+        <p>לפי חוק הגנת הפרטיות, ולמבקרים מהאיחוד האירופי גם לפי GDPR, יש לכם זכות לעיין במידע עליכם, לתקן אותו, למחוק אותו ולהתנגד לעיבוד שלו. מאחר שאנחנו לא שומרים מידע עליכם, את רוב הזכויות האלה אפשר לממש ישירות בדפדפן (מחיקת נתוני האתר) ובהגדרות של Google. לכל בקשה אחרת: <a href="mailto:balkeryyyy@gmail.com">balkeryyyy@gmail.com</a>.</p>
         <h2>ילדים</h2>
-        <p>המשחק לא אוסף מידע אישי מאף אחד, כולל ילדים. התוכן סאטירי-פוליטי ומתאים לבני נוער ומבוגרים.</p>
-        <h2>עדכונים</h2>
-        <p>עודכן לאחרונה: אוקטובר 2026.</p>
+        <p>האתר לא מיועד לילדים מתחת לגיל 13 ולא אוסף ביודעין מידע עליהם. התוכן פוליטי-סאטירי ומתאים לבני נוער ומבוגרים.</p>
+        <h2>שינויים</h2>
+        <p>נעדכן את המדיניות כשמשהו משתנה, ונעדכן את התאריך למטה. עודכן לאחרונה: 7 באוקטובר 2026.</p>
       </article></div>
     </main>
     <footer class="site-footer"><div class="wrap">
-      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28" />ממשלת ישמעל</a>
-      <nav aria-label="קישורי תחתית"><a href="/game/">שחק</a><a href="/how-to-play/">איך משחקים</a><a href="/about/">אודות</a><a href="/privacy/">פרטיות</a><a href="/terms/">תנאי שימוש</a><a href="/contact/">צור קשר</a></nav>
+      <a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28" />ממשלת ישמעאל</a>
+      <nav aria-label="קישורי תחתית"><a href="/game/">שחק</a><a href="/how-to-play/">איך משחקים</a><a href="/about/">אודות</a><a href="/privacy/">פרטיות</a><a href="/terms/">תנאי שימוש</a><a href="/contact/">צור קשר</a><a href="/accessibility/">נגישות</a><button type="button" class="link-btn" data-consent-open>הגדרות עוגיות</button></nav>
       <p class="fine">משחק סאטירי. המדינה, המפלגות, המוסדות והדמויות בדיוניים לחלוטין. כל דמיון לאנשים או לגופים אמיתיים מקרי.</p>
     </div></footer>
+    <script type="module" src="/src/shared/site.ts"></script>
   </body>
 </html>

@@ -78,7 +78,7 @@ export function Header({ onMenu }: { onMenu: () => void }) {
     <header className="sticky top-0 z-30 border-b-4 masthead" style={{ borderColor: 'var(--ink)' }}>
       <div className="flex items-center gap-2 px-3 md:px-5 h-16">
         <button className="btn btn-sm lg:hidden menu-btn" onClick={onMenu} aria-label="תפריט" data-tip="פתיחת התפריט: כל המסכים של המשחק">☰</button>
-        <span className="logo hidden xl:inline-block ml-2">ממשלת ישמעל</span>
+        <span className="logo hidden xl:inline-block ml-2">ממשלת ישמעאל</span>
         <div className="flex items-center gap-2 min-w-0">
           <Caricature spec={me.caricature} size={40} tie={party.color} />
           <div className="min-w-0 leading-tight">
@@ -124,18 +124,19 @@ export function Layout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="min-h-screen">
+      <a className="skip-link" href="#main">דלג לתוכן הראשי</a>
       <Header onMenu={() => setOpen(true)} />
       <div className="flex">
         <aside className="hidden lg:block w-56 shrink-0 p-3 sticky top-[5.6rem] self-start h-[calc(100vh-5.6rem)] overflow-y-auto border-l" style={{ borderColor: 'var(--line)' }}>
           <Sidebar />
           <div className="mt-4"><AdSlot slot="sidebar" seed={1} /></div>
         </aside>
-        <main className="flex-1 min-w-0 p-3 md:p-5 pb-24">{children}</main>
+        <main id="main" tabIndex={-1} className="flex-1 min-w-0 p-3 md:p-5 pb-24">{children}</main>
       </div>
       {open && (
         <div className="backdrop lg:hidden" style={{ alignItems: 'stretch', justifyContent: 'flex-start', padding: 0 }} onClick={() => setOpen(false)}>
           <div className="w-64 h-full p-3 overflow-y-auto" style={{ background: 'var(--panel)' }} onClick={(e) => e.stopPropagation()}>
-            <div className="flex justify-between items-center mb-2"><b>🪑 ממשלת ישמעל</b><button className="btn btn-sm btn-ghost" onClick={() => setOpen(false)}>✕</button></div>
+            <div className="flex justify-between items-center mb-2"><b>🪑 ממשלת ישמעאל</b><button className="btn btn-sm btn-ghost" onClick={() => setOpen(false)}>✕</button></div>
             <Sidebar onPick={() => setOpen(false)} />
           </div>
         </div>

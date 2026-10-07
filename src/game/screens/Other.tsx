@@ -169,7 +169,7 @@ export function CareerScreen() {
       <div className="grid lg:grid-cols-2 gap-4">
         <Section title="לבנות שם" icon="📈">
           <div className="flex flex-wrap gap-2 items-center">
-            <select value={domain} onChange={(e) => setDomain(e.target.value as Domain)}>{Object.entries(DOMAIN_NAMES).map(([k, v]) => <option key={k} value={k}>{v} ({(me.expertise[k as Domain] ?? 20).toFixed(0)})</option>)}</select>
+            <select aria-label="תחום לעבודת ועדה" value={domain} onChange={(e) => setDomain(e.target.value as Domain)}>{Object.entries(DOMAIN_NAMES).map(([k, v]) => <option key={k} value={k}>{v} ({(me.expertise[k as Domain] ?? 20).toFixed(0)})</option>)}</select>
             <ActionButton id="committee_work" params={{ domain }} className="btn btn-sm">📑 עבודת ועדה</ActionButton>
           </div>
           <div className="flex flex-wrap gap-2 mt-3">
@@ -190,7 +190,7 @@ export function CareerScreen() {
             <ActionButton id="run_primaries" className="btn btn-sm btn-danger" confirm="פריימריז נגד המנהיג. הפסד יעלה ביוקר.">⚔️ קריאת תיגר</ActionButton>
           </div>
           <div className="flex flex-wrap gap-2 mt-3 items-center">
-            <select value={target} onChange={(e) => setTarget(e.target.value)}><option value="">מעבר למפלגה…</option>{Object.values(s.parties).filter((p) => p.id !== s.player.partyId && p.seats > 0).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>
+            <select aria-label="מפלגה לעבור אליה" value={target} onChange={(e) => setTarget(e.target.value)}><option value="">מעבר למפלגה…</option>{Object.values(s.parties).filter((p) => p.id !== s.player.partyId && p.seats > 0).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>
             <ActionButton id="switch_party" params={{ partyId: target }} className="btn btn-sm" confirm="לעבור מפלגה? 'קפצן' זה לא מחמאה.">🦘 מעבר</ActionButton>
           </div>
           <div className="mt-4 pt-3 border-t" style={{ borderColor: 'var(--line)' }}><ActionButton id="resign" className="btn btn-sm btn-danger" confirm="להתפטר? זה סוף המשחק.">🚪 התפטרות</ActionButton></div>
@@ -240,6 +240,12 @@ export function SaveScreen() {
         <span className="text-sm">🎓 מדריך המשחק</span>
         <button className="btn btn-sm" onClick={() => { resetTutorial(); useGame.getState().setScreen('dashboard'); }}>הצג שוב</button>
       </div>
+      <div className="card flex flex-wrap items-center gap-2">
+        <span className="text-sm flex-1">🔒 פרטיות ונגישות</span>
+        <button className="btn btn-sm" data-consent-open data-tip="פותח את הודעת העוגיות כדי לשנות את הבחירה">🍪 הגדרות עוגיות</button>
+        <a className="btn btn-sm" href="/accessibility/" data-tip="הצהרת הנגישות של האתר">♿ הצהרת נגישות</a>
+        <a className="btn btn-sm" href="/privacy/" data-tip="מדיניות הפרטיות">מדיניות פרטיות</a>
+      </div>
     </div>
   );
 }
@@ -252,7 +258,7 @@ function LlmSettings() {
       <div className="h-title">🤖 דיאלוגים חיים עם Claude (לא חובה)</div>
       <p className="text-sm muted">בלי מפתח המשחק משתמש בתבניות טקסט מקומיות. עם מפתח API משלך, פוליטיקאים יגיבו בטקסט שנוצר על ידי Claude (מודל claude-opus-5-5). המפתח נשמר רק בדפדפן הזה ונשלח רק ל-Anthropic. ה-AI כותב טקסט בלבד ולא משנה מספרים.</p>
       <div className="flex gap-2 flex-wrap">
-        <input type="password" className="flex-1" style={{ background: 'var(--bg2)', border: '1px solid var(--line2)', color: 'var(--text)', borderRadius: 10, padding: '9px 12px' }} placeholder="sk-ant-..." value={key} onChange={(e) => { setKey(e.target.value); setSaved(false); }} />
+        <input type="password" aria-label="מפתח API של Claude" className="flex-1" style={{ background: 'var(--bg2)', border: '1px solid var(--line2)', color: 'var(--text)', borderRadius: 10, padding: '9px 12px' }} placeholder="sk-ant-..." value={key} onChange={(e) => { setKey(e.target.value); setSaved(false); }} />
         <button className="btn btn-sm btn-blue" onClick={() => { setLlmKey(key.trim()); setSaved(true); }}>שמור</button>
         <button className="btn btn-sm" onClick={() => { setLlmKey(''); setKey(''); setSaved(true); }}>הסר</button>
       </div>

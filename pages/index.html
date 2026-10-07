@@ -3,15 +3,15 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>ממשלת ישמעל – סימולטור פוליטי סאטירי</title>
+    <title>ממשלת ישמעאל – סימולטור פוליטי סאטירי</title>
     <meta name="description" content="משחק דפדפן סאטירי: נהלו את המדינה הבדיונית צבריה כראש ממשלה, מועמד, שר או חבר כנסטון. תקציב, קואליציה, משברים ובחירות – ופוליטיקאים שזוכרים לכם הכול. חינם, בלי הרשמה." />
     <meta name="theme-color" content="#3b1fb8" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <!-- Open Graph: the build makes og:image absolute from Netlify's URL (or SITE_URL) env var. -->
     <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="ממשלת ישמעל" />
+    <meta property="og:site_name" content="ממשלת ישמעאל" />
     <meta property="og:locale" content="he_IL" />
-    <meta property="og:title" content="ממשלת ישמעל – סימולטור פוליטי סאטירי" />
+    <meta property="og:title" content="ממשלת ישמעאל – סימולטור פוליטי סאטירי" />
     <meta property="og:description" content="נהלו מדינה בדיונית, הרכיבו קואליציה, שרדו משברים ובחירות. משחק דפדפן חינמי, ציני ומצחיק." />
     <meta property="og:image" content="/og-image.png" />
     <meta property="og:image:width" content="1200" />
@@ -22,22 +22,21 @@
       {
         "@context": "https://schema.org",
         "@type": "WebSite",
-        "name": "ממשלת ישמעל",
+        "name": "ממשלת ישמעאל",
         "alternateName": ["Memshelet Ismael", "memsheletismael"],
         "url": "https://memsheletismael.netlify.app/"
       }
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;600;700;800;900&display=swap" rel="stylesheet" />
     <link rel="preload" as="image" href="/images/screens/dashboard-720.webp" imagesrcset="/images/screens/dashboard-720.webp 720w, /images/screens/dashboard-1366.webp 1366w" imagesizes="(max-width: 860px) 92vw, 600px" />
     <link rel="stylesheet" href="/src/landing/styles/site.css" />
+    <script src="/consent-defaults.js"></script>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7498446818280929" crossorigin="anonymous"></script>
   </head>
   <body>
+    <a class="skip-link" href="#main">דלג לתוכן הראשי</a>
     <header class="site-header">
       <div class="wrap">
-        <a class="brand" href="/" aria-label="ממשלת ישמעל – דף הבית"><img src="/favicon.svg" alt="" width="34" height="34" /><span>ממשלת ישמעל</span></a>
+        <a class="brand" href="/" aria-label="ממשלת ישמעאל – דף הבית"><img src="/favicon.svg" alt="" width="34" height="34" /><span>ממשלת ישמעאל</span></a>
         <nav class="nav" aria-label="ניווט ראשי">
           <a href="#what">מה זה</a>
           <a href="#how">איך משחקים</a>
@@ -49,12 +48,12 @@
       </div>
     </header>
 
-    <main>
+    <main id="main">
       <!-- Hero -->
       <section class="hero">
         <div class="wrap">
           <div class="hero-copy">
-            <div class="logo-badge">ממשלת ישמעל</div>
+            <div class="logo-badge">ממשלת ישמעאל</div>
             <h1>סימולטור פוליטי סאטירי: לנהל מדינה, לשרוד בכיסא.</h1>
             <p class="lead">
               צבריה היא מדינה בדיונית עם כנסטון של 120 חברים, תשע מפלגות ותקציב של חצי טריליון.
@@ -83,7 +82,7 @@
         <div class="wrap">
           <span class="eyebrow">מה זה המשחק</span>
           <h2 class="h2">מה היה קורה אם הייתם נכנסים לפוליטיקה?</h2>
-          <p class="lead">ממשלת ישמעל הוא משחק ניהול ציני: כלכלה אמיתית מאחורי הקלעים, ופוליטיקאים שמתנהגים בדיוק כמו שחשבתם.</p>
+          <p class="lead">ממשלת ישמעאל הוא משחק ניהול ציני: כלכלה אמיתית מאחורי הקלעים, ופוליטיקאים שמתנהגים בדיוק כמו שחשבתם.</p>
           <div class="cards">
             <article class="card">
               <div class="ic">🏛️</div>
@@ -212,7 +211,7 @@
 
     <footer class="site-footer">
       <div class="wrap">
-        <a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28" />ממשלת ישמעל</a>
+        <a class="brand" href="/"><img src="/favicon.svg" alt="" width="28" height="28" />ממשלת ישמעאל</a>
         <nav aria-label="קישורי תחתית">
           <a href="/game/">שחק</a>
           <a href="/how-to-play/">איך משחקים</a>
@@ -220,9 +219,12 @@
           <a href="/privacy/">פרטיות</a>
           <a href="/terms/">תנאי שימוש</a>
           <a href="/contact/">צור קשר</a>
+          <a href="/accessibility/">נגישות</a>
+          <button type="button" class="link-btn" data-consent-open>הגדרות עוגיות</button>
         </nav>
         <p class="fine">משחק סאטירי. המדינה, המפלגות, המוסדות והדמויות בדיוניים לחלוטין. כל דמיון לאנשים או לגופים אמיתיים מקרי.</p>
       </div>
     </footer>
+    <script type="module" src="/src/shared/site.ts"></script>
   </body>
 </html>

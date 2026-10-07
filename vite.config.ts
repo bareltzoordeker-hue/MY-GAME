@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs';
 //   pages/game/index.html         → /game/        the game (React app, src/game)
 //   pages/how-to-play/index.html  → /how-to-play/
 //   pages/{privacy,terms,about,contact}/index.html
-const PAGES = ['game', 'how-to-play', 'privacy', 'terms', 'about', 'contact'];
+const PAGES = ['game', 'how-to-play', 'privacy', 'terms', 'about', 'contact', 'accessibility'];
 const r = (p: string) => resolve(__dirname, p);
 const netlifyCsp = () => readFileSync(r('netlify.toml'), 'utf8').match(/Content-Security-Policy = "([^"]+)"/)?.[1] ?? '';
 

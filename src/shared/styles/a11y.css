@@ -1,0 +1,51 @@
+/* Accessibility helpers shared by the site and the game (IS 5568 / WCAG 2.0 AA). */
+
+/* "Skip to main content" – visible only when focused with the keyboard */
+.skip-link {
+  position: fixed; top: 8px; inset-inline-start: 8px; z-index: 100;
+  background: #1d1b3a; color: #fff; padding: 10px 16px; border-radius: 10px; font-weight: 700;
+  transform: translateY(-160%); transition: transform .15s;
+}
+.skip-link:focus { transform: none; }
+
+/* Clear keyboard focus everywhere */
+:focus-visible { outline: 3px solid #ffc61a; outline-offset: 2px; }
+
+/* Text size steps: scale the whole page like browser zoom (sizes here are a mix of rem, px and vw, so font-size alone is not enough).
+   The menu itself is excluded so it stays put. */
+html.a11y-text-1 body { zoom: 1.15; }
+html.a11y-text-2 body { zoom: 1.3; }
+html.a11y-text-1 .a11y-menu { zoom: calc(1 / 1.15); }
+html.a11y-text-2 .a11y-menu { zoom: calc(1 / 1.3); }
+
+/* High contrast: dark text, no faded greys, underlined links */
+html.a11y-contrast { --muted: #1d1b3a; --dim: #1d1b3a; --line: rgba(29, 27, 58, .55); }
+html.a11y-contrast body { color: #000; }
+html.a11y-contrast a { text-decoration: underline !important; }
+html.a11y-contrast .muted, html.a11y-contrast .fine { color: inherit !important; opacity: 1 !important; }
+
+/* Stop animations (also follows the OS "reduce motion" setting) */
+html.a11y-still *, html.a11y-still *::before, html.a11y-still *::after {
+  animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important;
+}
+
+/* ♿ menu: a tab on the side of the screen, clear of the game's floating advisor */
+.a11y-menu { position: fixed; top: 50%; inset-inline-start: 0; z-index: 85; transform: translateY(-50%); font-family: var(--font); direction: rtl; }
+.a11y-toggle {
+  width: 44px; height: 44px; border: 0; border-start-end-radius: 12px; border-end-end-radius: 12px;
+  background: #1d4ed8; color: #fff; font-size: 22px; cursor: pointer; box-shadow: 0 6px 18px -6px rgba(0, 0, 0, .45);
+}
+.a11y-panel {
+  position: absolute; top: 50%; inset-inline-start: 48px; transform: translateY(-50%);
+  width: 220px; background: #fff; color: #1d1b3a; border: 1px solid rgba(29, 27, 58, .2); border-radius: 14px;
+  box-shadow: 0 20px 50px -16px rgba(0, 0, 0, .45); padding: 12px; display: flex; flex-direction: column; gap: 6px;
+}
+.a11y-panel[hidden] { display: none; }
+.a11y-title { font-weight: 800; margin-bottom: 2px; }
+.a11y-panel button, .a11y-panel a {
+  font: inherit; font-weight: 600; text-align: start; background: #f4f2ff; color: #1d1b3a; border: 1px solid transparent;
+  border-radius: 10px; padding: 8px 10px; cursor: pointer; text-decoration: none;
+}
+.a11y-panel button[aria-pressed="true"] { background: #1d4ed8; color: #fff; }
+.a11y-panel a { background: none; text-decoration: underline; padding-inline: 4px; }
+@media print { .a11y-menu, .skip-link { display: none; } }
