@@ -8,13 +8,13 @@
 // Politicians also write to the player on their own.
 // ============================================================
 import { LAWS } from '../data/laws';
-import type { ChatMsg, GameState, Politician } from '../types/game';
+import type { ChatMsg, ChatTopic, GameState, Politician } from '../types/game';
 import { clamp } from '../utils';
 import { addNews, applyEffects, logEvent, remember } from './effects';
 import { chance, pick, rand } from './rng';
 import { shiftPartyRelation } from './relations';
 
-export type Intent = 'threat' | 'promise' | 'request' | 'apology' | 'thanks' | 'insult' | 'question' | 'other';
+export type Intent = 'threat' | 'promise' | 'request' | 'apology' | 'thanks' | 'insult' | 'question' | 'meet' | 'agree' | 'decline' | 'askwhat' | 'greet' | 'other';
 
 const MAX_CHAT = 60;
 const FREE_PER_TURN = 3;
@@ -25,7 +25,12 @@ const PATTERNS: { intent: Intent; re: RegExp }[] = [
   { intent: 'request', re: /תתמוך|תצביע|אבקש|בקשה|מבקש|צריך אותך|צריכה אותך|עזור|סייע|תסכים|תצטרף|תסיר|תפסיק|תקדם|אשמח ש/ },
   { intent: 'apology', re: /סליחה|מתנצל|טעיתי|מצטער|אני מצטערת|מתנצלת/ },
   { intent: 'insult', re: /טיפש|שקרן|בוגד|פתטי|מביש|כישלון|תתבייש|מטומטם|אידיוט|חסר ערך|נוכל/ },
-  { intent: 'thanks', re: /תודה|מעריך|גאה|כל הכבוד|עבודה מצוינת|אני איתך|נעבוד יחד|שיתוף פעולה|נפגש|פגישה|קפה|שמח לעבוד|מקווה לעבוד|תמיכה/ },
+  { intent: 'askwhat', re: /מה רצית|מה אתה רוצה|מה את רוצה|מה רצתה|במה מדובר|על מה (רצית|את רוצה|אתה רוצה|מדובר)|מה הנושא|מה הבעיה|מה קרה|מה אתה מציע|מה את מציעה|מה אתה מבקש|מה את מבקשת|ספר לי|תספר|תפרט|תסביר|מה בדיוק|מה הבקשה|מה אפשר לעשות/ },
+  { intent: 'meet', re: /בוא נדבר|בואי נדבר|נדבר|נתקשר|בוא נפגש|בואי נפגש|נפגש|נקבע|שנדבר|אשמח לדבר|אשמח להיפגש|אפשר לדבר|נשוחח|בוא נשב|נשב/ },
+  { intent: 'decline', re: /^(לא|אין לי|לא מעוניין|לא מעוניינת|לא יכול|לא יכולה|אסרב|בלי|אין סיכוי|לא עכשיו|לא אעשה)/ },
+  { intent: 'agree', re: /^(כן|בסדר|אוקיי|אוקי|מסכים|מסכימה|מקובל|סגור|אין בעיה|בטח|ברור|אעשה|אשמח|טוב|נהדר|מצוין|יופי|על כך|אני איתך)/ },
+  { intent: 'greet', re: /^(שלום|היי|הי|בוקר טוב|ערב טוב|צהריים טובים|מה נשמע|מה שלומך|מה שלומך|אהלן|הלו)/ },
+  { intent: 'thanks', re: /תודה|מעריך|גאה|כל הכבוד|עבודה מצוינת|אני איתך|נעבוד יחד|שיתוף פעולה|פגישה|קפה|שמח לעבוד|מקווה לעבוד|תמיכה/ },
   { intent: 'question', re: /\?|מה דעתך|מה אתה חושב|מה את חושבת|איך |למה |מתי |האם / },
 ];
 
@@ -114,12 +119,142 @@ function lawStance(s: GameState, p: Politician, lawId: string): 'for' | 'against
 
 interface Reply { text: string; hint?: string }
 
+// ---------------- conversations with a thread ----------------
+const lawTitle = (id?: string) => LAWS.find((l) => l.id === id)?.title ?? 'החוק';
+const TALK_INTENTS: Intent[] = ['meet', 'agree', 'askwhat', 'greet', 'question', 'thanks'];
+
+/** What a politician who is unhappy actually complains about – from their memory, their ministry and their party. */
+function grievance(s: GameState, t: Politician): { demand: NonNullable<ChatTopic['demand']>; text: string; lawId?: string } {
+  const open = t.memory.find((m) => m.kind === 'promise' && !m.resolved);
+  if (open?.ref === 'role') return { demand: 'role', text: 'הובטח לי תפקיד, והוא עדיין לא ניתן. אני מצפה שהעניין יטופל.' };
+  if (open?.ref) return { demand: 'law', lawId: open.ref, text: `הובטח לי שתקדם את ${lawTitle(open.ref)}. עברו חודשים ושום דבר לא זז.` };
+  if (t.ministryId) return { demand: 'budget', text: 'המשרד שלי לא עומד במשימות בתקציב הנוכחי. אני מצפה לתוספת תקציב לתחום.' };
+  const fav = s.parties[t.partyId]?.favoriteLaws[0];
+  if (fav) return { demand: 'law', lawId: fav, text: `${lawTitle(fav)} חשוב לנו, ואני לא רואה שאתה מקדם אותו.` };
+  return { demand: 'respect', text: 'אני מרגיש שאני לא שותף להחלטות. אני מצפה ליחס אחר: להתייעץ איתי לפני שמחליטים.' };
+}
+
+const setTopic = (s: GameState, id: string, topic: ChatTopic | null) => {
+  s.chatTopics ??= {};
+  if (topic) s.chatTopics[id] = topic; else delete s.chatTopics[id];
+};
+
+/**
+ * Continues the thread the politician opened ("כדאי שנדבר", "אני מבקש שתקדם…"), so a short answer
+ * like "בוא נדבר" or "בסדר" is understood in context. Returns null when the message is not part of the thread.
+ */
+function dialog(s: GameState, t: Politician, intent: Intent, law: ReturnType<typeof matchLaw>): Reply | null {
+  const topic = s.chatTopics?.[t.id];
+  if (!topic) return null;
+  if (s.turn - topic.turn > 3) { setTopic(s, t.id, null); return null; }
+  const party = s.parties[t.partyId];
+  const yes = intent === 'agree' || intent === 'promise' || intent === 'request' || intent === 'apology' || intent === 'thanks';
+  const talk = TALK_INTENTS.includes(intent);
+  const no = intent === 'decline';
+  const lid = topic.lawId ?? law?.id;
+
+  switch (topic.kind) {
+    case 'unhappy': {
+      if (topic.stage === 'opened' && (talk || intent === 'apology' || intent === 'promise')) {
+        const g = topic.demand === 'role' ? { demand: 'role' as const, text: `המטרה שלי היא: ${t.ambitionTarget}. אשמח להבטחה שתתמוך בי כשיגיע הזמן.`, lawId: undefined } : grievance(s, t);
+        setTopic(s, t.id, { ...topic, stage: 'explained', demand: g.demand, lawId: g.lawId });
+        remember(s, t.id, 'support', 'הקשבת לטענות שלי', 3);
+        return { text: `תודה שהקשבת. ${g.text} מה אתה מציע?`, hint: 'הפוליטיקאי פירט את הטענה שלו. אפשר להבטיח, להתנצל או לסרב.' };
+      }
+      if (topic.stage === 'explained' && (yes || intent === 'meet')) {
+        const d = topic.demand;
+        setTopic(s, t.id, null);
+        if (d === 'law' && topic.lawId) { remember(s, t.id, 'promise', `לקדם את ${lawTitle(topic.lawId)}`, 8, s.turn + 6, topic.lawId); return { text: `תודה. אני מעריך את זה, ואזכור. רשמתי: ${lawTitle(topic.lawId)}.`, hint: 'נרשמה הבטחה עם מועד. תקבל תזכורת לפני שיגיע.' }; }
+        if (d === 'role') { remember(s, t.id, 'promise', 'תפקיד או תיק', 8, s.turn + 3, 'role'); return { text: 'תודה. אני מצפה לתפקיד כפי שנאמר, ואזכור את הפנייה.', hint: 'נרשמה הבטחה לתפקיד עם מועד (שנה).' }; }
+        if (d === 'budget') { remember(s, t.id, 'favor', 'הסכמה לתוספת תקציב', 8); return { text: 'תודה. אחכה לראות את זה בתקציב. אם לא – נחזור לשיחה הזו.', hint: 'היחסים השתפרו. כדי לקיים, בקש תוספת תקציב לשר מראש הממשלה או אשר אותה.' }; }
+        remember(s, t.id, 'support', 'הבטחת יחס אחר', 8);
+        return { text: 'תודה. זה כל מה שביקשתי. אעריך שתתייעץ איתי בהמשך.', hint: 'היחסים השתפרו.' };
+      }
+      if (topic.stage === 'explained' && (intent === 'askwhat' || intent === 'question')) {
+        const g = grievance(s, t);
+        return { text: `אסביר שוב: ${g.text}` };
+      }
+      if (no) {
+        setTopic(s, t.id, null);
+        remember(s, t.id, 'insult', 'סירב לשמוע אותי', -8);
+        return { text: 'אז אין לנו על מה לדבר. אצטרך לשקול את צעדיי.', hint: 'היחסים נפגעו.' };
+      }
+      return null;
+    }
+    case 'praise': {
+      if (talk || yes) {
+        remember(s, t.id, 'support', 'שיחה חיובית', 4);
+        if (topic.lawId) {
+          for (const b of s.bills.filter((x) => x.lawId === topic.lawId && x.status === 'active')) b.push += 10;
+          setTopic(s, t.id, null);
+          return { text: `בשמחה. אני איתך בהצבעה על ${lawTitle(topic.lawId)}.`, hint: 'התמיכה בהצעה גדלה.' };
+        }
+        setTopic(s, t.id, { ...topic, stage: 'explained' });
+        if (law) return null;
+        return { text: 'בשמחה. במה אפשר לעזור? אפשר לציין חוק שחשוב לך, תקציב או תפקיד.' };
+      }
+      return no ? { text: 'בסדר גמור. אני כאן אם תצטרך.' } : null;
+    }
+    case 'coop': {
+      const pick1 = lid ?? party?.favoriteLaws[0];
+      if (topic.stage === 'opened' && (talk || yes)) {
+        if (!pick1) { setTopic(s, t.id, null); return { text: 'אשמח לעבוד יחד. תציע נושא ונבדוק.' }; }
+        setTopic(s, t.id, { ...topic, stage: 'explained', lawId: pick1 });
+        return { text: `הרעיון: שנקדם יחד את ${lawTitle(pick1)}. הצעה משותפת תגדיל את הסיכוי שתעבור, ושנינו נרוויח מזה. מה דעתך?`, hint: 'הוצעה הצעה משותפת. תשובה חיובית תרשום התחייבות הדדית.' };
+      }
+      if (topic.stage === 'explained' && yes && topic.lawId) {
+        remember(s, t.id, 'promise', `לתמוך בהצעה של ${t.name}: ${lawTitle(topic.lawId)}`, 6, s.turn + 4, topic.lawId);
+        for (const b of s.bills.filter((x) => x.lawId === topic.lawId && x.status === 'active')) b.push += 8;
+        shiftPartyRelation(s, s.player.partyId, t.partyId, 2);
+        setTopic(s, t.id, null);
+        return { text: `מצוין. נתאם את ההגשה, ואני סומך עליך שתתמוך גם בהצעה שלנו.`, hint: 'נרשמה התחייבות הדדית. היחסים בין המפלגות השתפרו.' };
+      }
+      if (no) { setTopic(s, t.id, null); return { text: 'הבנתי. ההצעה נשארת פתוחה אם תשנה את דעתך.' }; }
+      return null;
+    }
+    case 'ask_law': {
+      if (yes || intent === 'meet') {
+        remember(s, t.id, 'promise', `לקדם את ${lawTitle(lid)}`, 6, s.turn + 6, lid);
+        for (const b of s.bills.filter((x) => x.lawId === lid && x.status === 'active')) b.push += 6;
+        setTopic(s, t.id, null);
+        return { text: `תודה. ${lawTitle(lid)} חשוב לנו, ונזכור מי עזר.`, hint: 'נרשמה הבטחה עם מועד. תקבל תזכורת לפני שיגיע.' };
+      }
+      if (intent === 'askwhat' || intent === 'question' || intent === 'greet') {
+        setTopic(s, t.id, { ...topic, stage: 'explained' });
+        return { text: `${lawTitle(lid)} קרוב לליבה האידיאולוגית של ${party?.shortName ?? 'המפלגה'} ולבוחרים שלנו. אשמח לתמיכתך. תוכל לעזור?` };
+      }
+      if (no) { setTopic(s, t.id, null); remember(s, t.id, 'insult', 'סירב לבקשה', -3); return { text: 'חבל. נזכור זאת בהצבעות.', hint: 'היחסים נפגעו מעט.' }; }
+      return null;
+    }
+    case 'warn_law': {
+      if (talk || yes) {
+        const red = party?.redLines?.includes(lid ?? '');
+        setTopic(s, t.id, null);
+        remember(s, t.id, 'support', 'שיחה על חוק שנוי במחלוקת', 2);
+        return { text: `${lawTitle(lid)} ${red ? 'הוא קו אדום' : 'פוגע בעקרונות'} של ${party?.shortName ?? 'המפלגה'}. אם תרכך את ההצעה או תציע תמורה ממשית, אשקול מחדש. אחרת נצביע נגד.`, hint: 'אפשר לרכך את ההצעה (פעולת "ריכוך") או להציע תמורה בשיחה.' };
+      }
+      return no ? (setTopic(s, t.id, null), { text: 'אז נפגש בהצבעה.' }) : null;
+    }
+    case 'campaign': {
+      if (talk || yes) {
+        shiftPartyRelation(s, s.player.partyId, t.partyId, 2);
+        setTopic(s, t.id, null);
+        return { text: 'ברמה העקרונית אפשר לבחון הסכם עודפים או שיתוף פעולה אחרי הבחירות. נחזור לזה כשהסקרים יתייצבו.', hint: 'היחסים בין המפלגות השתפרו מעט. הסכם עודפים אפשר לעשות במסך מפת היחסים.' };
+      }
+      return no ? (setTopic(s, t.id, null), { text: 'בסדר. נדבר אחרי הבחירות.' }) : null;
+    }
+  }
+  return null;
+}
+
 function handle(s: GameState, t: Politician, text: string): Reply {
   const me = s.politicians[s.player.politicianId];
   const intent = detectIntent(text);
   const tn = tone(t);
   const law = matchLaw(text);
-  const fresh = (intent === 'other' || intent === 'question') ? true : once(s, t.id, intent);
+  const threaded = dialog(s, t, intent, law);
+  if (threaded) return threaded;
+  const fresh = (intent === 'other' || intent === 'question' || TALK_INTENTS.includes(intent) || intent === 'decline') ? true : once(s, t.id, intent);
   if (!fresh) return { text: pick(s, ['כבר דיברנו על זה היום. נחזור לנושא בהמשך.', 'את הנקודה הבנתי. אין לי מה להוסיף כרגע.']) };
 
   switch (intent) {
@@ -192,8 +327,36 @@ function handle(s: GameState, t: Politician, text: string): Reply {
       }
       return { text: pick(s, ['השאלה חשובה. אשמח לדון בזה פנים אל פנים.', 'אין לי עמדה סופית. מה דעתך?', 'אני מעדיף לענות בפגישה ולא בכתב.']) };
     }
-    default:
-      return { text: line(s, 'other', tn) };
+    case 'greet':
+      return { text: tn === 'hostile' ? 'שלום. מה אתה רוצה?' : pick(s, ['שלום. מה תרצה לדבר עליו?', 'היי. במה אפשר לעזור?', 'שלום, טוב לשמוע ממך. על מה נדבר?']) };
+    case 'meet': {
+      remember(s, t.id, 'support', 'ביקש לדבר', tn === 'hostile' ? 1 : 3);
+      if (tn === 'hostile') return { text: 'אני מוכן לשמוע, אבל אל תצפה להפתעות. על מה תרצה לדבר?' };
+      return { text: pick(s, ['בוודאי. על מה תרצה שנדבר: חוק, תקציב, תפקיד או שיתוף פעולה?', 'אשמח. מה הנושא? אפשר לציין חוק מסוים, תקציב או תפקיד.']) };
+    }
+    case 'agree':
+      return { text: tn === 'hostile' ? 'טוב. נראה מה יצא מזה.' : pick(s, ['מצוין. על מה תרצה שנדבר?', 'יופי. תפרט מה אתה מציע ואחשוב על זה.']) };
+    case 'decline':
+      return { text: tn === 'friendly' ? 'בסדר, נחזור לזה בהזדמנות.' : 'מובן. אם תשנה את דעתך – אני כאן.' };
+    case 'askwhat': {
+      if (t.loyalty < 30) {
+        const g = grievance(s, t);
+        setTopic(s, t.id, { kind: 'unhappy', stage: 'explained', turn: s.turn, demand: g.demand, lawId: g.lawId });
+        return { text: `אם אתה שואל: ${g.text} מה אתה מציע?`, hint: 'הפוליטיקאי פירט את הטענה שלו. אפשר להבטיח, להתנצל או לסרב.' };
+      }
+      return { text: pick(s, ['אין לי בקשה מסוימת כרגע, רציתי להתעדכן. אם חשוב לך משהו – ציין חוק, תקציב או תפקיד.', 'שום דבר דחוף. אם יש משהו שאתה צריך ממני, תגיד.']) };
+    }
+    default: {
+      // a message with a subject but no clear verb: answer the subject instead of asking to repeat
+      if (law) {
+        const st = lawStance(s, t, law.id);
+        const word = st === 'for' ? 'תומך' : st === 'against' ? 'מתנגד' : st === 'redline' ? 'מתנגד נחרצות' : 'מתלבט';
+        return { text: `בנושא ${law.title}: אני ${word}. אם אתה מבקש משהו ממני, תגיד זאת במפורש.` };
+      }
+      if (mentionsMoney(text)) return { text: 'תקציב זה עניין של ראש הממשלה ושל שר האוצר. אם אתה מציע משהו בתמורה לתמיכה, תפרט.' };
+      if (mentionsRole(text)) return { text: 'מינויים הם עניין של ראש הממשלה. אם אתה מבטיח תפקיד, אמור זאת במפורש ואני אזכור.' };
+      return { text: tn === 'hostile' ? 'תגיע לעניין.' : pick(s, ['לא לגמרי הבנתי. אפשר לדבר על חוק מסוים, על תקציב, על תפקיד או על שיתוף פעולה. מה חשוב לך?', 'אשמח להבין. במה מדובר: חוק, תקציב, תפקיד או משהו אחר?']) };
+    }
   }
 }
 
@@ -221,30 +384,78 @@ export function sendChat(s: GameState, targetId: string, text: string): boolean 
 }
 
 // ---------------- politicians write on their own ----------------
-function proactive(s: GameState, p: Politician): string | null {
-  const me = s.politicians[s.player.politicianId];
-  const inGov = s.government.coalition.includes(p.partyId);
+interface Opening { text: string; topic?: Omit<ChatTopic, 'turn' | 'stage'> }
+
+/** Deterministic 0..1 value from the seed, the turn and a key – chat chatter must not shift the game's main random sequence. */
+function side(s: GameState, key: string): number {
+  let h = 2166136261;
+  for (const c of `${s.seed}|${s.turn}|${key}`) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return ((h >>> 0) % 100000) / 100000;
+}
+
+/** Everything this politician could say right now, given who they are and what is going on. */
+function openings(s: GameState, p: Politician): Opening[] {
+  const me = s.politicians[s.player.politicianId].name;
   const party = s.parties[p.partyId];
+  const pn = party?.shortName ?? 'הסיעה';
+  const inGov = s.government.coalition.includes(p.partyId);
   const open = s.bills.find((b) => b.status === 'active');
   const campaign = s.campaign?.electionDay !== undefined;
+  const ministry = p.ministryId ? s.government.ministries.find((m) => m.id === p.ministryId)?.name : undefined;
+  const fav = party?.favoriteLaws[0];
+  const rival = Object.values(s.politicians).filter((x) => x.active && !x.isPlayer && x.partyId !== p.partyId && x.id !== s.player.politicianId && x.power > 40);
+  const out: Opening[] = [];
+  const add = (text: string, topic?: Opening['topic']) => out.push({ text, topic });
+
   if (p.loyalty < 30) {
-    return pick(s, [
-      `${me.name}, אני לא מרוצה מההתנהלות כלפיי ולכן אני שוקל את צעדיי. כדאי שנדבר.`,
-      inGov ? `אני מצפה להתחייבויות שניתנו. אם זה לא ישתנה, ${party?.shortName ?? 'הסיעה'} תשקול את המשך דרכה בקואליציה.` : 'אנחנו מתנגדים למדיניות שלך, ונפעל נגדה בכנסטון.',
-    ]);
+    add(`${me}, אני לא מרוצה מההתנהלות כלפיי ולכן אני שוקל את צעדיי. כדאי שנדבר.`, { kind: 'unhappy' });
+    add(`לא התייעצת איתי לפני ההחלטות האחרונות, ${me}. אני מצפה ליחס אחר.`, { kind: 'unhappy', demand: 'respect' });
+    add('שמעתי דברים שנאמרו עליי, ואני מניח שלא בלי ידיעתך. אפשר לשוחח?', { kind: 'unhappy' });
+    add('אני מרגיש שהבטחות לא מתקיימות. אשמח להבין איפה אנחנו עומדים.', { kind: 'unhappy' });
+    if (ministry) add(`${ministry} נשחק ואני לא יכול להמשיך כך. אני רוצה פגישה דחופה על התקציב.`, { kind: 'unhappy', demand: 'budget' });
+    if (inGov) {
+      add(`אני מצפה להתחייבויות שניתנו. אם זה לא ישתנה, ${pn} תשקול את המשך דרכה בקואליציה.`, { kind: 'unhappy' });
+      add(`בסיעה של ${pn} מתחילים לשאול למה אנחנו בקואליציה. תן לי סיבה להסביר להם.`, { kind: 'unhappy' });
+    } else {
+      add('אנחנו מתנגדים למדיניות שלך, ונפעל נגדה בכנסטון.');
+      add(`המדיניות שלך פוגעת בבוחרים של ${pn}. נילחם בה בכנסטון ובתקשורת.`);
+      add('אל תצפה לתמיכה שלנו בהצבעות הקרובות.');
+    }
+  } else if (p.loyalty > 70) {
+    add(`${me}, רציתי לומר שאני מעריך את שיתוף הפעולה בינינו. אם אפשר לעזור במשהו – אני כאן.`, { kind: 'praise' });
+    add('ראיתי את הדברים שלך בתקשורת. נשמע לי נכון. כדאי שנמשיך בקו הזה.', { kind: 'praise' });
+    add(`${pn} מאחוריך. מה הצעד הבא?`, { kind: 'praise' });
+    add('אם צריך שאדבר עם עמיתים בסיעה בשבילך, אני זמין.', { kind: 'praise' });
+    if (open) add(`אני עוקב אחרי ${open.title}. אם צריך תמיכה שלי בהצבעה, תגיד.`, { kind: 'praise', lawId: open.lawId });
+    if (open) add(`דיברתי עם כמה חברים על ${open.title}. יש מקום להסכמות, אם נרצה.`, { kind: 'praise', lawId: open.lawId });
+    add('יש לי רעיון לשיתוף פעולה. אשמח להיפגש.', { kind: 'coop' });
+    if (fav) add(`מה דעתך שנגיש יחד הצעה בנושא ${lawTitle(fav)}? זה יחזק את שנינו.`, { kind: 'coop', lawId: fav });
+  } else {
+    if (ministry) add(`אשמח לפגישה קצרה על ${ministry}. יש כמה נושאים שדורשים החלטה.`, { kind: 'unhappy', demand: 'budget' });
+    if (p.ambitionTarget) add(`אני חושב על הצעד הבא שלי: ${p.ambitionTarget}. אשמח לשמוע מה דעתך.`, { kind: 'unhappy', demand: 'role' });
+    if (fav) add(`${pn} מקדמת את ${lawTitle(fav)}. אולי נוכל לשתף פעולה?`, { kind: 'coop', lawId: fav });
+    add('הסקרים זזים. כדאי שנתאם עמדות לפני ההצבעות הבאות.', { kind: 'coop' });
+    add('היה לי רעיון בעקבות השיחה האחרונה שלנו. אפשר לדבר?', { kind: 'coop' });
+    if (rival.length) {
+      const r = rival[Math.floor(side(s, `rival${p.id}`) * rival.length)];
+      add(`שמעתי ש${r.name} (${s.parties[r.partyId]?.shortName ?? ''}) מתכנן מהלך שיכול להשפיע עליך. כדאי לבדוק לפני שיהיה מאוחר.`);
+    }
   }
-  if (p.loyalty > 70) {
-    return pick(s, [
-      `${me.name}, רציתי לומר שאני מעריך את שיתוף הפעולה בינינו. אם אפשר לעזור במשהו – אני כאן.`,
-      open ? `אני עוקב אחרי ${open.title}. אם צריך תמיכה שלי בהצבעה, תגיד.` : 'יש לי רעיון לשיתוף פעולה. אשמח להיפגש.',
-    ]);
+  if (open && party && (party.favoriteLaws.includes(open.lawId) || party.hatedLaws.includes(open.lawId))) {
+    if (party.favoriteLaws.includes(open.lawId)) add(`אני מבקש שתקדם את ${open.title}. זה חשוב לנו, ואנחנו נזכור מי עזר.`, { kind: 'ask_law', lawId: open.lawId });
+    else add(`אני מזהיר אותך: ${pn} תתנגד ל${open.title} בכל כוחה.`, { kind: 'warn_law', lawId: open.lawId });
   }
-  if (open && (party?.favoriteLaws.includes(open.lawId) || party?.hatedLaws.includes(open.lawId))) {
-    const fav = party.favoriteLaws.includes(open.lawId);
-    return fav ? `אני מבקש שתקדם את ${open.title}. זה חשוב לנו, ואנחנו נזכור מי עזר.` : `אני מזהיר אותך: ${party.shortName} תתנגד ל${open.title} בכל כוחה.`;
+  if (campaign && !inGov) {
+    add('הבחירות מתקרבות. אולי כדאי שנדבר על שיתוף פעולה אחרי היום שאחרי.', { kind: 'campaign' });
+    add('אנחנו בוחנים הסכם עודפים. תהיה פתוח לשיחה?', { kind: 'campaign' });
   }
-  if (campaign && !inGov) return pick(s, ['הבחירות מתקרבות. אולי כדאי שנדבר על שיתוף פעולה אחרי היום שאחרי.', 'אנחנו בוחנים הסכם עודפים. תהיה פתוח לשיחה?']);
-  return null;
+  return out;
+}
+
+function proactive(s: GameState, p: Politician): Opening | null {
+  const said = new Set((s.chats?.[p.id] ?? []).filter((m) => m.from === 'them').map((m) => m.text));
+  const fresh = openings(s, p).filter((o) => !said.has(o.text));
+  return fresh.length ? fresh[Math.floor(side(s, `pick${p.id}`) * fresh.length)] : null;
 }
 
 /** Once per turn: a couple of politicians write to the player. */
@@ -252,12 +463,13 @@ export function chatTick(s: GameState): void {
   if (s.gameOver || s.elections.phase !== 'none') return;
   const pool = chatContacts(s).filter((p) => p.id !== s.player.politicianId);
   let sent = 0;
-  for (const p of pool.sort(() => rand(s) - 0.5)) {
+  for (const p of pool.sort((a, b) => side(s, `order${a.id}`) - side(s, `order${b.id}`))) {
     if (sent >= 2) break;
-    if (!chance(s, p.loyalty < 30 || p.loyalty > 70 ? 0.28 : 0.1)) continue;
-    const text = proactive(s, p);
-    if (!text) continue;
-    push(s, p.id, { from: 'them', text, proactive: true });
+    if (side(s, `go${p.id}`) >= (p.loyalty < 30 || p.loyalty > 70 ? 0.3 : 0.16)) continue;
+    const o = proactive(s, p);
+    if (!o) continue;
+    push(s, p.id, { from: 'them', text: o.text, proactive: true });
+    setTopic(s, p.id, o.topic ? { ...o.topic, stage: 'opened', turn: s.turn } : null);
     sent += 1;
     logEvent(s, '💬', `${p.name} כתב לך הודעה`, 1, 'neutral', 'chat');
   }

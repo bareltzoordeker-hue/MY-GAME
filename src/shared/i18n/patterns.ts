@@ -9,6 +9,10 @@ const FOR_AGAINST: Record<number, Record<string, [string, string]>> = {
   0: { 'בעד': ['for', 'مع'], 'נגד': ['against', 'ضد'] },
 };
 
+const STANCE: Record<number, Record<string, [string, string]>> = {
+  1: { 'תומך': ['in favor', 'مؤيد'], 'מתנגד': ['opposed', 'معارض'], 'מתנגד נחרצות': ['strongly opposed', 'معارض بشدة'], 'מתלבט': ['undecided', 'متردد'] },
+};
+
 export const PATTERNS: Pattern[] = [
   ['{0} עדיין לא טופל. כל תור בלי טיפול פוגע בשביעות הרצון ובתמיכה בממשלה.', '{0} has not been handled yet. Every turn without handling hurts satisfaction and support for the government.', '{0} لم تُعالج بعد. كل دور بلا معالجة يضر بالرضا وبالدعم للحكومة.'],
   ['צריך להרכיב ממשלה: {0} מנדטים לפחות. כל שותפה מציבה דרישות לתיקים, לתקציבים ולחוקים.', 'A government must be formed: at least {0} seats. Each partner sets demands for portfolios, budgets and laws.', 'يجب تشكيل حكومة: {0} مقعدًا على الأقل. كل شريك يضع مطالب بحقائب وميزانيات وقوانين.'],
@@ -137,6 +141,8 @@ export const PATTERNS: Pattern[] = [
   ['שטח A {0}%, שטח B {1}%, שטח C {2}%', 'Area A {0}%, Area B {1}%, Area C {2}%', 'المنطقة أ {0}%، المنطقة ب {1}%، المنطقة ج {2}%'],
   ['גידול {#0}%', 'Growth {0}%', 'نمو {0}%'],
   ['יו״ר {0}', 'Chair of {0}', 'رئيس {0}'],
+  ['בנושא {0}: אני {1}. {2}', 'On {0}: I am {1}. {2}', 'بشأن {0}: أنا {1}. {2}', STANCE],
+  ['בנושא {0}: אני {1}. אם אתה מבקש משהו ממני, תגיד זאת במפורש.', 'On {0}: I am {1}. If you are asking something of me, say so explicitly.', 'بشأن {0}: أنا {1}. إذا كنت تطلب مني شيئًا، فقلها صراحة.', STANCE],
   ['{#0} הודעות חדשות', '{0} new messages', '{0} رسائل جديدة'],
   ['{0}, {#1} מנדטים', '{0}, {1} seats', '{0}، {1} مقعدًا'],
   ['{0}, {#1} מנדט', '{0}, {1} seat', '{0}، {1} مقعد'],];

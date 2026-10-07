@@ -54,6 +54,13 @@ describe('translate()', () => {
     expect(translate('משפט שלא קיים באף מילון בעולם הזה', 'en')).toBeNull();
   });
 
+  it('translates the conversation lines, including a nested complaint', () => {
+    expect(translate('שלום. מה תרצה לדבר עליו?', 'en')).toBe('Hello. What would you like to talk about?');
+    const out = translate('תודה שהקשבת. המשרד שלי לא עומד במשימות בתקציב הנוכחי. אני מצפה לתוספת תקציב לתחום. מה אתה מציע?', 'ar');
+    expect(out).not.toMatch(HEB);
+    expect(out).toContain('شكرًا لأنك استمعت');
+  });
+
   it('leaves Hebrew alone', () => {
     expect(translate('הליכוד', 'he')).toBeNull();
   });

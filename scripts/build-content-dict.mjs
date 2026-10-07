@@ -42,7 +42,7 @@ for (const lang of ['en', 'ar']) {
     if (!(key in dict)) dict[key] = v;
   });
   // supplementary entries (fragments, labels) – these win over the generated ones
-  const extra = ['docs/tr/extra.tsv', 'docs/tr/extra2.tsv'].flatMap((f) => readFileSync(f, 'utf8').split('\n')).filter((l) => l.trim());
+  const extra = ["docs/tr/extra.tsv", "docs/tr/extra2.tsv", "docs/tr/extra3.tsv"].flatMap((f) => readFileSync(f, 'utf8').split('\n')).filter((l) => l.trim());
   for (const line of extra) {
     const [he, en, ar] = line.replace(/\r$/, '').split('\t');
     if (he && en && ar) dict[he.trim()] = (lang === 'en' ? en : ar).trim();

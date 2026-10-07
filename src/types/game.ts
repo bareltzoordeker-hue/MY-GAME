@@ -270,6 +270,16 @@ export interface Government {
   agreements?: Commitment[];
 }
 
+export type ChatTopicKind = 'unhappy' | 'praise' | 'coop' | 'ask_law' | 'warn_law' | 'campaign';
+/** An open thread in a conversation: why the politician wrote, and how far the talk has got */
+export interface ChatTopic {
+  kind: ChatTopicKind;
+  stage: 'opened' | 'explained';
+  turn: number;
+  lawId?: string;
+  demand?: 'role' | 'budget' | 'law' | 'respect';
+}
+
 export interface ChatMsg {
   from: 'me' | 'them';
   text: string;
@@ -565,6 +575,8 @@ export interface GameState {
   /** chat history per politician, and unread counts */
   chats?: Record<string, ChatMsg[]>;
   chatUnread?: Record<string, number>;
+  /** what each conversation is currently about (set when the politician writes first) */
+  chatTopics?: Record<string, ChatTopic>;
   /** security fronts, forces and the diplomatic track */
   world?: WorldState;
   /** the player party's election campaign (set when the campaign opens) */

@@ -85,7 +85,6 @@
 {} אני מצפה לתפקיד כפי שנאמר. ||| {0} I expect the position as promised. ||| {0} أتوقع المنصب كما قيل.
 {} אחכה לראות את זה בתקציב. ||| {0} I will wait to see it in the budget. ||| {0} سأنتظر لأراه في الميزانية.
 זה קו אדום עבורי ועבור {}. לא נתמוך ב{} בשום מצב. ||| This is a red line for me and for {0}. We will not support {1} under any circumstances. ||| هذا خط أحمر بالنسبة لي ولـ{0}. لن ندعم {1} تحت أي ظرف.
-בנושא {}: אני {}. {} ||| On {0}: I am {1}. {2} ||| بشأن {0}: أنا {1}. {2}
 {}, אני לא מרוצה מההתנהלות כלפיי ולכן אני שוקל את צעדיי. כדאי שנדבר. ||| {0}, I am not pleased with how I have been treated, and so I am weighing my steps. We should talk. ||| {0}، لست راضيًا عن التعامل معي، ولذلك أدرس خطواتي. يجدر أن نتحدث.
 {}, רציתי לומר שאני מעריך את שיתוף הפעולה בינינו. אם אפשר לעזור במשהו – אני כאן. ||| {0}, I wanted to say that I appreciate our cooperation. If I can help with anything – I am here. ||| {0}، أردت أن أقول إنني أقدّر التعاون بيننا. إذا كان بالإمكان المساعدة في شيء – أنا هنا.
 אני עוקב אחרי {}. אם צריך תמיכה שלי בהצבעה, תגיד. ||| I am following {0}. If you need my support in the vote, say so. ||| أتابع {0}. إذا احتجت إلى دعمي في التصويت، قل.
@@ -395,3 +394,27 @@
 {}: {} צפויים נפגעים. לאשר? ||| {0}: {1} casualties expected. Approve? ||| {0}: يُتوقع {1} إصابات. هل تصادق؟
 
 {} פורש מסיעתו ומצטרף לקואליציה ||| {0} leaves their faction and joins the coalition ||| {0} ينسحب من كتلته وينضم إلى الائتلاف
+תודה שהקשבת. {} מה אתה מציע? ||| Thank you for listening. {0} What do you propose? ||| شكرًا لأنك استمعت. {0} ماذا تقترح؟
+הובטח לי שתקדם את {}. עברו חודשים ושום דבר לא זז. ||| I was promised you would advance {0}. Months have passed and nothing has moved. ||| وُعدت بأن تدفع {0}. مرّت أشهر ولم يتحرك شيء.
+{} חשוב לנו, ואני לא רואה שאתה מקדם אותו. ||| {0} is important to us, and I do not see you advancing it. ||| {0} مهم لنا، ولا أراك تدفعه.
+המטרה שלי היא: {}. אשמח להבטחה שתתמוך בי כשיגיע הזמן. ||| My goal is: {0}. I would like a promise that you will back me when the time comes. ||| هدفي هو: {0}. أودّ وعدًا بأن تدعمني حين يحين الوقت.
+תודה. אני מעריך את זה, ואזכור. רשמתי: {}. ||| Thank you. I appreciate it, and I will remember. I noted: {0}. ||| شكرًا. أقدّر ذلك وسأتذكر. سجّلت: {0}.
+אסביר שוב: {} ||| Let me explain again: {0} ||| سأشرح مجددًا: {0}
+בשמחה. אני איתך בהצבעה על {}. ||| Gladly. I am with you in the vote on {0}. ||| بكل سرور. أنا معك في التصويت على {0}.
+הרעיון: שנקדם יחד את {}. הצעה משותפת תגדיל את הסיכוי שתעבור, ושנינו נרוויח מזה. מה דעתך? ||| The idea: that we advance {0} together. A joint proposal raises the chance it passes, and we both gain from it. What do you think? ||| الفكرة: أن ندفع {0} معًا. اقتراح مشترك يزيد فرصة تمريره، ونربح كلانا من ذلك. ما رأيك؟
+תודה. {} חשוב לנו, ונזכור מי עזר. ||| Thank you. {0} is important to us, and we will remember who helped. ||| شكرًا. {0} مهم لنا، وسنتذكر من ساعد.
+{} קרוב לליבה האידיאולוגית של {} ולבוחרים שלנו. אשמח לתמיכתך. תוכל לעזור? ||| {0} is close to the ideological core of {1} and to our voters. I would appreciate your support. Can you help? ||| {0} قريب من الجوهر الأيديولوجي لـ{1} ومن ناخبينا. سأقدّر دعمك. هل تستطيع المساعدة؟
+{} הוא קו אדום של {}. אם תרכך את ההצעה או תציע תמורה ממשית, אשקול מחדש. אחרת נצביע נגד. ||| {0} is a red line of {1}. If you soften the proposal or offer something real in return, I will reconsider. Otherwise we will vote against. ||| {0} خط أحمر لـ{1}. إذا لينت الاقتراح أو عرضت مقابلًا حقيقيًا، سأعيد النظر. وإلا سنصوّت ضد.
+{} פוגע בעקרונות של {}. אם תרכך את ההצעה או תציע תמורה ממשית, אשקול מחדש. אחרת נצביע נגד. ||| {0} harms the principles of {1}. If you soften the proposal or offer something real in return, I will reconsider. Otherwise we will vote against. ||| {0} يمسّ بمبادئ {1}. إذا لينت الاقتراح أو عرضت مقابلًا حقيقيًا، سأعيد النظر. وإلا سنصوّت ضد.
+אם אתה שואל: {} מה אתה מציע? ||| Since you ask: {0} What do you propose? ||| إن كنت تسأل: {0} ماذا تقترح؟
+לא התייעצת איתי לפני ההחלטות האחרונות, {}. אני מצפה ליחס אחר. ||| You did not consult me before the latest decisions, {0}. I expect different treatment. ||| لم تستشرني قبل القرارات الأخيرة يا {0}. أتوقع معاملة مختلفة.
+{} נשחק ואני לא יכול להמשיך כך. אני רוצה פגישה דחופה על התקציב. ||| {0} is being worn down and I cannot go on like this. I want an urgent meeting about the budget. ||| {0} يتآكل ولا أستطيع المواصلة هكذا. أريد لقاء عاجلًا حول الميزانية.
+בסיעה של {} מתחילים לשאול למה אנחנו בקואליציה. תן לי סיבה להסביר להם. ||| In the {0} faction they are starting to ask why we are in the coalition. Give me a reason to explain to them. ||| في كتلة {0} يبدؤون بالتساؤل لماذا نحن في الائتلاف. أعطني سببًا لأشرحه لهم.
+המדיניות שלך פוגעת בבוחרים של {}. נילחם בה בכנסטון ובתקשורת. ||| Your policy hurts the voters of {0}. We will fight it in the Knesseton and in the media. ||| سياستك تضر بناخبي {0}. سنحاربها في الكنيستون وفي الإعلام.
+{} מאחוריך. מה הצעד הבא? ||| {0} is behind you. What is the next step? ||| {0} خلفك. ما هي الخطوة التالية؟
+דיברתי עם כמה חברים על {}. יש מקום להסכמות, אם נרצה. ||| I talked to a few colleagues about {0}. There is room for agreement, if we want it. ||| تحدثت مع بعض الزملاء عن {0}. هناك مجال للتفاهمات إذا شئنا.
+מה דעתך שנגיש יחד הצעה בנושא {}? זה יחזק את שנינו. ||| How about submitting a joint proposal on {0}? It would strengthen both of us. ||| ما رأيك أن نقدّم معًا اقتراحًا بشأن {0}؟ هذا سيقوّينا كلينا.
+אשמח לפגישה קצרה על {}. יש כמה נושאים שדורשים החלטה. ||| I would like a short meeting about {0}. There are a few issues that need a decision. ||| أودّ لقاءً قصيرًا حول {0}. هناك عدة مواضيع تحتاج إلى قرار.
+אני חושב על הצעד הבא שלי: {}. אשמח לשמוע מה דעתך. ||| I am thinking about my next step: {0}. I would like to hear what you think. ||| أفكر في خطوتي القادمة: {0}. أودّ أن أسمع رأيك.
+{} מקדמת את {}. אולי נוכל לשתף פעולה? ||| {0} is advancing {1}. Maybe we can cooperate? ||| {0} تدفع {1}. ربما نستطيع التعاون؟
+שמעתי ש{} ({}) מתכנן מהלך שיכול להשפיע עליך. כדאי לבדוק לפני שיהיה מאוחר. ||| I heard that {0} ({1}) is planning a move that could affect you. Worth checking before it is too late. ||| سمعت أن {0} ({1}) يخطط لخطوة قد تؤثر عليك. يجدر الفحص قبل فوات الأوان.

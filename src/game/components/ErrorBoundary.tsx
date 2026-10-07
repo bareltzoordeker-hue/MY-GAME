@@ -21,6 +21,10 @@ export class ErrorBoundary extends Component<{ children: ReactNode }, { error: E
             <button className="btn btn-primary" onClick={() => location.reload()}>🔄 לנסות שוב</button>
             <button className="btn btn-danger" onClick={() => { deleteSave(); location.reload(); }}>🗑️ למחוק את השמירה ולהתחיל מחדש</button>
           </div>
+          <details className="mt-3 text-start text-xs muted" dir="ltr">
+            <summary style={{ cursor: 'pointer' }}>Technical details</summary>
+            <pre className="whitespace-pre-wrap break-words mt-1">{`${this.state.error.name}: ${this.state.error.message}\n${(this.state.error.stack ?? '').split('\n').slice(1, 5).join('\n')}`}</pre>
+          </details>
           <p className="text-xs muted mt-3"><a href="/">חזרה לדף הבית</a></p>
         </div>
       </div>

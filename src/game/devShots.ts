@@ -44,3 +44,5 @@ export function runShotMode(): void {
   if (person) useGame.getState().openChat(person);
   useGame.setState({ screen: screen as ScreenId });
 };
+/** DEV ONLY: window.__ids() lists politician ids of the running game. */
+(window as unknown as { __ids: () => string[] }).__ids = () => Object.keys(useGame.getState().game?.politicians ?? {});
