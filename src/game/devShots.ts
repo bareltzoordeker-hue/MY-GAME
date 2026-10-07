@@ -13,7 +13,7 @@ export function runShotMode(): void {
   if (!shot) return;
   try {
     localStorage.setItem('hakise.disclaimer.v2', '1');
-    localStorage.setItem('hakise.tutorial.done', '1');
+    if (q.get('tut') !== '1') localStorage.setItem('hakise.tutorial.done', '1'); else localStorage.removeItem('hakise.tutorial.done');
     localStorage.setItem('hakise.consent.v1', JSON.stringify({ ads: 'denied', at: new Date().toISOString() }));
   } catch { /* ignore */ }
   const st = useGame.getState();

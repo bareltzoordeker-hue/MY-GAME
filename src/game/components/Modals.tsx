@@ -71,7 +71,7 @@ export function ReactionModal() {
           )}
           {r.quip && <div className="inset text-sm flex items-start gap-2"><Caricature spec={ADVISOR_SPEC} size={30} /><span>{r.quip}</span></div>}
         </div>
-        <div className="p-4 pt-0 flex justify-end"><button className="btn btn-primary" onClick={dismiss} autoFocus>הבנתי</button></div>
+        <div className="p-4 pt-0 flex justify-end"><button className="btn btn-primary" data-tut="modal-ok" onClick={dismiss} autoFocus>הבנתי</button></div>
       </div>
       </div>
     </div>
@@ -208,7 +208,7 @@ export function ExplainModal() {
           <div className="text-xl font-black mb-2">{e.title}</div>
           <p className="text-sm leading-relaxed">{e.text}</p>
           {e.tip && <div className="inset text-sm mt-3">💡 {e.tip}</div>}
-          <div className="flex justify-end mt-4"><button className="btn btn-primary btn-sm" onClick={() => close(null)}>הבנתי</button></div>
+          <div className="flex justify-end mt-4"><button className="btn btn-primary btn-sm" data-tut="modal-ok" onClick={() => close(null)}>הבנתי</button></div>
         </div>
       </div>
     </div>

@@ -12,6 +12,7 @@ export function Explain({ k, className = '' }: { k: string; className?: string }
       style={{ background: '#e8edf5', color: 'var(--muted)', border: 0, cursor: 'help' }}
       onClick={(e) => { e.stopPropagation(); explain(k); }}
       aria-label="מה זה אומר?"
+      data-tut={`explain-${k}`}
       data-tip="מה זה אומר?"
     >?</button>
   );

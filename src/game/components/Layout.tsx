@@ -50,7 +50,7 @@ function Sidebar({ onPick }: { onPick?: () => void }) {
       {NAV.filter((n) => !n.show || n.show(s)).map((n) => {
         const b = n.badge?.(s) ?? 0;
         return (
-          <button key={n.id} data-tip={n.tip} className={`side-link ${screen === n.id ? 'side-link-active' : ''}`} onClick={() => { setScreen(n.id); onPick?.(); }}>
+          <button key={n.id} data-tut={`nav-${n.id}`} data-tip={n.tip} className={`side-link ${screen === n.id ? 'side-link-active' : ''}`} onClick={() => { setScreen(n.id); onPick?.(); }}>
             <span className="text-base w-5 text-center">{n.icon}</span>
             <span className="flex-1">{t(`nav.${n.id}` as Key)}</span>
             {b > 0 && <span className="chip chip-bad num" style={{ padding: '0 7px' }}>{b}</span>}
@@ -109,9 +109,9 @@ export function Header({ onMenu }: { onMenu: () => void }) {
         <span className="hidden md:inline text-[11px] muted" data-tip={saveStatus === 'failed' ? 'השמירה נכשלה – המשחק עדיין בזיכרון, ננסה שוב בתור הבא' : 'שמירה אוטומטית בסוף כל תור'}>
           {saveStatus === 'saved' ? `💾 ${t('hdr.saved')}` : saveStatus === 'failed' ? '⚠️ לא נשמר' : ''}
         </span>
-        <button className="btn btn-sm" onClick={openSpeech} data-tip="כתיבת נאום ונשיאתו: בטלוויזיה, במליאה, בכנס או ברשתות" aria-label={t('hdr.speech')}>🎤<span className="hidden lg:inline"> {t('hdr.speech')}</span></button>
+        <button className="btn btn-sm" data-tut="speech" onClick={openSpeech} data-tip="כתיבת נאום ונשיאתו: בטלוויזיה, במליאה, בכנס או ברשתות" aria-label={t('hdr.speech')}>🎤<span className="hidden lg:inline"> {t('hdr.speech')}</span></button>
         <SoundToggles />
-        <button className="btn btn-primary" onClick={endTurn} disabled={!!blocked} data-tip={blocked ?? `הזמן מתקדם ב${span} (עד ${dateLabel(next, true)}): הכלכלה, הציבור והפוליטיקאים מגיבים`}>
+        <button className="btn btn-primary" data-tut="next-turn" onClick={endTurn} disabled={!!blocked} data-tip={blocked ?? `הזמן מתקדם ב${span} (עד ${dateLabel(next, true)}): הכלכלה, הציבור והפוליטיקאים מגיבים`}>
           <span className="hidden xl:inline">{t('hdr.next', { span })}</span><span className="xl:hidden">{span} ⏭</span> <span className="hidden xl:inline">⏭</span>
         </button>
       </div>

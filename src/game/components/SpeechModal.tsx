@@ -60,14 +60,14 @@ export function SpeechModal() {
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
               <span className="label">הנאום ({words} מילים)</span>
-              <button className="btn btn-sm btn-blue" onClick={() => setText(writeSpeech({ venue, topic, stance: stance / 100, tone, audience }))} data-tip="טיוטה אוטומטית לפי הבמה, הנושא, העמדה והטון. אפשר לערוך אותה.">✍️ כתוב לי</button>
+              <button className="btn btn-sm btn-blue" data-tut="speech-write" onClick={() => setText(writeSpeech({ venue, topic, stance: stance / 100, tone, audience }))} data-tip="טיוטה אוטומטית לפי הבמה, הנושא, העמדה והטון. אפשר לערוך אותה.">✍️ כתוב לי</button>
             </div>
-            <textarea aria-label="טקסט הנאום" value={text} onChange={(e) => setText(e.target.value)} rows={12} className="w-full flex-1" style={{ background: 'var(--bg2, #fff)', border: '1px solid var(--line2, #ddd)', borderRadius: 10, padding: 10, resize: 'vertical' }} placeholder="כתוב כאן את הנאום, או לחץ על 'כתוב לי'." />
+            <textarea data-tut="speech-text" aria-label="טקסט הנאום" value={text} onChange={(e) => setText(e.target.value)} rows={12} className="w-full flex-1" style={{ background: 'var(--bg2, #fff)', border: '1px solid var(--line2, #ddd)', borderRadius: 10, padding: 10, resize: 'vertical' }} placeholder="כתוב כאן את הנאום, או לחץ על 'כתוב לי'." />
             <div className="text-[11px] muted">נאום קצר מ-25 מילים לא משאיר רושם; נאום ארוך מ-450 מילים מאבד את הקהל.</div>
           </div>
         </div>
         <div className="p-4 pt-0 flex justify-between gap-2 flex-wrap items-center">
-          <button className="btn btn-sm" onClick={close}>ביטול</button>
+          <button className="btn btn-sm" data-tut="speech-cancel" onClick={close}>ביטול</button>
           {blocked && <span className="text-xs bad">⛔ {blocked}</span>}
           <button className="btn btn-primary" disabled={!!blocked || !text.trim()} onClick={() => { act('give_speech', params); close(); setText(''); }}>🎤 לשאת את הנאום</button>
         </div>

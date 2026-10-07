@@ -19,7 +19,7 @@ function Row({ s, p, active, onPick }: { s: GameState; p: Politician; active: bo
   const last = s.chats?.[p.id]?.at(-1);
   const role = p.id === s.government.pmId ? 'ראש הממשלה' : p.ministryId ? s.government.ministries.find((m) => m.id === p.ministryId)?.name : s.parties[p.partyId]?.leaderId === p.id ? `יו״ר ${s.parties[p.partyId]?.shortName}` : s.parties[p.partyId]?.shortName;
   return (
-    <button className={`inset w-full text-right flex items-center gap-2 ${active ? 'card-selected' : ''}`} onClick={onPick} aria-pressed={active} data-tip={`פותח שיחה עם ${p.name}. אפשר לכתוב איום, הבטחה, בקשה, התנצלות או מילה טובה, וההשפעה תלויה ביחסים ובאופי של הצד השני`}>
+    <button data-tut="chat-contact" className={`inset w-full text-right flex items-center gap-2 ${active ? 'card-selected' : ''}`} onClick={onPick} aria-pressed={active} data-tip={`פותח שיחה עם ${p.name}. אפשר לכתוב איום, הבטחה, בקשה, התנצלות או מילה טובה, וההשפעה תלויה ביחסים ובאופי של הצד השני`}>
       <Caricature spec={p.caricature} size={38} tie={s.parties[p.partyId]?.color} />
       <span className="flex-1 min-w-0">
         <span className="block font-bold text-sm leading-tight">{p.name}</span>
@@ -83,11 +83,11 @@ export function ChatScreen() {
                 <div ref={endRef} />
               </div>
               <div className="flex flex-wrap gap-1 pb-2">
-                {SUGGESTIONS.map((x) => <button key={x} className="chip" style={{ cursor: 'pointer', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} onClick={() => setText(x)} data-tip="לחצו כדי למלא את ההודעה, ואפשר לערוך אותה">{x}</button>)}
+                {SUGGESTIONS.map((x) => <button key={x} data-tut="chat-chip" className="chip" style={{ cursor: 'pointer', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} onClick={() => setText(x)} data-tip="לחצו כדי למלא את ההודעה, ואפשר לערוך אותה">{x}</button>)}
               </div>
               <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); submit(); }}>
-                <input type="text" className="flex-1" value={text} maxLength={400} onChange={(e) => setText(e.target.value)} placeholder="כתבו הודעה…" aria-label={`הודעה ל${target.name}`} />
-                <button className="btn btn-primary" type="submit" disabled={!text.trim()}>שליחה</button>
+                <input type="text" data-tut="chat-input" className="flex-1" value={text} maxLength={400} onChange={(e) => setText(e.target.value)} placeholder="כתבו הודעה…" aria-label={`הודעה ל${target.name}`} />
+                <button className="btn btn-primary" data-tut="chat-send" type="submit" disabled={!text.trim()}>שליחה</button>
               </form>
               <p className="text-[11px] muted mt-2">הבטחה לחוק או לתפקיד נרשמת עם מועד ותזכורת. איום עלול לעבוד או לחזור אליכם. אחרי שלוש הודעות באותו תור השיחה נרגעת.</p>
             </>
