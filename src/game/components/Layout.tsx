@@ -6,7 +6,9 @@ import { roleLabel } from '../../engine/newGame';
 import { canAdvance } from '../../engine/turn';
 import { coalitionSeats } from '../../engine/polls';
 import { getCapabilities } from '../../engine/roles';
-import { daysBetween, electionCountdown, monthsUntilElection, nextTurnDate, spanText } from '../../engine/calendar';
+import { daysBetween, electionCountdown, electionDate, monthsUntilElection, nextTurnDate, spanText } from '../../engine/calendar';
+import { dateL, spanL, t } from '../../shared/i18n';
+import type { Key } from '../../shared/i18n/dict';
 import { Caricature } from '../../shared/components/Caricature';
 import { setMusic, setSfx, soundPrefs } from '../audio/sound';
 import { Explain } from './ui';
@@ -48,7 +50,7 @@ function Sidebar({ onPick }: { onPick?: () => void }) {
         return (
           <button key={n.id} data-tip={n.tip} className={`side-link ${screen === n.id ? 'side-link-active' : ''}`} onClick={() => { setScreen(n.id); onPick?.(); }}>
             <span className="text-base w-5 text-center">{n.icon}</span>
-            <span className="flex-1">{n.label}</span>
+            <span className="flex-1">{t(`nav.${n.id}` as Key)}</span>
             {b > 0 && <span className="chip chip-bad num" style={{ padding: '0 7px' }}>{b}</span>}
           </button>
         );
@@ -78,11 +80,11 @@ export function Header({ onMenu }: { onMenu: () => void }) {
   const def = deficitPct(s);
   const tte = monthsUntilElection(s);
   const next = nextTurnDate(s);
-  const span = spanText(daysBetween(s.date, next));
+  const span = spanL(daysBetween(s.date, next)) || spanText(daysBetween(s.date, next));
   return (
     <header className="sticky top-0 z-30 border-b-4 masthead" style={{ borderColor: 'var(--ink)' }}>
       <div className="flex items-center gap-2 px-3 md:px-5 h-16">
-        <button className="btn btn-sm lg:hidden menu-btn" onClick={onMenu} aria-label="תפריט" data-tip="פתיחת התפריט: כל המסכים של המשחק">☰</button>
+        <button className="btn btn-sm lg:hidden menu-btn" onClick={onMenu} aria-label={t('hdr.menu')} data-tip="פתיחת התפריט: כל המסכים של המשחק">☰</button>
         <span className="logo hidden xl:inline-block ml-2">ממשלת ישמעאל</span>
         <div className="flex items-center gap-2 min-w-0">
           <Caricature spec={me.caricature} size={40} tie={party.color} />
@@ -93,22 +95,22 @@ export function Header({ onMenu }: { onMenu: () => void }) {
         </div>
         {/* Stats scroll inside their own strip on mid-size screens instead of widening the page. */}
         <div className="flex items-center mr-2 min-w-0 overflow-x-auto" style={{ scrollbarWidth: 'none' }}>
-          <HeaderStat label="תאריך" value={dateLabel(s.date, true)} />
-          <HeaderStat label={`${party.logo} ${party.shortName}`} value={`${seats} מנדטים`} k="seats" />
-          {s.player.role === 'pm' && <HeaderStat label="קואליציה" value={coalitionSeats(s)} tone={coalitionSeats(s) < 61 ? 'bad' : ''} />}
-          <HeaderStat label="שביעות רצון" value={`${s.government.approval.toFixed(0)}%`} k="approval" tone={s.government.approval < 35 ? 'bad' : ''} />
-          <HeaderStat label="גירעון" value={`${def.toFixed(1)}%`} k="deficit" tone={def > 4.5 ? 'bad' : ''} />
-          <HeaderStat label="הון פוליטי" value={`🎯 ${s.player.politicalCapital.toFixed(0)}`} k="capital" />
-          <HeaderStat label="בחירות" value={electionCountdown(s)} tone={tte <= 4 ? 'warn' : ''} />
+          <HeaderStat label={t('hdr.date')} value={dateL(s.date) || dateLabel(s.date, true)} />
+          <HeaderStat label={`${party.logo} ${party.shortName}`} value={`${seats} ${t('hdr.seats')}`} k="seats" />
+          {s.player.role === 'pm' && <HeaderStat label={t('hdr.coalition')} value={coalitionSeats(s)} tone={coalitionSeats(s) < 61 ? 'bad' : ''} />}
+          <HeaderStat label={t('hdr.approval')} value={`${s.government.approval.toFixed(0)}%`} k="approval" tone={s.government.approval < 35 ? 'bad' : ''} />
+          <HeaderStat label={t('hdr.deficit')} value={`${def.toFixed(1)}%`} k="deficit" tone={def > 4.5 ? 'bad' : ''} />
+          <HeaderStat label={t('hdr.capital')} value={`🎯 ${s.player.politicalCapital.toFixed(0)}`} k="capital" />
+          <HeaderStat label={t('hdr.elections')} value={spanL(daysBetween(s.date, electionDate(s))) || electionCountdown(s)} tone={tte <= 4 ? 'warn' : ''} />
         </div>
         <div className="flex-1" />
         <span className="hidden md:inline text-[11px] muted" data-tip={saveStatus === 'failed' ? 'השמירה נכשלה – המשחק עדיין בזיכרון, ננסה שוב בתור הבא' : 'שמירה אוטומטית בסוף כל תור'}>
-          {saveStatus === 'saved' ? '💾 נשמר' : saveStatus === 'failed' ? '⚠️ לא נשמר' : ''}
+          {saveStatus === 'saved' ? `💾 ${t('hdr.saved')}` : saveStatus === 'failed' ? '⚠️ לא נשמר' : ''}
         </span>
-        <button className="btn btn-sm" onClick={openSpeech} data-tip="כתיבת נאום ונשיאתו: בטלוויזיה, במליאה, בכנס או ברשתות" aria-label="נאום">🎤<span className="hidden lg:inline"> נאום</span></button>
+        <button className="btn btn-sm" onClick={openSpeech} data-tip="כתיבת נאום ונשיאתו: בטלוויזיה, במליאה, בכנס או ברשתות" aria-label={t('hdr.speech')}>🎤<span className="hidden lg:inline"> {t('hdr.speech')}</span></button>
         <SoundToggles />
         <button className="btn btn-primary" onClick={endTurn} disabled={!!blocked} data-tip={blocked ?? `הזמן מתקדם ב${span} (עד ${dateLabel(next, true)}): הכלכלה, הציבור והפוליטיקאים מגיבים`}>
-          <span className="hidden xl:inline">התור הבא: {span}</span><span className="xl:hidden">{span} ⏭</span> <span className="hidden xl:inline">⏭</span>
+          <span className="hidden xl:inline">{t('hdr.next', { span })}</span><span className="xl:hidden">{span} ⏭</span> <span className="hidden xl:inline">⏭</span>
         </button>
       </div>
       <div className="ticker" aria-hidden><div>{[0, 1].map((k) => <span key={k}>{s.news.slice(0, 8).map((n) => `${n.icon} ${n.headline}`).join('   ✦   ')}</span>)}</div></div>

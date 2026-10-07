@@ -8,6 +8,7 @@ import { MinistryScreen } from './screens/Ministry';
 import { NewsScreen, ProjectsScreen, CrisesScreen, AdvisorScreen, CareerScreen, SaveScreen, DebugPanel } from './screens/Other';
 import { BriefingModal, ConfirmModal, ExplainModal, GameOverScreen, MeetingModal, ReactionModal } from './components/Modals';
 import { CoalitionModal } from './screens/Coalition';
+import { useLang } from './useLang';
 import { SpeechModal } from './components/SpeechModal';
 import { CampaignStartModal, ElectionNightModal } from './screens/Campaign';
 import { Tutorial } from './components/Tutorial';
@@ -30,6 +31,7 @@ const SecurityScreen = lazy(() => import('./screens/Security').then((m) => ({ de
 const RelationsScreen = lazy(() => import('./screens/Relations').then((m) => ({ default: m.RelationsScreen })));
 
 export default function App() {
+  useLang(); // re-render everything when the interface language changes
   const game = useGame((s) => s.game);
   const screen = useGame((s) => s.screen);
   const [creating, setCreating] = useState(false);

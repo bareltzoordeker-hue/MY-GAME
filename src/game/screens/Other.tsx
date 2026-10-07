@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { LANGS, getLang, setLang, t } from '../../shared/i18n';
 import { adviseCrisis } from '../../engine/advisorPlus';
 import { canHandleCrisis, crisisOwner } from '../../engine/crises';
 import { playerMinistry } from '../../engine/roles';
@@ -231,6 +232,13 @@ export function SaveScreen() {
           <button className="btn btn-danger" onClick={quit}>🏠 לתפריט הראשי</button>
         </div>
         {msg && <div className="bad text-sm">{msg}</div>}
+      </div>
+      <div className="card space-y-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm flex-1">🌐 {t('set.language')}</span>
+          {LANGS.map((l) => <button key={l.id} lang={l.id} className={`btn btn-sm ${getLang() === l.id ? 'btn-blue' : ''}`} aria-pressed={getLang() === l.id} onClick={() => setLang(l.id)}>{l.name}</button>)}
+        </div>
+        <p className="text-xs muted">{t('set.languageNote')}</p>
       </div>
       <div className="card flex items-center justify-between gap-2">
         <span className="text-sm">🎓 מדריך המשחק</span>

@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { LANGS, getLang, setLang, t } from '../../shared/i18n';
 import { useGame } from '../store/gameStore';
 import { PARTIES } from '../../data/parties';
 import { PEOPLE, type PersonDef } from '../../data/people';
@@ -41,19 +42,20 @@ export function MainMenu({ onNew }: { onNew: () => void }) {
     <div className="min-h-screen flex items-center justify-center p-4">
       <div className="w-full max-w-3xl">
         <div className="card p-6 md:p-10 text-center rise">
-          <div className="text-xs font-bold tracking-widest muted">סימולטור פוליטי</div>
-          <h1 className="text-5xl md:text-6xl font-black mt-2" style={{ letterSpacing: '-0.02em' }}>ממשלת ישמעאל</h1>
+          <div className="text-xs font-bold tracking-widest muted">{t('menu.kicker')}</div>
+          <h1 className="text-5xl md:text-6xl font-black mt-2" style={{ letterSpacing: '-0.02em' }}>{t('menu.title')}</h1>
           <p className="muted mt-4 leading-relaxed max-w-xl mx-auto">
-            ספטמבר 2026. הכנסטון התפזר, 38 רשימות מתמודדות, והבחירות ב-27 באוקטובר.
-            בחרו פוליטיקאי ממשי או צרו דמות משלכם, נהלו קמפיין, הרכיבו קואליציה והובילו את המדינה.
+            {t('menu.lead')}
           </p>
           <div className="flex flex-wrap gap-3 mt-7 justify-center">
-            <button className="btn btn-primary btn-lg" onClick={onNew}>משחק חדש</button>
-            {meta && <button className="btn btn-lg" onClick={() => cont()}>המשך משחק</button>}
-            <HowToPlayButton className="btn btn-lg" />
+            <button className="btn btn-primary btn-lg" onClick={onNew}>{t('menu.new')}</button>
+            {meta && <button className="btn btn-lg" onClick={() => cont()}>{t('menu.continue')}</button>}
+            <HowToPlayButton className="btn btn-lg" label={`📖 ${t('menu.howto')}`} />
           </div>
-          {meta && <p className="text-xs muted mt-3">שמירה אחרונה: {meta.name} · {meta.party} · תור {meta.turn}</p>}
-          <p className="text-sm mt-5"><a href="/" className="muted" style={{ textDecoration: 'underline' }}>לאתר המשחק</a></p>
+          {meta && <p className="text-xs muted mt-3">{t('menu.last', { name: meta.name, party: meta.party, turn: meta.turn })}</p>}
+          <div className="flex justify-center gap-1.5 mt-5" role="group" aria-label="Language / שפה / اللغة">{LANGS.map((l) => <button key={l.id} className={`btn btn-sm ${getLang() === l.id ? 'btn-blue' : ''}`} aria-pressed={getLang() === l.id} lang={l.id} onClick={() => setLang(l.id)}>{l.name}</button>)}</div>
+          {t('menu.contentNote') && <p className="text-xs muted mt-2">{t('menu.contentNote')}</p>}
+          <p className="text-sm mt-5"><a href="/" className="muted" style={{ textDecoration: 'underline' }}>{t('menu.site')}</a></p>
         </div>
       </div>
     </div>
@@ -83,13 +85,13 @@ export function NewGame({ onBack }: { onBack: () => void }) {
     if (mode === 'real') newGame({ personId: chosen.id, difficulty });
     else newGame({ custom: { name: name.trim() || (gender === 'f' ? 'דנה כהן' : 'דני כהן'), gender, look: look.spec, replaceId: chosen.id }, difficulty });
   };
-  const steps = ['מסלול', 'רשימה', mode === 'real' ? 'פוליטיקאי' : 'את מי מחליפים', 'הגדרות'];
+  const steps = [t('wiz.path'), t('wiz.list'), mode === 'real' ? t('wiz.politician') : t('wiz.replace'), t('wiz.settings')];
 
   return (
     <div className="min-h-screen p-4 flex justify-center">
       <div className="w-full max-w-5xl">
         <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-          <button className="btn btn-ghost btn-sm" onClick={step ? () => setStep(step - 1) : onBack}>→ חזרה</button>
+          <button className="btn btn-ghost btn-sm" onClick={step ? () => setStep(step - 1) : onBack}>{t('wiz.back')}</button>
           <ol className="flex flex-wrap gap-1 text-xs" aria-label="שלבי יצירת משחק">
             {steps.map((t, i) => <li key={t} className={`chip ${i === step ? 'chip-gold' : ''}`} aria-current={i === step ? 'step' : undefined}>{i + 1}. {t}</li>)}
           </ol>
@@ -97,16 +99,16 @@ export function NewGame({ onBack }: { onBack: () => void }) {
 
         {step === 0 && (
           <div className="rise">
-            <h1 className="screen-title mb-1">איך נכנסים לפוליטיקה?</h1>
-            <p className="h-sub mb-4">כל המפלגות, הרשימות והאנשים לפי המצב בספטמבר 2026.</p>
+            <h1 className="screen-title mb-1">{t('wiz.howEnter')}</h1>
+            <p className="h-sub mb-4">{t('wiz.howEnterSub')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <button className={`card card-hover text-right ${mode === 'real' ? 'card-selected' : ''}`} onClick={() => { setMode('real'); setStep(1); }}>
-                <div className="text-xl font-black">פוליטיקאי אמיתי</div>
-                <p className="muted text-sm mt-1">משחקים בתור אחד מחברי הכנסטון והמועמדים. התפקיד ההתחלתי לפי התפקיד האמיתי: ראש ממשלה, שר, יו״ר מפלגה או חבר כנסטון.</p>
+                <div className="text-xl font-black">{t('wiz.real')}</div>
+                <p className="muted text-sm mt-1">{t('wiz.realDesc')}</p>
               </button>
               <button className={`card card-hover text-right ${mode === 'custom' ? 'card-selected' : ''}`} onClick={() => { setMode('custom'); setStep(1); }}>
-                <div className="text-xl font-black">דמות משלך</div>
-                <p className="muted text-sm mt-1">יוצרים פוליטיקאי חדש שתופס את המקום של אחד המועמדים ברשימה – כולל המקום ברשימה והתפקיד שלו.</p>
+                <div className="text-xl font-black">{t('wiz.custom')}</div>
+                <p className="muted text-sm mt-1">{t('wiz.customDesc')}</p>
               </button>
             </div>
           </div>
@@ -114,8 +116,8 @@ export function NewGame({ onBack }: { onBack: () => void }) {
 
         {step === 1 && (
           <div className="rise">
-            <h1 className="screen-title mb-1">באיזו רשימה?</h1>
-            <p className="h-sub mb-4">ממוצע הסקרים האחרונים לפני הבחירות, ומספר המושבים בכנסטון היוצא.</p>
+            <h1 className="screen-title mb-1">{t('wiz.whichList')}</h1>
+            <p className="h-sub mb-4">{t('wiz.whichListSub')}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {PARTIES.map((p) => (
                 <button key={p.id} onClick={() => { setPartyId(p.id); setPersonId(null); setStep(2); }} className={`card card-hover text-right ${partyId === p.id ? 'card-selected' : ''}`} style={{ borderInlineStart: `6px solid ${p.color}` }}>
@@ -155,7 +157,7 @@ export function NewGame({ onBack }: { onBack: () => void }) {
             </div>
             <div className="flex justify-between items-center mt-4 gap-3 flex-wrap">
               <span className="text-sm muted">{chosen ? `${chosen.name} · ${chosen.bio ?? ROLE_TEXT(chosen)} · מתחילים בתור: ${START_AS(chosen)}` : 'בחרו מהרשימה'}</span>
-              <button className="btn btn-primary" disabled={!chosen} onClick={() => setStep(3)}>המשך</button>
+              <button className="btn btn-primary" disabled={!chosen} onClick={() => setStep(3)}>{t('wiz.continue')}</button>
             </div>
           </div>
         )}
@@ -187,7 +189,7 @@ export function NewGame({ onBack }: { onBack: () => void }) {
                 </>
               )}
               <div>
-                <div className="label mb-2">רמת קושי</div>
+                <div className="label mb-2">{t('wiz.difficulty')}</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {Object.values(DIFFICULTIES).map((d) => (
                     <button key={d.id} className={`inset text-right ${difficulty === d.id ? 'card-selected' : ''}`} aria-pressed={difficulty === d.id} onClick={() => setDifficulty(d.id)}>
@@ -208,7 +210,7 @@ export function NewGame({ onBack }: { onBack: () => void }) {
               <div className="chip chip-gold">{START_AS(chosen)}</div>
               <div className="text-sm muted">{party.name} · {chosen.rank ? `מקום ${chosen.rank} ברשימה` : 'לא ברשימה'}</div>
               {mode === 'custom' && <div className="text-xs muted">תופס/ת את המקום של {chosen.name}</div>}
-              <button className="btn btn-primary btn-lg w-full mt-auto" onClick={start}>התחלת המשחק</button>
+              <button className="btn btn-primary btn-lg w-full mt-auto" onClick={start}>{t('wiz.start')}</button>
             </div>
           </div>
         )}

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { t } from '../../shared/i18n';
 
 const KEY = 'hakise.disclaimer.v2';
 const seen = () => { try { return localStorage.getItem(KEY) === '1'; } catch { return false; } };
@@ -18,17 +19,17 @@ export function Disclaimer() {
     <div className="backdrop" style={{ zIndex: 80 }} onKeyDown={(e) => { if (e.key === 'Escape') close(); }}>
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="disclaimer-title" style={{ maxWidth: 520 }}>
         <div className="p-6 space-y-3">
-          <h2 id="disclaimer-title" className="text-2xl font-black">לפני שמתחילים</h2>
-          <p className="leading-relaxed">ממשלת ישמעאל הוא משחק סימולציה וסאטירה פוליטית. המשחק משתמש בשמות של מפלגות ואנשי ציבור אמיתיים ובאירועים מהמציאות, אבל ההחלטות, הציטוטים, התגובות והתוצאות במשחק הם סימולציה בלבד. הם אינם מייצגים את עמדותיהם, מעשיהם או כוונותיהם של האנשים והמפלגות.</p>
-          <p className="leading-relaxed">הקריקטורות והאפשרויות במשחק הן חלק מהמשחק ואינן מרמזות דבר על אף אדם. השמות "ישמעאל" ו"כנסטון" הם שמות בדיוניים.</p>
-          <p className="leading-relaxed">המשחק לא נועד לפגוע באף אדם, ציבור או מגזר, ואינו מביע עמדה פוליטית או ממליץ להצביע לאף מפלגה.</p>
-          <p className="text-sm muted">המשך המשחק מהווה הסכמה ל<a href="/terms/" style={{ textDecoration: 'underline' }}>תנאי השימוש</a>.</p>
+          <h2 id="disclaimer-title" className="text-2xl font-black">{t('disc.title')}</h2>
+          <p className="leading-relaxed">{t('disc.p1')}</p>
+          <p className="leading-relaxed">{t('disc.p2')}</p>
+          <p className="leading-relaxed">{t('disc.p3')}</p>
+          <p className="text-sm muted"><a href="/terms/" style={{ textDecoration: 'underline' }}>{t('disc.terms')}</a></p>
           <label className="flex items-center gap-2 text-sm" style={{ cursor: 'pointer' }}>
             <input type="checkbox" checked={remember} onChange={(e) => setRemember(e.target.checked)} />
-            אל תציג שוב
+            {t('disc.dontShow')}
           </label>
           <div className="flex justify-end">
-            <button ref={btn} className="btn btn-primary" onClick={close}>הבנתי, אפשר להתחיל</button>
+            <button ref={btn} className="btn btn-primary" onClick={close}>{t('disc.ok')}</button>
           </div>
         </div>
       </div>

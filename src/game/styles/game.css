@@ -297,3 +297,5 @@ input[type=text], input[type=password], select, textarea { border-color: #cfd8e6
 .stamp { transform: none; }
 .breaking { background: linear-gradient(90deg, #8a1c2c, #b3263a); animation: none; }
 .h-title > span:first-child { background: linear-gradient(145deg, #3463b3, #1b3f7a); box-shadow: 0 3px 0 #0f2547, 0 6px 12px -6px rgba(15, 31, 61, .6); }
+/* English interface: Hebrew content paragraphs keep their own (right-to-left) direction */
+html[dir=ltr] :is(p, li, h1, h2, h3, figcaption, .bubble, .text-sm, .text-xs, .h-title, .label, b, .chip, option) { unicode-bidi: plaintext; }
