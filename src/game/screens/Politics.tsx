@@ -247,7 +247,7 @@ export function LawsScreen() {
 
 const AXES: { k: keyof Ideology; neg: string; pos: string }[] = [
   { k: 'economic', neg: 'שמאל כלכלי', pos: 'ימין כלכלי' },
-  { k: 'security', neg: 'יוני', pos: 'ניצי' },
+  { k: 'security', neg: 'הסדר מדיני', pos: 'הרתעה וכוח' },
   { k: 'religion', neg: 'חילוני', pos: 'דתי' },
 ];
 
