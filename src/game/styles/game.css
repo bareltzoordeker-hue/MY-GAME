@@ -303,3 +303,7 @@ html[dir=ltr] :is(p, li, h1, h2, h3, figcaption, .bubble, .text-sm, .text-xs, .h
 /* full names: the cabinet table lets names wrap */
 .cabinet > button { min-width: 92px; max-width: 108px; transform: none; }
 .cabinet > button:hover { transform: translateY(-3px); }
+/* long labels (promises, strategies, operations) wrap instead of pushing the page wider than the screen */
+.btn { max-width: 100%; }
+@media (max-width: 640px) { .btn { white-space: normal; text-align: center; line-height: 1.3; } }
+.masthead .btn { white-space: nowrap; }

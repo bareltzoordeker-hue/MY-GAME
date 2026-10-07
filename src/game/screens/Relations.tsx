@@ -25,7 +25,7 @@ function PartyMap({ s, selected, onSelect }: { s: GameState; selected: string; o
     if (Math.abs(v) >= (touches ? 10 : 35)) edges.push({ a: parties[i].id, b: parties[j].id, v });
   }
   return (
-    <svg viewBox="0 0 600 520" className="w-full" style={{ maxHeight: 520 }} role="img" aria-label="מפת היחסים בין המפלגות. רשימה מפורטת מופיעה לצד המפה.">
+    <svg viewBox="0 0 600 520" className="w-full" style={{ maxHeight: 520 }} role="group" aria-label="מפת היחסים בין המפלגות. רשימה מפורטת מופיעה לצד המפה.">
       {edges.map((e) => {
         const touches = e.a === selected || e.b === selected;
         return <line key={`${e.a}-${e.b}`} x1={pos[e.a].x} y1={pos[e.a].y} x2={pos[e.b].x} y2={pos[e.b].y}

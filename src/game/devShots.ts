@@ -32,3 +32,15 @@ export function runShotMode(): void {
   st2.textContent = '.advisor-fab .bubble{display:none!important}';
   document.head.appendChild(st2);
 }
+
+/** DEV ONLY: window.__axe() runs axe-core on the current page. */
+(window as unknown as { __axe: () => Promise<unknown> }).__axe = async () => {
+  const axe = (await import('axe-core')).default;
+  const r = await axe.run(document, { runOnly: ['wcag2a', 'wcag2aa'] });
+  return r.violations.map((v) => ({ id: v.id, impact: v.impact, n: v.nodes.length, sample: v.nodes[0]?.target?.join(' ') }));
+};
+(window as unknown as { __goto: (s: string, p?: string) => void }).__goto = (screen, person) => {
+  useGame.getState().openChat?.(null);
+  if (person) useGame.getState().openChat(person);
+  useGame.setState({ screen: screen as ScreenId });
+};
