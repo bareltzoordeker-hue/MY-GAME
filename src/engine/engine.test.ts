@@ -232,7 +232,7 @@ describe('role-appropriate decisions', () => {
         assertSane(r.state);
       }
     }
-  });
+  }, 30000); // runs every action of every ministry: slow when the whole suite runs in parallel
   it('media and PM drama actions run cleanly', () => {
     const ids: [string, Record<string, string | number>][] = [
       ['press_conference', {}], ['tv_interview', {}], ['tweet_storm', {}], ['visit_region', { regionId: 'negev' }], ['protest_speech', {}],
