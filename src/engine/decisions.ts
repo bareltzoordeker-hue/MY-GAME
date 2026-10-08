@@ -1597,7 +1597,7 @@ def({
   id: 'speaker_mediate', title: 'תיווך בין קואליציה לאופוזיציה', icon: '🤝', category: 'parliament', level: 'medium', capital: 6, cooldown: 2,
   description: 'פגישה משותפת להורדת המתחים. מעלה את יציבות הממשלה ואת המוניטין שלך.',
   unavailable: speakerOnly,
-  run: (s) => { applyEffects(s, { stability: 4, playerReputation: 3 }); return { title: 'הצלחת להרגיע את המליאה', quip: 'שני הצדדים יצאו וטענו שניצחו.' }; },
+  run: (s) => { s.flags.speakerMediations = (s.flags.speakerMediations ?? 0) + 1; applyEffects(s, { stability: 4, playerReputation: 3 }); return { title: 'הצלחת להרגיע את המליאה', quip: 'שני הצדדים יצאו וטענו שניצחו.' }; },
 });
 def({
   id: 'speaker_debate', title: 'דיון מיוחד במליאה', icon: '🎙️', category: 'parliament', level: 'simple', capital: 4, cooldown: 2,
@@ -1633,7 +1633,7 @@ def({
   id: 'speaker_reform', title: 'רפורמה בתקנון הכנסטון', icon: '📘', category: 'parliament', level: 'major', capital: 10, cooldown: 6,
   description: 'קיצור נאומים, שקיפות בהצבעות ושידור הוועדות. מוניטין גבוה ויציבות.',
   unavailable: speakerOnly,
-  run: (s) => { applyEffects(s, { playerReputation: 5, stability: 3 }); return { title: 'תקנון הכנסטון עודכן', quip: 'הנאומים התקצרו. כמעט.' }; },
+  run: (s) => { s.flags.speakerReform = 1; applyEffects(s, { playerReputation: 5, stability: 3 }); return { title: 'תקנון הכנסטון עודכן', quip: 'הנאומים התקצרו. כמעט.' }; },
 });
 
 export const ACTIONS: Record<string, ActionDef> = Object.fromEntries(A.map((a) => [a.id, a]));

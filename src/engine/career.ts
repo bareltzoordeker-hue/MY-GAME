@@ -1,3 +1,5 @@
+import { careerGoals } from './aftermath';
+import { isSpeaker } from './roles';
 import type { GameOverInfo, GameState, Role } from '../types/game';
 import { N } from './ai/narrative';
 import { roleLabel } from './newGame';
@@ -38,6 +40,9 @@ export function updateCareer(s: GameState, months = 4): void {
   add(s.government.approval > 62 && s.player.role === 'pm', 'שביעות רצון מעל 62%');
   add(s.career.lawsPassed >= 5, 'חמישה חוקים שהעביר');
   add(s.politicians[s.player.politicianId].popularity > 65, 'הפוליטיקאי הפופולרי במדינה');
+  const goals = careerGoals(s);
+  add(isSpeaker(s) && goals.every((g) => g.done), 'יו״ר כנסטון מצטיין');
+  add(s.career.roleHistory.some((r) => r.role === 'mk') && s.career.roleHistory.some((r) => r.role === 'minister' || r.role === 'pm'), 'מחבר כנסטון לשולחן הממשלה');
 }
 
 export function setGameOver(s: GameState, reason: GameOverInfo['reason'], title: string, text?: string): void {

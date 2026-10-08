@@ -35,6 +35,7 @@ import { isPM } from './roles';
 import { growNeeds, simulateServices } from './services';
 import { generateDrama } from './drama';
 import { slideDeadlines } from './deadlines';
+import { lawAftermathTick, warTick } from './aftermath';
 import { simulateAlliances } from './alliances';
 
 export function canAdvance(s: GameState): string | null {
@@ -89,6 +90,8 @@ export function advanceTurn(s0: GameState): GameState {
   if (!(s.government.caretaker && s.elections.phase === 'none')) for (let i = 0; i < Math.max(1, Math.round(steps)); i++) simulateParliament(s); // a dissolved Knesseton does not legislate
 
   capitalIncome(s, steps);
+  warTick(s);
+  lawAftermathTick(s);
 
   // discrete events: once per turn, with chance scaled to the turn's length
   const events = Math.min(2, steps);

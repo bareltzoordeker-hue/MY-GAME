@@ -1,3 +1,4 @@
+import { registerLaw } from './aftermath';
 import { LAW_BY_ID, type LawDef } from '../data/laws';
 import { MAJORITY } from '../data/world';
 import { pick } from './rng';
@@ -93,6 +94,7 @@ export function lawEffectsScale(bill: Bill) {
 export function enactLaw(s: GameState, law: LawDef, k = 1): void {
   if (s.activeLaws.includes(law.id)) return;
   s.activeLaws.push(law.id);
+  registerLaw(s, law);
   for (const [g, v] of Object.entries(law.groups)) {
     const st = s.population.groups[g as GroupId];
     st.offset += (v ?? 0) * k * 0.7;

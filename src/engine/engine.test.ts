@@ -742,3 +742,46 @@ describe('chat lobbying', () => {
     expect(pm.memory.some((m) => m.text.includes('דיבר איתי בעד'))).toBe(true);
   });
 });
+
+describe('aftermath: war, laws, projects, goals', () => {
+  it('a war is felt turn after turn: casualties, rally, fatigue, international pressure', async () => {
+    const { warTick } = await import('./aftermath');
+    const s = createGame(cfg('pm'));
+    s.world!.fronts.gaza.status = 'fighting';
+    s.world!.fronts.gaza.threat = 80;
+    const usa0 = s.world!.channels.usa;
+    warTick(s);
+    expect(s.flags.warTurns).toBe(1);
+    expect(s.news.some((n) => n.headline.includes('התלכדות'))).toBe(true);
+    s.turn += 1; warTick(s); s.turn += 1; warTick(s);
+    expect(s.flags.warTurns).toBe(3);
+    expect(s.world!.channels.usa).toBeLessThan(usa0);
+    expect(s.inbox.some((i) => i.kind === 'war_pressure')).toBe(true);
+    s.world!.fronts.gaza.status = 'ceasefire';
+    s.crises = s.crises.filter((c) => c.defId !== 'war');
+    warTick(s);
+    expect(s.flags.warTurns).toBe(0);
+    expect(s.news.some((n) => n.headline.includes('המלחמה הסתיימה'))).toBe(true);
+  });
+  it('a law that passed keeps making news in the following turns', async () => {
+    const { enactLaw } = await import('./parliament');
+    const { lawAftermathTick } = await import('./aftermath');
+    const { LAW_BY_ID } = await import('../data/laws');
+    const s = createGame(cfg('pm'));
+    enactLaw(s, LAW_BY_ID.draft_equality);
+    expect(s.aftermath?.length).toBe(1);
+    const n0 = s.news.length;
+    s.turn += 1; lawAftermathTick(s);
+    expect(s.news.length).toBeGreaterThan(n0);
+    expect(s.news.some((n) => n.headline.includes('מפגינים') || n.headline.includes('מברכים'))).toBe(true);
+  });
+  it('every role has goals with progress', async () => {
+    const { careerGoals } = await import('./aftermath');
+    for (const role of ['pm', 'minister', 'mk', 'candidate'] as const) {
+      const s = createGame(cfg(role, role === 'minister' ? { ministryId: 'transport' } : {}));
+      const goals = careerGoals(s);
+      expect(goals.length, role).toBeGreaterThanOrEqual(3);
+      for (const g of goals) expect(g.progress.length).toBeGreaterThan(0);
+    }
+  });
+});

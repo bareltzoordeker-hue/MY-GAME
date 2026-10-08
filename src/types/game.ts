@@ -614,6 +614,8 @@ export interface GameState {
   eventLog: TurnEvent[]; // long-term notable events
   briefing: Briefing | null;
   flags: Record<string, number>; // generic cooldowns / counters
+  /** laws that passed recently: their consequences unfold over the next turns */
+  aftermath?: { lawId: string; turn: number; stage?: number }[];
   gameOver: GameOverInfo | null;
   nextId: number;
 }

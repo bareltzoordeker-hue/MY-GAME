@@ -1,3 +1,4 @@
+import { careerGoals } from '../../engine/aftermath';
 import { useMemo, useState } from 'react';
 import { LANGS, getLang, setLang, t } from '../../shared/i18n';
 import { adviseCrisis } from '../../engine/advisorPlus';
@@ -204,6 +205,9 @@ export function CareerScreen() {
           <div className="mt-4 pt-3 border-t" style={{ borderColor: 'var(--line)' }}><ActionButton id="resign" className="btn btn-sm btn-danger" confirm="להתפטר? זה סוף המשחק.">🚪 התפטרות</ActionButton></div>
         </Section>
       </div>
+      <Section title="המטרות שלך בתפקיד" icon="🎯">
+        <ul className="text-sm space-y-1">{careerGoals(s).map((g) => <li key={g.text} className={g.done ? 'good' : ''}>{g.done ? '✅' : '⬜'} {g.text} <span className="muted num">({g.progress})</span></li>)}</ul>
+      </Section>
       <Section title="מסלול ורגעים" icon="📸">
         <ul className="text-sm space-y-1">{c.roleHistory.map((r, i) => <li key={i}>🎖️ {r.label} (תור {r.turn})</li>)}{c.memorable.slice(-8).map((m, i) => <li key={'m' + i}>📸 {m}</li>)}{c.achievements.map((a) => <li key={a}>🏆 {a}</li>)}</ul>
       </Section>

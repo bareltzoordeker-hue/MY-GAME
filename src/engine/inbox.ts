@@ -1,5 +1,6 @@
+import { repealLaw } from './parliament';
 import { LAW_BY_ID } from '../data/laws';
-import { rand } from './rng';
+import { rand, chance } from './rng';
 import type { ActionResult, BudgetCategory, GameState, InboxItem, Reaction } from '../types/game';
 import { clamp, clone } from '../utils';
 import { setGameOver, setRole, syncRole } from './career';
@@ -180,6 +181,37 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
         return R(`איחוד עם ${other.name}`, 'approved', 'יו״ר המפלגה המצטרפת יקבל את המקום השני ברשימה.');
       }
       return R('דחית את האיחוד', 'info');
+    }
+    case 'war_pressure': {
+      const w = s.world!;
+      if (opt === 'talks') {
+        for (const ch of Object.keys(w.channels)) w.channels[ch] = Math.min(100, w.channels[ch] + 6);
+        applyEffects(s, { groups: { left: 3, center: 2, right: -4, settlers: -3 }, stability: -1 });
+        const ok = chance(s, 0.5);
+        if (ok) for (const f of Object.values(w.fronts)) if (f.status === 'fighting') { f.status = 'ceasefire'; f.ceasefireUntil = s.turn + 3; }
+        addNews(s, ok ? 'הפסקת אש בתיווך בינלאומי נכנסה לתוקף' : 'השיחות על הפסקת אש נכשלו; הלחימה נמשכת', ok ? 'good' : 'neutral', '🕊️');
+        return R(ok ? 'הפסקת אש' : 'השיחות נכשלו', ok ? 'approved' : 'info', ok ? 'הלחימה נעצרה לשלושה תורות לפחות. הימין זועם, העולם מרוצה.' : 'ניסית. העולם ראה שניסית, וזה שווה משהו.');
+      }
+      for (const ch of Object.keys(w.channels)) w.channels[ch] = Math.max(0, w.channels[ch] - 4);
+      applyEffects(s, { groups: { right: 3, settlers: 2, left: -3 }, stability: -1 });
+      addNews(s, 'ישמעאל דחתה את הלחץ הבינלאומי: "נמשיך עד הניצחון"', 'neutral', '💪');
+      return R('המערכה נמשכת', 'info', 'הימין מרוצה. ערוצי התיווך נסגרים לאט.');
+    }
+    case 'court_petition': {
+      const law = LAW_BY_ID[String(it.payload.lawId)];
+      if (!law) return R('העתירה נמחקה', 'info');
+      if (opt === 'defend' && s.player.politicalCapital >= 5) {
+        s.player.politicalCapital -= 5;
+        const stays = chance(s, 0.55);
+        if (stays) { applyEffects(s, { groups: { right: 2 }, playerReputation: 1 }); addNews(s, `בג״ץ דחה את העתירה נגד ${law.title}`, 'good', '⚖️'); return R('החוק נשאר על כנו', 'approved', 'בית המשפט לא התערב. התומכים חוגגים.'); }
+        repealLaw(s, law);
+        applyEffects(s, { groups: { liberals: 3, left: 2, right: -4 }, stability: -3 });
+        addNews(s, `בג״ץ פסל את ${law.title}`, 'bad', '⚖️');
+        return R('החוק נפסל', 'rejected', 'הימין קורא "הפיכה משפטית". החוק ירד מספר החוקים.');
+      }
+      applyEffects(s, { groups: { liberals: 2, center: 1, right: -2 }, stability: 2 });
+      addNews(s, `${law.title} תוקן בעקבות העתירה`, 'neutral', '✏️');
+      return R('החוק תוקן', 'info', 'העתירה נמחקה. החוק נשאר, בגרסה רכה יותר.');
     }
     case 'commitment_reminder':
       return R('התזכורת נרשמה', 'info', 'את כל ההתחייבויות והמועדים אפשר לראות במסך הממשלה.');

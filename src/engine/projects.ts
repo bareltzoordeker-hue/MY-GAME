@@ -1,3 +1,4 @@
+import { projectCeremony, projectDelayed, projectStarted } from './aftermath';
 import { PROJECT_BY_ID } from '../data/projects';
 import { chance } from './rng';
 import type { GameState, Project } from '../types/game';
@@ -14,6 +15,7 @@ export function startProject(s: GameState, defId: string, sponsorId: string): Pr
   };
   s.projects.push(p);
   if (sponsorId === s.player.politicianId) s.career.moneyInvested += def.cost;
+  projectStarted(s, p.id);
   refreshFiscals(s);
   addNews(s, `יוצא לדרך: ${def.name} (₪${def.cost} מיליארד)`, 'neutral', def.icon);
   return p;
@@ -42,6 +44,7 @@ export function simulateProjects(s: GameState): void {
       p.durationTurns += 1;
       p.totalCost *= 1.04;
       if (p.delays === 2) addNews(s, `${p.name}: עיכוב נוסף וחריגה בתקציב`, 'bad', '🐌');
+      projectDelayed(s, p.id);
     } else {
       p.progress = clamp((p.turnsElapsed / p.durationTurns) * 100);
     }
@@ -55,6 +58,7 @@ export function simulateProjects(s: GameState): void {
       st.infrastructure = clamp(st.infrastructure + 6);
       addNews(s, `נחנך: ${p.name}${p.delays ? ` (באיחור של ${p.delays * 2} חודשים)` : ''}`, 'good', '✂️');
       logEvent(s, '🎀', `הפרויקט "${p.name}" הושלם`, 2, 'good', 'project');
+      projectCeremony(s, p.id);
       if (p.sponsorId === s.player.politicianId) {
         s.career.memorable.push(`חנך את ${p.name}`);
         s.player.reputation = clamp(s.player.reputation + 4);
