@@ -647,3 +647,39 @@ describe('bills in short turns', () => {
     expect(b.stage).not.toBe('preliminary');
   });
 });
+
+describe('chat brain', () => {
+  it('finds ministries, parses a two-sided deal and closes it', async () => {
+    const { createGame } = await import('./newGame');
+    const { matchMinistry, parseDeal, sendChat } = await import('./chat');
+    const { LAWS } = await import('../data/laws');
+    const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, role: 'pm', partyId: 'likud' });
+    expect(matchMinistry(s, 'תן לי את תיק החינוך')?.id).toBe('education');
+    expect(matchMinistry(s, 'המשרד לביטחון לאומי')?.id).toBe('national_security');
+    const t = Object.values(s.politicians).find((p) => p.active && !p.isPlayer && p.id !== s.government.pmId && s.parties[p.partyId]?.favoriteLaws.some((l) => !s.activeLaws.includes(l)))!;
+    const party = s.parties[t.partyId];
+    const fav = party.favoriteLaws.find((l) => !s.activeLaws.includes(l))!;
+    const neutral = LAWS.find((l) => !s.activeLaws.includes(l.id) && !party.favoriteLaws.includes(l.id) && !party.hatedLaws.includes(l.id) && !(party.redLines ?? []).includes(l.id))!;
+    const favT = LAWS.find((l) => l.id === fav)!.title;
+    const text = `אני אקדם את ${favT} אם תתמוך ב${neutral.title}`;
+    const deal = parseDeal(s, text);
+    expect(deal.give?.lawId).toBe(fav);
+    expect(deal.want?.lawId).toBe(neutral.id);
+    sendChat(s, t.id, text);
+    expect(s.chats![t.id].at(-1)!.text).toMatch(/סגור|עסקה/);
+    expect(t.memory.some((m) => m.kind === 'promise' && m.ref === fav)).toBe(true);
+  });
+  it('resolves "זה" from the previous messages', async () => {
+    const { createGame } = await import('./newGame');
+    const { sendChat } = await import('./chat');
+    const { LAWS } = await import('../data/laws');
+    const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 5, role: 'pm', partyId: 'likud' });
+    const t = Object.values(s.politicians).find((p) => p.active && !p.isPlayer && p.id !== s.government.pmId && s.government.coalition.includes(p.partyId))!;
+    const law = LAWS.find((l) => !s.activeLaws.includes(l.id) && l.title.length > 12)!;
+    sendChat(s, t.id, `מה דעתך על ${law.title}?`);
+    sendChat(s, t.id, 'תתמוך בזה?');
+    const last = s.chats![t.id].at(-1)!.text;
+    expect(last).not.toContain('ציין חוק');
+    expect(last).not.toContain('במה בדיוק');
+  });
+});
