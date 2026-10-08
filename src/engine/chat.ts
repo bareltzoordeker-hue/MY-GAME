@@ -17,7 +17,6 @@ import { shiftPartyRelation } from './relations';
 export type Intent = 'threat' | 'promise' | 'request' | 'apology' | 'thanks' | 'insult' | 'question' | 'meet' | 'agree' | 'decline' | 'askwhat' | 'greet' | 'other';
 
 const MAX_CHAT = 60;
-const FREE_PER_TURN = 3;
 
 const PATTERNS: { intent: Intent; re: RegExp }[] = [
   { intent: 'threat', re: /אפיל|אפרסם|אחשוף|אפטר|אפרוש|אעזוב|אשבית|אצביע נגד|אפרק|אנקום|תתחרט|אאיים|איום|אדאג שתיפול|אודיע על|ננתק|אפסיק לתמוך|אסיר/ },
@@ -417,16 +416,6 @@ export function sendChat(s: GameState, targetId: string, text: string): boolean 
   if (!t || !msg || t.isPlayer) return false;
   push(s, targetId, { from: 'me', text: msg });
   markRead(s, targetId);
-  const key = `chat_n_${targetId}`;
-  const n = (s.flags[key] ?? 0) as number;
-  const sameTurn = (s.flags[`${key}_turn`] ?? -1) === s.turn;
-  const count = sameTurn ? n + 1 : 1;
-  s.flags[key] = count;
-  s.flags[`${key}_turn`] = s.turn;
-  if (count > FREE_PER_TURN) {
-    push(s, targetId, { from: 'them', text: 'דיברנו כבר הרבה היום. בוא נמשיך בתור הבא.' });
-    return true;
-  }
   const r = handle(s, t, msg);
   push(s, targetId, { from: 'them', text: r.text, hint: r.hint });
   markRead(s, targetId);
