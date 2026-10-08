@@ -443,3 +443,10 @@
 אני לא מסתיר: {}. אם זה יגיע, טוב. אם לא, גם בסדר. ||| I don't hide it: {0}. If it comes, good. If not, that's fine too. ||| لا أخفي ذلك: {0}. إن جاء فحسن، وإن لم يأتِ فلا بأس.
 {}? זה לא בידיים שלי. דבר עם {} או עם יו״ר הסיעה שלך. ||| {0}? That's not in my hands. Talk to {1} or to your faction chair. ||| {0}؟ هذا ليس بيدي. تحدث مع {1} أو مع رئيس كتلتك.
 אתה מציע לי {}, אבל אתה לא זה שממנה. כשתוכל להבטיח את זה באמת, נדבר. ||| You're offering me {0}, but you're not the one who appoints. When you can really promise it, we'll talk. ||| تعرض عليّ {0}، لكنك لست من يعيّن. حين تستطيع أن تعد بذلك فعلًا، سنتحدث.
+בסדר, אדבר עם {} על {}. אני לא מבטיח תוצאה, אבל המילה שלי שווה שם משהו. ||| Fine, I'll talk to {0} about {1}. I can't promise a result, but my word counts for something there. ||| حسنًا، سأتحدث مع {0} بشأن {1}. لا أعد بنتيجة، لكن كلمتي لها وزن هناك.
+אעלה את זה בפני {}. {} זה דבר שאפשר להסביר, ואני אסביר. ||| I'll raise it with {0}. {1} is something that can be explained, and I will explain it. ||| سأطرح الأمر على {0}. {1} أمر يمكن شرحه، وسأشرحه.
+שאדבר עם {} בשבילך? אחרי מה שהיה בינינו, לא. ||| Talk to {0} for you? After what happened between us, no. ||| أتحدث مع {0} من أجلك؟ بعد ما جرى بيننا، لا.
+{} לא מקשיב לי בימים אלה. אם אדבר איתו, זה רק יזיק לך. תנסה דרך מישהו אחר. ||| {0} isn't listening to me these days. If I talk to him it will only hurt you. Try someone else. ||| {0} لا يصغي إليّ هذه الأيام. إن تحدثت معه فسيضرك ذلك فقط. جرّب عبر شخص آخر.
+תוספת תקציב ל{} ||| a budget increase for {0} ||| زيادة ميزانية لـ{0}
+קידום {} ||| advancing {0} ||| دفع {0}
+{} שמע ממנו מילה טובה: היחס שלו אליך השתפר (+{}). זה מעלה את הסיכוי לאישורים. ||| {0} heard a good word from him: his attitude to you improved (+{1}). That raises the chance of approvals. ||| {0} سمع منه كلمة طيبة: تحسّن موقفه منك (+{1}). هذا يرفع فرص الموافقات.

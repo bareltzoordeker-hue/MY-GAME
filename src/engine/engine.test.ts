@@ -722,3 +722,23 @@ describe('every ministry is complete', () => {
     expect(lawAllowed(k, LAWS.find((l) => l.ministries?.includes('defense'))!)).toBe(false);
   });
 });
+
+describe('chat lobbying', () => {
+  it('a minister asks a colleague to press the PM for budget: understood, and the PM warms up', async () => {
+    const { createGame } = await import('./newGame');
+    const { sendChat, parseDeal } = await import('./chat');
+    const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, personId: 'likud_14' }); // שר התפוצות
+    expect(s.player.role).toBe('minister');
+    const t = Object.values(s.politicians).find((p) => p.active && !p.isPlayer && p.id !== s.government.pmId && s.government.coalition.includes(p.partyId) && p.loyalty >= 35)!;
+    const pm = s.politicians[s.government.pmId];
+    const before = pm.loyalty;
+    const d = parseDeal(s, 'אני בעד, בתמורה לחץ על הגדלת התקציב למשרד התפוצות');
+    expect(d.want?.kind).toBe('budget');
+    sendChat(s, t.id, 'לחץ על ראש הממשלה להגדלת התקציב');
+    const last = s.chats![t.id].at(-1)!.text;
+    expect(last).toContain(pm.name);
+    expect(last).not.toContain('עניין של ראש הממשלה ושל שר האוצר');
+    expect(pm.loyalty).toBeGreaterThan(before);
+    expect(pm.memory.some((m) => m.text.includes('דיבר איתי בעד'))).toBe(true);
+  });
+});

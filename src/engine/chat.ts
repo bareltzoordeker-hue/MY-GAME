@@ -384,14 +384,17 @@ interface DealSide { kind: 'law' | 'role' | 'budget' | 'support'; lawId?: string
 export interface Deal { give: DealSide | null; want: DealSide | null }
 
 const GIVE_RE = /אתן|אמנה|אעביר|אקדם|אתמוך|אצביע|אאשר|תקבל|תקבלי|יהיה לך|אדאג|אקצה|אוסיף|אבטיח|מבטיח|אני נותן|אני מציע|אתה מקבל|את מקבלת|אעזור|אשמור/;
-const WANT_RE = /תתמוך|תתמכי|תצביע|תצביעי|תעזור|תעזרי|תן לי|תני לי|תיתן לי|תיתני לי|תמנה אותי|תסכים|תסכימי|תצטרף|תצטרפי|אני רוצה|אני צריך|אני צריכה|תעביר|תקדם|תפסיק|תסיר|תסגור|תהיה איתי|תישאר|תישארי|תוותר|תמשוך|אבקש|מבקש|מבקשת/;
+const WANT_RE = /לחץ|תלחץ|תדבר עם|דבר עם|תשכנע|שכנע|תעזור לי|תגיד ל|תפעיל|תתמוך|תתמכי|תצביע|תצביעי|תעזור|תעזרי|תן לי|תני לי|תיתן לי|תיתני לי|תמנה אותי|תסכים|תסכימי|תצטרף|תצטרפי|אני רוצה|אני צריך|אני צריכה|תעביר|תקדם|תפסיק|תסיר|תסגור|תהיה איתי|תישאר|תישארי|תוותר|תמשוך|אבקש|מבקש|מבקשת/;
 const ROLE_RE = /תיק|שר\b|שרה\b|סגן|ועדה|תפקיד|ראשות|משרד/;
 const SUPPORT_RE = /תמיכה|תתמוך|תתמכי|תצביע|תצביעי|בעד|הצבעה|קואליציה|תישאר|תישארי/;
 
 function sideOf(s: GameState, seg: string): DealSide | null {
+  const m = matchMinistry(s, seg);
+  // money without the word "law": a budget, even if some law title shares a word or two
+  if (mentionsMoney(seg) && !/חוק|רפורמ/.test(seg)) return { kind: 'budget', ministryId: m?.id, text: seg };
   const law = matchLaw(seg);
   if (law) return { kind: 'law', lawId: law.id, text: seg };
-  const m = matchMinistry(s, seg);
+  if (mentionsMoney(seg)) return { kind: 'budget', ministryId: m?.id, text: seg };
   if (m && ROLE_RE.test(seg)) return { kind: 'role', ministryId: m.id, text: seg };
   if (ROLE_RE.test(seg)) return { kind: 'role', text: seg };
   if (mentionsMoney(seg)) return { kind: 'budget', ministryId: m?.id, text: seg };
@@ -482,6 +485,28 @@ function negotiate(s: GameState, t: Politician, deal: Deal): Reply {
   return { text: v === 0 ? `${name(give)} לא שווה לי הרבה. בשביל ${name(want)} תצטרך להציע משהו ש${party?.shortName ?? 'הסיעה'} באמת רוצה.` : `על ${name(want)} אני לא מוכן ללכת בשביל ${name(give)}. תציע יותר.` };
 }
 
+const LOBBY_RE = /לחץ|תלחץ|תדבר עם|דבר עם|תשכנע|שכנע|תפעיל|תעזור לי מול|תגיד ל/;
+const PM_RE = /ראש הממשלה|רה״מ|רה"מ|ראש ממשלה|שר האוצר/;
+
+/** "לחץ על ראש הממשלה להגדיל את התקציב שלי": the politician agrees (or not) to put in a word, and the PM remembers it. */
+function lobby(s: GameState, t: Politician, text: string): Reply | null {
+  if (!LOBBY_RE.test(text)) return null;
+  const target = PM_RE.test(text) ? s.politicians[s.government.pmId] : matchPolitician(s, text, t.id);
+  if (!target || target.id === t.id) return null;
+  const tn = tone(t);
+  const m = matchMinistry(s, text) ?? s.government.ministries.find((x) => x.ministerId === s.player.politicianId);
+  const law = matchLaw(text);
+  const subject = law ? `קידום ${law.title}` : mentionsRole(text) ? 'תפקיד בשבילך' : mentionsMoney(text) ? `תוספת תקציב ל${m?.name ?? 'המשרד שלך'}` : 'העניין שלך';
+  if (tn === 'hostile') return { text: `שאדבר עם ${target.name} בשבילך? אחרי מה שהיה בינינו, לא.`, hint: 'הוא לא ישתדל בשבילך כל עוד היחסים גרועים.' };
+  const rel = t.relationships[target.id] ?? 0;
+  if (rel < -30) return { text: `${target.name} לא מקשיב לי בימים אלה. אם אדבר איתו, זה רק יזיק לך. תנסה דרך מישהו אחר.` };
+  const weight = tn === 'friendly' ? 4 : 2;
+  remember(s, target.id, 'support', `${t.name} דיבר איתי בעד ${subject}`, weight);
+  remember(s, t.id, 'favor', `השתדל בשבילך אצל ${target.name}`, 2);
+  setTopic(s, t.id, null);
+  return { text: pick(s, [`בסדר, אדבר עם ${target.name} על ${subject}. אני לא מבטיח תוצאה, אבל המילה שלי שווה שם משהו.`, `אעלה את זה בפני ${target.name}. ${subject} זה דבר שאפשר להסביר, ואני אסביר.`]), hint: `${target.name} שמע ממנו מילה טובה: היחס שלו אליך השתפר (+${weight}). זה מעלה את הסיכוי לאישורים.` };
+}
+
 /** Instead of "לא הבנתי": a focused question built from whatever was recognizable. */
 function clarify(s: GameState, t: Politician, text: string, tn: ReturnType<typeof tone>): Reply {
   const words = tokens(text);
@@ -522,7 +547,10 @@ function handleRaw(s: GameState, t: Politician, text: string): Reply {
   const law = matchLaw(text) ?? (REFERS_BACK.test(text) ? ctx.law : null);
   // a full deal in one sentence ("אתמוך ב-X אם תיתן לי Y"): answer both parts
   const deal = parseDeal(s, text);
-  if (deal.give && deal.want) return negotiate(s, t, deal);
+  if (deal.give && deal.want && !(deal.want.kind === 'budget' && t.id !== s.government.pmId)) return negotiate(s, t, deal);
+  // "לחץ על ראש הממשלה בשביל התקציב שלי": a lobbying request, also as the price of a deal
+  const lobbied = lobby(s, t, text);
+  if (lobbied) return lobbied;
   const threaded = dialog(s, t, intent, law, text);
   if (threaded) return threaded;
   const fresh = (intent === 'other' || intent === 'question' || TALK_INTENTS.includes(intent) || intent === 'decline' || intent === 'later' || intent === 'conditional' || intent === 'maybe') ? true : once(s, t.id, `${intent}:${law?.id ?? ''}`);
