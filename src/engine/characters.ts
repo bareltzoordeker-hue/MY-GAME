@@ -113,7 +113,8 @@ export function capitalIncome(s: GameState, steps: number): void {
   const d = DIFFICULTIES[s.difficulty];
   const me = s.politicians[s.player.politicianId];
   const gain = { pm: 6, candidate: 5, minister: 4, mk: 3 }[s.player.role] * d.capitalGain + (me.popularity - 40) * 0.05 + (s.player.reputation - 40) * 0.03;
-  s.player.politicalCapital = clamp(s.player.politicalCapital + Math.max(1, gain) * Math.max(0.5, steps));
+  // +8 every turn on top, so there is always enough to act on
+  s.player.politicalCapital = clamp(s.player.politicalCapital + Math.max(1, gain) * Math.max(0.5, steps) + 8);
 }
 
 // ---------------- AI initiatives ----------------

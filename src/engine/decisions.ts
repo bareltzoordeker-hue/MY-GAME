@@ -1587,7 +1587,8 @@ export function cooldownLeft(s: GameState, id: string, p: Params = {}): number {
   const key = cooldownKey(id, p);
   return Math.max(0, (s.player.actionCooldowns[key] ?? 0) - s.turn);
 }
-const cooldownKey = (id: string, p: Params) => (p.ministryId ? `${id}_${p.ministryId}` : id);
+// per ministry or per bill: voting on (or pushing) one bill doesn't block the others in the same turn
+const cooldownKey = (id: string, p: Params) => (p.ministryId ? `${id}_${p.ministryId}` : p.billId ? `${id}_${p.billId}` : id);
 
 export function checkAction(s: GameState, id: string, p: Params = {}): string | null {
   const a = ACTIONS[id];

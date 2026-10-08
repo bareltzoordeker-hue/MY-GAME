@@ -122,6 +122,8 @@ interface Reply { text: string; hint?: string }
 // ---------------- conversations with a thread ----------------
 /** Only the prime minister hands out budgets, so only they get budget demands. */
 const isPm = (s: GameState) => s.government.pmId === s.player.politicianId;
+/** Only the prime minister or a party leader hands out jobs, so only they get job requests. */
+const canAppoint = (s: GameState) => isPm(s) || s.parties[s.player.partyId]?.leaderId === s.player.politicianId;
 const lawTitle = (id?: string) => LAWS.find((l) => l.id === id)?.title ?? 'החוק';
 const TALK_INTENTS: Intent[] = ['meet', 'agree', 'askwhat', 'greet', 'question', 'thanks'];
 
@@ -158,7 +160,7 @@ function dialog(s: GameState, t: Politician, intent: Intent, law: ReturnType<typ
   switch (topic.kind) {
     case 'unhappy': {
       if (topic.stage === 'opened' && (talk || intent === 'apology' || intent === 'promise')) {
-        const g = topic.demand === 'role' ? { demand: 'role' as const, text: `המטרה שלי היא: ${t.ambitionTarget}. אשמח להבטחה שתתמוך בי כשיגיע הזמן.`, lawId: undefined } : grievance(s, t);
+        const g = topic.demand === 'role' && canAppoint(s) ? { demand: 'role' as const, text: `המטרה שלי היא: ${t.ambitionTarget}. אשמח להבטחה שתתמוך בי כשיגיע הזמן.`, lawId: undefined } : grievance(s, t);
         setTopic(s, t.id, { ...topic, stage: 'explained', demand: g.demand, lawId: g.lawId });
         remember(s, t.id, 'support', 'הקשבת לטענות שלי', 3);
         return { text: `תודה שהקשבת. ${g.text} מה אתה מציע?`, hint: 'הפוליטיקאי פירט את הטענה שלו. אפשר להבטיח, להתנצל או לסרב.' };
@@ -401,10 +403,15 @@ function openings(s: GameState, p: Politician): Opening[] {
   const party = s.parties[p.partyId];
   const pn = party?.shortName ?? 'הסיעה';
   const inGov = s.government.coalition.includes(p.partyId);
-  const open = s.bills.find((b) => b.status === 'active');
+  // each politician cares about a different bill: their party's own first, otherwise one picked per person
+  const active = s.bills.filter((b) => b.status === 'active');
+  const own = active.filter((b) => party?.favoriteLaws.includes(b.lawId));
+  const pool = own.length ? own : active;
+  const open = pool.length ? pool[Math.floor(side(s, `bill${p.id}`) * pool.length)] : undefined;
   const campaign = s.campaign?.electionDay !== undefined;
   const ministry = p.ministryId ? s.government.ministries.find((m) => m.id === p.ministryId)?.name : undefined;
-  const fav = party?.favoriteLaws[0];
+  const favs = party?.favoriteLaws.filter((l) => !s.activeLaws.includes(l)) ?? [];
+  const fav = favs.length ? favs[Math.floor(side(s, `fav${p.id}`) * favs.length)] : undefined;
   const rival = Object.values(s.politicians).filter((x) => x.active && !x.isPlayer && x.partyId !== p.partyId && x.id !== s.player.politicianId && x.power > 40);
   const out: Opening[] = [];
   const add = (text: string, topic?: Opening['topic']) => out.push({ text, topic });
@@ -435,7 +442,7 @@ function openings(s: GameState, p: Politician): Opening[] {
   } else {
     if (ministry && isPm(s)) add(`אשמח לפגישה קצרה על ${ministry}. יש כמה נושאים שדורשים החלטה.`, { kind: 'unhappy', demand: 'budget' });
     else if (ministry) add(`אני נלחם על התקציב של ${ministry} מול ראש הממשלה ושר האוצר. אשמח לתמיכה שלך בעניין.`, { kind: 'coop' });
-    if (p.ambitionTarget) add(`אני חושב על הצעד הבא שלי: ${p.ambitionTarget}. אשמח לשמוע מה דעתך.`, { kind: 'unhappy', demand: 'role' });
+    if (p.ambitionTarget && canAppoint(s)) add(`אני חושב על הצעד הבא שלי: ${p.ambitionTarget}. אשמח לשמוע מה דעתך.`, { kind: 'unhappy', demand: 'role' });
     if (fav) add(`${pn} מקדמת את ${lawTitle(fav)}. אולי נוכל לשתף פעולה?`, { kind: 'coop', lawId: fav });
     add('הסקרים זזים. כדאי שנתאם עמדות לפני ההצבעות הבאות.', { kind: 'coop' });
     add('היה לי רעיון בעקבות השיחה האחרונה שלנו. אפשר לדבר?', { kind: 'coop' });

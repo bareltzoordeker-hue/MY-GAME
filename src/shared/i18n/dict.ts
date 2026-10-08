@@ -3,7 +3,7 @@ const he = {
   // navigation
   'nav.dashboard': 'לוח בקרה', 'nav.ministry': 'המשרד שלי', 'nav.state': 'מצב המדינה', 'nav.economy': 'כלכלה', 'nav.budget': 'תקציב',
   'nav.population': 'אוכלוסייה', 'nav.map': 'מפה', 'nav.security': 'ביטחון ומדיניות', 'nav.government': 'ממשלה', 'nav.parliament': 'כנסטון',
-  'nav.laws': 'חוקים', 'nav.relations': 'מפת יחסים', 'nav.chat': 'שיחות', 'nav.party': 'מפלגה ובריתות', 'nav.projects': 'פרויקטים', 'nav.crises': 'משברים',
+  'nav.laws': 'חוקים', 'nav.relations': 'מפת יחסים', 'nav.chat': 'שיחות', 'nav.promises': 'הבטחות', 'nav.party': 'מפלגה ובריתות', 'nav.projects': 'פרויקטים', 'nav.crises': 'משברים',
   'nav.polls': 'סקרים', 'nav.news': 'חדשות', 'nav.advisor': 'היועץ', 'nav.career': 'קריירה', 'nav.save': 'שמירה והגדרות',
   // header
   'hdr.date': 'תאריך', 'hdr.coalition': 'קואליציה', 'hdr.approval': 'שביעות רצון', 'hdr.deficit': 'גירעון', 'hdr.capital': 'הון פוליטי',
@@ -34,7 +34,7 @@ export type Key = keyof typeof he;
 const en: Partial<Record<Key, string>> = {
   'nav.dashboard': 'Dashboard', 'nav.ministry': 'My ministry', 'nav.state': 'State of the country', 'nav.economy': 'Economy', 'nav.budget': 'Budget',
   'nav.population': 'Population', 'nav.map': 'Map', 'nav.security': 'Security & diplomacy', 'nav.government': 'Government', 'nav.parliament': 'Knesseton',
-  'nav.laws': 'Laws', 'nav.relations': 'Relations map', 'nav.chat': 'Chats', 'nav.party': 'Party & alliances', 'nav.projects': 'Projects', 'nav.crises': 'Crises',
+  'nav.laws': 'Laws', 'nav.relations': 'Relations map', 'nav.chat': 'Chats', 'nav.promises': 'Promises', 'nav.party': 'Party & alliances', 'nav.projects': 'Projects', 'nav.crises': 'Crises',
   'nav.polls': 'Polls', 'nav.news': 'News', 'nav.advisor': 'Advisor', 'nav.career': 'Career', 'nav.save': 'Save & settings',
   'hdr.date': 'Date', 'hdr.coalition': 'Coalition', 'hdr.approval': 'Approval', 'hdr.deficit': 'Deficit', 'hdr.capital': 'Political capital',
   'hdr.elections': 'Elections', 'hdr.saved': 'Saved', 'hdr.next': 'Next turn: {span}', 'hdr.speech': 'Speech', 'hdr.menu': 'Menu', 'hdr.seats': 'seats',
@@ -59,7 +59,7 @@ const en: Partial<Record<Key, string>> = {
 const ar: Partial<Record<Key, string>> = {
   'nav.dashboard': 'لوحة القيادة', 'nav.ministry': 'وزارتي', 'nav.state': 'وضع الدولة', 'nav.economy': 'الاقتصاد', 'nav.budget': 'الميزانية',
   'nav.population': 'السكان', 'nav.map': 'الخريطة', 'nav.security': 'الأمن والسياسة', 'nav.government': 'الحكومة', 'nav.parliament': 'الكنيستون',
-  'nav.laws': 'القوانين', 'nav.relations': 'خريطة العلاقات', 'nav.chat': 'المحادثات', 'nav.party': 'الحزب والتحالفات', 'nav.projects': 'المشاريع', 'nav.crises': 'الأزمات',
+  'nav.laws': 'القوانين', 'nav.relations': 'خريطة العلاقات', 'nav.chat': 'المحادثات', 'nav.promises': 'الوعود', 'nav.party': 'الحزب والتحالفات', 'nav.projects': 'المشاريع', 'nav.crises': 'الأزمات',
   'nav.polls': 'الاستطلاعات', 'nav.news': 'الأخبار', 'nav.advisor': 'المستشار', 'nav.career': 'المسيرة', 'nav.save': 'الحفظ والإعدادات',
   'hdr.date': 'التاريخ', 'hdr.coalition': 'الائتلاف', 'hdr.approval': 'الرضا', 'hdr.deficit': 'العجز', 'hdr.capital': 'الرصيد السياسي',
   'hdr.elections': 'الانتخابات', 'hdr.saved': 'محفوظ', 'hdr.next': 'الدور التالي: {span}', 'hdr.speech': 'خطاب', 'hdr.menu': 'القائمة', 'hdr.seats': 'مقاعد',
