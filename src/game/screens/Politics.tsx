@@ -59,7 +59,7 @@ export function PolCard({ p, s, extra }: { p: Politician; s: GameState; extra?: 
 function AgreementSection({ s }: { s: GameState }) {
   const list = (s.government.agreements ?? []).filter((c) => !c.secret || c.status === 'broken');
   if (!list.length) return null;
-  const due = (c: (typeof list)[number]) => c.dueTurn !== undefined ? (c.dueTurn - s.turn > 0 ? `עוד ${c.dueTurn - s.turn} תורות` : 'המועד הגיע') : c.dueDay !== undefined ? `בעוד ${spanText(Math.max(0, c.dueDay - dayNumber(s.date)))}` : '';
+  const due = (c: (typeof list)[number]) => c.dueTurn !== undefined ? (c.dueTurn - s.turn > 0 ? `עוד ${Math.ceil(c.dueTurn - s.turn)} תורות` : 'המועד הגיע') : c.dueDay !== undefined ? `בעוד ${spanText(Math.max(0, c.dueDay - dayNumber(s.date)))}` : '';
   return (
     <Section title="ההסכם הקואליציוני" icon="📜">
       <p className="text-sm muted mb-2">כל מה שהתחייבת אליו מול השותפות. התחייבות שלא תקוים בזמן נחשבת הפרה: השותפה כועסת, היציבות יורדת, ולפעמים היא פורשת.</p>

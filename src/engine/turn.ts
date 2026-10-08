@@ -34,6 +34,7 @@ import { checkPromises } from './promises';
 import { isPM } from './roles';
 import { growNeeds, simulateServices } from './services';
 import { generateDrama } from './drama';
+import { slideDeadlines } from './deadlines';
 import { simulateAlliances } from './alliances';
 
 export function canAdvance(s: GameState): string | null {
@@ -56,6 +57,7 @@ export function advanceTurn(s0: GameState): GameState {
   s.date = nextTurnDate(s);
   const days = daysBetween(prevDate, s.date);
   const steps = stepsForDays(days);
+  slideDeadlines(s, days);
 
   // 2. decisions mature: expired inbox items resolve by default
   expireInbox(s);

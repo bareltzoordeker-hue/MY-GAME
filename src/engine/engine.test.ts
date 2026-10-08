@@ -578,3 +578,26 @@ describe('political capital', () => {
     }
   });
 });
+
+describe('promise deadlines', () => {
+  it('freeze while there is no functioning government, and the open list shows them', async () => {
+    const { createGame } = await import('./newGame');
+    const { slideDeadlines, openPromises } = await import('./deadlines');
+    const { remember } = await import('./effects');
+    const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, role: 'pm', partyId: 'likud' });
+    const other = Object.values(s.politicians).find((p) => p.active && !p.isPlayer)!;
+    remember(s, other.id, 'promise', 'לקדם חוק', 0, s.turn + 2, 'role');
+    const m = () => other.memory.find((x) => x.kind === 'promise')!.deadlineTurn!;
+    const start = m();
+    s.government.caretaker = true;
+    slideDeadlines(s, 122);
+    expect(m()).toBe(start + 1);
+    s.government.caretaker = false;
+    s.elections.phase = 'none';
+    slideDeadlines(s, 14); // a 2-week campaign turn barely moves the clock
+    expect(m()).toBeGreaterThan(start + 1.8);
+    slideDeadlines(s, 122);
+    expect(m()).toBeCloseTo(start + 1 + (1 - 14 / 122), 5);
+    expect(openPromises(s).some((p) => p.toId === other.id && p.role)).toBe(true);
+  });
+});

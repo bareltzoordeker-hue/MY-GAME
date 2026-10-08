@@ -418,3 +418,8 @@
 אני חושב על הצעד הבא שלי: {}. אשמח לשמוע מה דעתך. ||| I am thinking about my next step: {0}. I would like to hear what you think. ||| أفكر في خطوتي القادمة: {0}. أودّ أن أسمع رأيك.
 {} מקדמת את {}. אולי נוכל לשתף פעולה? ||| {0} is advancing {1}. Maybe we can cooperate? ||| {0} تدفع {1}. ربما نستطيع التعاون؟
 שמעתי ש{} ({}) מתכנן מהלך שיכול להשפיע עליך. כדאי לבדוק לפני שיהיה מאוחר. ||| I heard that {0} ({1}) is planning a move that could affect you. Worth checking before it is too late. ||| سمعت أن {0} ({1}) يخطط لخطوة قد تؤثر عليك. يجدر الفحص قبل فوات الأوان.
+אני נלחם על התקציב של {} מול ראש הממשלה ושר האוצר. אשמח לתמיכה שלך בעניין. ||| I am fighting for the budget of {0} against the prime minister and the finance minister. I would welcome your support on this. ||| أنا أناضل من أجل ميزانية {0} أمام رئيس الحكومة ووزير المالية. سأكون ممتنًا لدعمك في هذا الأمر.
+עוד כ-{} חודשים ||| About {0} months left ||| بقي نحو {0} أشهر
+ההסכם הקואליציוני ({}) ||| The coalition agreement ({0}) ||| الاتفاق الائتلافي ({0})
+הבטחות אישיות ({}) ||| Personal promises ({0}) ||| وعود شخصية ({0})
+הבטחות לציבור ({}) ||| Promises to the public ({0}) ||| وعود للجمهور ({0})

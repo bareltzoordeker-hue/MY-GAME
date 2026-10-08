@@ -6,6 +6,8 @@ import { advanceTurn } from '../engine/turn';
 import { resolveDrama } from '../engine/drama';
 import { resolveInbox } from '../engine/inbox';
 import { performAction } from '../engine/decisions';
+import { remember } from '../engine/effects';
+import { LAWS } from '../data/laws';
 
 export function runShotMode(): void {
   const q = new URLSearchParams(location.search);
@@ -25,6 +27,13 @@ export function runShotMode(): void {
     for (const it of [...g.inbox]) g = resolveInbox(g, it.id, it.defaultOptionId).state;
     if (g.drama) g = resolveDrama(g, g.drama.options[0].id).state;
     g = advanceTurn(g);
+  }
+  if (q.get('promises')) {
+    // sample open promises for the promises screen
+    const others = Object.values(g.politicians).filter((p) => p.active && !p.isPlayer && p.power > 40).slice(0, 3);
+    remember(g, others[0].id, 'promise', `לקדם את ${LAWS[0].title}`, 0, g.turn + 1, LAWS[0].id);
+    remember(g, others[1].id, 'promise', 'תפקיד או תיק', 0, g.turn + 3, 'role');
+    g.government.agreements = [{ id: 'c1', partyId: others[2].partyId, kind: 'law', label: `לחוקק: ${LAWS[1].title}`, lawId: LAWS[1].id, dueTurn: g.turn + 5, status: 'pending' }];
   }
   if (q.get('nonight') && g.elections.last) g = { ...g, elections: { ...g.elections, last: { ...g.elections.last, turn: -1 } } };
   useGame.setState({ game: g, screen: shot as ScreenId, briefingOpen: false, reactions: [] });

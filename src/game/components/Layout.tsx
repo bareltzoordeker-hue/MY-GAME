@@ -1,5 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useGame, type ScreenId } from '../store/gameStore';
+import { deadlinesFrozen, openPromises } from '../../engine/deadlines';
 import type { GameState } from '../../types/game';
 import { dateLabel, deficitPct } from '../../utils';
 import { roleLabel } from '../../engine/newGame';
@@ -19,6 +20,7 @@ import { openSpeech } from './SpeechModal';
 interface NavItem { id: ScreenId; icon: string; label: string; tip?: string; show?: (s: GameState) => boolean; badge?: (s: GameState) => number }
 export const NAV: NavItem[] = [
   { id: 'dashboard', icon: '🏠', label: 'לוח בקרה', tip: 'מבט על: מצב המדינה, משברים, החלטות שמחכות לך וחדשות', badge: (s) => s.inbox.length },
+  { id: 'promises', icon: '📌', label: 'הבטחות', tip: 'כל ההבטחות שעוד לא קוימו: להסכם הקואליציוני, לפוליטיקאים ולציבור, עם המועד ועם כפתור לקיום מהיר', badge: (s) => openPromises(s).filter((p) => p.turnsLeft !== undefined && p.turnsLeft <= 1 && !deadlinesFrozen(s)).length },
   { id: 'ministry', icon: '🏛️', label: 'המשרד שלי', tip: 'ניהול המשרד: תקציב, מדדים ייעודיים ופעולות שרק המשרד הזה יכול לעשות', show: (s) => getCapabilities(s).canManageMinistry || s.player.role === 'pm' },
   { id: 'state', icon: '🗺️', label: 'מצב המדינה', tip: 'איכות השירותים הציבוריים, מה גורם לה לעלות או לרדת ואילו בעיות פתוחות' },
   { id: 'economy', icon: '📈', label: 'כלכלה', tip: 'צמיחה, אבטלה, אינפלציה, חוב ומסים, כולל מה מניע כל מספר' },
