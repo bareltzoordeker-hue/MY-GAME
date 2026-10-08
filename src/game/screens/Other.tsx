@@ -11,7 +11,7 @@ import { getCapabilities } from '../../engine/roles';
 import { playerListRank } from '../../engine/elections';
 import { DOMAIN_NAMES } from '../../data/ministries';
 import { ROLE_NAMES } from '../../engine/roles';
-import { serialize, deserialize, saveGame } from '../../engine/persistence/save';
+import { serialize, deserialize, saveGame, storageDiagnostics } from '../../engine/persistence/save';
 import type { Domain } from '../../types/game';
 import { resetTutorial } from '../components/Tutorial';
 import { DecideButton } from '../components/Overlay';
@@ -226,6 +226,13 @@ export function SaveScreen() {
       <div className="card space-y-3">
         <div>סטטוס: <b>{status === 'saved' ? '💾 נשמר' : status === 'failed' ? '⚠️ השמירה נכשלה – המשחק בזיכרון, ננסה שוב בתור הבא' : '—'}</b></div>
         <div className="text-sm muted">Seed: {s.seed} · רמת קושי: {s.difficulty} · תור {s.turn}</div>
+        {(() => { const d = storageDiagnostics(s); return (
+          <div className="text-xs muted inset">
+            <div>אחסון בדפדפן: <b className={d.available ? 'good' : 'bad'}>{d.available ? 'זמין' : 'חסום'}</b> · שמירה אחרונה בדפדפן: <b>{d.savedTurn === null ? 'אין' : `תור ${d.savedTurn}`}</b> · גודל: {d.sizeKB}KB · כתובת: {d.origin}</div>
+            {d.error && <div className="bad mt-1">שגיאה: {d.error}</div>}
+            {!d.available && <div className="mt-1">הדפדפן לא מאפשר לשמור (גלישה פרטית, או הגדרת פרטיות שחוסמת אחסון). צא מגלישה פרטית, או השתמש ב"ייצוא שמירה" כדי לשמור קובץ.</div>}
+          </div>
+        ); })()}
         <div className="flex flex-wrap gap-2">
           <button className="btn" data-tip="מוריד את המשחק השמור כקובץ למחשב שלך, לגיבוי או למעבר למחשב אחר. לא משנה דבר במשחק" onClick={exportSave}>⬇️ ייצוא שמירה</button>
           <label className="btn">⬆️ ייבוא שמירה<input type="file" accept=".json" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) importSave(f); }} /></label>

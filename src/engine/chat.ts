@@ -122,6 +122,12 @@ interface Reply { text: string; hint?: string }
 /** Only the prime minister hands out budgets, so only they get budget demands. */
 const isPm = (s: GameState) => s.government.pmId === s.player.politicianId;
 /** Only the prime minister or a party leader hands out jobs, so only they get job requests. */
+/** A minister only complains about money when his ministry really gets less than its need. */
+const underfunded = (s: GameState, p: Politician): boolean => {
+  const m = s.government.ministries.find((x) => x.ministerId === p.id || x.id === p.ministryId);
+  const cat = m?.categories[0];
+  return !!cat && s.budget.allocations[cat] / Math.max(0.1, s.budget.needs[cat]) < 0.97;
+};
 const canAppoint = (s: GameState) => isPm(s) || s.parties[s.player.partyId]?.leaderId === s.player.politicianId;
 const lawTitle = (id?: string) => LAWS.find((l) => l.id === id)?.title ?? 'החוק';
 const TALK_INTENTS: Intent[] = ['meet', 'agree', 'askwhat', 'greet', 'question', 'thanks'];
@@ -131,7 +137,7 @@ function grievance(s: GameState, t: Politician): { demand: NonNullable<ChatTopic
   const open = t.memory.find((m) => m.kind === 'promise' && !m.resolved);
   if (open?.ref === 'role') return { demand: 'role', text: 'הובטח לי תפקיד, והוא עדיין לא ניתן. אני מצפה שהעניין יטופל.' };
   if (open?.ref) return { demand: 'law', lawId: open.ref, text: `הובטח לי שתקדם את ${lawTitle(open.ref)}. עברו חודשים ושום דבר לא זז.` };
-  if (t.ministryId && isPm(s)) return { demand: 'budget', text: 'המשרד שלי לא עומד במשימות בתקציב הנוכחי. אני מצפה לתוספת תקציב לתחום.' };
+  if (t.ministryId && isPm(s) && underfunded(s, t)) return { demand: 'budget', text: 'המשרד שלי לא עומד במשימות בתקציב הנוכחי. אני מצפה לתוספת תקציב לתחום.' };
   const fav = s.parties[t.partyId]?.favoriteLaws[0];
   if (fav) return { demand: 'law', lawId: fav, text: `${lawTitle(fav)} חשוב לנו, ואני לא רואה שאתה מקדם אותו.` };
   return { demand: 'respect', text: 'אני מרגיש שאני לא שותף להחלטות. אני מצפה ליחס אחר: להתייעץ איתי לפני שמחליטים.' };
@@ -451,14 +457,16 @@ function openings(s: GameState, p: Politician): Opening[] {
   const out: Opening[] = [];
   const add = (text: string, topic?: Opening['topic']) => out.push({ text, topic });
 
-  if (p.loyalty < 30) {
+  // complaints need a cause: nothing has happened on the first turn, and "broken promises" needs a promise
+  const brokenPromise = p.memory.some((m) => m.kind === 'betrayal' && !m.resolved);
+  if (p.loyalty < 30 && s.turn >= 1) {
     add(`${me}, אני לא מרוצה מההתנהלות כלפיי ולכן אני שוקל את צעדיי. כדאי שנדבר.`, { kind: 'unhappy' });
     add(`לא התייעצת איתי לפני ההחלטות האחרונות, ${me}. אני מצפה ליחס אחר.`, { kind: 'unhappy', demand: 'respect' });
     add('שמעתי דברים שנאמרו עליי, ואני מניח שלא בלי ידיעתך. אפשר לשוחח?', { kind: 'unhappy' });
-    add('אני מרגיש שהבטחות לא מתקיימות. אשמח להבין איפה אנחנו עומדים.', { kind: 'unhappy' });
-    if (ministry && isPm(s)) add(`${ministry} נשחק ואני לא יכול להמשיך כך. אני רוצה פגישה דחופה על התקציב.`, { kind: 'unhappy', demand: 'budget' });
+    if (brokenPromise) add('אני מרגיש שהבטחות לא מתקיימות. אשמח להבין איפה אנחנו עומדים.', { kind: 'unhappy' });
+    if (ministry && isPm(s) && underfunded(s, p)) add(`${ministry} נשחק ואני לא יכול להמשיך כך. אני רוצה פגישה דחופה על התקציב.`, { kind: 'unhappy', demand: 'budget' });
     if (inGov) {
-      add(`אני מצפה להתחייבויות שניתנו. אם זה לא ישתנה, ${pn} תשקול את המשך דרכה בקואליציה.`, { kind: 'unhappy' });
+      if (brokenPromise) add(`אני מצפה להתחייבויות שניתנו. אם זה לא ישתנה, ${pn} תשקול את המשך דרכה בקואליציה.`, { kind: 'unhappy' });
       add(`בסיעה של ${pn} מתחילים לשאול למה אנחנו בקואליציה. תן לי סיבה להסביר להם.`, { kind: 'unhappy' });
     } else {
       add('אנחנו מתנגדים למדיניות שלך, ונפעל נגדה בכנסטון.');
@@ -475,12 +483,12 @@ function openings(s: GameState, p: Politician): Opening[] {
     add('יש לי רעיון לשיתוף פעולה. אשמח להיפגש.', { kind: 'coop' });
     if (fav) add(`מה דעתך שנגיש יחד הצעה בנושא ${lawTitle(fav)}? זה יחזק את שנינו.`, { kind: 'coop', lawId: fav });
   } else {
-    if (ministry && isPm(s)) add(`אשמח לפגישה קצרה על ${ministry}. יש כמה נושאים שדורשים החלטה.`, { kind: 'unhappy', demand: 'budget' });
+    if (ministry && isPm(s) && underfunded(s, p)) add(`אשמח לפגישה קצרה על ${ministry}. יש כמה נושאים שדורשים החלטה.`, { kind: 'unhappy', demand: 'budget' });
     else if (ministry) add(`אני נלחם על התקציב של ${ministry} מול ראש הממשלה ושר האוצר. אשמח לתמיכה שלך בעניין.`, { kind: 'coop' });
     if (p.ambitionTarget && canAppoint(s)) add(`אני חושב על הצעד הבא שלי: ${p.ambitionTarget}. אשמח לשמוע מה דעתך.`, { kind: 'unhappy', demand: 'role' });
     if (fav) add(`${pn} מקדמת את ${lawTitle(fav)}. אולי נוכל לשתף פעולה?`, { kind: 'coop', lawId: fav });
     add('הסקרים זזים. כדאי שנתאם עמדות לפני ההצבעות הבאות.', { kind: 'coop' });
-    add('היה לי רעיון בעקבות השיחה האחרונה שלנו. אפשר לדבר?', { kind: 'coop' });
+    if ((s.chats?.[p.id] ?? []).some((m) => m.from === 'me')) add('היה לי רעיון בעקבות השיחה האחרונה שלנו. אפשר לדבר?', { kind: 'coop' });
     if (rival.length) {
       const r = rival[Math.floor(side(s, `rival${p.id}`) * rival.length)];
       add(`שמעתי ש${r.name} (${s.parties[r.partyId]?.shortName ?? ''}) מתכנן מהלך שיכול להשפיע עליך. כדאי לבדוק לפני שיהיה מאוחר.`);

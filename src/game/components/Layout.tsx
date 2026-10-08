@@ -108,7 +108,7 @@ export function Header({ onMenu }: { onMenu: () => void }) {
           <HeaderStat label={t('hdr.elections')} value={spanL(daysBetween(s.date, electionDate(s))) || electionCountdown(s)} tone={tte <= 4 ? 'warn' : ''} />
         </div>
         <div className="flex-1" />
-        <span className="hidden md:inline text-[11px] muted" data-tip={saveStatus === 'failed' ? 'השמירה נכשלה – המשחק עדיין בזיכרון, ננסה שוב בתור הבא' : 'שמירה אוטומטית בסוף כל תור'}>
+        <span className={`${saveStatus === 'failed' ? 'inline bad font-bold cursor-pointer' : 'hidden md:inline muted'} text-[11px]`} role={saveStatus === 'failed' ? 'button' : undefined} onClick={saveStatus === 'failed' ? () => useGame.getState().goTo('save') : undefined} data-tip={saveStatus === 'failed' ? 'השמירה נכשלה: הדפדפן חוסם אחסון (גלישה פרטית?). לחץ לפרטים ולייצוא' : 'שמירה אוטומטית בסוף כל תור'}>
           {saveStatus === 'saved' ? `💾 ${t('hdr.saved')}` : saveStatus === 'failed' ? '⚠️ לא נשמר' : ''}
         </span>
         <button className="btn btn-sm" data-tut="speech" onClick={openSpeech} data-tip="כתיבת נאום ונשיאתו: בטלוויזיה, במליאה, בכנס או ברשתות" aria-label={t('hdr.speech')}>🎤<span className="hidden lg:inline"> {t('hdr.speech')}</span></button>

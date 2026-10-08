@@ -35,15 +35,30 @@ export function deserialize(raw: string): GameState | null {
   }
 }
 
+/** Why the last save failed (browser error name/message), for the save screen. */
+export let lastSaveError: string | null = null;
+
 /** Returns true on success. A failure never loses the in-memory state. */
 export function saveGame(s: GameState, store: StorageLike | null = storage()): boolean {
-  if (!store) return false;
+  if (!store) { lastSaveError = 'localStorage לא זמין בדפדפן הזה'; return false; }
   try {
     store.setItem(SAVE_KEY, serialize(s));
+    lastSaveError = null;
     return true;
-  } catch {
+  } catch (e) {
+    const err = e as { name?: string; message?: string } | undefined;
+    lastSaveError = `${err?.name ?? 'Error'}: ${err?.message ?? String(e)}`;
     return false;
   }
+}
+
+/** What the save screen shows so a failure can be diagnosed from a screenshot. */
+export function storageDiagnostics(s?: GameState): { available: boolean; origin: string; sizeKB: number; savedTurn: number | null; error: string | null } {
+  const st = storage();
+  let available = false;
+  try { st?.setItem('hakise.probe', '1'); st?.removeItem('hakise.probe'); available = !!st; } catch { available = false; }
+  const saved = loadGame();
+  return { available, origin: typeof location !== 'undefined' ? location.origin : '', sizeKB: s ? Math.round(serialize(s).length / 1024) : 0, savedTurn: saved?.turn ?? null, error: lastSaveError };
 }
 
 export function loadGame(store: StorageLike | null = storage()): GameState | null {
