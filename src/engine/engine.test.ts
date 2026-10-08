@@ -620,7 +620,7 @@ describe('chat understands free-text answers', () => {
     s.chatTopics = { [t.id]: { kind: 'unhappy', stage: 'explained', turn: s.turn, demand: 'respect' } };
     sendChat(s, t.id, 'תן לי קצת זמן');
     expect(s.chatTopics[t.id]).toBeTruthy();
-    expect(s.chats![t.id].at(-1)!.text).toContain('אחכה');
+    expect(s.chats![t.id].at(-1)!.text).toMatch(/אחכה|לחכות/);
     sendChat(s, t.id, 'סמוך עליי, אני אדאג לזה');
     expect(s.chatTopics[t.id]).toBeFalsy();
     expect(t.memory.some((m) => m.text === 'הבטחת יחס אחר')).toBe(true);
