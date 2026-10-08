@@ -1,3 +1,4 @@
+import { MINISTRY_LAWS } from './ministryLaws.generated';
 import type { BudgetCategory, Domain, EconomyShock, Effects, GroupId, Ideology, ServiceId } from '../types/game';
 
 // ============================================================
@@ -22,13 +23,15 @@ export interface LawDef {
   structural?: EconomyShock;
   revenueFactor?: number;
   onPass?: Effects;
+  /** ministry-specific laws: only these ministries' ministers may propose them */
+  ministries?: string[];
   /** legacy field – unused in v2 (kept so older saves still type-check) */
   satire?: string;
 }
 
 const I = (security: number, economic: number, religion: number): Ideology => ({ security, economic, religion });
 
-export const LAWS: LawDef[] = [
+const CORE_LAWS: LawDef[] = [
   // ---------- security & state ----------
   { id: 'draft_equality', title: 'חוק השוויון בנטל', icon: '🪖', domain: 'defense', level: 'major', ideology: I(0.3, 0, -0.8),
     description: 'גיוס חובה לכלל הציבור, כולל תלמידי ישיבות, עם יעדי גיוס וסנקציות.',
@@ -153,5 +156,7 @@ export const LAWS: LawDef[] = [
     description: 'אישור העברת שטחים לשליטה פלסטינית במסגרת הסכם.',
     groups: { left: 6, arabs: 6, settlers: -18, right: -14, religious: -4 } },
 ];
+
+export const LAWS: LawDef[] = [...CORE_LAWS, ...MINISTRY_LAWS];
 
 export const LAW_BY_ID = Object.fromEntries(LAWS.map((l) => [l.id, l])) as Record<string, LawDef>;

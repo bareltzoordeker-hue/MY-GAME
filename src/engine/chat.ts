@@ -147,6 +147,48 @@ const setTopic = (s: GameState, id: string, topic: ChatTopic | null) => {
  * Continues the thread the politician opened ("כדאי שנדבר", "אני מבקש שתקדם…"), so a short answer
  * like "בוא נדבר" or "בסדר" is understood in context. Returns null when the message is not part of the thread.
  */
+/** Answers about the state of things (polls, economy, security, coalition, the player): real numbers, said in character. */
+function knowledge(s: GameState, t: Politician, text: string): Reply | null {
+  const tn = tone(t);
+  const party = s.parties[t.partyId];
+  const mine = s.parties[s.player.partyId];
+  const poll = s.polls[s.polls.length - 1];
+  const inGov = s.government.coalition.includes(t.partyId);
+  const pm = s.politicians[s.government.pmId];
+  if (/מה שלומ|מה נשמע|מה קורה|מה המצב איתך|איך אתה/.test(text)) {
+    return { text: tn === 'hostile' ? 'עסוק. מה אתה צריך?' : pick(s, [`בסדר, תודה. יום עמוס ב${inGov ? 'ממשלה' : 'אופוזיציה'}. ומה איתך?`, 'עמוס כרגיל, אבל טוב. מה איתך?', `מחזיק מעמד. ב${party?.shortName ?? 'סיעה'} יש הרבה עבודה עכשיו.`]) };
+  }
+  if (/סקר|מנדט|כמה אתם|כמה אנחנו/.test(text) && poll) {
+    const his = Math.round(poll.seats[t.partyId] ?? 0);
+    const yours = Math.round(poll.seats[s.player.partyId] ?? 0);
+    return { text: `לפי הסקר האחרון ${party?.shortName ?? 'אנחנו'} ב-${his} מנדטים${t.partyId !== s.player.partyId ? ` ו${mine?.shortName ?? 'אתם'} ב-${yours}` : ''}. ${his >= yours ? 'אנחנו במגמה טובה.' : 'יש לנו עבודה לעשות.'}` };
+  }
+  if (/כלכל|אינפלצי|יוקר המחיה|אבטל|צמיח|גירעון/.test(text)) {
+    const e = s.economy;
+    const bad = e.inflation > 4 || e.unemployment > 6 || e.growth < 1;
+    return { text: `האינפלציה ${e.inflation.toFixed(1)}%, האבטלה ${e.unemployment.toFixed(1)}% והצמיחה ${e.growth.toFixed(1)}%. ${bad ? (inGov ? 'המצב לא פשוט, וצריך צעדים אמיצים.' : 'הממשלה הזאת מפסידה את הכלכלה.') : (inGov ? 'הכלכלה מחזיקה, וזה לא מובן מאליו.' : 'הכלכלה מחזיקה למרות הממשלה, לא בזכותה.')}` };
+  }
+  if (/ביטחון|מלחמ|עזה|חמאס|חיזבאללה|לבנון|איראן|צבא|צה״ל|צה"ל/.test(text)) {
+    const hawk = (party?.ideology.security ?? 0) > 0.3;
+    return { text: hawk ? pick(s, ['צריך להכות באויב חזק ולהחזיר את ההרתעה. אין מקום לוויתורים עכשיו.', 'הביטחון קודם לכל. אתמוך בכל צעד שמחזק את צה״ל.']) : pick(s, ['כוח לבד לא יפתור את זה. צריך גם מהלך מדיני.', 'אני תומך בצה״ל, אבל צריך אופק מדיני ולא רק עוד סבב.']) };
+  }
+  if (/קואליצי|ממשלה|ראש הממשלה|יציבות/.test(text)) {
+    const st = s.government.stability;
+    return { text: inGov ? `${st > 55 ? 'הקואליציה יציבה' : 'הקואליציה מתנדנדת'}${pm && pm.id !== t.id ? `, ו${pm.name} יודע שהוא צריך אותנו` : ''}. ${st > 55 ? 'נישאר כל עוד מקיימים את ההסכמים.' : 'אם לא יקיימו את ההסכמים, נשקול את צעדינו.'}` : `הממשלה הזאת ${st > 55 ? 'מחזיקה בינתיים' : 'בדרך החוצה'}, ואנחנו נעשה הכל כדי להחליף אותה.` };
+  }
+  if (/בחירות|הקדמת|פיזור/.test(text)) {
+    return { text: inGov ? 'אין סיבה ללכת לבחירות עכשיו. הציבור רוצה יציבות.' : 'כמה שיותר מהר. הציבור רוצה שינוי.' };
+  }
+  if (/דעתך עליי|חושב עליי|סומך עליי|אנחנו בסדר/.test(text)) {
+    return { text: t.loyalty >= 60 ? 'אני סומך עליך. עבדנו טוב יחד, ואני רוצה שזה יימשך.' : t.loyalty <= 30 ? 'בכנות? איבדתי אמון. יהיה צריך מעשים כדי לשנות את זה.' : 'יש בינינו כבוד הדדי, אבל אמון נבנה לאט. תלוי מה תעשה מכאן.' };
+  }
+  if (/המפלגה שלך|הסיעה שלך|מה אתם רוצים|מה חשוב לכם|מה חשוב לך/.test(text)) {
+    const fav = (party?.favoriteLaws ?? []).slice(0, 2).map((id) => LAWS.find((l) => l.id === id)?.title).filter(Boolean);
+    return { text: fav.length ? `מה שחשוב ל${party?.shortName}: ${fav.join(' ו')}. על זה לא נוותר.` : `${party?.shortName ?? 'הסיעה'} רוצה להשפיע על כיוון המדינה, ולא רק להיות שם.` };
+  }
+  return null;
+}
+
 function dialog(s: GameState, t: Politician, intent: Intent, law: ReturnType<typeof matchLaw>): Reply | null {
   const topic = s.chatTopics?.[t.id];
   if (!topic) return null;
@@ -329,6 +371,8 @@ function handle(s: GameState, t: Politician, text: string): Reply {
         const word = st === 'for' ? 'תומך' : st === 'against' ? 'מתנגד' : st === 'redline' ? 'מתנגד נחרצות' : 'מתלבט';
         return { text: `בנושא ${law.title}: אני ${word}. ${st === 'redline' ? 'זה קו אדום של הסיעה.' : st === 'neutral' ? 'אני צריך לראות את הנוסח ואת התמורה.' : `זה תואם את עמדת ${s.parties[t.partyId]?.shortName}.`}` };
       }
+      const known = knowledge(s, t, text);
+      if (known) return known;
       return { text: pick(s, ['השאלה חשובה. אשמח לדון בזה פנים אל פנים.', 'אין לי עמדה סופית. מה דעתך?', 'אני מעדיף לענות בפגישה ולא בכתב.']) };
     }
     case 'greet':
@@ -357,6 +401,8 @@ function handle(s: GameState, t: Politician, text: string): Reply {
         const word = st === 'for' ? 'תומך' : st === 'against' ? 'מתנגד' : st === 'redline' ? 'מתנגד נחרצות' : 'מתלבט';
         return { text: `בנושא ${law.title}: אני ${word}. אם אתה מבקש משהו ממני, תגיד זאת במפורש.` };
       }
+      const known = knowledge(s, t, text);
+      if (known) return known;
       if (mentionsMoney(text)) return { text: 'תקציב זה עניין של ראש הממשלה ושל שר האוצר. אם אתה מציע משהו בתמורה לתמיכה, תפרט.' };
       if (mentionsRole(text)) return { text: 'מינויים הם עניין של ראש הממשלה. אם אתה מבטיח תפקיד, אמור זאת במפורש ואני אזכור.' };
       return { text: tn === 'hostile' ? 'תגיע לעניין.' : pick(s, ['לא לגמרי הבנתי. אפשר לדבר על חוק מסוים, על תקציב, על תפקיד או על שיתוף פעולה. מה חשוב לך?', 'אשמח להבין. במה מדובר: חוק, תקציב, תפקיד או משהו אחר?']) };

@@ -5,14 +5,6 @@ import type { GameState, Politician } from '../../types/game';
 import { Caricature } from '../../shared/components/Caricature';
 import { ScreenHeader } from '../components/ui';
 
-const SUGGESTIONS = [
-  'תודה על התמיכה, אני מעריך את שיתוף הפעולה.',
-  'אני מתנצל על מה שקרה. בוא נתחיל מחדש.',
-  'אני מבטיח לקדם את חוק ההסדרים שביקשת.',
-  'אני מבקש שתתמוך בחוק השוויון בנטל.',
-  'אם לא תתמוך – אפרסם את עמדתך בפומבי.',
-  'מה דעתך על הרפורמה המשפטית?',
-];
 
 function Row({ s, p, active, onPick }: { s: GameState; p: Politician; active: boolean; onPick: () => void }) {
   const unread = s.chatUnread?.[p.id] ?? 0;
@@ -81,9 +73,6 @@ export function ChatScreen() {
                   </div>
                 ))}
                 <div ref={endRef} />
-              </div>
-              <div className="flex flex-wrap gap-1 pb-2">
-                {SUGGESTIONS.map((x) => <button key={x} data-tut="chat-chip" className="chip" style={{ cursor: 'pointer', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} onClick={() => setText(x)} data-tip="לחצו כדי למלא את ההודעה, ואפשר לערוך אותה">{x}</button>)}
               </div>
               <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); submit(); }}>
                 <input type="text" data-tut="chat-input" className="flex-1" value={text} maxLength={400} onChange={(e) => setText(e.target.value)} placeholder="כתבו הודעה…" aria-label={`הודעה ל${target.name}`} />

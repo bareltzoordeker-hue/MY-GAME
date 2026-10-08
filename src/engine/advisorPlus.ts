@@ -13,7 +13,7 @@ import { resolveDrama } from './drama';
 import { resolveInbox } from './inbox';
 import { partyStance } from './parliament';
 import { coalitionSeats } from './polls';
-import { getCapabilities, isPartyLeader, isPM, ministryLawDomains, playerMinistry } from './roles';
+import { getCapabilities, isPartyLeader, isPM, lawAllowed, playerMinistry } from './roles';
 import { fundingRatio } from './services';
 import { monthsUntilElection } from './calendar';
 import { needsCampaignStart } from './campaign';
@@ -119,8 +119,7 @@ export function screenAdvice(s: GameState, screen: string): AdviceTip[] {
     }
     case 'parliament': case 'laws': {
       const party = s.parties[s.player.partyId];
-      const domains = ministryLawDomains(s); // a minister may only propose laws in his ministry's domains – same filter as the laws screen
-      const good = LAWS.filter((l) => !s.activeLaws.includes(l.id) && !s.bills.some((b) => b.lawId === l.id && b.status === 'active') && (!domains || domains.includes(l.domain)))
+      const good = LAWS.filter((l) => !s.activeLaws.includes(l.id) && !s.bills.some((b) => b.lawId === l.id && b.status === 'active') && lawAllowed(s, l))
         .map((l) => ({ l, st: partyStance(s, party, { id: 'x', lawId: l.id, title: l.title, sponsorId: s.player.politicianId, isGovernment: isPM(s), stage: 'final', turnsInStage: 0, proposedTurn: 0, status: 'active', push: 0, modified: false }), help: l.groups[angry.id] ?? 0 }))
         .sort((a, b) => b.help + b.st * 5 - (a.help + a.st * 5))[0];
       if (good) out.push(`${GROUP_BY_ID[angry.id].name} הכי כועסים עכשיו. "${good.l.title}" ישמח אותם${good.st > 0.3 ? ' והמפלגה שלך בעד' : ''}.`, 'laws', `propose_law:${good.l.id}`);

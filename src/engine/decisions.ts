@@ -36,7 +36,7 @@ import { cancelProject, startProject } from './projects';
 import { makePromise } from './promises';
 import { allyHurt } from './alliances';
 import { mergeParties, partyRelation, shiftPartyRelation } from './relations';
-import { getCapabilities, isPM, isPartyLeader, ministryLawDomains, playerMinistry } from './roles';
+import { getCapabilities, isPM, isPartyLeader, lawAllowed, isSpeaker, playerMinistry } from './roles';
 
 export type Params = Record<string, string | number>;
 export type ActionCategory = 'economy' | 'government' | 'parliament' | 'ministry' | 'media' | 'party' | 'campaign' | 'career' | 'projects';
@@ -372,8 +372,7 @@ def({
     if (!LAW_BY_ID[lawId]) return 'חוק לא קיים';
     if (s.activeLaws.includes(lawId)) return 'החוק כבר בתוקף';
     if (s.bills.some((b) => b.lawId === lawId && b.status === 'active')) return 'כבר בדיון בכנסטון';
-    const domains = ministryLawDomains(s);
-    if (domains && !domains.includes(LAW_BY_ID[lawId].domain)) return 'לא בתחום האחריות של המשרד שלך';
+    if (!lawAllowed(s, LAW_BY_ID[lawId])) return 'לא בתחום האחריות של המשרד שלך';
     if (s.government.caretaker && s.elections.phase === 'none') return 'הכנסטון התפזר – אין חקיקה עד אחרי הבחירות';
     return null;
   },
@@ -1573,6 +1572,64 @@ def({
     const r = makePromise(s, str(p, 'promiseId'));
     return { title: r.title, subtitle: r.subtitle, status: r.status, quip: r.quip };
   },
+});
+
+// ===== KNESSETON SPEAKER =====
+const speakerOnly = (s: GameState) => (isSpeaker(s) ? null : 'רק יו״ר הכנסטון');
+const activeBill = (s: GameState, p: Params) => s.bills.find((b) => b.id === str(p, 'billId') && b.status === 'active');
+def({
+  id: 'speaker_schedule', title: 'קידום הצעה בסדר היום', icon: '📅', category: 'parliament', level: 'simple', capital: 4, cooldown: 1,
+  description: 'היו״ר קובע מה עולה למליאה. קידום מהיר מגדיל את סיכויי ההצעה (+15).',
+  unavailable: (s, p) => speakerOnly(s) ?? (activeBill(s, p) ? null : 'ההצעה לא פעילה'),
+  run: (s, p) => { const b = activeBill(s, p)!; b.push += 15; return { title: `"${b.title}" עלתה לראש סדר היום`, quip: 'מי שקובע את סדר היום קובע הרבה.' }; },
+});
+def({
+  id: 'speaker_delay', title: 'עיכוב הצעה', icon: '⏸️', category: 'parliament', level: 'simple', capital: 6, cooldown: 1,
+  description: 'דחיית הדיון בהצעה. מקטין את סיכוייה (-15), אבל תומכיה יכעסו.',
+  unavailable: (s, p) => speakerOnly(s) ?? (activeBill(s, p) ? null : 'ההצעה לא פעילה'),
+  run: (s, p) => { const b = activeBill(s, p)!; b.push -= 15; applyEffects(s, { playerReputation: -1 }); return { title: `הדיון ב"${b.title}" נדחה`, quip: 'התומכים טוענים לשימוש פוליטי בסמכות.' }; },
+});
+def({
+  id: 'speaker_mediate', title: 'תיווך בין קואליציה לאופוזיציה', icon: '🤝', category: 'parliament', level: 'medium', capital: 6, cooldown: 2,
+  description: 'פגישה משותפת להורדת המתחים. מעלה את יציבות הממשלה ואת המוניטין שלך.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { stability: 4, playerReputation: 3 }); return { title: 'הצלחת להרגיע את המליאה', quip: 'שני הצדדים יצאו וטענו שניצחו.' }; },
+});
+def({
+  id: 'speaker_debate', title: 'דיון מיוחד במליאה', icon: '🎙️', category: 'parliament', level: 'simple', capital: 4, cooldown: 2,
+  description: 'כינוס דיון מיוחד בנושא שבוער לציבור. מעלה את הפופולריות שלך.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { playerPopularity: 3 }); return { title: 'דיון מיוחד התקיים במליאה', quip: 'הציבור ראה שהכנסטון עוסק במה שחשוב לו.' }; },
+});
+def({
+  id: 'speaker_discipline', title: 'הרחקת ח״כים מפריעים', icon: '🚪', category: 'parliament', level: 'simple', capital: 3, cooldown: 2,
+  description: 'אכיפת הסדר במליאה. מעלה מוניטין ויציבות, אבל מרגיז את המורחקים.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { playerReputation: 2, stability: 2 }); return { title: 'הסדר במליאה הוחזר', quip: 'המורחקים כבר בדרך לאולפנים.' }; },
+});
+def({
+  id: 'speaker_visit', title: 'אירוח מנהיג זר בכנסטון', icon: '🌍', category: 'parliament', level: 'medium', capital: 5, cooldown: 3,
+  description: 'נאום של מנהיג זר במליאה. מחזק את מעמדך הבינלאומי ואת המוניטין.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { playerReputation: 4, playerPopularity: 2 }); return { title: 'מנהיג זר נאם בכנסטון', quip: 'התמונות מהטקס הגיעו לכל העולם.' }; },
+});
+def({
+  id: 'speaker_ethics', title: 'כינוס ועדת האתיקה', icon: '⚖️', category: 'parliament', level: 'simple', capital: 4, cooldown: 3,
+  description: 'בירור תלונות על התנהגות חברי כנסטון. משפר את אמון הציבור במוסד.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { playerReputation: 3 }); return { title: 'ועדת האתיקה פסקה', quip: 'הציבור אהב, החברים פחות.' }; },
+});
+def({
+  id: 'speaker_open_day', title: 'יום פתוח בכנסטון', icon: '🏛️', category: 'parliament', level: 'simple', capital: 2, cooldown: 3,
+  description: 'אלפי אזרחים מבקרים בכנסטון. מעלה פופולריות.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { playerPopularity: 2 }); return { title: 'יום פתוח מוצלח בכנסטון', quip: 'תורים ארוכים, צילומים ליד המנורה.' }; },
+});
+def({
+  id: 'speaker_reform', title: 'רפורמה בתקנון הכנסטון', icon: '📘', category: 'parliament', level: 'major', capital: 10, cooldown: 6,
+  description: 'קיצור נאומים, שקיפות בהצבעות ושידור הוועדות. מוניטין גבוה ויציבות.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { playerReputation: 5, stability: 3 }); return { title: 'תקנון הכנסטון עודכן', quip: 'הנאומים התקצרו. כמעט.' }; },
 });
 
 export const ACTIONS: Record<string, ActionDef> = Object.fromEntries(A.map((a) => [a.id, a]));

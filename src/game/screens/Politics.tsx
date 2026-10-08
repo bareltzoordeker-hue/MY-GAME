@@ -8,7 +8,7 @@ import { GROUP_BY_ID } from '../../data/world';
 import { coalitionSeats } from '../../engine/polls';
 import { ministerCandidates } from '../../engine/government';
 import { computeVote, partyStance } from '../../engine/parliament';
-import { getCapabilities, isPM, ministryLawDomains } from '../../engine/roles';
+import { getCapabilities, isPM, isSpeaker, lawAllowed } from '../../engine/roles';
 import { playerListRank } from '../../engine/elections';
 import { getProvider } from '../../engine/ai/provider';
 import { buildCharacterContext } from '../../engine/ai/contextBuilder';
@@ -182,6 +182,20 @@ export function ParliamentScreen() {
         <div className="flex justify-center"><Hemicycle s={s} /></div>
         <div className="flex flex-wrap gap-1.5 justify-center mt-2">{Object.values(s.parties).filter((p) => p.seats).map((p) => <PartyChip key={p.id} party={p} seats={p.seats} />)}</div>
       </Section>
+      {isSpeaker(s) && (
+        <Section title="יו״ר הכנסטון" icon="🔨">
+          <p className="text-sm muted mb-2">אתה מנהל את המליאה: קובע את סדר היום, שומר על הסדר ומייצג את הכנסטון. כל פעולה משפיעה על המוניטין, על הפופולריות ועל יציבות הממשלה.</p>
+          <div className="flex flex-wrap gap-2">
+            <ActionButton id="speaker_mediate" className="btn btn-sm">🤝 תיווך בין קואליציה לאופוזיציה</ActionButton>
+            <ActionButton id="speaker_debate" className="btn btn-sm">🎙️ דיון מיוחד במליאה</ActionButton>
+            <ActionButton id="speaker_discipline" className="btn btn-sm">🚪 הרחקת ח״כים מפריעים</ActionButton>
+            <ActionButton id="speaker_visit" className="btn btn-sm">🌍 אירוח מנהיג זר</ActionButton>
+            <ActionButton id="speaker_ethics" className="btn btn-sm">⚖️ ועדת האתיקה</ActionButton>
+            <ActionButton id="speaker_open_day" className="btn btn-sm">🏛️ יום פתוח</ActionButton>
+            <ActionButton id="speaker_reform" className="btn btn-sm btn-blue">📘 רפורמה בתקנון</ActionButton>
+          </div>
+        </Section>
+      )}
       <Section title="הצעות חוק בדיון" icon="📝">
         {!active.length ? <Empty icon="🦗" text="אין הצעות בדיון. הגש חוק ממסך החוקים." /> : (
           <div className="space-y-2">
@@ -198,6 +212,7 @@ export function ParliamentScreen() {
                   <div className="flex gap-1.5 flex-wrap mt-2">
                     <ActionButton id="push_bill" params={{ billId: b.id }} className="btn btn-sm">📣 גיוס תמיכה</ActionButton>
                     <ActionButton id="soften_bill" params={{ billId: b.id }} className="btn btn-sm">🧈 ריכוך</ActionButton>
+                    {isSpeaker(s) && <><ActionButton id="speaker_schedule" params={{ billId: b.id }} className="btn btn-sm btn-blue">📅 קידום בסדר היום</ActionButton><ActionButton id="speaker_delay" params={{ billId: b.id }} className="btn btn-sm">⏸️ עיכוב</ActionButton></>}
                     {!isPM(s) && <><ActionButton id="vote_bill" params={{ billId: b.id, vote: 'for' }} className="btn btn-sm btn-good">בעד</ActionButton><ActionButton id="vote_bill" params={{ billId: b.id, vote: 'against' }} className="btn btn-sm btn-danger">נגד</ActionButton></>}
                   </div>
                 </div>
@@ -215,12 +230,38 @@ export function LawsScreen() {
   const s = useGame((x) => x.game)!;
   const [tab, setTab] = useState<'catalog' | 'active'>('catalog');
   const mine = s.parties[s.player.partyId];
-  const lawDomains = ministryLawDomains(s);
+  const myMin = s.government.ministries.find((m) => m.ministerId === s.player.politicianId);
+  const [minF, setMinF] = useState<string>(s.player.role === 'minister' && myMin ? myMin.id : '');
+  const [q, setQ] = useState('');
+  const [kind, setKind] = useState<'' | 'medium' | 'major'>('');
+  const [limit, setLimit] = useState(60);
+  const minOrigins = (id: string) => s.government.ministries.find((m) => m.id === id)?.origins ?? [id];
+  const shown = (tab === 'active' ? LAWS.filter((l) => s.activeLaws.includes(l.id)) : LAWS.filter((l) => !s.activeLaws.includes(l.id) && lawAllowed(s, l)))
+    .filter((l) => !minF || (l.ministries ? l.ministries.some((id) => minOrigins(minF).includes(id)) : false))
+    .filter((l) => !kind || l.level === kind)
+    .filter((l) => !q.trim() || l.title.includes(q.trim()) || l.description.includes(q.trim()));
+  // the advisor can point at any law: put that one first, even past the filters and the page limit
+  const focusKey = useGame((x) => x.focusKey);
+  const focusLaw = focusKey?.startsWith('propose_law:') ? LAW_BY_ID[focusKey.split(':')[1]] : undefined;
+  if (tab === 'catalog' && focusLaw && !s.activeLaws.includes(focusLaw.id)) { const i = shown.indexOf(focusLaw); if (i !== 0) { if (i > 0) shown.splice(i, 1); shown.unshift(focusLaw); } }
   return (
     <div className="space-y-4">
       <ScreenHeader title="חוקים ורפורמות" sub={s.player.role === 'pm' ? 'חוק עובר טרומית → ועדה → קריאה שלישית. גדולים דורשים ישיבת ממשלה.' : s.player.role === 'minister' ? 'כשר אתה מגיש רק חוקים בתחום המשרד שלך. ראש הממשלה מחליט אם זו הצעה ממשלתית.' : 'כחבר כנסטון אתה מגיש הצעות חוק פרטיות. בלי תמיכת הקואליציה הן נופלות בטרומית.'} right={<Tabs value={tab} onChange={setTab} items={[{ id: 'catalog', label: 'הצעות אפשריות' }, { id: 'active', label: `בתוקף (${s.activeLaws.length})` }]} />} />
+      <div className="flex flex-wrap gap-2 items-center">
+        <select aria-label="סינון לפי משרד" value={minF} onChange={(e) => { setMinF(e.target.value); setLimit(60); }} className="text-sm">
+          <option value="">כל המשרדים</option>
+          {s.government.ministries.map((m) => <option key={m.id} value={m.id}>{m.icon} {m.name}</option>)}
+        </select>
+        <select aria-label="סוג" value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} className="text-sm">
+          <option value="">חוקים ורפורמות</option>
+          <option value="medium">חוקים</option>
+          <option value="major">רפורמות</option>
+        </select>
+        <input type="search" aria-label="חיפוש חוק" placeholder="חיפוש…" value={q} onChange={(e) => { setQ(e.target.value); setLimit(60); }} className="flex-1" style={{ minWidth: 140 }} />
+        <span className="text-xs muted">{shown.length} תוצאות</span>
+      </div>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
-        {(tab === 'active' ? LAWS.filter((l) => s.activeLaws.includes(l.id)) : LAWS.filter((l) => !s.activeLaws.includes(l.id) && (!lawDomains || lawDomains.includes(l.domain)))).map((l) => {
+        {shown.slice(0, limit).map((l) => {
           const st = partyStance(s, mine, { id: 'x', lawId: l.id, title: l.title, sponsorId: s.player.politicianId, isGovernment: isPM(s), stage: 'final', turnsInStage: 0, proposedTurn: 0, status: 'active', push: 0, modified: false });
           const groups = Object.entries(l.groups).sort((a, b) => Math.abs(b[1]!) - Math.abs(a[1]!)).slice(0, 4);
           return (
@@ -241,6 +282,7 @@ export function LawsScreen() {
           );
         })}
       </div>
+      {shown.length > limit && <div className="flex justify-center"><button className="btn" onClick={() => setLimit(limit + 60)}>הצג עוד</button></div>}
     </div>
   );
 }

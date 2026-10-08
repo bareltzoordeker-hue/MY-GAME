@@ -199,13 +199,13 @@ export const STEPS: Step[] = [
   },
   {
     id: 'chat-chip',
-    target: q('[data-tut="chat-chip"]'),
+    target: q('[data-tut="chat-input"]'),
     until: () => ((document.querySelector('[data-tut="chat-input"]') as HTMLInputElement | null)?.value.length ?? 0) > 0,
     title: { he: 'כתוב הודעה', en: 'Write a message', ar: 'اكتب رسالة' },
     text: {
-      he: 'אפשר לכתוב חופשי מה שרוצים. כדי להתחיל מהר, לחץ על אחת ההצעות המסומנות ותראה אותה בתיבת ההודעה.',
-      en: 'You can write anything you like. To start fast, press one of the highlighted suggestions and it appears in the message box.',
-      ar: 'يمكنك كتابة ما تشاء. للبدء بسرعة، اضغط على أحد الاقتراحات المميّزة وسيظهر في خانة الرسالة.',
+      he: 'כתוב חופשי מה שרוצים, כמו בשיחה רגילה: בקשה, הבטחה, שאלה או איום.',
+      en: 'Write anything you like, as in a normal conversation: a request, a promise, a question or a threat.',
+      ar: 'اكتب ما تشاء كما في محادثة عادية: طلب أو وعد أو سؤال أو تهديد.',
     },
   },
   {

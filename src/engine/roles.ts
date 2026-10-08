@@ -1,3 +1,4 @@
+import { PEOPLE } from '../data/people';
 import type { GameState, Role } from '../types/game';
 import { turnsUntilElection } from './calendar';
 
@@ -61,6 +62,19 @@ export function ministryLawDomains(s: GameState): string[] | null {
   return [...new Set((m.origins ?? [m.id]).flatMap((id) => MINISTRY_LAW_DOMAINS[id] ?? [m.domain]))];
 }
 
+/** Can the player propose this law? A minister: his ministry's own laws (all merged ministries' too) and the shared laws in its domains. */
+export function lawAllowed(s: GameState, law: { domain: string; ministries?: string[] }): boolean {
+  if (s.player.role !== 'minister') return true;
+  const m = playerMinistry(s);
+  if (!m) return false;
+  const origins = m.origins ?? [m.id];
+  if (law.ministries) return law.ministries.some((id) => origins.includes(id) || id === m.id);
+  return (ministryLawDomains(s) ?? []).includes(law.domain);
+}
+
 export const ROLE_NAMES: Record<Role, string> = {
   pm: 'ראש ממשלה', candidate: 'מועמד לראשות הממשלה', minister: 'שר', mk: 'חבר כנסטון',
 };
+
+/** Playing the Knesseton speaker: a real person whose post is speaker, while he is an MK (not in government). */
+export const isSpeaker = (s: GameState) => s.player.role === 'mk' && !s.flags.speakerLost && PEOPLE.find((p) => p.id === s.player.personId)?.role === 'speaker';
