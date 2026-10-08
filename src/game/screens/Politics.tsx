@@ -110,7 +110,7 @@ export function GovernmentScreen() {
                     <select aria-label={`מינוי שר ל${m.name}`} data-focus={`appoint:${m.id}`} data-tip="מינוי שר חדש למשרד: המספרים מראים מומחיות בתחום וכוח פוליטי" className="text-xs" style={{ padding: '4px 6px' }} value="" onChange={(e) => e.target.value && useGame.getState().act('appoint_minister', { ministryId: m.id, politicianId: e.target.value })}>
                       <option value="">מנה שר…</option>
                       {cands.filter((c) => c.id !== m.ministerId).sort((x, y) => (y.expertise[m.domain] ?? 20) - (x.expertise[m.domain] ?? 20)).map((c) => (
-                        <option key={c.id} value={c.id}>{c.name} ({s.parties[c.partyId].shortName}) · מומחיות {(c.expertise[m.domain] ?? 20).toFixed(0)} · כוח {c.power.toFixed(0)}</option>
+                        <option key={c.id} value={c.id}>{c.name} ({s.parties[c.partyId].shortName}){(() => { const held = s.government.ministries.filter((x) => x.ministerId === c.id).map((x) => x.name); return held.length ? ` · כבר מכהן: ${held.join(', ')}` : ' · בלי תיק'; })()} · מומחיות {(c.expertise[m.domain] ?? 20).toFixed(0)} · כוח {c.power.toFixed(0)}</option>
                       ))}
                     </select>
                     {min && min.id !== s.player.politicianId && <ActionButton id="network" params={{ politicianId: min.id }} className="btn btn-sm">☕</ActionButton>}
@@ -299,6 +299,7 @@ export function PartyScreen() {
   const caps = getCapabilities(s);
   const [name, setName] = useState(party.name);
   const [logo, setLogo] = useState(party.logo);
+  const [who, setWho] = useState('');
   const members = party.memberIds.map((id) => s.politicians[id]).filter((p) => p?.active).sort((a, b) => b.power - a.power);
   return (
     <div className="space-y-4">
@@ -364,8 +365,14 @@ export function PartyScreen() {
         </div>
       </Section>
       <Section title="פוליטיקאים אחרים" icon="🎭">
+        <input type="search" aria-label="חיפוש פוליטיקאי לפי שם" placeholder="חיפוש לפי שם…" value={who} onChange={(e) => setWho(e.target.value)} className="w-full mb-2" />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {Object.values(s.politicians).filter((p) => p.active && p.partyId !== party.id && s.parties[p.partyId]?.leaderId === p.id).map((p) => <PolCard key={p.id} p={p} s={s} />)}
+          {Object.values(s.politicians)
+            .filter((p) => p.active && !p.isPlayer && p.partyId !== party.id)
+            .filter((p) => who.trim() ? p.name.includes(who.trim()) : s.parties[p.partyId]?.leaderId === p.id || s.government.ministries.some((m) => m.ministerId === p.id))
+            .sort((a, b) => b.power - a.power)
+            .slice(0, 40)
+            .map((p) => <PolCard key={p.id} p={p} s={s} />)}
         </div>
       </Section>
     </div>

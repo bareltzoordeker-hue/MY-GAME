@@ -17,19 +17,15 @@ export function ministerCandidates(s: GameState): Politician[] {
 export function assignMinister(s: GameState, ministryId: string, politicianId: string | null): void {
   const m = getMinistry(s, ministryId);
   if (!m) return;
-  if (m.ministerId && s.politicians[m.ministerId]) {
-    const old = s.politicians[m.ministerId];
-    if (old.ministryId === m.id) old.ministryId = null;
-  }
+  const prevId = m.ministerId;
   m.ministerId = politicianId;
-  if (politicianId) {
+  // a minister may hold several portfolios: ministryId is his main one, the others point at him through ministerId
+  if (prevId && s.politicians[prevId] && s.politicians[prevId].ministryId === m.id) {
+    s.politicians[prevId].ministryId = s.government.ministries.find((x) => x.ministerId === prevId)?.id ?? null;
+  }
+  if (politicianId && politicianId !== s.government.pmId) {
     const p = s.politicians[politicianId];
-    // a politician holds one portfolio (PM may hold several)
-    if (p.ministryId && p.ministryId !== m.id && politicianId !== s.government.pmId) {
-      const prev = getMinistry(s, p.ministryId);
-      if (prev) prev.ministerId = null;
-    }
-    if (politicianId !== s.government.pmId) p.ministryId = m.id;
+    if (!p.ministryId || !s.government.ministries.some((x) => x.id === p.ministryId && x.ministerId === p.id)) p.ministryId = m.id;
   }
 }
 
