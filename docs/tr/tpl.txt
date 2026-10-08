@@ -450,3 +450,31 @@
 תוספת תקציב ל{} ||| a budget increase for {0} ||| زيادة ميزانية لـ{0}
 קידום {} ||| advancing {0} ||| دفع {0}
 {} שמע ממנו מילה טובה: היחס שלו אליך השתפר (+{}). זה מעלה את הסיכוי לאישורים. ||| {0} heard a good word from him: his attitude to you improved (+{1}). That raises the chance of approvals. ||| {0} سمع منه كلمة طيبة: تحسّن موقفه منك (+{1}). هذا يرفع فرص الموافقات.
+ראית את הכותרת "{}"? זה לא נראה טוב לנו. צריך תגובה מהירה. ||| Did you see the headline "{0}"? It doesn't look good for us. We need a quick response. ||| هل رأيت العنوان "{0}"؟ لا يبدو جيدًا لنا. نحتاج إلى رد سريع.
+ראית את הכותרת "{}"? הממשלה הזאת שוב מסתבכת. מה אתה אומר על זה? ||| Did you see the headline "{0}"? This government is in trouble again. What do you say? ||| هل رأيت العنوان "{0}"؟ هذه الحكومة تتورط مجددًا. ما رأيك؟
+"{}". סוף סוף חדשות טובות. כדאי שנדבר על זה בתקשורת לפני שישכחו. ||| "{0}". Finally some good news. We should talk about it in the media before people forget. ||| "{0}". أخيرًا أخبار جيدة. يجدر أن نتحدث عنها في الإعلام قبل أن ينسوا.
+התקציב עוד לא עבר, ו{} מצפה לראות בו את מה שסוכם. אל תפתיע אותנו. ||| The budget hasn't passed yet, and {0} expects to see what was agreed in it. Don't surprise us. ||| الميزانية لم تُقر بعد، و{0} تتوقع أن ترى فيها ما اتُفق عليه. لا تفاجئنا.
+האבטלה ב-{}%. אנשים מאבדים את הבית, ואנחנו מדברים על קואליציה. צריך תוכנית תעסוקה עכשיו. ||| Unemployment is at {0}%. People are losing their homes, and we talk about coalitions. We need a jobs plan now. ||| البطالة {0}%. الناس يفقدون بيوتهم ونحن نتحدث عن الائتلاف. نحتاج إلى خطة تشغيل الآن.
+האבטלה ב-{}%. פחות רגולציה, יותר השקעות. זה לא מסובך. ||| Unemployment is at {0}%. Less regulation, more investment. It's not complicated. ||| البطالة {0}%. تنظيم أقل واستثمار أكثر. الأمر ليس معقدًا.
+יוקר המחיה הורג את הבוחרים של {}. פיקוח מחירים זה לא מילה גסה. מה אתה מתכנן? ||| The cost of living is killing {0}'s voters. Price controls aren't a dirty word. What's your plan? ||| غلاء المعيشة يقتل ناخبي {0}. مراقبة الأسعار ليست كلمة قبيحة. ما خطتك؟
+יוקר המחיה הורג את הבוחרים של {}. תפתחו את היבוא ותורידו מכסים. מה אתה מתכנן? ||| The cost of living is killing {0}'s voters. Open imports and cut tariffs. What's your plan? ||| غلاء المعيشة يقتل ناخبي {0}. افتحوا الاستيراد وخفّضوا الرسوم. ما خطتك؟
+הסקרים לא טובים ל{}. אני צריך הישג שאפשר להראות לבוחרים. יש לך משהו בשבילי? ||| The polls aren't good for {0}. I need an achievement to show voters. Have you got something for me? ||| الاستطلاعات ليست جيدة لـ{0}. أحتاج إلى إنجاز أعرضه على الناخبين. هل لديك شيء لي؟
+{} עולה בסקרים. מי שרוצה לעבוד איתנו, שידבר עכשיו. ||| {0} is rising in the polls. Whoever wants to work with us should speak now. ||| {0} يصعد في الاستطلاعات. من يريد العمل معنا فليتحدث الآن.
+{} צריך את ראש הממשלה בצד שלו. בוא נעשה סיור משותף, זה טוב לשנינו. ||| {0} needs the prime minister on its side. Let's do a joint tour, it's good for both of us. ||| {0} تحتاج إلى رئيس الحكومة إلى جانبها. لنقم بجولة مشتركة، فهي مفيدة لكلينا.
+איך הולך ב{}? אם אתה צריך תמיכה בקבינט, תגיד לי לפני הישיבה ולא אחריה. ||| How is it going at {0}? If you need support in the cabinet, tell me before the meeting, not after. ||| كيف تسير الأمور في {0}؟ إن احتجت دعمًا في الحكومة فأخبرني قبل الجلسة لا بعدها.
+{}, אם תקים ממשלה, {} רוצה לשמוע מה יש לך להציע לפני כולם. ||| {0}, if you form a government, {1} wants to hear what you have to offer before anyone else. ||| {0}، إن شكّلت حكومة، فإن {1} تريد أن تسمع ما لديك قبل الجميع.
+"{}"? זה כאב ראש. צריך לטפל בזה לפני שזה הופך לסיפור. ||| "{0}"? It's a headache. We need to deal with it before it becomes a story. ||| "{0}"؟ إنه صداع. علينا معالجته قبل أن يتحول إلى قصة.
+"{}"? לא נעים, אבל זה יעבור אם לא נתעסק עם זה יותר מדי. ||| "{0}"? Unpleasant, but it will pass if we don't dwell on it. ||| "{0}"؟ غير مريح، لكنه سيمر إن لم ننشغل به كثيرًا.
+"{}"? ככה נראית ממשלה שאיבדה שליטה. ||| "{0}"? That's what a government that lost control looks like. ||| "{0}"؟ هكذا تبدو حكومة فقدت السيطرة.
+"{}"? אני לא מופתע. אמרנו שזה יקרה. ||| "{0}"? I'm not surprised. We said this would happen. ||| "{0}"؟ لست متفاجئًا. قلنا إن هذا سيحدث.
+"{}"? טוב לראות. כדאי לנצל את זה בתקשורת. ||| "{0}"? Good to see. Worth using in the media. ||| "{0}"؟ من الجيد رؤية ذلك. يجدر استغلاله في الإعلام.
+"{}"? נחכה לראות אם זה מחזיק מים. ||| "{0}"? We'll wait to see if it holds up. ||| "{0}"؟ سننتظر لنرى إن كان يصمد.
+"{}"? מעניין. אם זה נוגע לביטחון, אני אעקוב. ||| "{0}"? Interesting. If it touches security, I'll follow it. ||| "{0}"؟ مثير للاهتمام. إن كان يتعلق بالأمن فسأتابعه.
+"{}"? שמעתי. נראה מה יוצא מזה. ||| "{0}"? I heard. We'll see what comes of it. ||| "{0}"؟ سمعت. سنرى ما يخرج من ذلك.
+{}. בסקר אנחנו על {}. {} מחזיק את הכל ביד חזקה. ||| {0}. In the poll we're at {1}. {2} keeps a firm hand on everything. ||| {0}. في الاستطلاع نحن على {1}. {2} يمسك بكل شيء بيد قوية.
+{}. בסקר אנחנו על {}. אני מנסה להחזיק את כולם יחד. ||| {0}. In the poll we're at {1}. I'm trying to hold everyone together. ||| {0}. في الاستطلاع نحن على {1}. أحاول أن أبقي الجميع معًا.
+אני לא שוכח ש{}. ||| I don't forget that {0}. ||| لا أنسى أن {0}.
+אחרי ש{}, אתה מבין שקשה לי לסמוך עליך. ||| After {0}, you understand it's hard for me to trust you. ||| بعد أن {0}، تفهم أنه يصعب عليّ الوثوق بك.
+אני זוכר לטובה ש{}. ||| I remember well that {0}. ||| أتذكر بالخير أن {0}.
+אחרי ש{}, יש לך אצלי קרדיט. ||| After {0}, you have credit with me. ||| بعد أن {0}، لديك رصيد عندي.
+עוד לא עיכלתי את זה ש{}. ||| I still haven't digested that {0}. ||| لم أستوعب بعد أن {0}.

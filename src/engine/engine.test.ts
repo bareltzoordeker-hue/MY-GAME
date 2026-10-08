@@ -785,3 +785,35 @@ describe('aftermath: war, laws, projects, goals', () => {
     }
   });
 });
+
+describe('chat: more to say', () => {
+  it('answers each part of a two-sentence message, comments on the news and knows his party', async () => {
+    const { createGame } = await import('./newGame');
+    const { sendChat } = await import('./chat');
+    const { addNews } = await import('./effects');
+    const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, role: 'pm', partyId: 'likud' });
+    const t = Object.values(s.politicians).find((p) => p.active && !p.isPlayer && p.id !== s.government.pmId && s.government.coalition.includes(p.partyId))!;
+    sendChat(s, t.id, 'תודה על התמיכה. מה שלומך?');
+    const two = s.chats![t.id].at(-1)!.text;
+    expect(two.length).toBeGreaterThan(30);
+    expect(two).toMatch(/מה איתך|עמוס|מחזיק מעמד|עסוק/);
+    addNews(s, 'הממשלה נכשלה בהצבעה על התקציב', 'bad', '📉');
+    sendChat(s, t.id, 'ראית את החדשות?');
+    expect(s.chats![t.id].at(-1)!.text).toContain('הממשלה נכשלה בהצבעה על התקציב');
+    sendChat(s, t.id, 'מה קורה אצלכם בסיעה?');
+    expect(s.chats![t.id].at(-1)!.text).toMatch(/הסיעה|בסקר/);
+  });
+  it('has many more openings, and they change with the situation', async () => {
+    const { createGame } = await import('./newGame');
+    const { chatTick } = await import('./chat');
+    const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 11, role: 'pm', partyId: 'likud' });
+    const texts = new Set<string>();
+    for (let i = 0; i < 40; i++) {
+      s.turn += 1;
+      s.economy.unemployment = 4 + (i % 4);
+      chatTick(s);
+      for (const list of Object.values(s.chats ?? {})) for (const m of list) if (m.from === 'them') texts.add(m.text);
+    }
+    expect(texts.size).toBeGreaterThan(25);
+  });
+});

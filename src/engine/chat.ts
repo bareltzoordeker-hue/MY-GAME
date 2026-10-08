@@ -8,6 +8,7 @@
 // Politicians also write to the player on their own.
 // ============================================================
 import { LAWS } from '../data/laws';
+import { atWar } from '../data/warActions';
 import type { ChatMsg, ChatTopic, GameState, Politician } from '../types/game';
 import { clamp } from '../utils';
 import { addNews, applyEffects, logEvent, remember } from './effects';
@@ -54,16 +55,23 @@ export function sentiment(text: string): 'yes' | 'no' | null {
 const STOP = new Set(['חוק', 'חוקי', 'הסדרת', 'הצעת', 'תיקון', 'לחוק', 'בנושא', 'המשרד', 'משרד', 'השר', 'שר']);
 const tokens = (s: string) => s.replace(/[׳'"״,.:;()\-–?!]/g, ' ').split(/\s+/).map((w) => w.replace(/^[והבלכמש]{1,2}(?=.{4})/, '')).filter((w) => w.length >= 4 && !STOP.has(w));
 
+// how many law titles each word appears in: a word shared by many titles ("חדשות", "לאומי") is weak evidence
+let wordFreq: Map<string, number> | null = null;
+const titleFreq = (w: string): number => {
+  if (!wordFreq) { wordFreq = new Map(); for (const l of LAWS) for (const x of new Set(tokens(l.title))) wordFreq.set(x, (wordFreq.get(x) ?? 0) + 1); }
+  return wordFreq.get(w) ?? 1;
+};
+
 /** The law the text refers to (by a distinctive word in its title), if any. */
 export function matchLaw(text: string): (typeof LAWS)[number] | null {
   const t = text.replace(/[׳'"״]/g, '');
   let best: { law: (typeof LAWS)[number]; score: number } | null = null;
   for (const law of LAWS) {
     let score = 0;
-    for (const w of tokens(law.title)) if (t.includes(w)) score += 1;
+    for (const w of tokens(law.title)) if (t.includes(w)) score += titleFreq(w) <= 3 ? 1 : 0.4;
     const alias: Record<string, string[]> = { draft_equality: ['גיוס', 'שוויון בנטל'], draft_exemption: ['פטור', 'גיוס חרדים'], judicial_selection: ['שופטים', 'רפורמה משפטית'], override_clause: ['התגברות'], oct7_state_commission: ['ועדת חקירה', 'חקירה ממלכתית'], minimum_wage: ['שכר מינימום'], rent_control: ['שכר דירה', 'פיקוח'], civil_marriage: ['נישואים אזרחיים'] };
     for (const a of alias[law.id] ?? []) if (t.includes(a)) score += 2;
-    if (score > 0 && (!best || score > best.score)) best = { law, score };
+    if (score >= 1 && (!best || score > best.score)) best = { law, score };
   }
   return best?.law ?? null;
 }
@@ -111,11 +119,11 @@ export function searchPoliticians(s: GameState, q: string): Politician[] {
 
 // ---------------- the replies ----------------
 const R = {
-  thanks: { friendly: ['תודה. אני מעריך את הדברים, ואשמח להמשיך לעבוד יחד.', 'שמח לשמוע. נמשיך כך.'], neutral: ['תודה. נראה איך זה מתקדם.', 'מקובל. אשמח לשיתוף פעולה ענייני.'], hostile: ['המילים נעימות. המעשים חשובים יותר.', 'נשמע טוב, אבל לא שכחתי מה שקרה.'] },
+  thanks: { friendly: ['תודה. אני מעריך את הדברים, ואשמח להמשיך לעבוד יחד.', 'שמח לשמוע. נמשיך כך.', 'זה הדדי. יש לנו עוד הרבה לעשות.', 'תודה. בפוליטיקה לא מרבים לומר את זה.'], neutral: ['תודה. נראה איך זה מתקדם.', 'מקובל. אשמח לשיתוף פעולה ענייני.', 'בסדר. נבחן את זה לפי התוצאות.', 'תודה. אני מעדיף מעשים, אבל גם מילים טובות עוזרות.'], hostile: ['המילים נעימות. המעשים חשובים יותר.', 'נשמע טוב, אבל לא שכחתי מה שקרה.', 'תודה. זה לא משנה את מה שאני חושב.', 'נרשם. עכשיו תראה לי שזה אמיתי.'] },
   apology: { friendly: ['אין צורך להתנצל. הלאה.', 'תודה על הדברים. זה מאחורינו.'], neutral: ['אני מקבל את ההתנצלות. נראה אותה גם במעשים.', 'מעריך את הכנות.'], hostile: ['ההתנצלות התקבלה, אבל אמון לא חוזר בשיחה אחת.', 'נראה. לא שכחתי.'] },
   insult: { friendly: ['זה לא ראוי, ואני מופתע ממך.', 'אני מקווה שזו הייתה פליטת פה.'], neutral: ['אני לא מוכן לשיחה בטון הזה.', 'זה לא עניני. נדבר כשתהיה שיחה ראויה.'], hostile: ['שיחה כזו לא תמשיך. אזכור את זה.', 'תקבל את התשובה שלי בהצבעה.'] },
-  other: { friendly: ['קיבלתי. תרצה לפרט?', 'שמעתי. נשמח להמשיך את השיחה.'], neutral: ['קיבלתי. אפשר לפרט למה אתה מתכוון?', 'אני מקשיב.'], hostile: ['אני לא בטוח מה אתה מבקש ממני.', 'תגיע לעניין.'] },
-  promiseGeneric: { friendly: ['אני סומך עליך. נראה את זה בפועל.', 'תודה. מקווה שנוכל לקדם את זה יחד.'], neutral: ['אשמח. אבדוק את זה כשזה יגיע לשולחן.', 'הבטחות בפוליטיקה נמדדות בביצוע.'], hostile: ['שמעתי הבטחות בעבר. נראה.', 'אני אחכה לראות.'] },
+  other: { friendly: ['קיבלתי. תרצה לפרט?', 'שמעתי. נשמח להמשיך את השיחה.', 'מעניין. ספר לי עוד.', 'אני איתך. מה הצעד הבא?'], neutral: ['קיבלתי. אפשר לפרט למה אתה מתכוון?', 'אני מקשיב.', 'הבנתי את הכיוון. מה אתה מציע בפועל?'], hostile: ['אני לא בטוח מה אתה מבקש ממני.', 'תגיע לעניין.', 'אין לי זמן לחידות.'] },
+  promiseGeneric: { friendly: ['אני סומך עליך. נראה את זה בפועל.', 'תודה. מקווה שנוכל לקדם את זה יחד.', 'יופי. אני רושם את זה, ואתה יודע שאני זוכר.', 'מצוין. תגיד מתי, ואני אדאג שהסיעה תדע.'], neutral: ['אשמח. אבדוק את זה כשזה יגיע לשולחן.', 'הבטחות בפוליטיקה נמדדות בביצוע.', 'בסדר. נדבר שוב כשזה יקרה.', 'קיבלתי. אני מחכה לראות את זה בפועל.'], hostile: ['שמעתי הבטחות בעבר. נראה.', 'אני אחכה לראות.', 'מילים. תביא מעשים.', 'כבר הבטיחו לי. סלח לי אם אני לא מתרגש.'] },
 };
 const line = (s: GameState, group: keyof typeof R, t: ReturnType<typeof tone>) => pick(s, R[group][t]);
 
@@ -167,6 +175,8 @@ const setTopic = (s: GameState, id: string, topic: ChatTopic | null) => {
 /** Answers about the state of things (polls, economy, security, coalition, the player): real numbers, said in character. */
 function knowledge(s: GameState, t: Politician, text: string): Reply | null {
   const tn = tone(t);
+  if (/חדשות|כותרת|ראית מה|שמעת מה|מה קרה היום|מה אומרים על/.test(text)) { const r = newsComment(s, t); if (r) return r; }
+  if (/מה קורה אצלכם|מה קורה בסיעה|מה המצב במפלגה|מה נשמע אצלכם|איך בסיעה|מה עם הסיעה/.test(text)) return partyStatus(s, t);
   const party = s.parties[t.partyId];
   const mine = s.parties[s.player.partyId];
   const poll = s.polls[s.polls.length - 1];
@@ -527,6 +537,8 @@ function voice(s: GameState, t: Politician, r: Reply): Reply {
   const tn = tone(t);
   const ego = t.personality.ego > 0.6;
   const amb = t.personality.ambition > 0.6;
+  const mem = memoryLine(s, t);
+  if (mem && side(s, `mem${t.id}${s.turn}`) < 0.35 && !r.text.startsWith(mem)) return { ...r, text: `${mem} ${r.text}` };
   const pre = tn === 'hostile' ? '' : ego ? pick(s, ['תשמע. ', 'אני אגיד לך בדיוק. ', '']) : pick(s, ['תראה. ', 'בוא נהיה ישירים. ', '']);
   const post = tn === 'friendly' && amb ? pick(s, [' נמשיך מכאן.', ' יש לנו עוד הרבה לעשות יחד.', '']) : '';
   if (!pre && !post) return r;
@@ -535,6 +547,16 @@ function voice(s: GameState, t: Politician, r: Reply): Reply {
 }
 
 function handle(s: GameState, t: Politician, text: string): Reply {
+  // two or three sentences with different intents ("תודה על התמיכה. תוכל לקדם את X?"): answer each
+  const parts = text.split(/(?<=[.!?])\s+/).map((x) => x.trim()).filter((x) => x.length > 3);
+  if (parts.length >= 2 && parts.length <= 3) {
+    const deal = parseDeal(s, text);
+    const intents = parts.map(detectIntent);
+    if (!(deal.give && deal.want) && new Set(intents).size > 1) {
+      const replies = parts.map((x) => handleRaw(s, t, x));
+      return voice(s, t, { text: replies.map((r) => r.text).join(' '), hint: replies.find((r) => r.hint)?.hint });
+    }
+  }
   return voice(s, t, handleRaw(s, t, text));
 }
 
@@ -628,7 +650,11 @@ function handleRaw(s: GameState, t: Politician, text: string): Reply {
       if (known) return known;
       return { text: pick(s, ['השאלה חשובה. אשמח לדון בזה פנים אל פנים.', 'אין לי עמדה סופית. מה דעתך?', 'אני מעדיף לענות בפגישה ולא בכתב.']) };
     }
-    case 'greet':
+    case 'greet': {
+      // "מה שלומך" / "מה נשמע" get a real answer, not just "hello"
+      const small = knowledge(s, t, text);
+      if (small) return small;
+    }
       return { text: tn === 'hostile' ? 'שלום. מה אתה רוצה?' : pick(s, ['שלום. מה תרצה לדבר עליו?', 'היי. במה אפשר לעזור?', 'שלום, טוב לשמוע ממך. על מה נדבר?']) };
     case 'meet': {
       remember(s, t.id, 'support', 'ביקש לדבר', tn === 'hostile' ? 1 : 3);
@@ -693,6 +719,110 @@ function side(s: GameState, key: string): number {
 }
 
 /** Everything this politician could say right now, given who they are and what is going on. */
+// ---------------- more to say: news, season, role, personality, ideology ----------------
+const latestNews = (s: GameState) => s.news[s.news.length - 1];
+
+/** Openings that react to what is going on, so the same politician doesn't repeat himself. */
+function moreOpenings(s: GameState, p: Politician, add: (text: string, topic?: Opening['topic']) => void): void {
+  const party = s.parties[p.partyId];
+  const pn = party?.shortName ?? 'הסיעה';
+  const inGov = s.government.coalition.includes(p.partyId);
+  const hawk = (party?.ideology.security ?? 0) > 0.3;
+  const dove = (party?.ideology.security ?? 0) < -0.3;
+  const religious = (party?.ideology.religion ?? 0) > 0.4;
+  const secular = (party?.ideology.religion ?? 0) < -0.4;
+  const socialist = (party?.ideology.economic ?? 0) < -0.3;
+  const me = s.politicians[s.player.politicianId];
+  const myMinistry = s.government.ministries.find((m) => m.ministerId === me.id);
+  const hisMinistry = s.government.ministries.find((m) => m.ministerId === p.id);
+  const news = latestNews(s);
+  const e = s.economy;
+  const poll = s.polls[s.polls.length - 1];
+  const hisSeats = poll ? Math.round(poll.seats[p.partyId] ?? 0) : 0;
+  const war = atWar(s);
+  const ego = p.personality.ego > 0.6;
+  const ambitious = p.personality.ambition > 0.6;
+
+  // the latest headline
+  if (news && news.tone === 'bad') add(`ראית את הכותרת "${news.headline}"? ${inGov ? 'זה לא נראה טוב לנו. צריך תגובה מהירה.' : 'הממשלה הזאת שוב מסתבכת. מה אתה אומר על זה?'}`);
+  if (news && news.tone === 'good' && inGov) add(`"${news.headline}". סוף סוף חדשות טובות. כדאי שנדבר על זה בתקשורת לפני שישכחו.`);
+
+  // budget season
+  if (!s.budget.passed && isPm(s)) add(`התקציב עוד לא עבר, ו${pn} מצפה לראות בו את מה שסוכם. אל תפתיע אותנו.`, { kind: 'unhappy', demand: 'budget' });
+  if (!s.budget.passed && !isPm(s) && inGov) add('התקציב מתעכב, ואני לא אוהב את זה. אם יש לך השפעה על האוצר, עכשיו הזמן.');
+
+  // the economy, by ideology
+  if (e.unemployment > 5.5) add(socialist ? `האבטלה ב-${e.unemployment.toFixed(1)}%. אנשים מאבדים את הבית, ואנחנו מדברים על קואליציה. צריך תוכנית תעסוקה עכשיו.` : `האבטלה ב-${e.unemployment.toFixed(1)}%. פחות רגולציה, יותר השקעות. זה לא מסובך.`);
+  if (e.inflation > 4) add(`יוקר המחיה הורג את הבוחרים של ${pn}. ${socialist ? 'פיקוח מחירים זה לא מילה גסה.' : 'תפתחו את היבוא ותורידו מכסים.'} מה אתה מתכנן?`);
+
+  // security, by ideology
+  if (war && hawk) add('במלחמה לא מנצחים בחצי כוח. אם תהסס, הציבור ירגיש את זה. אני מאחוריך כל עוד המטרה היא ניצחון.');
+  if (war && dove) add('כל יום של לחימה בלי אופק מדיני עולה לנו בחיילים ובאמון העולם. מתי מדברים על היום שאחרי?');
+  if (!war && hawk && Object.values(s.world?.fronts ?? {}).some((f) => f.threat > 60)) add('האיום בצפון מתעצם ואנחנו מחכים. הרתעה לא בונים בישיבות.');
+
+  // religion and state
+  if (religious && !s.activeLaws.includes('draft_exemption')) add('הציבור שלנו מצפה להסדרת מעמד לומדי התורה. בלי זה, קשה לי להסביר בבית למה אנחנו שותפים.', { kind: 'ask_law', lawId: 'draft_exemption' });
+  if (secular && !s.activeLaws.includes('draft_equality')) add('שוויון בנטל זה לא סיסמה אצלנו. אם תזיז את זה, תקבל גב מלא.', { kind: 'ask_law', lawId: 'draft_equality' });
+
+  // polls
+  if (poll && hisSeats <= 4) add(`הסקרים לא טובים ל${pn}. אני צריך הישג שאפשר להראות לבוחרים. יש לך משהו בשבילי?`, { kind: 'coop' });
+  if (poll && hisSeats >= 12) add(`${pn} עולה בסקרים. מי שרוצה לעבוד איתנו, שידבר עכשיו.`);
+
+  // the player's role
+  if (isPm(s) && inGov && hisMinistry) add(`${hisMinistry.name} צריך את ראש הממשלה בצד שלו. בוא נעשה סיור משותף, זה טוב לשנינו.`, { kind: 'coop' });
+  if (s.player.role === 'minister' && myMinistry && inGov) add(`איך הולך ב${myMinistry.name}? אם אתה צריך תמיכה בקבינט, תגיד לי לפני הישיבה ולא אחריה.`);
+  if (s.player.role === 'mk' && inGov) add('ראיתי אותך בוועדה. עבודה טובה. אם תרצה להתקדם, כדאי שנדבר על מה שאתה יכול לעשות בשבילנו.');
+  if (s.player.role === 'mk' && !inGov) add('באופוזיציה אפשר להיות קול, או להיות רעש. אם תרצה לעבוד יחד על משהו שמביך את הממשלה, אני כאן.', { kind: 'coop' });
+  if (s.player.role === 'candidate') add(`${me.name}, אם תקים ממשלה, ${pn} רוצה לשמוע מה יש לך להציע לפני כולם.`, { kind: 'campaign' });
+
+  // personality
+  if (ego) add('אני לא רגיל לחכות לתשובות. כשאני כותב, אני מצפה למענה באותו יום.');
+  if (ambitious && inGov) add('אני לא מתכוון להישאר במקום הזה לנצח. מי שעוזר לי לעלות, אני זוכר אותו.');
+  if (!ego && p.loyalty >= 50) add('בלי דרמות: רציתי רק לבדוק שאנחנו מתואמים. יש משהו שצריך לדעת?');
+
+  // small talk and media
+  add('ראיתי אותך בטלוויזיה. לא רע. בפעם הבאה תדבר פחות על הכלכלה ויותר על אנשים.');
+  add('הטלפון שלי לא מפסיק לצלצל עם עיתונאים ששואלים עליך. מה אני אמור להגיד להם?');
+  if (p.loyalty >= 50) add('חבר ממליץ: אל תאמין לכל מה שמספרים לך על החברים שלך בקואליציה.');
+  if (s.turn >= 6) add('עברנו ביחד כבר כמה חודשים. אם תשאל אותי, המשחק האמיתי מתחיל עכשיו.');
+}
+
+/** The politician comments on the latest headline, in his party's voice. */
+function newsComment(s: GameState, t: Politician): Reply | null {
+  const news = latestNews(s);
+  if (!news) return null;
+  const party = s.parties[t.partyId];
+  const inGov = s.government.coalition.includes(t.partyId);
+  const hawk = (party?.ideology.security ?? 0) > 0.3;
+  const line = news.tone === 'bad'
+    ? (inGov ? pick(s, ['זה כאב ראש. צריך לטפל בזה לפני שזה הופך לסיפור.', 'לא נעים, אבל זה יעבור אם לא נתעסק עם זה יותר מדי.']) : pick(s, ['ככה נראית ממשלה שאיבדה שליטה.', 'אני לא מופתע. אמרנו שזה יקרה.']))
+    : news.tone === 'good'
+      ? (inGov ? 'טוב לראות. כדאי לנצל את זה בתקשורת.' : 'נחכה לראות אם זה מחזיק מים.')
+      : (hawk ? 'מעניין. אם זה נוגע לביטחון, אני אעקוב.' : 'שמעתי. נראה מה יוצא מזה.');
+  return { text: `"${news.headline}"? ${line}` };
+}
+
+/** "מה קורה אצלכם": the state of his party. */
+function partyStatus(s: GameState, t: Politician): Reply {
+  const party = s.parties[t.partyId];
+  if (!party) return { text: 'אצלנו? שקט יחסית.' };
+  const poll = s.polls[s.polls.length - 1];
+  const seats = poll ? Math.round(poll.seats[party.id] ?? 0) : party.seats;
+  const mood = party.cohesion >= 65 ? 'הסיעה מלוכדת' : party.cohesion >= 45 ? 'יש ויכוחים בסיעה, כרגיל' : 'הסיעה מפוצלת, ולא בטוח שאפשר להסתיר את זה עוד';
+  const leader = s.politicians[party.leaderId];
+  return { text: `${mood}. בסקר אנחנו על ${seats}. ${leader && leader.id !== t.id ? `${leader.name} מחזיק את הכל ביד חזקה.` : 'אני מנסה להחזיק את כולם יחד.'}` };
+}
+
+/** A line about something the politician remembers, when it is fresh and strong. */
+function memoryLine(s: GameState, t: Politician): string | null {
+  const m = [...t.memory].reverse().find((x) => !x.resolved && Math.abs(x.weight) >= 8 && s.turn - x.turn <= 6);
+  if (!m) return null;
+  if (m.kind === 'betrayal') return pick(s, [`אני לא שוכח ש${m.text}.`, `אחרי ש${m.text}, אתה מבין שקשה לי לסמוך עליך.`]);
+  if (m.kind === 'favor' || m.kind === 'appointed' || m.kind === 'support') return pick(s, [`אני זוכר לטובה ש${m.text}.`, `אחרי ש${m.text}, יש לך אצלי קרדיט.`]);
+  if (m.kind === 'insult') return `עוד לא עיכלתי את זה ש${m.text}.`;
+  return null;
+}
+
 function openings(s: GameState, p: Politician): Opening[] {
   const me = s.politicians[s.player.politicianId].name;
   const party = s.parties[p.partyId];
@@ -756,6 +886,7 @@ function openings(s: GameState, p: Politician): Opening[] {
     add('הבחירות מתקרבות. אולי כדאי שנדבר על שיתוף פעולה אחרי היום שאחרי.', { kind: 'campaign' });
     add('אנחנו בוחנים הסכם עודפים. תהיה פתוח לשיחה?', { kind: 'campaign' });
   }
+  moreOpenings(s, p, add);
   return out;
 }
 
