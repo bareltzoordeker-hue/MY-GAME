@@ -85,7 +85,7 @@ export function MinistryScreen() {
   return (
     <div className="space-y-4">
       <ScreenHeader title={`${m.icon} ${m.name}`} sub={pm && m.ministerId !== s.player.politicianId ? 'כראש ממשלה אתה יכול להנחות את השר (עולה עוד 2 הון).' : 'המשרד שלך. התקציב שלך. הבעיות שלך.'}
-        right={choices.length > 1 ? <select aria-label="בחירת משרד לצפייה" value={m.id} onChange={(e) => setView(e.target.value)}>{choices.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select> : undefined} />
+        right={choices.length > 1 ? <select aria-label="בחירת משרד לצפייה" className="select-ministry" value={m.id} onChange={(e) => setView(e.target.value)}>{choices.map((x) => <option key={x.id} value={x.id}>{x.name}</option>)}</select> : undefined} />
       <div className="grid lg:grid-cols-[1fr_1.4fr] gap-4">
         <Section title="תמונת מצב" icon="📋">
           {minister && <PolName p={minister} s={s} size={44} sub={`מומחיות ${(minister.expertise[m.domain] ?? 20).toFixed(0)} · ${s.parties[minister.partyId]?.shortName}`} />}

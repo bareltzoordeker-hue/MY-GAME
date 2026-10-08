@@ -250,7 +250,7 @@ export function LawsScreen() {
     <div className="space-y-4">
       <ScreenHeader title="חוקים ורפורמות" sub={s.player.role === 'pm' ? 'חוק עובר טרומית → ועדה → קריאה שלישית. גדולים דורשים ישיבת ממשלה.' : s.player.role === 'minister' ? 'כשר אתה מגיש רק חוקים בתחום המשרד שלך. ראש הממשלה מחליט אם זו הצעה ממשלתית.' : 'כחבר כנסטון אתה מגיש הצעות חוק פרטיות. בלי תמיכת הקואליציה הן נופלות בטרומית.'} right={<Tabs value={tab} onChange={setTab} items={[{ id: 'catalog', label: 'הצעות אפשריות' }, { id: 'active', label: `בתוקף (${s.activeLaws.length})` }]} />} />
       <div className="flex flex-wrap gap-2 items-center">
-        <select aria-label="סינון לפי משרד" value={minF} onChange={(e) => { setMinF(e.target.value); setLimit(60); }} className="text-sm">
+        <select aria-label="סינון לפי משרד" value={minF} onChange={(e) => { setMinF(e.target.value); setLimit(60); }} className="select-ministry text-sm">
           <option value="">כל המשרדים</option>
           {s.government.ministries.map((m) => <option key={m.id} value={m.id}>{m.icon} {m.name}</option>)}
         </select>

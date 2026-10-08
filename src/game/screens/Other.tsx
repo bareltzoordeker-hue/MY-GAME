@@ -44,8 +44,13 @@ export function ProjectsScreen() {
   const active = s.projects.filter((p) => p.status === 'active');
   const done = s.projects.filter((p) => p.status === 'done');
   const myMin = playerMinistry(s);
-  const mine = (d: { ministry: string }) => s.player.role === 'pm' || (s.player.role === 'minister' && !!myMin && (myMin.origins ?? [myMin.id]).includes(d.ministry));
-  const avail = PROJECTS.filter((d) => !s.projects.some((p) => p.defId === d.id && p.status !== 'cancelled') && mine(d));
+  // a minister may hold several portfolios: all of them count
+  const held = s.government.ministries.filter((x) => x.ministerId === s.player.politicianId);
+  const mine = (d: { ministry: string }) => s.player.role === 'pm' || (s.player.role === 'minister' && held.some((x) => (x.origins ?? [x.id]).includes(d.ministry)));
+  const choices = s.player.role === 'pm' ? s.government.ministries : held;
+  const [minF, setMinF] = useState<string>(s.player.role === 'minister' && myMin ? myMin.id : '');
+  const inMin = (d: { ministry: string }) => !minF || ((s.government.ministries.find((x) => x.id === minF)?.origins ?? [minF]).includes(d.ministry));
+  const avail = PROJECTS.filter((d) => !s.projects.some((p) => p.defId === d.id && p.status !== 'cancelled') && mine(d) && inMin(d));
   return (
     <div className="space-y-4">
       <ScreenHeader title="פרויקטים לאומיים" sub={`הוצאה שנתית על פרויקטים: ₪${s.budget.projectSpending.toFixed(1)}B. עיכובים תלויים בביורוקרטיה וביעילות המשרד.`} />
@@ -60,7 +65,12 @@ export function ProjectsScreen() {
         ))}</div>}
       </Section>
       {!caps.canStartProjects && <div className="card text-sm">🏗️ פרויקטים לאומיים משיקים ראש הממשלה והשרים, כל אחד בתחום המשרד שלו. כחבר כנסטון אתה יכול לדרוש פרויקט לאזור שלך בתקשורת, או לבקר אזור מוזנח (מסך הקריירה).</div>}
-      {caps.canStartProjects && <Section title={s.player.role === 'pm' ? 'אפשר להשיק' : `פרויקטים של ${myMin?.name ?? 'המשרד'}`} icon="🏗️">
+      {caps.canStartProjects && <Section title="אפשר להשיק" icon="🏗️" right={choices.length > 1 || s.player.role === 'pm' ? (
+        <select aria-label="בחירת משרד לפרויקטים" className="select-ministry text-sm" value={minF} onChange={(e) => setMinF(e.target.value)}>
+          {s.player.role === 'pm' && <option value="">כל המשרדים</option>}
+          {choices.map((x) => <option key={x.id} value={x.id}>{x.icon} {x.name}</option>)}
+        </select>
+      ) : undefined}>
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-2">{avail.map((d) => (
           <div key={d.id} className="inset flex flex-col gap-1">
             <b className="text-sm">{d.icon} {d.name}</b>

@@ -18,28 +18,29 @@ import { HowToPlayButton } from './HowToPlay';
 import { openSpeech } from './SpeechModal';
 
 interface NavItem { id: ScreenId; icon: string; label: string; tip?: string; show?: (s: GameState) => boolean; badge?: (s: GameState) => number }
-export const NAV: NavItem[] = [
+export // the order the player asked for: overview, money, career, promises, then parliament and the ministry
+const NAV: NavItem[] = [
   { id: 'dashboard', icon: '🏠', label: 'לוח בקרה', tip: 'מבט על: מצב המדינה, משברים, החלטות שמחכות לך וחדשות', badge: (s) => s.inbox.length },
-  { id: 'promises', icon: '📌', label: 'הבטחות', tip: 'כל ההבטחות שעוד לא קוימו: להסכם הקואליציוני, לפוליטיקאים ולציבור, עם המועד ועם כפתור לקיום מהיר', badge: (s) => openPromises(s).filter((p) => p.turnsLeft !== undefined && p.turnsLeft <= 1 && !deadlinesFrozen(s)).length },
-  { id: 'ministry', icon: '🏛️', label: 'המשרד שלי', tip: 'ניהול המשרד: תקציב, מדדים ייעודיים ופעולות שרק המשרד הזה יכול לעשות', show: (s) => getCapabilities(s).canManageMinistry || s.player.role === 'pm' },
   { id: 'state', icon: '🗺️', label: 'מצב המדינה', tip: 'איכות השירותים הציבוריים, מה גורם לה לעלות או לרדת ואילו בעיות פתוחות' },
-  { id: 'economy', icon: '📈', label: 'כלכלה', tip: 'צמיחה, אבטלה, אינפלציה, חוב ומסים, כולל מה מניע כל מספר' },
   { id: 'budget', icon: '💰', label: 'תקציב', tip: 'חלוקת הכסף בין המשרדים. כל שינוי משפיע על השירותים, על הגירעון ועל הציבור' },
-  { id: 'population', icon: '👥', label: 'אוכלוסייה', tip: '21 קבוצות אוכלוסייה: מי מרוצה, מי כועס ואיך זה משתנה' },
-  { id: 'map', icon: '📍', label: 'מפה', tip: 'מפת ישמעאל עם שכבות: אבטלה, הכנסה, השקעות, תשתיות ושביעות רצון לפי אזור' },
+  { id: 'career', icon: '🎖️', label: 'קריירה', tip: 'איך להתקדם: ועדות, ראיונות, פריימריז, מעבר מפלגה או התפטרות' },
+  { id: 'promises', icon: '📌', label: 'הבטחות', tip: 'כל ההבטחות שעוד לא קוימו: להסכם הקואליציוני, לפוליטיקאים ולציבור, עם המועד ועם כפתור לקיום מהיר', badge: (s) => openPromises(s).filter((p) => p.turnsLeft !== undefined && p.turnsLeft <= 1 && !deadlinesFrozen(s)).length },
+  { id: 'parliament', icon: '🏟️', label: 'כנסטון', tip: '120 המושבים, הצעות חוק בדיון וצפי הצבעה' },
+  { id: 'ministry', icon: '🏛️', label: 'המשרד שלי', tip: 'ניהול המשרד: תקציב, מדדים ייעודיים ופעולות שרק המשרד הזה יכול לעשות', show: (s) => getCapabilities(s).canManageMinistry || s.player.role === 'pm' },
+  { id: 'laws', icon: '📜', label: 'חוקים', tip: 'הגשת חוקים חדשים וביטול חוקים קיימים' },
+  { id: 'projects', icon: '🏗️', label: 'פרויקטים', tip: 'פרויקטים לאומיים: כבישים, רכבות, בתי חולים. לוקחים זמן ועולים כסף' },
   { id: 'security', icon: '🛡️', label: 'ביטחון ומדיניות', tip: 'חזיתות, כוחות צה״ל, מבצעים באישור הקבינט, ערוצי הידברות, הפסקות אש, שטחי A/B/C ויחסי חוץ' },
   { id: 'government', icon: '🪑', label: 'ממשלה', tip: 'שרים, משרדים וקואליציה: מינויים, פיטורים, איחוד משרדים וכספים קואליציוניים' },
-  { id: 'parliament', icon: '🏟️', label: 'כנסטון', tip: '120 המושבים, הצעות חוק בדיון וצפי הצבעה' },
-  { id: 'laws', icon: '📜', label: 'חוקים', tip: 'הגשת חוקים חדשים וביטול חוקים קיימים' },
+  { id: 'party', icon: '🎌', label: 'מפלגה ובריתות', tip: 'המפלגה שלך, הקמפיין, הבטחות בחירות ובריתות עם מפלגות אחרות' },
   { id: 'relations', icon: '🕸️', label: 'מפת יחסים', tip: 'היחסים בין המפלגות ובינך לבין חברי הכנסטון: פגישות, אירועים משותפים, תמיכה הדדית, הסכמי עודפים ואיחודים' },
   { id: 'chat', icon: '💬', label: 'שיחות', tip: 'כתיבה חופשית לשרים וליו״רי מפלגות: איומים, הבטחות, בקשות וחיזוק קשרים. חיפוש לפי שם', badge: (s) => unreadTotal(s) },
-  { id: 'party', icon: '🎌', label: 'מפלגה ובריתות', tip: 'המפלגה שלך, הקמפיין, הבטחות בחירות ובריתות עם מפלגות אחרות' },
-  { id: 'projects', icon: '🏗️', label: 'פרויקטים', tip: 'פרויקטים לאומיים: כבישים, רכבות, בתי חולים. לוקחים זמן ועולים כסף' },
+  { id: 'advisor', icon: '🧠', label: 'היועץ', tip: 'כל העצות של היועץ לפי סדר דחיפות' },
   { id: 'crises', icon: '🚨', label: 'משברים', tip: 'משברים פעילים ודרכי הטיפול בהם, ויומן האירועים', badge: (s) => s.crises.length },
   { id: 'polls', icon: '📊', label: 'סקרים', tip: 'מנדטים בסקר, מגמות ומי הכי כועס' },
+  { id: 'economy', icon: '📈', label: 'כלכלה', tip: 'צמיחה, אבטלה, אינפלציה, חוב ומסים, כולל מה מניע כל מספר' },
+  { id: 'map', icon: '📍', label: 'מפה', tip: 'מפת ישמעאל עם שכבות: אבטלה, הכנסה, השקעות, תשתיות ושביעות רצון לפי אזור' },
+  { id: 'population', icon: '👥', label: 'אוכלוסייה', tip: '21 קבוצות אוכלוסייה: מי מרוצה, מי כועס ואיך זה משתנה' },
   { id: 'news', icon: '📰', label: 'חדשות', tip: 'כל הכותרות. רובן לא מחמיאות' },
-  { id: 'advisor', icon: '🧠', label: 'היועץ', tip: 'כל העצות של היועץ לפי סדר דחיפות' },
-  { id: 'career', icon: '🎖️', label: 'קריירה', tip: 'איך להתקדם: ועדות, ראיונות, פריימריז, מעבר מפלגה או התפטרות' },
   { id: 'save', icon: '💾', label: 'שמירה והגדרות', tip: 'שמירה, ייבוא וייצוא, הגדרות פרטיות ונגישות והפעלה מחדש של המדריך' },
 ];
 

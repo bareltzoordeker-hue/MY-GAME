@@ -307,3 +307,7 @@ html[dir=ltr] :is(p, li, h1, h2, h3, figcaption, .bubble, .text-sm, .text-xs, .h
 .btn { max-width: 100%; }
 @media (max-width: 640px) { .btn { white-space: normal; text-align: center; line-height: 1.3; } }
 .masthead .btn { white-space: nowrap; }
+
+/* the ministry picker on "my ministry", laws and projects: stands out like a primary button */
+.select-ministry { background: linear-gradient(180deg, #3463b3, var(--violet)); color: #fff; font-weight: 800; border: 2px solid var(--violet-d); border-radius: 10px; padding: 6px 10px; box-shadow: 0 2px 0 var(--violet-d); }
+.select-ministry option { color: var(--ink, #111); background: #fff; font-weight: 600; }
