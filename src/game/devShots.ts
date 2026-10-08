@@ -21,6 +21,7 @@ export function runShotMode(): void {
   const st = useGame.getState();
   st.newGame({ personId: q.get('person') ?? 'likud_1', difficulty: 'normal', seed: Number(q.get('seed') ?? 7), cast: q.get('cast') === 'fictional' ? 'fictional' : 'real' });
   let g = useGame.getState().game!;
+  if (q.get('campaign') === '0') g = { ...g, flags: { ...g.flags, shot_skip_campaign: 1 } }; // keep the campaign dialog out of the picture
   if (q.get('campaign') !== '0') g = performAction(g, 'start_campaign', { strategy: 'security', t1: 'reservists', t2: 'right', budget: 'mid', slogan: 'ביטחון קודם לכל' }).state;
   const turns = Number(q.get('turns') ?? 0);
   for (let i = 0; i < turns && g.elections.phase === 'none'; i++) {

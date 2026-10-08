@@ -25,7 +25,7 @@ export function CampaignStartModal() {
     window.addEventListener('open-campaign', reopen);
     return () => window.removeEventListener('open-campaign', reopen);
   }, []);
-  if (!s || busy || !needsCampaignStart(s) || later === s.turn) return null;
+  if (!s || busy || !needsCampaignStart(s) || later === s.turn || s.flags.shot_skip_campaign) return null;
   const sal = issueSalience(s);
   const party = s.parties[s.player.partyId];
   const st = strategy ? STRATEGY_BY_ID[strategy] : null;

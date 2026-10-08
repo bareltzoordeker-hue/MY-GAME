@@ -311,3 +311,6 @@ html[dir=ltr] :is(p, li, h1, h2, h3, figcaption, .bubble, .text-sm, .text-xs, .h
 /* the ministry picker on "my ministry", laws and projects: stands out like a primary button */
 .select-ministry { background: linear-gradient(180deg, #3463b3, var(--violet)); color: #fff; font-weight: 800; border: 2px solid var(--violet-d); border-radius: 10px; padding: 6px 10px; box-shadow: 0 2px 0 var(--violet-d); }
 .select-ministry option { color: var(--ink, #111); background: #fff; font-weight: 600; }
+
+/* the phone drawer: two columns of compact links so all screens fit without a long scroll */
+@media (max-width: 1023px) { .nav-grid .side-link { padding: 8px 6px; font-size: 12.5px; } .nav-grid .side-link > span:first-child { width: 1.1rem; } }

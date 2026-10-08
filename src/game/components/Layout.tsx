@@ -49,7 +49,7 @@ function Sidebar({ onPick }: { onPick?: () => void }) {
   const screen = useGame((x) => x.screen);
   const setScreen = useGame((x) => x.setScreen);
   return (
-    <nav className="flex flex-col gap-0.5">
+    <nav className="grid grid-cols-2 gap-1 lg:flex lg:flex-col lg:gap-0.5 nav-grid">
       {NAV.filter((n) => !n.show || n.show(s)).map((n) => {
         const b = n.badge?.(s) ?? 0;
         return (

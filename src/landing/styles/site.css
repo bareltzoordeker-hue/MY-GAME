@@ -212,3 +212,8 @@ p { margin: 0; }
 .site-footer { background: #0b1730; }
 .eyebrow { background: #e3e9f3; }
 .card .ic { background: linear-gradient(145deg, #3463b3, #1b3f7a); box-shadow: 0 3px 0 #0f2547; }
+
+/* language links in the site header */
+.lang-pick { margin-inline-start: 6px; padding-inline-start: 10px; border-inline-start: 1px solid rgba(255,255,255,.25); white-space: nowrap; }
+.lang-pick a { font-weight: 700; }
+.hero-note a { text-decoration: underline; }
