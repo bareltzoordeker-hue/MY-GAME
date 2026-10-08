@@ -573,7 +573,7 @@ describe('political capital', () => {
     let s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, role: 'mk', partyId: 'likud' });
     for (let i = 0; i < 3; i++) {
       const before = s.player.politicalCapital;
-      s = advanceTurn({ ...s, drama: undefined });
+      s = advanceTurn({ ...s, drama: null });
       expect(s.player.politicalCapital).toBeGreaterThan(before);
     }
   });
