@@ -18,7 +18,7 @@ import { campaignTick } from './campaign';
 import { chatTick } from './chat';
 import { worldTick } from './security';
 import { evaluateGameOver, setGameOver, syncRole, updateCareer } from './career';
-import { generateInitiatives, simulateCharacters } from './characters';
+import { capitalIncome, generateInitiatives, simulateCharacters } from './characters';
 import { generateCrises, tickCrises } from './crises';
 import { simulateEconomy } from './economy';
 import { addNews, logEvent } from './effects';
@@ -84,6 +84,8 @@ export function advanceTurn(s0: GameState): GameState {
     simulateGovernment(s);
     if (!(s.government.caretaker && s.elections.phase === 'none')) simulateParliament(s); // a dissolved Knesseton does not legislate
   }
+
+  capitalIncome(s, steps);
 
   // discrete events: once per turn, with chance scaled to the turn's length
   const events = Math.min(2, steps);

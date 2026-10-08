@@ -565,3 +565,16 @@ describe('chat (v2)', () => {
     expect(unread).toBeGreaterThan(0);
   });
 });
+
+describe('political capital', () => {
+  it('grows every turn, including short campaign turns', async () => {
+    const { advanceTurn } = await import('./turn');
+    const { createGame } = await import('./newGame');
+    let s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, role: 'mk', partyId: 'likud' });
+    for (let i = 0; i < 3; i++) {
+      const before = s.player.politicalCapital;
+      s = advanceTurn({ ...s, drama: undefined });
+      expect(s.player.politicalCapital).toBeGreaterThan(before);
+    }
+  });
+});

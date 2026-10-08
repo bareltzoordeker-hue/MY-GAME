@@ -105,10 +105,15 @@ export function simulateCharacters(s: GameState): void {
     party.cohesion = clamp(lerp(party.cohesion, target, 0.15));
     party.power = clamp(party.seats * 1.6 + party.cohesion * 0.2);
   }
+}
 
-  // political capital income
+/** Political capital income, once per turn. `steps` is the turn's length in 2-month steps;
+ *  short campaign turns still pay at least half, so every turn brings something. */
+export function capitalIncome(s: GameState, steps: number): void {
+  const d = DIFFICULTIES[s.difficulty];
+  const me = s.politicians[s.player.politicianId];
   const gain = { pm: 6, candidate: 5, minister: 4, mk: 3 }[s.player.role] * d.capitalGain + (me.popularity - 40) * 0.05 + (s.player.reputation - 40) * 0.03;
-  s.player.politicalCapital = clamp(s.player.politicalCapital + Math.max(1, gain));
+  s.player.politicalCapital = clamp(s.player.politicalCapital + Math.max(1, gain) * Math.max(0.5, steps));
 }
 
 // ---------------- AI initiatives ----------------
