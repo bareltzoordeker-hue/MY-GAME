@@ -175,6 +175,7 @@ export function ParliamentScreen() {
   const active = s.bills.filter((b) => b.status === 'active');
   const done = s.bills.filter((b) => b.status !== 'active').slice(-8).reverse();
   const stage = { preliminary: 'קריאה טרומית', committee: 'ועדה', final: 'קריאה שלישית' };
+  const dissolved = s.government.caretaker && s.elections.phase === 'none';
   return (
     <div className="space-y-4">
       <ScreenHeader title="הכנסטון" sub="120 מושבים. כדי להעביר חוק או להקים ממשלה צריך רוב." />
@@ -196,6 +197,7 @@ export function ParliamentScreen() {
           </div>
         </Section>
       )}
+      {dissolved && <div className="card card-tight" role="status">⏸️ הכנסטון התפזר לקראת הבחירות. הצעות חוק שכבר הוגשו ממתינות, וההצבעות עליהן יתקיימו רק אחרי שתקום ממשלה חדשה.</div>}
       <Section title="הצעות חוק בדיון" icon="📝">
         {!active.length ? <Empty icon="🦗" text="אין הצעות בדיון. הגש חוק ממסך החוקים." /> : (
           <div className="space-y-2">
@@ -209,12 +211,12 @@ export function ParliamentScreen() {
                     <span className="chip">{stage[b.stage]} · {b.isGovernment ? 'ממשלתית' : `פרטית (${sp?.name})`}</span>
                   </div>
                   <div className="text-xs mt-1">צפי הצבעה: <b className="good">{v.for}</b> בעד · <b className="bad">{v.against}</b> נגד · {v.abstain} נמנעים</div>
-                  <div className="flex gap-1.5 flex-wrap mt-2">
+                  {dissolved ? <div className="text-xs muted mt-2">⏸️ ממתין לכנסטון החדש</div> : <div className="flex gap-1.5 flex-wrap mt-2">
                     <ActionButton id="push_bill" params={{ billId: b.id }} className="btn btn-sm">📣 גיוס תמיכה</ActionButton>
                     <ActionButton id="soften_bill" params={{ billId: b.id }} className="btn btn-sm">🧈 ריכוך</ActionButton>
                     {isSpeaker(s) && <><ActionButton id="speaker_schedule" params={{ billId: b.id }} className="btn btn-sm btn-blue">📅 קידום בסדר היום</ActionButton><ActionButton id="speaker_delay" params={{ billId: b.id }} className="btn btn-sm">⏸️ עיכוב</ActionButton></>}
                     {!isPM(s) && <><ActionButton id="vote_bill" params={{ billId: b.id, vote: 'for' }} className="btn btn-sm btn-good">בעד</ActionButton><ActionButton id="vote_bill" params={{ billId: b.id, vote: 'against' }} className="btn btn-sm btn-danger">נגד</ActionButton></>}
-                  </div>
+                  </div>}
                 </div>
               );
             })}

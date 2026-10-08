@@ -73,6 +73,8 @@ export function computeVote(s: GameState, bill: Bill): VoteResult {
 }
 
 export function proposeBill(s: GameState, lawId: string, sponsorId: string, isGovernment: boolean, modified = false): Bill | null {
+  // a dissolved Knesseton (caretaker government, no campaign running) takes no new bills: they would only sit there until after the elections
+  if (s.government.caretaker && s.elections.phase === 'none') return null;
   if (s.activeLaws.includes(lawId) || s.bills.some((b) => b.lawId === lawId && b.status === 'active')) return null;
   const law = LAW_BY_ID[lawId];
   const bill: Bill = {

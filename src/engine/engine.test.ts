@@ -177,6 +177,7 @@ describe('parliament', () => {
   });
   it('coalition votes for government bills, opposition hates draft exemption', () => {
     const s = createGame(cfg('pm'));
+    s.government.caretaker = false; // a sitting Knesseton: a dissolved one takes no bills
     const bill = proposeBill(s, 'draft_exemption', 'player', true)!;
     bill.stage = 'final';
     const v = computeVote(s, bill);
@@ -453,6 +454,7 @@ describe('coalition deals (v2)', () => {
   });
   it('red lines: Haredi parties never vote for the draft equality law, even as a government bill', () => {
     const s = createGame(cfg('pm'));
+    s.government.caretaker = false; // a sitting Knesseton: a dissolved one takes no bills
     s.government.coalition = ['likud', 'shas', 'utj', 'otzma', 'rzp'];
     const bill = proposeBill(s, 'draft_equality', 'player', true)!;
     bill.stage = 'final';
@@ -624,5 +626,24 @@ describe('chat understands free-text answers', () => {
     sendChat(s, t.id, 'סמוך עליי, אני אדאג לזה');
     expect(s.chatTopics[t.id]).toBeFalsy();
     expect(t.memory.some((m) => m.text === 'הבטחת יחס אחר')).toBe(true);
+  });
+});
+
+describe('bills in short turns', () => {
+  it('a bill with a majority passes the preliminary reading within one campaign turn', async () => {
+    const { createGame } = await import('./newGame');
+    const { advanceTurn } = await import('./turn');
+    const { proposeBill, computeVote } = await import('./parliament');
+    let s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, role: 'pm', partyId: 'likud' });
+    const { dayNumber } = await import('./calendar');
+    const start = dayNumber(s.date);
+    s.government.caretaker = false; // a sitting Knesseton, but still short pre-election turns
+    const law = (await import('../data/laws')).LAWS.find((l) => !s.activeLaws.includes(l.id) && computeVote(s, { id: 'x', lawId: l.id, title: l.title, sponsorId: s.player.politicianId, isGovernment: false, stage: 'preliminary', turnsInStage: 0, proposedTurn: 0, status: 'active', push: 0, modified: false }).passed)!;
+    const bill = proposeBill(s, law.id, s.player.politicianId, false)!;
+    expect(bill.stage).toBe('preliminary');
+    s = advanceTurn({ ...s, drama: null });
+    expect(dayNumber(s.date) - start).toBeLessThan(61); // the game starts inside the campaign: short turns
+    const b = s.bills.find((x) => x.id === bill.id)!;
+    expect(b.stage).not.toBe('preliminary');
   });
 });

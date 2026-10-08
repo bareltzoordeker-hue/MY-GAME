@@ -84,8 +84,9 @@ export function advanceTurn(s0: GameState): GameState {
     simulateCharacters(s);
     simulateAlliances(s);
     simulateGovernment(s);
-    if (!(s.government.caretaker && s.elections.phase === 'none')) simulateParliament(s); // a dissolved Knesseton does not legislate
   }
+  // the Knesseton sits every turn, also in short campaign turns: a bill with a majority must not wait for the 2-month step
+  if (!(s.government.caretaker && s.elections.phase === 'none')) for (let i = 0; i < Math.max(1, Math.round(steps)); i++) simulateParliament(s); // a dissolved Knesseton does not legislate
 
   capitalIncome(s, steps);
 
