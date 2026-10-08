@@ -593,14 +593,14 @@ describe('promise deadlines', () => {
     const m = () => other.memory.find((x) => x.kind === 'promise')!.deadlineTurn!;
     const start = m();
     s.government.caretaker = true;
-    slideDeadlines(s, 122);
+    slideDeadlines(s, 61);
     expect(m()).toBe(start + 1);
     s.government.caretaker = false;
     s.elections.phase = 'none';
     slideDeadlines(s, 14); // a 2-week campaign turn barely moves the clock
-    expect(m()).toBeGreaterThan(start + 1.8);
-    slideDeadlines(s, 122);
-    expect(m()).toBeCloseTo(start + 1 + (1 - 14 / 122), 5);
+    expect(m()).toBeGreaterThan(start + 1.7);
+    slideDeadlines(s, 61);
+    expect(m()).toBeCloseTo(start + 1 + (1 - 14 / 61), 5);
     expect(openPromises(s).some((p) => p.toId === other.id && p.role)).toBe(true);
   });
 });

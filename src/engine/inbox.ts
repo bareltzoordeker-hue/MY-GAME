@@ -71,7 +71,7 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
       if (opt === 'accept') {
         if (it.payload.lawId) {
           proposeBill(s, String(it.payload.lawId), s.player.politicianId, true);
-          remember(s, from!.id, 'promise', `להעביר את ${LAW_BY_ID[String(it.payload.lawId)].title}`, 0, s.turn + 8, String(it.payload.lawId));
+          remember(s, from!.id, 'promise', `להעביר את ${LAW_BY_ID[String(it.payload.lawId)].title}`, 0, s.turn + 16, String(it.payload.lawId));
         } else {
           applyDecision(s, { budget: { [cat ?? 'welfare']: amount || 2 } });
         }
@@ -88,7 +88,7 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
     }
     case 'demand_role': {
       if (opt === 'promise') {
-        remember(s, from!.id, 'promise', s.player.role === 'candidate' ? 'מקום ריאלי' : 'משרד בממשלה', 6, s.turn + 6, 'role');
+        remember(s, from!.id, 'promise', s.player.role === 'candidate' ? 'מקום ריאלי' : 'משרד בממשלה', 6, s.turn + 12, 'role');
         return R(`הבטחת ל${name}`, 'approved', 'הוא יזכור את ההבטחה, ויצפה שתקיים אותה.');
       }
       remember(s, from!.id, 'ignored', 'סירבו לתת לו תפקיד', -10);
@@ -102,7 +102,7 @@ function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
       if (opt === 'deal') {
         if (s.player.politicalCapital < 20) return R('אין מספיק הון פוליטי לעסקה', 'rejected');
         s.player.politicalCapital -= 20;
-        remember(s, from!.id, 'promise', 'משרד בכיר', 15, s.turn + 6, 'role');
+        remember(s, from!.id, 'promise', 'משרד בכיר', 15, s.turn + 12, 'role');
         return R(`${name} מקפיא את המרד`, 'approved', 'הבטחת לו משרד בכיר. כדאי לקיים.');
       }
       const party = s.parties[s.player.partyId];

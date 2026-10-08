@@ -229,7 +229,7 @@ function knowledge(s: GameState, t: Politician, text: string): Reply | null {
 function dialog(s: GameState, t: Politician, intent0: Intent, law: ReturnType<typeof matchLaw>, text = ''): Reply | null {
   const topic = s.chatTopics?.[t.id];
   if (!topic) return null;
-  if (s.turn - topic.turn > 3) { setTopic(s, t.id, null); return null; }
+  if (s.turn - topic.turn > 6) { setTopic(s, t.id, null); return null; }
   const party = s.parties[t.partyId];
   // a free-text answer inside an open topic: read its direction instead of asking to repeat
   const sent = intent0 === 'other' ? sentiment(text) : null;
@@ -265,8 +265,8 @@ function dialog(s: GameState, t: Politician, intent0: Intent, law: ReturnType<ty
       if (topic.stage === 'explained' && (yes || intent === 'meet')) {
         const d = topic.demand;
         setTopic(s, t.id, null);
-        if (d === 'law' && topic.lawId) { remember(s, t.id, 'promise', `לקדם את ${lawTitle(topic.lawId)}`, 8, s.turn + 6, topic.lawId); return { text: `תודה. אני מעריך את זה, ואזכור. רשמתי: ${lawTitle(topic.lawId)}.`, hint: 'נרשמה הבטחה עם מועד. תקבל תזכורת לפני שיגיע.' }; }
-        if (d === 'role') { remember(s, t.id, 'promise', 'תפקיד או תיק', 8, s.turn + 3, 'role'); return { text: 'תודה. אני מצפה לתפקיד כפי שנאמר, ואזכור את הפנייה.', hint: 'נרשמה הבטחה לתפקיד עם מועד (שנה).' }; }
+        if (d === 'law' && topic.lawId) { remember(s, t.id, 'promise', `לקדם את ${lawTitle(topic.lawId)}`, 8, s.turn + 12, topic.lawId); return { text: `תודה. אני מעריך את זה, ואזכור. רשמתי: ${lawTitle(topic.lawId)}.`, hint: 'נרשמה הבטחה עם מועד. תקבל תזכורת לפני שיגיע.' }; }
+        if (d === 'role') { remember(s, t.id, 'promise', 'תפקיד או תיק', 8, s.turn + 6, 'role'); return { text: 'תודה. אני מצפה לתפקיד כפי שנאמר, ואזכור את הפנייה.', hint: 'נרשמה הבטחה לתפקיד עם מועד (שנה).' }; }
         if (d === 'budget') { remember(s, t.id, 'favor', 'הסכמה לתוספת תקציב', 8); return { text: 'תודה. אחכה לראות את זה בתקציב. אם לא – נחזור לשיחה הזו.', hint: 'היחסים השתפרו. כדי לקיים, בקש תוספת תקציב לשר מראש הממשלה או אשר אותה.' }; }
         remember(s, t.id, 'support', 'הבטחת יחס אחר', 8);
         return { text: 'תודה. זה כל מה שביקשתי. אעריך שתתייעץ איתי בהמשך.', hint: 'היחסים השתפרו.' };
@@ -304,7 +304,7 @@ function dialog(s: GameState, t: Politician, intent0: Intent, law: ReturnType<ty
         return { text: `הרעיון: שנקדם יחד את ${lawTitle(pick1)}. הצעה משותפת תגדיל את הסיכוי שתעבור, ושנינו נרוויח מזה. מה דעתך?`, hint: 'הוצעה הצעה משותפת. תשובה חיובית תרשום התחייבות הדדית.' };
       }
       if (topic.stage === 'explained' && yes && topic.lawId) {
-        remember(s, t.id, 'promise', `לתמוך בהצעה של ${t.name}: ${lawTitle(topic.lawId)}`, 6, s.turn + 4, topic.lawId);
+        remember(s, t.id, 'promise', `לתמוך בהצעה של ${t.name}: ${lawTitle(topic.lawId)}`, 6, s.turn + 8, topic.lawId);
         for (const b of s.bills.filter((x) => x.lawId === topic.lawId && x.status === 'active')) b.push += 8;
         shiftPartyRelation(s, s.player.partyId, t.partyId, 2);
         setTopic(s, t.id, null);
@@ -315,7 +315,7 @@ function dialog(s: GameState, t: Politician, intent0: Intent, law: ReturnType<ty
     }
     case 'ask_law': {
       if (yes || intent === 'meet') {
-        remember(s, t.id, 'promise', `לקדם את ${lawTitle(lid)}`, 6, s.turn + 6, lid);
+        remember(s, t.id, 'promise', `לקדם את ${lawTitle(lid)}`, 6, s.turn + 12, lid);
         for (const b of s.bills.filter((x) => x.lawId === lid && x.status === 'active')) b.push += 6;
         setTopic(s, t.id, null);
         return { text: `תודה. ${lawTitle(lid)} חשוב לנו, ונזכור מי עזר.`, hint: 'נרשמה הבטחה עם מועד. תקבל תזכורת לפני שיגיע.' };
@@ -466,8 +466,8 @@ function negotiate(s: GameState, t: Politician, deal: Deal): Reply {
   const need = want.kind === 'law' && want.lawId ? (lawStance(s, t, want.lawId) === 'against' ? 3 : lawStance(s, t, want.lawId) === 'for' ? 0 : 2) : want.kind === 'support' ? 2 : 1;
   if (v >= need) {
     // record the player's side as a tracked promise, and deliver the politician's side
-    if (give.kind === 'law' && give.lawId) remember(s, t.id, 'promise', `לקדם את ${lawTitle(give.lawId)}`, 8, s.turn + 6, give.lawId);
-    else if (give.kind === 'role') remember(s, t.id, 'promise', give.ministryId ? `למנות ל${name(give)}` : 'תפקיד או תיק', 8, s.turn + 3, 'role');
+    if (give.kind === 'law' && give.lawId) remember(s, t.id, 'promise', `לקדם את ${lawTitle(give.lawId)}`, 8, s.turn + 12, give.lawId);
+    else if (give.kind === 'role') remember(s, t.id, 'promise', give.ministryId ? `למנות ל${name(give)}` : 'תפקיד או תיק', 8, s.turn + 6, 'role');
     else if (give.kind === 'budget') remember(s, t.id, 'favor', 'הבטחה לתקציב', 5);
     else remember(s, t.id, 'favor', 'הבטחת תמיכה', 4);
     if (want.kind === 'law' && want.lawId) {
@@ -574,11 +574,11 @@ function handleRaw(s: GameState, t: Politician, text: string): Reply {
     }
     case 'promise': {
       if (law) {
-        remember(s, t.id, 'promise', `לקדם את ${law.title}`, 8, s.turn + 6, law.id);
+        remember(s, t.id, 'promise', `לקדם את ${law.title}`, 8, s.turn + 12, law.id);
         return { text: `${line(s, 'promiseGeneric', tn)} רשמתי: ${law.title}.`, hint: 'נרשמה הבטחה עם מועד (שנתיים). תקבל תזכורת לפני שיגיע.' };
       }
       if (mentionsRole(text)) {
-        remember(s, t.id, 'promise', 'תפקיד או תיק', 8, s.turn + 3, 'role');
+        remember(s, t.id, 'promise', 'תפקיד או תיק', 8, s.turn + 6, 'role');
         return { text: `${line(s, 'promiseGeneric', tn)} אני מצפה לתפקיד כפי שנאמר.`, hint: 'נרשמה הבטחה לתפקיד עם מועד (שנה).' };
       }
       if (mentionsMoney(text)) {

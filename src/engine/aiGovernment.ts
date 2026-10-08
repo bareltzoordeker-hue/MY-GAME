@@ -84,7 +84,7 @@ export function simulateAIGovernment(s: GameState): void {
     logEvent(s, c.icon, `הממשלה טיפלה ב${c.title} (${a.label})`, 2, 'neutral', 'crisis');
   }
   // losing the majority → early elections
-  if (coalitionSeats(s) < MAJORITY && s.government.lowMajorityTurns >= 2) callEarlyElections(s, 'הקואליציה איבדה את הרוב');
+  if (coalitionSeats(s) < MAJORITY && s.government.lowMajorityTurns >= 4) callEarlyElections(s, 'הקואליציה איבדה את הרוב');
 
   // ---- the player's career inside an AI government ----
   const pmTrust = pm.loyalty; // pm's attitude toward the player
@@ -111,7 +111,7 @@ export function simulateAIGovernment(s: GameState): void {
         return pa - pb;
       })[0];
       if (weakest) {
-        s.flags.offer_cd = s.turn + 6;
+        s.flags.offer_cd = s.turn + 12;
         addInbox(s, {
           kind: 'promotion_offer', title: `הצעה: ${weakest.name}`, fromId: pm.id, expiresTurn: s.turn + 2,
           text: `"${me.name}, אני רוצה אותך בממשלה. ${weakest.name} – שלך, אם אתה רוצה."`,

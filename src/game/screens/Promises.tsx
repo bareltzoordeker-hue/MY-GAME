@@ -15,7 +15,7 @@ const STAGE: Record<string, string> = { preliminary: 'קריאה טרומית', 
 function Deadline({ p }: { p: OpenPromise }) {
   if (p.turnsLeft === undefined) return null;
   const tone = p.turnsLeft <= 1 ? 'chip-bad' : p.turnsLeft <= 2 ? 'chip-warn' : '';
-  const months = p.turnsLeft * 4;
+  const months = p.turnsLeft * 2; // a standard turn is two months
   return <span className={`chip ${tone}`}>{p.turnsLeft === 0 ? 'המועד הגיע' : `עוד כ-${months} חודשים`}</span>;
 }
 

@@ -56,7 +56,7 @@ export function evaluateGameOver(s: GameState): void {
     setGameOver(s, 'expelled', 'הודחת מהמפלגה');
     return;
   }
-  if (s.player.role === 'pm' && s.government.lowApprovalTurns >= 3) {
+  if (s.player.role === 'pm' && s.government.lowApprovalTurns >= 6) {
     setGameOver(s, 'ousted', 'המחאה הגדולה הפילה אותך');
     return;
   }

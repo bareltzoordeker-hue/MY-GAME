@@ -21,7 +21,7 @@ export function startCrisis(s: GameState, defId: string, severity?: 1 | 2 | 3): 
     perTurn: def.perTurn, impactLines: def.impact, actions: def.actions, ministryId: def.ministryId,
   };
   s.crises.push(c);
-  s.flags[`crisis_cd_${defId}`] = s.turn + 6;
+  s.flags[`crisis_cd_${defId}`] = s.turn + 12;
   addNews(s, def.headline, 'bad', def.icon);
   logEvent(s, def.icon, `משבר חדש: ${def.title}`, 3, 'bad', 'crisis');
   applyEffects(s, scaleEffects(def.perTurn, 0.5 * c.severity));

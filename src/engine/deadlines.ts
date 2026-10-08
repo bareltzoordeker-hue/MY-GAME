@@ -1,6 +1,6 @@
 // ============================================================
 // Promise deadlines and the list of open promises.
-// Deadlines are kept in "standard" 4-month turns. A short turn (campaign, negotiation)
+// Deadlines are kept in "standard" two-month turns. A short turn (campaign, negotiation)
 // moves them forward only by its share of a standard turn, and while there is no
 // functioning government (caretaker, elections, negotiation) they stop altogether:
 // nobody can be blamed for a law the Knesseton could not pass.
@@ -8,7 +8,7 @@
 import type { GameState } from '../types/game';
 import { LAW_BY_ID } from '../data/laws';
 
-const STANDARD_DAYS = 122;
+const STANDARD_DAYS = 61; // a normal two-month turn
 
 /** True while the government can't legislate or appoint, so promise clocks are frozen. */
 export const deadlinesFrozen = (s: GameState) => !!s.government.caretaker || s.elections.phase !== 'none';

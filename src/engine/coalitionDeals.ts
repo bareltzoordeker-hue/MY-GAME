@@ -102,7 +102,7 @@ export function writeAgreement(s: GameState, accepted: { partyId: string; demand
           break;
         case 'law':
           c.status = 'pending';
-          c.dueTurn = s.turn + 6; // two years
+          c.dueTurn = s.turn + 12; // two years of two-month turns
           break;
         case 'veto':
           c.status = 'pending';
@@ -163,7 +163,7 @@ export function processCommitments(s: GameState): void {
           logEvent(s, '✅', `קיימת התחייבות קואליציונית: ${c.label}`, 2, 'good', 'coalition');
         } else if (c.dueTurn !== undefined && s.turn >= c.dueTurn) {
           breach(s, c, `לא קיים: ${c.label}`);
-        } else if (c.dueTurn !== undefined && c.dueTurn - s.turn <= 1) {
+        } else if (c.dueTurn !== undefined && c.dueTurn - s.turn <= 2) {
           remind(s, c, `לפי ההסכם הקואליציוני, "${c.label.replace('לחוקק: ', '')}" צריך לעבור עד התור הבא. אם לא – ${s.parties[c.partyId].name} תראה בזה הפרה.`);
         }
         break;

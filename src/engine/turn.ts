@@ -103,7 +103,7 @@ export function advanceTurn(s0: GameState): GameState {
   if (events >= 2) generateCrises(s);
   if (isPM(s) && !s.government.caretaker) {
     fillVacancies(s, false);
-    if (coalitionSeats(s) < MAJORITY && s.government.lowMajorityTurns >= 2) callEarlyElections(s, 'הקואליציה איבדה את הרוב');
+    if (coalitionSeats(s) < MAJORITY && s.government.lowMajorityTurns >= 4) callEarlyElections(s, 'הקואליציה איבדה את הרוב');
   }
   checkPromises(s);
 

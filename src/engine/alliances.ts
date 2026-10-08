@@ -45,7 +45,7 @@ export function proposeAlliance(s0: GameState, partyId: string, kind: Alliance['
   const d = allianceDemand(s, partyId);
   // the price of an alliance: if the player controls the budget it's paid now, otherwise it's a promise
   if (s.government.pmId === s.player.politicianId) applyEffects(s, { budget: { [d.category]: d.amount } });
-  else if (leader) remember(s, leader.id, 'promise', d.label, 0, s.turn + 12);
+  else if (leader) remember(s, leader.id, 'promise', d.label, 0, s.turn + 24);
   s.alliances.push({ partyId, kind, strength: 60, since: s.turn, demand: d.label });
   if (leader) remember(s, leader.id, 'deal', kind === 'bloc' ? 'גוש פוליטי משותף' : 'ברית הצבעה', 12);
   shiftPartyRelation(s, s.player.partyId, partyId, kind === 'bloc' ? 18 : 10);
@@ -92,7 +92,7 @@ export function simulateAlliances(s: GameState): void {
     a.strength = clamp(a.strength + (leader.loyalty - 50) / 10 - 1.5);
     if (a.strength < 12) dissolve(s, a, 'היחסים התקררו לגמרי');
     else if (a.strength < 30 && (s.flags[`ally_warn_${a.partyId}`] ?? 0) <= s.turn) {
-      s.flags[`ally_warn_${a.partyId}`] = s.turn + 4;
+      s.flags[`ally_warn_${a.partyId}`] = s.turn + 8;
       addNews(s, `${leader.name} רומז: "הברית לא מובנת מאליה"`, 'bad', '⚠️');
     }
   }

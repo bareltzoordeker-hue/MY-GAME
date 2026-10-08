@@ -397,7 +397,7 @@ export const DRAMAS: DramaDef[] = [
       return { icon: '🔀', title: 'ח״כ אופוזיציה מוכן לעבור לקואליציה', fromId: p?.id, text: `${p?.name} פנה אליך בשקט: הוא מוכן לפרוש מסיעתו ולהצטרף לקואליציה, בתמורה לתפקיד בממשלה.` };
     },
     options: [
-      { id: 'accept', label: 'לקבל אותו (+1 מנדט לקואליציה)', hint: 'מרכז ↓, הבטחה לתפקיד', resolve: (s, ev) => { const p = pol(s, ev); if (!p) return meh('הוא חזר בו.'); const from = s.parties[p.partyId]; const to = s.parties[s.player.partyId]; from.memberIds = from.memberIds.filter((x) => x !== p.id); from.seats = Math.max(0, from.seats - 1); to.memberIds.push(p.id); to.seats += 1; p.partyId = to.id; remember(s, p.id, 'promise', 'תפקיד בממשלה', 10, s.turn + 3, 'role'); fx(s, { groups: { center: -3, left: -2 }, stability: 4 }); return meh(`${p.name} עבר לקואליציה. בסיעתו הקודמת מאשימים אותו בבגידה בבוחרים.`, `${p.name} פורש מסיעתו ומצטרף לקואליציה`); } },
+      { id: 'accept', label: 'לקבל אותו (+1 מנדט לקואליציה)', hint: 'מרכז ↓, הבטחה לתפקיד', resolve: (s, ev) => { const p = pol(s, ev); if (!p) return meh('הוא חזר בו.'); const from = s.parties[p.partyId]; const to = s.parties[s.player.partyId]; from.memberIds = from.memberIds.filter((x) => x !== p.id); from.seats = Math.max(0, from.seats - 1); to.memberIds.push(p.id); to.seats += 1; p.partyId = to.id; remember(s, p.id, 'promise', 'תפקיד בממשלה', 10, s.turn + 6, 'role'); fx(s, { groups: { center: -3, left: -2 }, stability: 4 }); return meh(`${p.name} עבר לקואליציה. בסיעתו הקודמת מאשימים אותו בבגידה בבוחרים.`, `${p.name} פורש מסיעתו ומצטרף לקואליציה`); } },
       { id: 'refuse', label: 'לסרב', resolve: (s) => { fx(s, { playerReputation: 4, playerPopularity: 1 }); return ok('סירבת. "אנחנו לא בונים קואליציה על עריקות", אמרת.'); } },
     ],
   },

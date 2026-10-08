@@ -1,10 +1,10 @@
 // ============================================================
 // Calendar: real dates instead of fixed-length turns.
-// - normal turn = 4 months
+// - normal turn = 2 months
 // - the last 4 months before an election ("campaign") = 8 turns of 2 weeks
 // - elections happen on a date (27.10.2026, then every 4 years or early)
-// The continuous simulation (economy, services, population…) still runs in
-// 2-month steps; see stepsForTurn().
+// The continuous simulation (economy, services, population…) runs in 2-month
+// steps: one per normal turn, a fraction per campaign turn; see stepsForDays().
 // ============================================================
 import { CAMPAIGN_TURN_DAYS, TURN_MONTHS } from '../data/world';
 import type { GameDate, GameState } from '../types/game';

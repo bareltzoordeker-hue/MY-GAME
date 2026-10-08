@@ -210,7 +210,7 @@ function initiativesFor(s: GameState, p: Politician): Initiative[] {
   }
   if (sameParty && isPartyLeader(s) && p.power > 45 && me.popularity < 32 && p.loyalty < 38 && p.personality.ambition > 0.6 && (s.flags.challenge_cd ?? 0) <= s.turn) {
     out.push({ weight: 2, run: () => {
-      s.flags.challenge_cd = s.turn + 8;
+      s.flags.challenge_cd = s.turn + 16;
       addInbox(s, {
         kind: 'leadership_challenge', title: `${p.name} קורא תיגר על ההנהגה`, fromId: p.id, expiresTurn: s.turn + 1,
         text: `"המפלגה צריכה הנהגה חדשה כדי לנצח בבחירות. אני מודיע על התמודדות על ראשות המפלגה."`,

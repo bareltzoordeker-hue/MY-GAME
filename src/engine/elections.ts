@@ -385,7 +385,7 @@ export function finalizeCoalition(s: GameState): Reaction {
     for (const d of o.demands) {
       if (d.kind === 'law' && d.lawId) {
         proposeBill(s, d.lawId, s.player.politicianId, true);
-        remember(s, leaderId, 'promise', `להעביר את ${LAW_BY_ID[d.lawId].title}`, 0, s.turn + 6, d.lawId);
+        remember(s, leaderId, 'promise', `להעביר את ${LAW_BY_ID[d.lawId].title}`, 0, s.turn + 12, d.lawId);
       }
     }
   }

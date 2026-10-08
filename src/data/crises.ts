@@ -27,7 +27,7 @@ const ignore: CrisisAction = { id: 'ignore', label: 'לא לנקוט צעד כר
 
 export const CRISES: CrisisDef[] = [
   {
-    id: 'transport_strike', title: 'שביתת נהגי האוטובוסים', icon: '🚌', category: 'תחבורה', ministryId: 'transport', duration: 3,
+    id: 'transport_strike', title: 'שביתת נהגי האוטובוסים', icon: '🚌', category: 'תחבורה', ministryId: 'transport', duration: 6,
     services: ['transport'], groups: ['employees', 'students', 'youth'],
     trigger: (s) => (q(s, 'transport') < 45 ? 0.12 : 0) + (ratio(s, 'transport') < 0.9 ? 0.08 : 0),
     perTurn: { services: { transport: -3 }, groups: { employees: -2, students: -2, youth: -1.5 }, economy: { growth: -0.15 } },
@@ -40,7 +40,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'שביתת נהגי האוטובוסים: עומסי תנועה כבדים בכל הארץ',
   },
   {
-    id: 'er_collapse', title: 'קריסת חדרי המיון', icon: '🚑', category: 'בריאות', ministryId: 'health', duration: 2,
+    id: 'er_collapse', title: 'קריסת חדרי המיון', icon: '🚑', category: 'בריאות', ministryId: 'health', duration: 4,
     services: ['health'], groups: ['elderly', 'retirees', 'families'],
     trigger: (s) => (winter(s) && q(s, 'health') < 50 ? 0.22 : 0) + (q(s, 'health') < 38 ? 0.1 : 0),
     perTurn: { services: { health: -3 }, groups: { elderly: -3, retirees: -3, families: -1.5 } },
@@ -53,7 +53,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'גל תחלואה: עומס חריג בחדרי המיון',
   },
   {
-    id: 'teachers_strike', title: 'שביתת המורים', icon: '📚', category: 'חינוך', ministryId: 'education', duration: 2,
+    id: 'teachers_strike', title: 'שביתת המורים', icon: '📚', category: 'חינוך', ministryId: 'education', duration: 4,
     services: ['education'], groups: ['families', 'students'],
     trigger: (s) => (s.date.month === 9 ? 0.15 : 0.03) * (ratio(s, 'education') < 0.95 || q(s, 'education') < 48 ? 2.5 : 0.3),
     perTurn: { services: { education: -3 }, groups: { families: -4, publicSector: -1 }, economy: { growth: -0.1 } },
@@ -66,7 +66,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'שביתת המורים: מאות אלפי תלמידים בבית',
   },
   {
-    id: 'blackout', title: 'הפסקות חשמל מתגלגלות', icon: '🔌', category: 'אנרגיה', ministryId: 'energy', duration: 2,
+    id: 'blackout', title: 'הפסקות חשמל מתגלגלות', icon: '🔌', category: 'אנרגיה', ministryId: 'energy', duration: 4,
     services: ['energy'], groups: ['families', 'selfEmployed'],
     trigger: (s) => (summer(s) && q(s, 'energy') < 52 ? 0.2 : 0) + (q(s, 'energy') < 38 ? 0.08 : 0),
     perTurn: { services: { energy: -4 }, groups: { families: -2, selfEmployed: -3 }, economy: { growth: -0.2 } },
@@ -79,7 +79,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'הפסקות חשמל מתגלגלות בגל החום',
   },
   {
-    id: 'downgrade', title: 'איום בהורדת דירוג אשראי', icon: '📉', category: 'כלכלה', ministryId: 'finance', duration: 3,
+    id: 'downgrade', title: 'איום בהורדת דירוג אשראי', icon: '📉', category: 'כלכלה', ministryId: 'finance', duration: 6,
     services: [], groups: ['highIncome', 'middleClass'],
     trigger: (s) => (deficitPct(s) > 5 ? 0.18 : 0) + (debtPct(s) > 80 ? 0.12 : 0),
     perTurn: { economy: { growth: -0.25, inflation: 0.2 }, groups: { highIncome: -2, middleClass: -1 } },
@@ -92,7 +92,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'חברת דירוג בינלאומית מזהירה מהורדת דירוג',
   },
   {
-    id: 'cost_protest', title: 'מחאת יוקר המחיה', icon: '🪧', category: 'חברה', duration: 3,
+    id: 'cost_protest', title: 'מחאת יוקר המחיה', icon: '🪧', category: 'חברה', duration: 6,
     services: ['housing'], groups: ['youth', 'middleClass', 'students'],
     trigger: (s) => (s.economy.inflation > 4.5 ? 0.15 : 0) + (s.services.housing.satisfaction < 33 ? 0.1 : 0) + (s.government.approval < 30 ? 0.08 : 0),
     perTurn: { groups: { youth: -2, middleClass: -2, students: -2 }, stability: -2, playerPopularity: -1 },
@@ -105,7 +105,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'מחאת יוקר המחיה מתרחבת: מאהלים בערים הגדולות',
   },
   {
-    id: 'cyber', title: 'מתקפת סייבר על מערכות ממשלתיות', icon: '👾', category: 'ביטחון', ministryId: 'defense', duration: 1,
+    id: 'cyber', title: 'מתקפת סייבר על מערכות ממשלתיות', icon: '👾', category: 'ביטחון', ministryId: 'defense', duration: 2,
     services: ['govServices', 'security'], groups: ['selfEmployed', 'retirees'],
     trigger: (s) => 0.015 + (q(s, 'security') < 50 ? 0.03 : 0),
     perTurn: { services: { govServices: -6, security: -2 }, groups: { selfEmployed: -3, retirees: -2 } },
@@ -117,7 +117,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'מתקפת סייבר השביתה שירותים ממשלתיים',
   },
   {
-    id: 'border', title: 'מתיחות ביטחונית בגבולות', icon: '🚨', category: 'ביטחון', ministryId: 'defense', duration: 2,
+    id: 'border', title: 'מתיחות ביטחונית בגבולות', icon: '🚨', category: 'ביטחון', ministryId: 'defense', duration: 4,
     services: ['security'], groups: ['reservists', 'soldiers', 'periphery'],
     trigger: (s) => 0.02 + (q(s, 'security') < 50 ? 0.06 : 0) + (ratio(s, 'defense') < 0.9 ? 0.04 : 0),
     perTurn: { groups: { reservists: -3, periphery: -2, families: -1 }, economy: { growth: -0.2 }, services: { security: -2 } },
@@ -130,7 +130,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'כוננות גבוהה בגבולות; גיוס מילואים',
   },
   {
-    id: 'water', title: 'משבר מים', icon: '🚱', category: 'תשתיות', ministryId: 'energy', duration: 2,
+    id: 'water', title: 'משבר מים', icon: '🚱', category: 'תשתיות', ministryId: 'energy', duration: 4,
     services: ['infrastructure'], groups: ['periphery', 'families'],
     trigger: (s) => (summer(s) && q(s, 'infrastructure') < 48 ? 0.15 : 0),
     perTurn: { services: { infrastructure: -3 }, groups: { periphery: -3, families: -1 } },
@@ -142,7 +142,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'משבר מים: הפסקות אספקה ביישובי הפריפריה',
   },
   {
-    id: 'layoffs', title: 'גל פיטורים בהייטק', icon: '💼', category: 'כלכלה', ministryId: 'economy', duration: 3,
+    id: 'layoffs', title: 'גל פיטורים בהייטק', icon: '💼', category: 'כלכלה', ministryId: 'economy', duration: 6,
     services: [], groups: ['youth', 'highIncome', 'center'],
     trigger: (s) => (s.economy.growth < 1 ? 0.2 : 0) + (s.economy.unemployment > 7 ? 0.08 : 0),
     perTurn: { economy: { unemployment: 0.4, growth: -0.15 }, groups: { youth: -2, highIncome: -2, center: -1 } },
@@ -155,7 +155,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'גל פיטורים בהייטק: אלפי עובדים פוטרו',
   },
   {
-    id: 'scandal', title: 'חשד לשחיתות במשרד ממשלתי', icon: '🔎', category: 'פוליטיקה', duration: 2,
+    id: 'scandal', title: 'חשד לשחיתות במשרד ממשלתי', icon: '🔎', category: 'פוליטיקה', duration: 4,
     services: [], groups: ['center', 'left', 'middleClass'],
     trigger: (s) => {
       const govPols = Object.values(s.politicians).filter((p) => p.active && p.ministryId && !p.isPlayer);
@@ -172,7 +172,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'חקירה: חשד למכרזים לא תקינים במשרד ממשלתי',
   },
   {
-    id: 'quake', title: 'רעידת אדמה', icon: '🌋', category: 'אסון טבע', duration: 1,
+    id: 'quake', title: 'רעידת אדמה', icon: '🌋', category: 'אסון טבע', duration: 2,
     services: ['infrastructure', 'housing'], groups: ['periphery', 'families'],
     trigger: (s) => 0.008 + (q(s, 'infrastructure') < 40 ? 0.004 : 0),
     perTurn: { services: { infrastructure: -6, housing: -3 }, groups: { periphery: -3 }, economy: { growth: -0.3 } },
@@ -184,7 +184,7 @@ export const CRISES: CrisisDef[] = [
     headline: 'רעידת אדמה בעוצמה 5.1: נזק לבניינים ישנים',
   },
   {
-    id: 'draft_riots', title: 'הפגנות נגד הגיוס', icon: '🪧', category: 'חברה', duration: 2,
+    id: 'draft_riots', title: 'הפגנות נגד הגיוס', icon: '🪧', category: 'חברה', duration: 4,
     services: ['transport'], groups: ['haredim', 'secular', 'employees'],
     trigger: (s) => (s.activeLaws.includes('draft_equality') ? 0.22 : 0),
     perTurn: { services: { transport: -2 }, groups: { haredim: -3, secular: -1, employees: -1 } },
@@ -199,7 +199,7 @@ export const CRISES: CrisisDef[] = [
 ];
 // Started only by decisions (a wide military operation), never at random.
 CRISES.push({
-  id: 'war', title: 'מלחמה', icon: '💥', category: 'ביטחון', ministryId: 'defense', duration: 4,
+  id: 'war', title: 'מלחמה', icon: '💥', category: 'ביטחון', ministryId: 'defense', duration: 8,
   services: ['security', 'transport'], groups: ['reservists', 'families', 'periphery'],
   trigger: () => 0,
   perTurn: { economy: { growth: -0.5, unemployment: 0.15 }, groups: { reservists: -4, families: -3, periphery: -3, left: -2, right: 1 }, services: { security: -1, transport: -1 }, oneOffCost: 1.5 },

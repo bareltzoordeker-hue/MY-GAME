@@ -10,10 +10,10 @@ export const MAJORITY = 61;
 export const THRESHOLD = 3.25;
 export const TERM_YEARS = 4;
 /** normal turn = 4 months; during the 4 months before an election each turn is 2 weeks */
-export const TURN_MONTHS = 4;
+export const TURN_MONTHS = 2; // a normal turn: two months
 export const CAMPAIGN_TURN_DAYS = 14;
 /** kept for code that still counts in turns of the normal length */
-export const TERM_TURNS = 12;
+export const TERM_TURNS = 24; // four years of two-month turns
 
 // ---------------- Population groups ----------------
 export interface GroupDef { id: GroupId; name: string; emoji: string; share: number; base: number }
