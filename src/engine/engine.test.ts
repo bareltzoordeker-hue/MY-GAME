@@ -553,9 +553,10 @@ describe('chat (v2)', () => {
     expect(s.chats![target.id].length).toBe(2);
     sendChat(s, target.id, 'אתה שקרן');
     expect(s.politicians[target.id].loyalty).toBeLessThan(before + 10);
-    // after three messages the same turn the conversation cools down without changes
-    for (let i = 0; i < 4; i++) sendChat(s, target.id, 'תודה רבה');
-    expect(s.chats![target.id].at(-1)!.text).toContain('בתור הבא');
+    // no limit on messages per turn: the politician keeps answering
+    for (let i = 0; i < 6; i++) sendChat(s, target.id, 'תודה רבה');
+    expect(s.chats![target.id].at(-1)!.from).toBe('them');
+    expect(s.chats![target.id].at(-1)!.text).not.toContain('בתור הבא');
   });
   it('politicians write to the player on their own across turns', async () => {
     let s = normalTime(createGame(cfg('pm', { seed: 11 })));
