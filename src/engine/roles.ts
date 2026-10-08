@@ -65,11 +65,11 @@ export function ministryLawDomains(s: GameState): string[] | null {
 /** Can the player propose this law? A minister: his ministry's own laws (all merged ministries' too) and the shared laws in its domains. */
 export function lawAllowed(s: GameState, law: { domain: string; ministries?: string[] }): boolean {
   if (s.player.role !== 'minister') return true;
-  const m = playerMinistry(s);
-  if (!m) return false;
-  const origins = m.origins ?? [m.id];
-  if (law.ministries) return law.ministries.some((id) => origins.includes(id) || id === m.id);
-  return (ministryLawDomains(s) ?? []).includes(law.domain);
+  const held = s.government.ministries.filter((m) => m.ministerId === s.player.politicianId);
+  if (!held.length) return false;
+  const origins = held.flatMap((m) => [m.id, ...(m.origins ?? [])]);
+  if (law.ministries) return law.ministries.some((id) => origins.includes(id));
+  return [...new Set(held.flatMap((m) => (m.origins ?? [m.id]).flatMap((id) => MINISTRY_LAW_DOMAINS[id] ?? [m.domain])))].includes(law.domain);
 }
 
 export const ROLE_NAMES: Record<Role, string> = {
