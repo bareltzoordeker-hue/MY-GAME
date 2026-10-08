@@ -1,0 +1,15 @@
+🧠	welfare	north	3	6	3	families:3,reservists:3	מרכזי חוסן קהילתיים בצפון	Community Resilience Centers in the North	مراكز المنعة المجتمعية في الشمال
+🧠	welfare	negev	3	6	3	families:3,reservists:3	מרכזי חוסן קהילתיים בדרום	Community Resilience Centers in the South	مراكز المنعة المجتمعية في الجنوب
+🏘️	housing	north	8	12	3	periphery:4,families:2	שיקום יישובי קו העימות	Frontline Communities Rebuilding	إعادة إعمار بلدات خط المواجهة
+🏠	housing	center	5	8	3	families:3,periphery:3	ממ״דים לבניינים ישנים	Safe Rooms for Old Buildings	غرف آمنة للمباني القديمة
+🏛️	govServices	jerusalem	3	6	2	center:3,periphery:2	רשות החירום הלאומית	National Emergency Authority	هيئة الطوارئ الوطنية
+📦	welfare	shfela	4	8	2	center:2,families:2	מחסני חירום אזרחיים	Civilian Emergency Depots	مخازن الطوارئ المدنية
+⚡	energy	north	4	8	2	periphery:3,center:2	גנרטורים ואגירה ליישובים	Generators and Storage for Communities	مولدات وتخزين للبلدات
+🚌	transport	negev	3	6	2	periphery:3,elderly:2	מערך פינוי אזרחי	Civilian Evacuation System	منظومة الإخلاء المدني
+🏫	education	north	3	6	2	families:3,periphery:2	מיגון בתי ספר וגנים	Fortifying Schools and Kindergartens	تحصين المدارس والروضات
+💼	govServices	center	3	6	2	selfEmployed:4,employees:2	קרן ביטוח מלחמה לעסקים	War Insurance Fund for Businesses	صندوق تأمين الحرب للأعمال
+🧑‍⚕️	health	center	3	6	2	publicSector:3,reservists:2	מרכז הכשרת מטפלים בטראומה	Trauma Therapists Training Center	مركز تأهيل معالجي الصدمات
+📻	govServices	center	2	4	2	center:2,elderly:2	מערכת תקשורת לשעת חירום	Emergency Communication System	نظام اتصالات الطوارئ
+🎗️	welfare	center	3	6	2	families:4,reservists:3	מרכז למשפחות שכולות ולנפגעים	Center for Bereaved Families and Casualties	مركز للعائلات الثكلى والمصابين
+🚑	health	north	3	6	2	periphery:3,center:1	מיגון בתי חולים בצפון	Fortifying Hospitals in the North	تحصين المستشفيات في الشمال
+🤝	govServices	center	1	3	2	center:3,families:1	מרכז מתנדבי חירום לאומי	National Emergency Volunteers Center	مركز متطوعي الطوارئ الوطني

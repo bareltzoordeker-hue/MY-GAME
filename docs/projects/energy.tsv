@@ -1,0 +1,15 @@
+☀️	energy	negev	8	10	4	liberals:3,periphery:2	שדה סולארי ענק בנגב	Giant Solar Field in the Negev	حقل شمسي ضخم في النقب
+🔋	energy	center	6	8	3	center:2,middleClass:2	מתקני אגירת אנרגיה	Energy Storage Facilities	منشآت تخزين الطاقة
+🌊	infrastructure	sharon	7	10	3	families:2,center:2	מתקן התפלה חדש	New Desalination Plant	محطة تحلية جديدة
+🔌	energy	north	8	12	3	periphery:3	שדרוג רשת החשמל בצפון	Northern Power Grid Upgrade	تحديث شبكة الكهرباء في الشمال
+🌬️	energy	north	4	8	2	liberals:2,periphery:2	חוות רוח בגולן	Wind Farm in the Golan	مزرعة رياح في الجولان
+⚡	energy	center	5	8	3	middleClass:2,youth:2	רשת עמדות טעינה ארצית	National EV Charging Network	شبكة شحن قطرية للسيارات الكهربائية
+💧	infrastructure	north	4	8	2	periphery:3	החלפת צנרת מים בפריפריה	Water Pipe Replacement in the Periphery	استبدال أنابيب المياه في الأطراف
+🔥	energy	haifa	6	10	2	employees:2,center:2	תחנת כוח בגז בחיפה	Gas Power Plant in Haifa	محطة طاقة بالغاز في حيفا
+🏭	energy	shfela	5	8	3	families:3,liberals:2	סגירת יחידות הפחם	Closing the Coal Units	إغلاق وحدات الفحم
+🌍	energy	center	9	14	2	center:2,highIncome:2	כבל חשמל תת-ימי לאירופה	Undersea Power Cable to Europe	كابل كهرباء بحري إلى أوروبا
+🏞️	infrastructure	north	3	6	2	periphery:2,liberals:2	שיקום מערכות ביוב בצפון	Sewage System Rehabilitation in the North	إعادة تأهيل شبكات الصرف في الشمال
+📟	energy	center	3	5	2	middleClass:2,center:2	מונים חכמים לכל בית	Smart Meters for Every Home	عدادات ذكية لكل بيت
+🔦	energy	jerusalem	2	4	2	center:2,families:2	גיבוי חשמל לבתי חולים ומקלטים	Backup Power for Hospitals and Shelters	طاقة احتياطية للمستشفيات والملاجئ
+🏘️	energy	negev	3	6	2	periphery:3,arabs:2	חיבור יישובים מרוחקים לחשמל	Connecting Remote Communities to Power	ربط البلدات النائية بالكهرباء
+♻️	energy	center	4	8	2	liberals:3,youth:2	מתקן אנרגיה מפסולת	Waste-to-Energy Plant	منشأة طاقة من النفايات

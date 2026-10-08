@@ -1,0 +1,15 @@
+🪪	govServices	center	3	6	3	center:2,youth:2	תעודת זהות דיגיטלית לאומית	National Digital ID	الهوية الرقمية الوطنية
+🏢	govServices	north	2	4	2	periphery:3	לשכות אוכלוסין חדשות בפריפריה	New Population Offices in the Periphery	مكاتب سكان جديدة في الأطراف
+🗺️	govServices	center	3	6	2	middleClass:2,youth:2	מערכת תכנון ורישוי מקוונת	Online Planning and Licensing System	نظام تخطيط وترخيص إلكتروني
+🏘️	housing	north	5	8	2	arabs:4,periphery:1	תוכניות מתאר ליישובים הערביים	Master Plans for Arab Towns	مخططات هيكلية للبلدات العربية
+🌳	govServices	center	2	4	2	families:2,center:1	פארקים עירוניים חדשים	New Urban Parks	حدائق حضرية جديدة
+🧑‍🚒	govServices	shfela	2	4	2	periphery:2,center:2	מחסני חירום ברשויות	Emergency Depots in Local Authorities	مخازن طوارئ في السلطات المحلية
+♿	govServices	center	2	5	2	elderly:2,families:2	הנגשת מבני הרשויות	Accessibility in Municipal Buildings	إتاحة مباني السلطات
+🏚️	housing	north	6	10	2	lowIncome:2,elderly:2	חיזוק מבנים מפני רעידות אדמה	Earthquake Retrofitting	تدعيم المباني ضد الزلازل
+📊	govServices	center	1	3	2	center:2,liberals:1	מדד שירות ברשויות	Municipal Service Index	مؤشر الخدمة في السلطات
+🤝	govServices	negev	2	4	2	periphery:3	אשכול שירותים אזורי בנגב	Regional Services Cluster in the Negev	عنقود خدمات إقليمي في النقب
+🚸	govServices	center	1	3	2	families:3	מעברי חצייה בטוחים ליד בתי ספר	Safe Crossings Near Schools	ممرات عبور آمنة قرب المدارس
+🏜️	infrastructure	negev	6	10	2	arabs:4,periphery:2	תשתיות ליישובים הבדואיים	Infrastructure for Bedouin Towns	بنية تحتية للبلدات البدوية
+🏗️	housing	center	4	8	2	middleClass:2,youth:2	מינהלת התחדשות עירונית	Urban Renewal Administration	إدارة التجديد الحضري
+🧹	govServices	haifa	1	3	2	center:2,families:1	תוכנית ניקיון ארצית	National Cleanliness Program	برنامج النظافة القطري
+🏛️	govServices	jerusalem	2	5	2	publicSector:2,center:1	מרכז הכשרה לעובדי הרשויות	Training Center for Municipal Staff	مركز تدريب لموظفي السلطات

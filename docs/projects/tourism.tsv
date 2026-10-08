@@ -1,0 +1,15 @@
+🏨	govServices	eilat	6	10	3	selfEmployed:3,periphery:2	שדרוג מלונות אילת	Eilat Hotels Upgrade	تحديث فنادق إيلات
+🏖️	govServices	center	2	4	2	families:3,youth:2	שדרוג החופים לתיירות	Beach Upgrade for Tourism	تحديث الشواطئ للسياحة
+🏛️	govServices	jerusalem	4	8	3	center:2,religious:2	פיתוח אתרי העיר העתיקה	Old City Sites Development	تطوير مواقع البلدة القديمة
+🗺️	govServices	north	2	4	2	families:3,periphery:2	שבילי טיול לאומיים	National Hiking Trails	مسارات مشي وطنية
+🎤	govServices	center	5	8	2	youth:2,selfEmployed:2	מרכז כנסים בינלאומי	International Convention Center	مركز مؤتمرات دولي
+🏥	govServices	negev	4	8	2	highIncome:2,center:2	מלונות מרפא בים המלח	Spa Hotels at the Dead Sea	فنادق علاجية في البحر الميت
+🕌	govServices	north	3	6	2	arabs:4	פיתוח תיירות בנצרת	Tourism Development in Nazareth	تطوير السياحة في الناصرة
+🏜️	govServices	negev	3	6	2	periphery:3,liberals:1	תיירות מדבר בנגב	Desert Tourism in the Negev	سياحة صحراوية في النقب
+📱	govServices	center	1	3	2	youth:2,center:2	אפליקציית תיירות לאומית	National Tourism App	تطبيق السياحة الوطني
+🧭	govServices	center	1	3	2	families:2,center:1	מרכזי מידע לתיירים	Tourist Information Centers	مراكز معلومات للسياح
+🍷	govServices	north	2	4	2	periphery:3,selfEmployed:2	דרך היין בגליל	The Galilee Wine Route	طريق النبيذ في الجليل
+🚌	govServices	jerusalem	2	4	2	center:2,selfEmployed:1	קווי תיירות לאטרקציות	Tourist Lines to Attractions	خطوط سياحية إلى المعالم
+🏡	govServices	north	2	4	2	periphery:3,selfEmployed:2	כפרי נופש בצפון	Holiday Villages in the North	قرى سياحية في الشمال
+♿	govServices	center	1	3	2	families:2,elderly:2	הנגשת אתרי תיירות	Accessible Tourist Sites	إتاحة المواقع السياحية
+🧳	govServices	eilat	3	6	2	highIncome:2,periphery:2	טרמינל טיסות זולות באילת	Low-Cost Flights Terminal in Eilat	محطة الرحلات منخفضة التكلفة في إيلات

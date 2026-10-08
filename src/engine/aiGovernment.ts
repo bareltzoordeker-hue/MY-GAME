@@ -132,10 +132,13 @@ export function simulateAIGovernment(s: GameState): void {
 }
 
 /** The AI PM decides on a request from the player (minister). */
-export function aiPmDecides(s: GameState, amount: number): { approved: boolean; chance: number } {
+/** `funding`: the asking ministry's budget as a share of its need. The better it is funded, the easier the yes; at 100%+ the deficit is no excuse. */
+export function aiPmDecides(s: GameState, amount: number, funding = 1): { approved: boolean; chance: number } {
   const pm = s.politicians[s.government.pmId];
   const me = s.politicians[s.player.politicianId];
-  const p = clamp(0.35 + (pm.loyalty - 50) / 100 + (me.power - 50) / 200 - Math.max(0, deficitPct(s) - 3) * 0.12 - amount * 0.03, 0.05, 0.9);
+  const deficitPenalty = funding >= 1 ? 0 : Math.max(0, deficitPct(s) - 3) * 0.12 * (1 - funding);
+  const fundingBonus = clamp((funding - 0.85) * 1.5, -0.3, 0.45);
+  const p = clamp(0.35 + (pm.loyalty - 50) / 100 + (me.power - 50) / 200 - deficitPenalty - amount * 0.03 + fundingBonus, 0.05, 0.95);
   return { approved: chance(s, p), chance: p };
 }
 

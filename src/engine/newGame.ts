@@ -226,13 +226,13 @@ export function createGame(cfg: NewGameConfig): GameState {
 
   // ---------------- ministries (real ministers) ----------------
   for (const def of MINISTRIES) {
-    const holder = PEOPLE.find((p) => p.role === def.id);
+    const holder = PEOPLE.find((p) => p.role === def.id || p.roles?.includes(def.id));
     s.government.ministries.push({
       id: def.id, name: def.name, icon: def.icon, domain: def.domain, services: [...def.services], categories: [...def.categories],
       ministerId: holder?.id ?? null, efficiency: 46 + Math.round(hash(def.id) * 12), bureaucracy: 42 + Math.round(hash(def.id + 'b') * 22), deep: def.deep,
       agreementPartyId: holder?.party ?? def.initialParty,
     });
-    if (holder) {
+    if (holder && holder.role !== 'pm' && !s.politicians[holder.id].ministryId) {
       s.politicians[holder.id].ministryId = def.id;
       s.politicians[holder.id].power = clamp(s.politicians[holder.id].power + 10);
     }

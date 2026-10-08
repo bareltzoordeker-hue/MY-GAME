@@ -1,0 +1,15 @@
+🛡️	security	north	6	8	3	periphery:3,reservists:2	מיגון יישובי הצפון	Northern Communities Fortification	تحصين بلدات الشمال
+🏭	security	negev	9	12	3	employees:3,periphery:3	מפעל תחמושת לאומי בנגב	National Munitions Plant in the Negev	مصنع ذخيرة وطني في النقب
+🚀	security	center	12	14	4	right:3,center:2	שכבת יירוט לייזר	Laser Interception Layer	طبقة اعتراض بالليزر
+🏥	health	center	4	6	2	reservists:3,soldiers:2	מרכז שיקום לאומי לפצועי צה״ל	National Rehabilitation Center for Wounded Soldiers	مركز وطني لتأهيل جرحى الجيش
+🏗️	security	negev	15	18	3	periphery:4,employees:2	עיר הבה״דים שלב ב׳	Training Bases City, Phase B	مدينة قواعد التدريب، المرحلة الثانية
+📡	security	north	5	8	3	periphery:2,right:2	מכשול חכם בגבול לבנון	Smart Barrier on the Lebanon Border	حاجز ذكي على الحدود اللبنانية
+🛰️	security	center	7	10	2	center:2,right:2	לווייני תצפית חדשים	New Observation Satellites	أقمار مراقبة جديدة
+🏘️	housing	north	5	8	2	soldiers:3,families:2	דיור לאנשי קבע בצפון	Housing for Career Soldiers in the North	سكن لعسكريي الخدمة الدائمة في الشمال
+🧠	health	jerusalem	3	5	2	reservists:3,families:2	מערך טיפול בפוסט-טראומה	PTSD Treatment Network	منظومة علاج اضطراب ما بعد الصدمة
+🚁	security	negev	8	10	2	right:2,center:1	טייסת מסוקים חדשה	New Helicopter Squadron	سرب مروحيات جديد
+🏫	education	center	3	6	2	soldiers:3,youth:2	מכללה טכנולוגית לחיילים משוחררים	Technology College for Discharged Soldiers	كلية تكنولوجية للجنود المسرّحين
+🚢	security	haifa	10	14	2	right:2,employees:2	שדרוג נמל חיל הים בחיפה	Haifa Naval Base Upgrade	تحديث قاعدة سلاح البحرية في حيفا
+📦	security	shfela	4	6	2	center:2,reservists:2	מחסני חירום לאומיים	National Emergency Depots	مخازن الطوارئ الوطنية
+🧪	security	center	6	10	2	highIncome:2,employees:2	מרכז מו״פ ביטחוני	Defense R&D Center	مركز بحث وتطوير دفاعي
+🏟️	security	judea_samaria	3	5	2	settlers:4,right:2	מיגון יישובי יהודה ושומרון	Judea and Samaria Communities Fortification	تحصين بلدات يهودا والسامرة

@@ -1,0 +1,15 @@
+🚓	security	north	4	6	3	arabs:3,periphery:2	תחנות משטרה חדשות ביישובים הערביים	New Police Stations in Arab Towns	مراكز شرطة جديدة في البلدات العربية
+🏢	security	negev	8	12	2	publicSector:2,center:1	בית כלא מודרני בנגב	Modern Prison in the Negev	سجن حديث في النقب
+🎓	security	center	3	6	2	publicSector:3	האקדמיה הלאומית לשוטרים	National Police Academy	الأكاديمية الوطنية للشرطة
+📹	security	center	3	5	2	elderly:2,center:2	מערך מצלמות עירוני ארצי	National Urban Camera Network	شبكة كاميرات حضرية قطرية
+🚒	security	north	3	5	2	periphery:3	תחנות כיבוי חדשות בגליל	New Fire Stations in the Galilee	محطات إطفاء جديدة في الجليل
+✈️	security	center	5	8	2	periphery:2,center:2	צי מטוסי כיבוי	Firefighting Aircraft Fleet	أسطول طائرات الإطفاء
+🧪	security	center	2	4	2	center:2	מעבדה פורנזית לאומית	National Forensic Laboratory	مختبر الأدلة الجنائية الوطني
+🚨	security	center	3	6	3	families:2,center:2	מוקד חירום לאומי מאוחד	Unified National Emergency Center	مركز الطوارئ الوطني الموحد
+🏘️	security	shfela	2	4	2	periphery:2,elderly:2	תחנות שיטור קהילתי בשכונות	Community Policing Stations	مراكز الشرطة المجتمعية في الأحياء
+🚔	security	center	4	6	2	right:2,center:2	בסיס מג״ב חדש במרכז	New Border Police Base in the Center	قاعدة جديدة لحرس الحدود في المركز
+📱	security	center	2	4	2	families:2,youth:2	יחידת סייבר-פשיעה ארצית	National Cybercrime Unit	وحدة الجرائم الإلكترونية القطرية
+🏛️	security	jerusalem	2	4	2	center:2	מרכז בקרה ארצי למשטרה	National Police Command Center	مركز القيادة الوطني للشرطة
+🧑‍🦯	security	center	1	3	2	elderly:3	יחידה למניעת הונאות קשישים	Elder Fraud Prevention Unit	وحدة منع الاحتيال على المسنين
+🔓	security	shfela	3	6	2	liberals:2,center:1	מרכז שיקום אסירים	Prisoner Rehabilitation Center	مركز إعادة تأهيل السجناء
+🏜️	security	negev	3	5	2	periphery:3,right:1	יחידת אכיפה נגד גניבות חקלאיות	Agricultural Theft Enforcement Unit	وحدة الإنفاذ ضد السرقات الزراعية

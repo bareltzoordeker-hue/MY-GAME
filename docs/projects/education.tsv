@@ -1,0 +1,15 @@
+🏫	education	center	6	8	4	families:3,publicSector:1	1,000 כיתות חדשות	1,000 New Classrooms	1,000 صف دراسي جديد
+💻	education	center	4	6	3	youth:3,families:2	מחשב לכל תלמיד	A Computer for Every Pupil	حاسوب لكل طالب
+👶	education	shfela	5	8	3	families:4,employees:2	מעונות יום ציבוריים	Public Daycare Centers	حضانات عامة
+🧪	education	north	3	6	2	youth:2,periphery:2	מעבדות מדע בתיכוני הפריפריה	Science Labs in Periphery High Schools	مختبرات علوم في ثانويات الأطراف
+🎓	education	negev	4	8	3	students:3,periphery:3	קמפוס אקדמי בנגב	Academic Campus in the Negev	حرم أكاديمي في النقب
+🧑‍🏫	education	center	3	6	2	publicSector:3	מכללה להכשרת מורים	Teacher Training College	كلية لتأهيل المعلمين
+🍎	education	center	2	4	2	lowIncome:3,families:2	מטבחים לארוחה חמה בבתי ספר	School Kitchens for Hot Meals	مطابخ لوجبة ساخنة في المدارس
+🧑‍🔧	education	haifa	3	6	2	youth:3,employees:2	בתי ספר טכנולוגיים	Technology Schools	مدارس تكنولوجية
+🎨	education	jerusalem	2	4	2	youth:2,liberals:2	בתי ספר לאמנויות	Arts Schools	مدارس للفنون
+🚌	education	north	2	4	2	periphery:3,families:1	צי הסעות תלמידים	Student Transport Fleet	أسطول مواصلات الطلاب
+🧠	education	center	2	5	2	families:3,youth:2	יועצים ופסיכולוגים בבתי ספר	School Counselors and Psychologists	مستشارون وأخصائيون نفسيون في المدارس
+📚	education	shfela	1	3	2	families:2,lowIncome:2	תוכנית הקריאה הלאומית	National Reading Program	برنامج القراءة الوطني
+🏫	education	judea_samaria	3	6	2	settlers:3,families:2	בתי ספר ביישובים המתרחבים	Schools in Growing Settlements	مدارس في البلدات المتوسعة
+🧮	education	center	3	6	2	haredim:3,secular:1	מרכזי ליבה לחינוך החרדי	Core Studies Centers for Haredi Education	مراكز المواد الأساسية للتعليم الحريدي
+🔤	education	north	2	4	2	arabs:3,olim:2	תוכנית אנגלית מדוברת	Spoken English Program	برنامج الإنجليزية المحكية

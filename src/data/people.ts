@@ -18,6 +18,8 @@ export interface PersonDef {
   rank: number;
   mk?: boolean;
   role?: string;
+  /** further portfolios held by the same minister (the real 2026 government has several) */
+  roles?: string[];
   fame: 1 | 2 | 3 | 4 | 5;
   domain: Domain;
   skills?: Partial<Record<Domain, number>>;
@@ -34,10 +36,10 @@ const P = (party: string, rank: number, name: string, gender: 'm' | 'f', fame: P
 };
 
 // ---------------- הליכוד ----------------
-P('likud', 1, 'בנימין נתניהו', 'm', 5, 'foreign', { mk: true, role: 'pm', skills: { foreign: 95, defense: 85, economy: 85, media: 90, finance: 75 }, look: { hair: 'grey', hairColor: '#cfcfcf', mouth: 'smirk', nose: 0.7 }, bio: 'ראש הממשלה ויו״ר הליכוד' });
+P('likud', 1, 'בנימין נתניהו', 'm', 5, 'foreign', { mk: true, role: 'pm', roles: ['interior', 'intelligence'], skills: { foreign: 95, defense: 85, economy: 85, media: 90, finance: 75 }, look: { hair: 'grey', hairColor: '#cfcfcf', mouth: 'smirk', nose: 0.7 }, bio: 'ראש הממשלה ויו״ר הליכוד' });
 P('likud', 2, 'אלי כהן', 'm', 4, 'energy', { role: 'energy', skills: { energy: 70, foreign: 70, economy: 65, management: 60 }, look: { hair: 'comb', hairColor: '#2a2a2a' }, bio: 'שר האנרגיה, לשעבר שר החוץ' });
 P('likud', 3, 'אמיר אוחנה', 'm', 4, 'law', { mk: true, role: 'speaker', skills: { law: 75, management: 65, defense: 50 }, look: { hair: 'bald', beard: 'stubble', hairColor: '#3a3a3a' }, bio: 'יו״ר הכנסת' });
-P('likud', 4, 'יריב לוין', 'm', 4, 'law', { mk: true, role: 'justice', skills: { law: 90, management: 70, interior: 55 }, look: { hair: 'grey', glasses: true }, bio: 'המשנה לראש הממשלה ושר המשפטים' });
+P('likud', 4, 'יריב לוין', 'm', 4, 'law', { mk: true, role: 'justice', roles: ['labor', 'religious', 'jerusalem'], skills: { law: 90, management: 70, interior: 55, welfare: 50 }, look: { hair: 'grey', glasses: true }, bio: 'המשנה לראש הממשלה, שר המשפטים, העבודה, שירותי הדת וירושלים' });
 P('likud', 5, 'מירי רגב', 'f', 5, 'transport', { role: 'transport', skills: { transport: 75, culture: 65, media: 80 }, look: { hair: 'curly', hairColor: '#2b1a12' }, bio: 'שרת התחבורה' });
 P('likud', 6, 'ישראל כ״ץ', 'm', 4, 'defense', { mk: true, role: 'defense', skills: { defense: 65, transport: 80, finance: 65, foreign: 60 }, look: { hair: 'grey', hairColor: '#d4d4d4' }, bio: 'שר הביטחון, לשעבר שר התחבורה והאוצר' });
 P('likud', 7, 'גדעון סער', 'm', 4, 'foreign', { role: 'foreign', skills: { foreign: 75, law: 80, education: 70, interior: 65 }, look: { hair: 'grey', hairColor: '#bdbdbd' }, bio: 'שר החוץ' });
@@ -51,7 +53,7 @@ P('likud', 14, 'עמיחי שיקלי', 'm', 3, 'foreign', { role: 'diaspora', s
 P('likud', 15, 'אלישע מדן', 'm', 1, 'management');
 P('likud', 16, 'דוד פטר', 'm', 1, 'defense');
 P('likud', 17, 'משה סעדה', 'm', 2, 'law', { mk: true, skills: { law: 65 }, look: { hair: 'bald', hairColor: '#333' } });
-P('likud', 18, 'חיים כץ', 'm', 3, 'welfare', { skills: { welfare: 65, economy: 55 }, look: { hair: 'grey', glasses: true }, bio: 'לשעבר שר הרווחה והכלכלה' });
+P('likud', 18, 'חיים כץ', 'm', 3, 'welfare', { role: 'health', roles: ['housing', 'welfare', 'tourism'], skills: { welfare: 65, economy: 55, health: 55, housing: 50 }, look: { hair: 'grey', glasses: true }, bio: 'שר הבריאות, הבינוי והשיכון, הרווחה והתיירות' });
 P('likud', 19, 'דודי אמסלם', 'm', 4, 'interior', { role: 'regional', skills: { interior: 55, management: 60, media: 65 }, look: { hair: 'bald', hairColor: '#333' }, bio: 'השר לשיתוף פעולה אזורי' });
 P('likud', 20, 'אתי עטייה', 'f', 2, 'welfare', { mk: true, skills: { welfare: 55 } });
 P('likud', 21, 'בועז ביסמוט', 'm', 3, 'media', { mk: true, skills: { media: 75, defense: 60, foreign: 55 }, look: { hair: 'grey', glasses: true }, bio: 'יו״ר ועדת החוץ והביטחון' });

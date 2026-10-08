@@ -25,6 +25,12 @@ function kpis(s: GameState, m: Ministry): { l: string; v: string; good?: boolean
   if (ids.includes('energy')) out.push({ l: 'סיכון להפסקות', v: `${s.services.energy.metrics.blackoutRisk}%`, good: s.services.energy.metrics.blackoutRisk < 30 }, { l: 'אנרגיה מתחדשת', v: `${s.services.energy.metrics.renewables}%` });
   if (ids.includes('interior')) out.push({ l: 'ימי המתנה לשירות', v: `${s.services.govServices.metrics.bureaucracyDays}`, good: s.services.govServices.metrics.bureaucracyDays < 25 });
   if (ids.includes('economy')) out.push({ l: 'אבטלה', v: `${s.economy.unemployment.toFixed(1)}%`, good: s.economy.unemployment < 5 });
+  if (!out.length) {
+    // every ministry gets a picture: its funding, its projects and the public's view of the government
+    const cat = m.categories[0];
+    if (cat) { const pct = Math.round((100 * s.budget.allocations[cat]) / Math.max(0.1, s.budget.needs[cat])); out.push({ l: 'מימון מהצורך', v: `${pct}%`, good: pct >= 95 }); }
+    out.push({ l: 'פרויקטים בביצוע', v: `${s.projects.filter((p) => p.status === 'active' && ids.includes(PROJECTS.find((d) => d.id === p.defId)?.ministry ?? '')).length}` }, { l: 'שביעות רצון מהממשלה', v: `${s.government.approval.toFixed(0)}%`, good: s.government.approval >= 45 });
+  }
   return out;
 }
 

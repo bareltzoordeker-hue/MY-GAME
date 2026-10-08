@@ -1,0 +1,15 @@
+🕍	govServices	center	3	6	2	religious:3,haredim:2	שיפוץ בתי כנסת ברחבי הארץ	Synagogue Renovation Nationwide	ترميم الكنس في أنحاء البلاد
+🕯️	govServices	north	2	4	2	religious:3,haredim:2	מקוואות חדשים ביישובים	New Mikvaot in Communities	مغاطس طقسية جديدة في البلدات
+⚰️	govServices	center	3	6	2	secular:3,olim:2	בתי עלמין אזרחיים	Civil Cemeteries	مقابر مدنية
+⛪	govServices	north	2	4	2	arabs:4	שיפוץ מסגדים וכנסיות	Mosque and Church Renovation	ترميم المساجد والكنائس
+🏛️	govServices	jerusalem	2	4	2	religious:2,center:2	שדרוג המועצות הדתיות	Religious Councils Upgrade	تحديث المجالس الدينية
+🪦	govServices	center	2	4	2	families:2,elderly:2	תחזוקת בתי העלמין	Cemetery Maintenance	صيانة المقابر
+🧱	govServices	jerusalem	3	6	2	center:2,religious:2	רחבת תפילה לכל הזרמים בכותל	Prayer Plaza for All Streams at the Western Wall	ساحة صلاة لجميع التيارات عند الحائط الغربي
+📿	govServices	north	2	4	2	religious:3,center:1	אתרי קברי צדיקים מונגשים	Accessible Holy Tomb Sites	مواقع قبور الصديقين المتاحة
+🕎	govServices	center	2	4	2	olim:3,religious:1	בתי דין לגיור חדשים	New Conversion Courts	محاكم تهويد جديدة
+💍	govServices	center	1	3	2	secular:3,liberals:2	מסלול רישום זוגיות אזרחי	Civil Union Registration Track	مسار تسجيل الاتحاد المدني
+🍽️	govServices	center	1	3	2	selfEmployed:2,secular:2	רשות פיקוח על הכשרות	Kashrut Oversight Authority	هيئة الرقابة على الكشروت
+📚	govServices	jerusalem	2	4	2	haredim:3,religious:2	מרכז לימוד יהדות לציבור הרחב	Jewish Studies Center for the Public	مركز دراسات يهودية لعامة الجمهور
+🕯️	govServices	north	1	3	2	religious:2,reservists:2	מערך רבנות לחיילים ולמשפחות	Rabbinate Network for Soldiers and Families	شبكة حاخامية للجنود والعائلات
+🏠	govServices	shfela	2	4	2	religious:3,families:1	שירותי דת בשכונות החדשות	Religious Services in New Neighborhoods	خدمات دينية في الأحياء الجديدة
+🧑‍⚖️	govServices	center	1	3	2	families:2,liberals:2	מרכז סיוע לעגונות ומסורבות גט	Support Center for Women Refused a Divorce	مركز دعم للنساء الممنوعات من الطلاق

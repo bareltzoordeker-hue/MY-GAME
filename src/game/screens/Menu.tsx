@@ -17,8 +17,9 @@ const ROLE_TEXT = (p: PersonDef) => {
   if (p.role === 'pm') return 'ראש הממשלה';
   if (p.role === 'speaker') return 'יו״ר הכנסטון';
   if (p.role?.startsWith('deputy:')) return 'סגן/ית שר';
-  const m = MINISTRIES.find((x) => x.id === p.role);
-  if (m) return m.name.startsWith('המשרד') ? `שר/ה ${m.name.slice(6)}` : `שר/ה ${m.name.replace(/^משרד /, '')}`;
+  const short = (m: (typeof MINISTRIES)[number]) => (m.name.startsWith('המשרד') ? m.name.slice(6) : m.name.replace(/^משרד /, ''));
+  const held = [p.role, ...(p.roles ?? [])].map((id) => MINISTRIES.find((x) => x.id === id)).filter((x): x is (typeof MINISTRIES)[number] => !!x);
+  if (held.length) return `שר/ה ${held.map(short).join(', ')}`;
   if (p.rank === 1) return 'יו״ר הרשימה';
   return p.mk ? 'חבר/ת כנסטון' : 'מועמד/ת';
 };

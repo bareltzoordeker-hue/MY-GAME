@@ -1,0 +1,15 @@
+🚋	transport	jerusalem	8	12	3	center:2,haredim:2	קו ירוק של הרכבת הקלה בירושלים	Jerusalem Light Rail Green Line	الخط الأخضر للقطار الخفيف في القدس
+🧑‍💻	govServices	jerusalem	5	8	3	youth:3,highIncome:2	רובע החדשנות בירושלים	Jerusalem Innovation District	حي الابتكار في القدس
+🏘️	housing	jerusalem	8	12	3	youth:3,families:3	20 אלף דירות בירושלים	20,000 Homes in Jerusalem	20 ألف شقة في القدس
+🏫	education	jerusalem	4	8	3	arabs:4,families:2	בתי ספר במזרח ירושלים	Schools in East Jerusalem	مدارس في القدس الشرقية
+🏛️	govServices	jerusalem	6	10	2	religious:3,center:2	שימור ופיתוח העיר העתיקה	Old City Preservation and Development	الحفاظ على البلدة القديمة وتطويرها
+🎓	education	jerusalem	3	6	2	students:4	מעונות סטודנטים בירושלים	Student Dorms in Jerusalem	مساكن طلابية في القدس
+🏢	govServices	jerusalem	5	8	2	publicSector:2,center:2	קריית הממשלה המורחבת	Expanded Government Campus	المجمع الحكومي الموسع
+🌳	govServices	jerusalem	3	6	2	families:3,liberals:1	פארק המסילה המורחב	Expanded Railway Park	حديقة السكة الموسعة
+🛣️	transport	jerusalem	4	8	2	arabs:3,center:1	כבישים ותשתיות במזרח העיר	Roads and Infrastructure in the East of the City	طرق وبنية تحتية في شرق المدينة
+🏨	govServices	jerusalem	4	8	2	selfEmployed:3,center:1	מלונות חדשים בירושלים	New Hotels in Jerusalem	فنادق جديدة في القدس
+🎭	govServices	jerusalem	2	4	2	liberals:2,youth:2	מרכז תרבות ואירועים	Culture and Events Center	مركز الثقافة والفعاليات
+🛡️	security	jerusalem	3	6	2	right:3,center:1	מערך מצלמות ואבטחה בירושלים	Camera and Security Network in Jerusalem	شبكة كاميرات وأمن في القدس
+📜	govServices	jerusalem	4	8	2	religious:3,right:2	מוזיאון המורשת הלאומי	National Heritage Museum	متحف التراث الوطني
+🕍	housing	jerusalem	5	8	2	haredim:4	שכונה חרדית חדשה בירושלים	New Haredi Neighborhood in Jerusalem	حي حريدي جديد في القدس
+🤝	govServices	jerusalem	2	4	2	arabs:3,liberals:2	מרכזים משותפים לכל תושבי העיר	Shared Centers for All City Residents	مراكز مشتركة لجميع سكان المدينة

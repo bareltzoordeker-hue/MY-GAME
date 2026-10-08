@@ -1,0 +1,15 @@
+🏠	housing	center	5	8	3	olim:5,lowIncome:1	דירות להשכרה מסובסדת לעולים	Subsidized Rental Housing for Olim	شقق إيجار مدعومة للمهاجرين
+🗣️	education	center	2	4	3	olim:5	רשת אולפנים חדשה	New Ulpan Network	شبكة أولبان جديدة
+🏢	govServices	center	2	4	2	olim:4,center:1	מרכזי קליטה אזוריים	Regional Absorption Centers	مراكز استيعاب إقليمية
+🩺	govServices	center	2	4	2	olim:4,publicSector:2	מרכז הכרה מקצועית לרופאים עולים	Professional Recognition Center for Immigrant Doctors	مركز الاعتراف المهني للأطباء المهاجرين
+🧓	housing	north	4	8	2	olim:4,elderly:3	דיור מוגן לעולים קשישים	Assisted Living for Elderly Olim	سكن محمي للمهاجرين المسنين
+🇪🇹	govServices	shfela	3	6	2	olim:5,families:2	מרכזי מצוינות ליוצאי אתיופיה	Excellence Centers for Ethiopian Israelis	مراكز تميز ليهود إثيوبيا
+💼	govServices	center	2	4	2	olim:4,selfEmployed:2	מרכז יזמות לעולים	Entrepreneurship Center for Olim	مركز ريادة أعمال للمهاجرين
+🧑‍🎓	welfare	center	2	4	2	olim:4,soldiers:3	בתים לחיילים בודדים	Homes for Lone Soldiers	بيوت للجنود الوحيدين
+💻	govServices	center	2	4	2	olim:4,youth:1	מערכת עלייה דיגיטלית	Digital Aliyah System	نظام الهجرة الرقمي
+🏘️	housing	negev	4	8	2	olim:4,periphery:3	קהילות עולים בנגב	Olim Communities in the Negev	مجتمعات مهاجرين في النقب
+🏘️	housing	north	4	8	2	olim:4,periphery:3	קהילות עולים בגליל	Olim Communities in the Galilee	مجتمعات مهاجرين في الجليل
+🎓	education	center	3	6	2	olim:4,youth:3	תוכנית נוער עולה	Immigrant Youth Program	برنامج الشباب المهاجرين
+🏛️	govServices	jerusalem	1	3	2	olim:3,center:1	נציבות קליטה	Absorption Ombudsman	مفوضية الاستيعاب
+🎤	govServices	center	1	3	2	olim:3,liberals:2	תיאטרון ותרבות בשפות העולים	Theater and Culture in Immigrant Languages	مسرح وثقافة بلغات المهاجرين
+🌍	govServices	center	2	4	2	olim:3,center:2	מרכז שליחי עלייה בעולם	Aliyah Emissaries Center Abroad	مركز مبعوثي الهجرة في العالم

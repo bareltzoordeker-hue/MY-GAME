@@ -1,0 +1,15 @@
+🏙️	infrastructure	negev	10	14	4	periphery:5,youth:2	תוכנית נגב 2035	Negev 2035 Plan	خطة النقب 2035
+🏔️	infrastructure	north	10	14	4	periphery:5,arabs:2	תוכנית גליל 2035	Galilee 2035 Plan	خطة الجليل 2035
+🎓	education	north	5	8	3	students:3,periphery:3	אוניברסיטת הגליל	Galilee University	جامعة الجليل
+🏥	health	negev	6	10	3	periphery:4	מרכז רפואי חדש בנגב	New Medical Center in the Negev	مركز طبي جديد في النقب
+🏭	infrastructure	negev	5	8	3	periphery:3,employees:3	פארק הייטק בבאר שבע	High-Tech Park in Beersheba	مجمع تكنولوجيا عالية في بئر السبع
+🏭	infrastructure	north	5	8	3	periphery:3,employees:3	פארק תעשייה בקריית שמונה	Industrial Park in Kiryat Shmona	مجمع صناعي في كريات شمونة
+🏘️	housing	north	6	10	3	periphery:3,reservists:2	שיקום יישובי קו העימות בצפון	Northern Frontline Communities Rebuilding	إعادة إعمار بلدات خط المواجهة في الشمال
+🌾	housing	negev	6	10	3	periphery:4,families:2	שיקום יישובי עוטף עזה	Gaza Envelope Communities Rebuilding	إعادة إعمار بلدات غلاف غزة
+🏜️	infrastructure	negev	5	8	2	arabs:4,periphery:2	תשתיות ליישובים הבדואיים המוכרים	Infrastructure for Recognized Bedouin Towns	بنية تحتية للبلدات البدوية المعترف بها
+☀️	energy	negev	4	8	2	periphery:3,liberals:2	שדות סולאריים קהילתיים בנגב	Community Solar Fields in the Negev	حقول شمسية مجتمعية في النقب
+🏨	govServices	north	3	6	2	periphery:3,selfEmployed:2	פיתוח תיירות בגליל	Tourism Development in the Galilee	تطوير السياحة في الجليل
+🏘️	housing	negev	5	8	2	periphery:3,youth:3	יישובים חדשים בנגב	New Communities in the Negev	بلدات جديدة في النقب
+🧑‍🤝‍🧑	govServices	north	2	4	2	arabs:3,periphery:3	מרכזי שותפות יהודית-ערבית בגליל	Jewish-Arab Partnership Centers in the Galilee	مراكز شراكة يهودية عربية في الجليل
+🏛️	govServices	negev	3	6	2	periphery:3,center:1	העברת מטות ממשלתיים לנגב	Moving Government Headquarters to the Negev	نقل مقرات حكومية إلى النقب
+🧑‍🏫	education	negev	2	4	2	periphery:3,families:2	תוכנית מורים מצוינים לנגב ולגליל	Excellent Teachers Program for the Negev and Galilee	برنامج المعلمين المتميزين للنقب والجليل

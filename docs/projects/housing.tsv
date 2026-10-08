@@ -1,0 +1,15 @@
+🏘️	housing	center	12	14	5	youth:4,families:3	50 אלף דירות במרכז	50,000 Homes in the Center	50 ألف شقة في المركز
+🏘️	housing	negev	8	12	4	periphery:4,youth:3	עיר חדשה בנגב	New City in the Negev	مدينة جديدة في النقب
+🏚️	housing	shfela	6	10	3	lowIncome:4,elderly:2	20 אלף דירות דיור ציבורי	20,000 Public Housing Units	20 ألف وحدة سكن عام
+🔑	housing	sharon	5	8	3	youth:4,lowIncome:2	דיור להשכרה ארוכת טווח	Long-Term Rental Housing	سكن للإيجار طويل الأمد
+🧓	housing	center	4	8	3	elderly:4,retirees:2	דיור מוגן ציבורי	Public Assisted Living	سكن محمي عام
+🏗️	housing	haifa	7	10	3	middleClass:3,youth:2	פינוי-בינוי בחיפה	Urban Renewal in Haifa	إخلاء وبناء في حيفا
+🏢	housing	center	3	6	2	youth:3,middleClass:1	דירות קטנות במרכזי ערים	Small Apartments in City Centers	شقق صغيرة في مراكز المدن
+🏘️	housing	north	6	10	3	arabs:4,youth:2	בנייה רוויה ביישובים הערביים	High-Density Building in Arab Towns	بناء مكثف في البلدات العربية
+🕍	housing	jerusalem	6	10	3	haredim:4,religious:1	שכונות חדשות לציבור החרדי	New Neighborhoods for the Haredi Public	أحياء جديدة للجمهور الحريدي
+🧑‍🎓	housing	center	3	6	2	students:4	מעונות סטודנטים לאומיים	National Student Dorms	مساكن طلابية وطنية
+🏭	housing	shfela	4	8	2	middleClass:2,employees:2	מפעל בנייה מתועשת	Industrialized Construction Plant	مصنع بناء صناعي
+🏘️	housing	judea_samaria	5	8	2	settlers:4,right:2	הרחבת היישובים ביהודה ושומרון	Settlement Expansion in Judea and Samaria	توسيع البلدات في يهودا والسامرة
+🌳	housing	center	2	4	2	families:3	גינות ומבני ציבור בשכונות חדשות	Parks and Public Buildings in New Neighborhoods	حدائق ومبانٍ عامة في الأحياء الجديدة
+🏢	housing	center	4	8	2	youth:3,middleClass:2	מגדלי מגורים ליד תחנות המטרו	Residential Towers Near Metro Stations	أبراج سكنية قرب محطات المترو
+🏘️	housing	eilat	3	6	2	periphery:3,youth:2	שכונה חדשה באילת	New Neighborhood in Eilat	حي جديد في إيلات

@@ -1,4 +1,5 @@
 import type { GroupId, RegionId, ServiceId } from '../types/game';
+import { MINISTRY_PROJECTS } from './ministryProjects.generated';
 
 // National projects, modelled on real plans. Cost in ₪ billions (total), turns = 2-month simulation steps.
 export interface ProjectDef {
@@ -9,7 +10,7 @@ export interface ProjectDef {
   note?: string;
 }
 
-export const PROJECTS: ProjectDef[] = [
+const CORE_PROJECTS: ProjectDef[] = [
   { id: 'metro_gush_dan', name: 'המטרו של גוש דן (שלב א׳)', icon: '🚇', service: 'transport', region: 'center', cost: 40, turns: 30, bonus: 9, groups: { center: 5, employees: 3, youth: 2 }, ministry: 'transport', note: 'הפרויקט התחבורתי הגדול בתולדות המדינה. יימשך שנים ארוכות.', metric: { key: 'railKm', amount: 50 } },
   { id: 'lightrail_purple', name: 'הקו הסגול של הרכבת הקלה', icon: '🚋', service: 'transport', region: 'center', cost: 8, turns: 12, bonus: 4, groups: { center: 3, students: 2 }, ministry: 'transport', note: 'העבודות ישבשו את התנועה בגוש דן עד לסיום.', metric: { key: 'railKm', amount: 27 } },
   { id: 'jerusalem_blue_line', name: 'הקו הכחול של הרכבת הקלה בירושלים', icon: '🚋', service: 'transport', region: 'jerusalem', cost: 6, turns: 12, bonus: 4, groups: { center: 1, students: 2, haredim: 1 }, ministry: 'transport', metric: { key: 'railKm', amount: 23 } },
@@ -36,4 +37,6 @@ export const PROJECTS: ProjectDef[] = [
   { id: 'police_stations', name: 'תחנות משטרה ביישובים הערביים', icon: '🚓', service: 'security', region: 'north', cost: 2, turns: 4, bonus: 3, groups: { arabs: 4, periphery: 2 }, ministry: 'national_security' },
   { id: 'digital_gov', name: 'ממשל דיגיטלי: שירותים מקוונים', icon: '💻', service: 'govServices', region: 'jerusalem', cost: 1.5, turns: 6, bonus: 7, groups: { selfEmployed: 3, youth: 1 }, ministry: 'interior' },
 ];
+export const PROJECTS: ProjectDef[] = [...CORE_PROJECTS, ...MINISTRY_PROJECTS];
+
 export const PROJECT_BY_ID = Object.fromEntries(PROJECTS.map((p) => [p.id, p])) as Record<string, ProjectDef>;

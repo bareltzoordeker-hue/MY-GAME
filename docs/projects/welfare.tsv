@@ -1,0 +1,15 @@
+🏠	welfare	center	3	6	3	lowIncome:3,center:1	מרכזי לינה ודיור ראשון לחסרי בית	Shelters and Housing First for the Homeless	مراكز مبيت وسكن أولي للمشردين
+🧓	welfare	north	4	8	3	elderly:4,retirees:2	מרכזי יום לקשישים בפריפריה	Senior Day Centers in the Periphery	مراكز نهارية للمسنين في الأطراف
+👶	welfare	shfela	3	6	2	families:3,youth:2	בתים לבוגרי פנימיות	Homes for Care Leavers	بيوت لخريجي المؤسسات الداخلية
+🛡️	welfare	center	3	6	3	families:3,liberals:2	מקלטים לנשים מוכות בכל מחוז	Shelters for Battered Women in Every District	ملاجئ للنساء المعنفات في كل منطقة
+♿	welfare	center	4	8	3	families:3,lowIncome:2	דיור בקהילה לאנשים עם מוגבלות	Community Housing for People with Disabilities	سكن مجتمعي لذوي الإعاقة
+🍲	welfare	negev	2	4	2	lowIncome:4	מרכזי מזון קהילתיים	Community Food Centers	مراكز غذاء مجتمعية
+🧑‍⚕️	welfare	center	2	5	2	publicSector:3	מכללה לעובדים סוציאליים	Social Workers College	كلية للعاملين الاجتماعيين
+🧠	welfare	north	3	6	2	families:2,lowIncome:2	מרכזי גמילה ושיקום	Rehab and Recovery Centers	مراكز علاج وتأهيل
+🏘️	welfare	jerusalem	3	6	2	haredim:3,lowIncome:2	מרכזי רווחה בשכונות החרדיות	Welfare Centers in Haredi Neighborhoods	مراكز رفاه في الأحياء الحريدية
+💻	govServices	center	2	4	3	lowIncome:2,elderly:2	מערכת מיצוי זכויות אוטומטית	Automatic Benefits System	نظام الحصول التلقائي على الحقوق
+🧒	welfare	center	3	6	2	families:4	מרכזי הגנה לילדים בסיכון	Protection Centers for Children at Risk	مراكز حماية للأطفال المعرضين للخطر
+🎗️	welfare	north	2	4	2	families:3,reservists:2	מרכזי תמיכה לנפגעי טרור	Support Centers for Terror Victims	مراكز دعم لضحايا الإرهاب
+🏡	welfare	sharon	4	8	3	elderly:4,families:2	מערך סיעוד ביתי ארצי	National Home Care Network	شبكة رعاية منزلية قطرية
+🧑‍🤝‍🧑	welfare	negev	3	6	2	arabs:3,lowIncome:2	מרכזי רווחה ביישובים הבדואיים	Welfare Centers in Bedouin Towns	مراكز رفاه في البلدات البدوية
+💼	welfare	shfela	2	4	2	lowIncome:3,employees:2	מרכזי יציאה מעוני לתעסוקה	Poverty-to-Work Centers	مراكز الخروج من الفقر إلى العمل

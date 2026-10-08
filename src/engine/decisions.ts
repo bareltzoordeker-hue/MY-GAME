@@ -114,9 +114,9 @@ function needsPmApproval(s: GameState, e: Effects): number {
   return add + taxes;
 }
 
-function pmApproval(s: GameState, amount: number): RunResult | null {
+function pmApproval(s: GameState, amount: number, funding = 1): RunResult | null {
   const pm = s.politicians[s.government.pmId];
-  const { approved } = aiPmDecides(s, amount);
+  const { approved } = aiPmDecides(s, amount, funding);
   if (approved) {
     return null;
   }
@@ -503,9 +503,9 @@ def({
     if (!d) return 'פרויקט לא קיים';
     if (s.projects.some((x) => x.defId === d.id && x.status === 'active')) return 'כבר בביצוע';
     if (isPM(s)) return null;
-    const m = playerMinistry(s);
-    if (s.player.role !== 'minister' || !m) return 'רק ראש הממשלה או השר האחראי';
-    return (m.origins ?? [m.id]).includes(d.ministry) ? null : 'הפרויקט לא באחריות המשרד שלך';
+    const held = s.government.ministries.filter((x) => x.ministerId === s.player.politicianId);
+    if (s.player.role !== 'minister' || !held.length) return 'רק ראש הממשלה או השר האחראי';
+    return held.some((x) => (x.origins ?? [x.id]).includes(d.ministry)) ? null : 'הפרויקט לא באחריות המשרד שלך';
   },
   needsMeeting: (s, p) => isPM(s) && (PROJECT_BY_ID[str(p, 'defId')]?.cost ?? 0) >= 10,
   run: (s, p) => {
@@ -572,8 +572,12 @@ def({
       people.push({ icon: '😠', label: pm.name, text: pick(s, ['הצעד לא תואם איתי ולא אושר בממשלה.', 'זו פעולה בניגוד לעקרון האחריות המשותפת.', 'אני שוקל את המשך כהונתך בממשלה.']), tone: 'bad' });
     } else {
       ask = needsPmApproval(s, eff);
+      // a ministry funded at 100% of its need pays for its own actions: no PM approval, no deficit excuse
+      const cat = m.categories[0];
+      const funding = cat ? s.budget.allocations[cat] / Math.max(0.1, s.budget.needs[cat]) : 1;
+      if (funding >= 1) ask = 0;
       if (ask > 0) {
-        const rej = pmApproval(s, ask);
+        const rej = pmApproval(s, ask, funding);
         if (rej) return rej;
         people.push({ icon: '🪑', label: pm.name, text: 'אושר, במסגרת התקציב הקיים.', tone: 'good' });
       }

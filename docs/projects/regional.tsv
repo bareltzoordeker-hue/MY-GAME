@@ -1,0 +1,15 @@
+🤝	infrastructure	north	5	8	2	center:2,arabs:2	אזור תעשייה משותף עם ירדן	Joint Industrial Zone with Jordan	منطقة صناعية مشتركة مع الأردن
+💧	infrastructure	negev	6	10	2	center:2,left:2	מתקן התפלה משותף לאזור	Joint Regional Desalination Plant	محطة تحلية مشتركة للمنطقة
+⚡	energy	negev	6	10	2	center:2,liberals:2	חיבור חשמל למדינות השכנות	Power Link to Neighboring Countries	ربط كهربائي مع الدول المجاورة
+🚆	transport	haifa	12	16	3	center:3,employees:2	מסילת הרכבת לירדן ולמפרץ	Railway to Jordan and the Gulf	سكة حديد إلى الأردن والخليج
+🛃	govServices	north	3	6	2	selfEmployed:2,center:2	שדרוג מעברי הגבול	Border Crossings Upgrade	تحديث المعابر الحدودية
+🎓	education	negev	3	6	2	students:3,arabs:2	אוניברסיטה אזורית	Regional University	جامعة إقليمية
+🏥	health	negev	4	8	2	center:2,arabs:2	מרכז רפואי אזורי	Regional Medical Center	مركز طبي إقليمي
+🌾	govServices	north	2	4	2	periphery:2,center:2	מרכז חקלאות אזורי	Regional Agriculture Center	مركز الزراعة الإقليمي
+🧳	govServices	eilat	3	6	2	selfEmployed:3,center:1	מסלול תיירות אזורי אילת-עקבה	Eilat-Aqaba Regional Tourism Route	مسار سياحي إقليمي إيلات-العقبة
+🔬	govServices	center	3	6	2	students:2,highIncome:2	מרכז חדשנות משותף עם המפרץ	Joint Innovation Center with the Gulf	مركز ابتكار مشترك مع الخليج
+🕊️	govServices	jerusalem	2	4	2	left:3,center:2	מכון לדיאלוג אזורי	Regional Dialogue Institute	معهد الحوار الإقليمي
+📦	infrastructure	haifa	8	12	2	employees:3,highIncome:2	מסוף סחר למסדרון הכלכלי	Trade Terminal for the Economic Corridor	محطة تجارية للممر الاقتصادي
+🌱	govServices	negev	2	4	2	liberals:2,center:2	מרכז אקלים אזורי	Regional Climate Center	مركز المناخ الإقليمي
+💼	govServices	center	4	8	2	highIncome:3,center:1	קרן השקעות אזורית	Regional Investment Fund	صندوق الاستثمار الإقليمي
+🗣️	govServices	north	1	3	2	arabs:3,center:1	מרכז שגרירי שלום ערבים	Arab Peace Ambassadors Center	مركز سفراء السلام العرب

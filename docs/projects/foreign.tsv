@@ -1,0 +1,15 @@
+🏛️	govServices	jerusalem	3	6	2	center:2,publicSector:1	קריית משרד החוץ החדשה	New Foreign Ministry Campus	المجمع الجديد لوزارة الخارجية
+🌍	govServices	center	2	5	2	center:2	פתיחת עשר שגרירויות באפריקה	Ten New Embassies in Africa	فتح عشر سفارات في أفريقيا
+📡	govServices	center	2	4	2	right:2,center:1	מרכז הסברה דיגיטלי	Digital Advocacy Center	مركز الدبلوماسية الرقمية
+🎓	govServices	jerusalem	2	5	2	students:2,center:1	אקדמיה דיפלומטית	Diplomatic Academy	الأكاديمية الدبلوماسية
+🤝	govServices	negev	4	8	2	center:2,periphery:2	מרכז שיתוף פעולה אזורי בנגב	Regional Cooperation Center in the Negev	مركز التعاون الإقليمي في النقب
+💧	infrastructure	negev	6	10	2	center:2,left:1	פרויקט מים לירדן	Water Project for Jordan	مشروع المياه للأردن
+✈️	govServices	center	2	4	2	highIncome:2,youth:1	מרכז שירות קונסולרי מקוון	Online Consular Service Center	مركز الخدمة القنصلية الإلكترونية
+🏨	govServices	eilat	3	6	2	selfEmployed:2,center:1	מרכז כנסים בינלאומי באילת	International Convention Center in Eilat	مركز مؤتمرات دولي في إيلات
+🧳	govServices	center	1	3	2	families:2,center:1	קרן חירום לאזרחים בחו״ל	Emergency Fund for Citizens Abroad	صندوق طوارئ للمواطنين في الخارج
+📦	infrastructure	haifa	8	12	2	employees:3,highIncome:1	מסוף סחר למסדרון הודו-אירופה	Trade Terminal for the India-Europe Corridor	محطة تجارية لممر الهند-أوروبا
+🎭	govServices	center	1	4	2	liberals:2,center:1	מרכז תרבות ישמעאלי בעולם	Yishmaeli Culture Centers Abroad	مراكز ثقافية يشمعيلية في العالم
+🔬	govServices	center	2	5	2	students:2,highIncome:1	קרן מחקר משותפת עם אירופה	Joint Research Fund with Europe	صندوق بحث مشترك مع أوروبا
+🕊️	govServices	jerusalem	2	5	2	left:2,center:2	מכון לדיפלומטיה אזורית	Institute for Regional Diplomacy	معهد الدبلوماسية الإقليمية
+🛡️	govServices	jerusalem	2	4	2	right:2,center:1	מערך משפטי מול בתי דין בינלאומיים	Legal Unit for International Courts	وحدة قانونية للمحاكم الدولية
+🌐	govServices	center	1	3	2	youth:2,center:1	תוכנית שגרירים צעירים	Young Ambassadors Program	برنامج السفراء الشباب

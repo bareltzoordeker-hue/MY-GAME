@@ -422,21 +422,31 @@ export const MINISTRY_ACTIONS: Record<string, MinistryActionSpec[]> = {
   strategic: [
     act('policy', 'str_iran', '☢️', 'מערכה מדינית נגד תוכנית הגרעין האיראנית', 'תיאום עם מעצמות ופעילות מול הסוכנות לאנרגיה אטומית.', 3, 3, { playerReputation: 2, groups: { right: 2, center: 1 } }),
     act('policy', 'str_bds', '📣', 'מאבק בתנועת החרם', 'פעילות משפטית והסברתית נגד חרמות.', 2, 3, { budget: { government: 0.1 }, groups: { right: 2 } }),
+    act('policy', 'str_assess', '🧭', 'הערכת מצב אסטרטגית לממשלה', 'מסמך מתואם לכל המשרדים על האיומים וההזדמנויות.', 2, 2, { stability: 2, playerReputation: 1 }),
+    act('policy', 'str_allies', '🤝', 'תיאום עם בעלות ברית', 'סבב שיחות עם ממשלות ידידות על האיום האזורי.', 3, 3, { playerReputation: 2, groups: { center: 1, right: 1 } }),
   ],
   periphery: [
     act('budget', 'per_grants', '🏘️', 'מענקים לרשויות בפריפריה', 'השקעה בתשתיות קהילתיות.', 2, 3, { budget: { infrastructure: 0.4 }, groups: { periphery: 4 } }),
     act('policy', 'per_jobs', '🏭', 'משרות ממשלתיות לפריפריה', 'העברת יחידות ממשלתיות לצפון ולדרום.', 3, 4, { groups: { periphery: 4, publicSector: -2 } }),
+    act('budget', 'per_transit', '🚌', 'קווי תחבורה לפריפריה', 'תגבור קווים בין ערי הפריפריה למרכז.', 2, 3, { budget: { transport: 0.3 }, services: { transport: 1 }, groups: { periphery: 3 } }),
+    act('policy', 'per_scholar', '🎓', 'מלגות לסטודנטים מהפריפריה', 'מלגה מלאה למי שלומד ונשאר בפריפריה.', 2, 3, { budget: { education: 0.2 }, groups: { periphery: 2, students: 2 } }),
   ],
   cyber: [
     act('policy', 'cyb_shield', '🛡️', 'מגן סייבר לאומי', 'הגנה על מערכות ממשלתיות ועל עסקים קטנים.', 2, 3, { budget: { science: 0.3 }, services: { govServices: 2, security: 1 } }),
     act('policy', 'cyb_talent', '👩‍💻', 'הכשרת מומחי סייבר', 'תוכניות לצעירים מהפריפריה.', 2, 3, { budget: { education: 0.2 }, groups: { youth: 2, periphery: 1 } }),
+    act('policy', 'cyb_drill', '🚨', 'תרגיל סייבר לאומי', 'תרגול מתקפה על תשתיות עם כל הגופים.', 2, 3, { services: { govServices: 1, energy: 1 }, stability: 1 }),
+    act('policy', 'cyb_gov', '📱', 'שירותי ממשלה דיגיטליים', 'עוד טפסים ושירותים מקוונים, פחות תורים.', 2, 3, { services: { govServices: 2 }, groups: { youth: 1, middleClass: 1 } }),
   ],
   public_diplomacy: [
     act('media', 'pd_campaign', '📣', 'קמפיין הסברה בינלאומי', 'תוכן ברשתות ובתקשורת הזרה.', 2, 3, { budget: { government: 0.2 }, groups: { right: 2 } }),
     act('media', 'pd_delegations', '🎤', 'משלחות דוברים לקמפוסים', 'שגרירים צעירים בקמפוסים בעולם.', 1, 3, { groups: { students: 1, right: 1 } }),
+    act('policy', 'pd_press', '📰', 'מרכז עיתונאים זרים', 'סיורים ותדרוכים לכתבים זרים.', 2, 3, { playerReputation: 1, groups: { center: 1 } }),
+    act('policy', 'pd_digital', '🌐', 'קמפיין הסברה דיגיטלי', 'תוכן בעשר שפות ברשתות החברתיות.', 2, 2, { budget: { government: 0.1 }, playerPopularity: 1, groups: { right: 1, center: 1 } }),
   ],
   national_resilience: [
     act('budget', 'nr_shelters', '🛡️', 'מיגון מוסדות חינוך ובתים', 'מרחבים מוגנים בבתי ספר ובבתים ישנים.', 3, 3, { budget: { defense: 0.6 }, groups: { families: 3, periphery: 3 } }),
     act('policy', 'nr_trauma', '🧠', 'טיפול בפוסט-טראומה בקהילה', 'מרכזי חוסן ופסיכולוגים בקהילות.', 2, 3, { budget: { health: 0.3 }, groups: { reservists: 3, periphery: 2 } }),
+    act('budget', 'res_centers', '🧠', 'מרכזי חוסן קהילתיים', 'טיפול נפשי זמין בכל עיר שנפגעה.', 2, 3, { budget: { welfare: 0.3 }, services: { welfare: 1 }, groups: { families: 2, reservists: 2 } }),
+    act('policy', 'res_compensation', '🏚️', 'פיצוי מהיר לנפגעי מלחמה', 'תשלום תוך 30 יום לבתים ולעסקים שנפגעו.', 3, 3, { budget: { welfare: 0.4 }, groups: { periphery: 3, selfEmployed: 2 } }),
   ],
 };

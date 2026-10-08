@@ -1,0 +1,15 @@
+🛡️	govServices	center	5	8	3	center:3,right:2	מרכז הגנת סייבר לאומי	National Cyber Defense Center	مركز الدفاع السيبراني الوطني
+🏛️	govServices	jerusalem	5	8	3	center:3,youth:2	מערכת ממשל דיגיטלי אחת	Single Digital Government System	نظام حوكمة رقمية موحد
+🎓	education	negev	3	6	2	youth:4,students:2	אקדמיה לסייבר בבאר שבע	Cyber Academy in Beersheba	أكاديمية السايبر في بئر السبع
+🏥	health	center	3	6	2	center:2,elderly:2	הגנת סייבר לבתי החולים	Cyber Protection for Hospitals	حماية سيبرانية للمستشفيات
+⚡	energy	center	4	8	2	center:2,periphery:2	הגנת סייבר לתשתיות חשמל ומים	Cyber Protection for Power and Water	حماية سيبرانية للكهرباء والمياه
+🔒	govServices	center	2	4	2	liberals:3,center:2	רשות הגנת המידע	Data Protection Authority	هيئة حماية البيانات
+☁️	govServices	center	4	8	2	center:2,highIncome:2	ענן ממשלתי מאובטח	Secure Government Cloud	سحابة حكومية آمنة
+🔑	govServices	center	2	4	2	center:2,youth:2	הזדהות דיגיטלית מאובטחת	Secure Digital Identity	هوية رقمية آمنة
+🚨	govServices	center	1	3	2	families:2,center:2	מוקד 119 לסייבר	119 Cyber Hotline	الخط 119 للسايبر
+🏢	govServices	shfela	2	4	2	selfEmployed:3	מגן סייבר לעסקים קטנים	Cyber Shield for Small Businesses	درع سيبراني للأعمال الصغيرة
+🧑‍💻	govServices	north	2	4	2	arabs:3,haredim:3	מרכזי הכשרת סייבר לכל האוכלוסיות	Cyber Training Centers for All Communities	مراكز تدريب سيبراني لجميع الفئات
+🗳️	govServices	jerusalem	2	4	2	center:3,liberals:1	מערך הגנה על הבחירות	Election Protection System	منظومة حماية الانتخابات
+🏦	govServices	center	2	4	2	center:2,highIncome:2	מרכז סייבר פיננסי	Financial Cyber Center	المركز السيبراني المالي
+🔁	govServices	center	2	4	2	center:2,youth:1	מערך גיבוי והתאוששות דיגיטלי	Digital Backup and Recovery System	منظومة النسخ الاحتياطي والتعافي الرقمي
+🧒	govServices	center	1	3	2	families:3,youth:2	מרכז אינטרנט בטוח לילדים	Safe Internet Center for Children	مركز الإنترنت الآمن للأطفال

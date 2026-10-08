@@ -1,0 +1,15 @@
+🏘️	housing	judea_samaria	8	12	3	settlers:5,right:2	10 אלף יחידות דיור ביהודה ושומרון	10,000 Housing Units in Judea and Samaria	10 آلاف وحدة سكنية في يهودا والسامرة
+🛣️	transport	judea_samaria	6	10	3	settlers:4,right:2	שדרוג כבישי יהודה ושומרון	Judea and Samaria Roads Upgrade	تحديث طرق يهودا والسامرة
+🛡️	security	judea_samaria	4	6	2	settlers:4,right:2	מיגון וגדרות חכמות ליישובים	Fortification and Smart Fences for Settlements	تحصين وأسوار ذكية للبلدات
+🏫	education	judea_samaria	3	6	2	settlers:3,families:2	בתי ספר וגנים ביישובים	Schools and Kindergartens in Settlements	مدارس وروضات في البلدات
+💧	infrastructure	judea_samaria	4	8	2	settlers:3,periphery:1	חיבור יישובים לרשת המים הארצית	Connecting Settlements to the National Water Network	ربط البلدات بشبكة المياه القطرية
+🏭	infrastructure	judea_samaria	4	8	2	settlers:3,employees:2	אזור תעשייה בבקעת הירדן	Industrial Zone in the Jordan Valley	منطقة صناعية في غور الأردن
+🏥	health	judea_samaria	3	6	2	settlers:3,families:2	מרפאות ומוקדי חירום ביישובים	Clinics and Emergency Centers in Settlements	عيادات ومراكز طوارئ في البلدات
+🎓	education	judea_samaria	3	6	2	settlers:3,students:2	הרחבת אוניברסיטת אריאל	Ariel University Expansion	توسيع جامعة أريئيل
+🏘️	housing	negev	5	8	2	periphery:4,youth:2	יישובים קהילתיים חדשים בנגב	New Community Settlements in the Negev	بلدات جديدة في النقب
+🏘️	housing	north	5	8	2	periphery:4,youth:2	יישובים חדשים בגליל	New Settlements in the Galilee	بلدات جديدة في الجليل
+🌳	govServices	judea_samaria	2	4	2	settlers:3,right:1	חוות חקלאיות לשמירת שטחים	Agricultural Farms for Land Preservation	مزارع زراعية لحماية الأراضي
+🚌	transport	judea_samaria	2	4	2	settlers:3,youth:1	אוטובוסים ממוגנים ליישובים	Armored Buses for Settlements	حافلات محصنة للبلدات
+🏡	housing	negev	3	6	2	periphery:3,youth:2	גרעינים משימתיים בערי פיתוח	Mission Groups in Development Towns	نوى رسالية في بلدات التطوير
+📡	infrastructure	judea_samaria	2	4	2	settlers:3	כיסוי סלולרי ואינטרנט ביישובים	Mobile Coverage and Internet in Settlements	تغطية خلوية وإنترنت في البلدات
+🏙️	housing	judea_samaria	6	10	2	settlers:4,youth:2	הרחבת מעלה אדומים	Ma'ale Adumim Expansion	توسيع معاليه أدوميم

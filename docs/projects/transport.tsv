@@ -1,0 +1,15 @@
+🚍	transport	center	4	6	4	youth:3,lowIncome:2	נתיבי תחבורה ציבורית בגוש דן	Bus Lanes in Gush Dan	مسارات حافلات في غوش دان
+🚊	transport	haifa	9	14	4	periphery:3,center:2	רכבת קלה בחיפה	Light Rail in Haifa	قطار خفيف في حيفا
+🚊	transport	negev	8	14	4	periphery:4	רכבת קלה בבאר שבע	Light Rail in Beersheba	قطار خفيف في بئر السبع
+🅿️	transport	center	3	5	2	middleClass:3	חניונים ליד תחנות הרכבת	Park-and-Ride Lots at Train Stations	مواقف سيارات قرب محطات القطار
+🚲	transport	sharon	2	4	2	youth:3,liberals:2	רשת שבילי אופניים ארצית	National Bike Lane Network	شبكة مسارات دراجات قطرية
+⚡	transport	center	6	10	3	liberals:3,youth:2	צי אוטובוסים חשמליים	Electric Bus Fleet	أسطول حافلات كهربائية
+🚦	transport	center	2	4	2	families:3	שדרוג 200 צמתים מסוכנים	Upgrading 200 Dangerous Junctions	تحديث 200 تقاطع خطير
+🛣️	transport	north	7	10	3	periphery:3,middleClass:2	הרחבת כביש 65	Widening Route 65	توسيع الطريق 65
+✈️	transport	negev	15	20	3	periphery:3,highIncome:2	שדה תעופה בינלאומי בנגב	International Airport in the Negev	مطار دولي في النقب
+🚢	transport	eilat	6	10	2	employees:2,periphery:2	שדרוג נמל אילת	Eilat Port Upgrade	تحديث ميناء إيلات
+🚌	transport	north	3	5	3	arabs:4,periphery:2	קווי אוטובוס ביישובים הערביים	Bus Lines in Arab Towns	خطوط حافلات في البلدات العربية
+💳	transport	center	1	3	2	center:2,youth:2	כרטיס תחבורה אחד לכל הארץ	One Transit Card for the Whole Country	بطاقة مواصلات واحدة لكل البلاد
+🚆	transport	sharon	5	8	3	middleClass:3,employees:2	הכפלת מסילה בשרון	Double Track in the Sharon	مسار مزدوج في الشارون
+🚚	transport	haifa	4	8	2	employees:3,selfEmployed:2	נמל יבש בעמק	Dry Port in the Valley	ميناء جاف في المرج
+🛣️	transport	judea_samaria	3	6	2	settlers:4,right:1	מחלפים בכביש 60	Interchanges on Route 60	تقاطعات على الطريق 60

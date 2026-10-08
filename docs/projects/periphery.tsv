@@ -1,0 +1,15 @@
+🚆	transport	negev	10	14	3	periphery:5	רכבת מהירה לפריפריה	Fast Train to the Periphery	قطار سريع إلى الأطراف
+🏭	infrastructure	north	5	8	3	periphery:4,employees:2	מוקדי תעסוקה אזוריים	Regional Employment Hubs	مراكز تشغيل إقليمية
+🎓	education	north	4	8	2	periphery:3,students:3	קמפוסים אקדמיים בפריפריה	Academic Campuses in the Periphery	حرم أكاديمية في الأطراف
+🏥	health	negev	4	8	3	periphery:4	מרפאות לילה בפריפריה	Night Clinics in the Periphery	عيادات مسائية في الأطراف
+🏘️	housing	north	5	8	2	periphery:3,youth:3	דיור לצעירים בערי פיתוח	Youth Housing in Development Towns	سكن للشباب في بلدات التطوير
+🌐	infrastructure	negev	3	6	2	periphery:3,youth:2	מרכזי עבודה מרחוק בפריפריה	Remote Work Centers in the Periphery	مراكز عمل عن بعد في الأطراف
+⚽	govServices	north	2	4	2	periphery:3,youth:2	מתקני ספורט בערי פיתוח	Sports Facilities in Development Towns	منشآت رياضية في بلدات التطوير
+🏛️	govServices	negev	3	6	2	periphery:3,center:1	העברת יחידות ממשלה לפריפריה	Moving Government Units to the Periphery	نقل وحدات حكومية إلى الأطراف
+🚌	transport	north	2	4	2	periphery:3	קווי לילה לפריפריה	Night Bus Lines to the Periphery	خطوط ليلية إلى الأطراف
+🧑‍🏫	education	negev	2	4	2	periphery:3,families:2	כיתות קטנות בערי פיתוח	Small Classes in Development Towns	صفوف صغيرة في بلدات التطوير
+🚑	health	north	2	4	2	periphery:3	תחנות אמבולנס ביישובים מרוחקים	Ambulance Stations in Remote Communities	محطات إسعاف في البلدات النائية
+🏘️	housing	north	5	8	2	periphery:3,middleClass:2	התחדשות ערי הפיתוח	Development Towns Renewal	تجديد بلدات التطوير
+🎭	govServices	negev	1	3	2	periphery:3,families:1	מרכזי תרבות בפריפריה	Culture Centers in the Periphery	مراكز ثقافية في الأطراف
+🏭	infrastructure	negev	4	8	2	periphery:4,employees:2	אזורי סחר חופשי בפריפריה	Free Trade Zones in the Periphery	مناطق تجارة حرة في الأطراف
+🧓	welfare	north	2	4	2	periphery:3,elderly:3	מרכזי יום לקשישים בערי פיתוח	Senior Day Centers in Development Towns	مراكز نهارية للمسنين في بلدات التطوير

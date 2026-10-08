@@ -1,0 +1,15 @@
+💧	infrastructure	negev	5	8	3	periphery:4	מאגרי מים לחקלאות בנגב	Agricultural Reservoirs in the Negev	خزانات مياه زراعية في النقب
+🔬	govServices	north	3	6	2	periphery:3,students:1	מרכז מחקר חקלאי בגליל	Agricultural Research Center in the Galilee	مركز بحث زراعي في الجليل
+🌾	govServices	center	3	6	3	periphery:3,center:1	מלאי מזון לאומי לחירום	National Emergency Food Stockpile	مخزون غذاء وطني للطوارئ
+🚜	govServices	north	3	6	2	periphery:3,selfEmployed:1	מרכז מיכון ורובוטיקה חקלאית	Agricultural Machinery and Robotics Center	مركز المكننة والروبوتات الزراعية
+🐟	govServices	negev	3	6	2	periphery:2,employees:2	חוות דגים במדבר	Desert Fish Farms	مزارع أسماك في الصحراء
+🏜️	infrastructure	eilat	4	8	2	periphery:3	הרחבת החקלאות בערבה	Expanding Arava Agriculture	توسيع الزراعة في وادي عربة
+🥬	govServices	center	2	4	2	families:2,periphery:2	שווקי איכרים בערים	Farmers' Markets in Cities	أسواق المزارعين في المدن
+🧑‍🌾	govServices	north	2	4	2	periphery:2,arabs:3	מרכז הכשרה לחקלאים ערבים ובדואים	Training Center for Arab and Bedouin Farmers	مركز تأهيل للمزارعين العرب والبدو
+🔐	govServices	negev	2	4	2	periphery:3,right:1	מערך שמירה על השטחים החקלאיים	Farmland Security Network	شبكة حماية الأراضي الزراعية
+🌳	govServices	shfela	2	4	2	periphery:2,liberals:2	מאגר זנים עמידים לחום	Heat-Resistant Varieties Bank	بنك أصناف مقاومة للحر
+🥛	govServices	north	3	6	2	periphery:3	שדרוג מחלבות ורפתות	Dairy Farms Upgrade	تحديث مزارع الألبان
+🌍	govServices	haifa	3	6	2	periphery:2,employees:2	מרכז לוגיסטי לייצוא חקלאי	Logistics Hub for Agricultural Exports	مركز لوجستي للصادرات الزراعية
+🏘️	housing	north	4	8	2	periphery:3,youth:2	דיור לצעירים במושבים	Youth Housing in Moshavim	سكن للشباب في الموشافيم
+🌿	govServices	center	2	4	2	liberals:2,families:2	מרכז חקלאות אורגנית	Organic Farming Center	مركز الزراعة العضوية
+🐝	govServices	north	1	3	2	periphery:2,liberals:1	תוכנית הצלת הדבורים	Bee Rescue Program	برنامج إنقاذ النحل

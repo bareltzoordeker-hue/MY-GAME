@@ -1,0 +1,15 @@
+🏥	health	north	8	12	5	periphery:4,arabs:2	בית חולים חדש בגליל	New Hospital in the Galilee	مستشفى جديد في الجليل
+🧠	health	center	3	6	3	youth:3,reservists:2	מרכזי בריאות הנפש בקהילה	Community Mental Health Centers	مراكز الصحة النفسية في المجتمع
+🚑	health	negev	2	4	2	periphery:3	תחנות אמבולנס בפריפריה	Ambulance Stations in the Periphery	محطات إسعاف في الأطراف
+💻	health	center	3	5	3	center:2,youth:2	תיק רפואי דיגיטלי אחד	Single Digital Medical Record	ملف طبي رقمي موحد
+🦷	health	shfela	2	4	2	families:3,youth:2	מרפאות שיניים ציבוריות	Public Dental Clinics	عيادات أسنان عامة
+🧓	health	center	4	8	3	elderly:4,retirees:2	מרכזי יום גריאטריים	Geriatric Day Centers	مراكز نهارية لكبار السن
+👩‍⚕️	health	north	3	6	2	publicSector:3,periphery:1	בית ספר לסיעוד בצפון	Nursing School in the North	مدرسة تمريض في الشمال
+🏨	health	center	6	10	3	elderly:3,families:2	אגפי אשפוז חדשים במרכז	New Hospital Wings in the Center	أجنحة استشفاء جديدة في المركز
+🔬	health	center	4	8	2	students:2,highIncome:2	מרכז מחקר רפואי לאומי	National Medical Research Center	مركز وطني للبحث الطبي
+🧒	health	jerusalem	3	6	3	families:3,haredim:2	בית חולים לילדים בירושלים	Children's Hospital in Jerusalem	مستشفى أطفال في القدس
+🚁	health	negev	2	4	2	periphery:3	מסוקי פינוי רפואי לדרום	Medical Evacuation Helicopters for the South	مروحيات إخلاء طبي للجنوب
+💊	health	center	2	4	2	elderly:2,lowIncome:2	רשת בתי מרקחת ציבוריים	Public Pharmacy Network	شبكة صيدليات عامة
+🏥	health	eilat	3	6	3	periphery:3	שדרוג בית החולים באילת	Eilat Hospital Upgrade	تحديث مستشفى إيلات
+🧪	health	center	2	4	2	center:2,families:1	מעבדה לאומית למגפות	National Epidemics Laboratory	مختبر وطني للأوبئة
+🏃	health	sharon	1	3	2	families:2,youth:2	תוכנית רפואה מונעת ארצית	National Preventive Medicine Program	برنامج الطب الوقائي القطري

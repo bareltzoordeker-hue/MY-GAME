@@ -1,0 +1,15 @@
+🤖	govServices	center	8	10	3	highIncome:3,youth:3	מחשב-על לאומי לבינה מלאכותית	National AI Supercomputer	حاسوب فائق وطني للذكاء الاصطناعي
+🚀	govServices	negev	6	10	2	youth:3,center:2	מרכז שיגור לוויינים	Satellite Launch Center	مركز إطلاق الأقمار الصناعية
+🧬	govServices	center	5	8	2	students:3,highIncome:2	פארק ביוטכנולוגיה	Biotechnology Park	مجمع التكنولوجيا الحيوية
+⚛️	govServices	center	5	8	2	students:3,highIncome:2	מרכז מחשוב קוונטי לאומי	National Quantum Computing Center	مركز وطني للحوسبة الكمومية
+🧪	govServices	haifa	4	8	2	students:3,center:1	מעבדות לאומיות פתוחות	Open National Laboratories	مختبرات وطنية مفتوحة
+🏫	education	north	3	6	2	youth:4,periphery:2	מרכזי מדע ורובוטיקה לנוער	Youth Science and Robotics Centers	مراكز علوم وروبوتات للشباب
+🏙️	govServices	negev	4	8	2	periphery:3,highIncome:2	מרכזי פיתוח הייטק בפריפריה	High-Tech Development Centers in the Periphery	مراكز تطوير التكنولوجيا العالية في الأطراف
+🔐	govServices	center	8	12	2	center:2,highIncome:2	מפעל שבבים לאומי	National Chip Factory	مصنع رقائق وطني
+🧑‍💻	govServices	north	3	6	2	arabs:3,haredim:3	מרכזי הכשרה להייטק לכל האוכלוסיות	Tech Training Centers for All Communities	مراكز تأهيل للتكنولوجيا لجميع الفئات
+🌱	govServices	negev	3	6	2	liberals:3,students:2	מרכז טכנולוגיות אקלים	Climate Technologies Center	مركز تقنيات المناخ
+📊	govServices	center	2	4	2	center:2,liberals:2	מאגר הנתונים הפתוח הלאומי	National Open Data Repository	قاعدة البيانات المفتوحة الوطنية
+🧑‍🔬	govServices	center	3	6	2	students:3,olim:2	תוכנית החזרת מדענים	Returning Scientists Program	برنامج إعادة العلماء
+🔭	govServices	negev	3	6	2	students:2,youth:2	מצפה כוכבים לאומי	National Observatory	مرصد وطني
+🎓	education	center	3	6	2	students:4	מלגות דוקטורט לאומיות	National PhD Scholarships	منح دكتوراه وطنية
+🏛️	govServices	jerusalem	2	4	2	students:2,center:2	מועצת המדע הלאומית	National Science Council	المجلس الوطني للعلوم

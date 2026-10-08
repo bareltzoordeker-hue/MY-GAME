@@ -1,0 +1,15 @@
+🛡️	welfare	center	3	6	3	families:3,liberals:2	מקלטים לנשים בכל מחוז	Women's Shelters in Every District	ملاجئ للنساء في كل منطقة
+🏘️	welfare	shfela	5	8	3	periphery:4,lowIncome:3	תוכנית שיקום שכונות	Neighborhood Renewal Program	برنامج ترميم الأحياء
+♿	govServices	center	3	6	2	families:3	מרכזי חיים עצמאיים לאנשים עם מוגבלות	Independent Living Centers for People with Disabilities	مراكز الحياة المستقلة لذوي الإعاقة
+👩‍💼	govServices	center	1	3	2	liberals:3,families:1	מרכז לקידום נשים בהנהלה	Center for Advancing Women in Management	مركز لتعزيز النساء في الإدارة
+🧔	govServices	jerusalem	2	4	2	haredim:4	מרכזי תעסוקה לנשים חרדיות	Employment Centers for Haredi Women	مراكز تشغيل للنساء الحريديات
+🧑‍🤝‍🧑	govServices	north	3	6	2	arabs:4,lowIncome:2	תוכנית שוויון אזרחי ביישובים הערביים	Civic Equality Program in Arab Towns	برنامج المساواة المدنية في البلدات العربية
+🎓	education	negev	3	6	2	lowIncome:3,students:2	מכינות ומלגות לדור ראשון להשכלה	Prep Programs and Scholarships for First-Generation Students	برامج تحضيرية ومنح لطلاب الجيل الأول
+🧓	welfare	center	2	4	2	elderly:4	מרכז זכויות האזרח הוותיק	Senior Citizens' Rights Center	مركز حقوق المواطن المسن
+🏛️	govServices	jerusalem	1	3	2	liberals:3,center:2	נציבות שוויון הזדמנויות	Equal Opportunity Commission	مفوضية تكافؤ الفرص
+🏳️‍🌈	govServices	center	1	3	2	liberals:4,secular:2	מרכז קהילתי לקהילה הגאה	LGBTQ Community Center	مركز مجتمعي لمجتمع الميم
+🌍	govServices	center	1	3	2	olim:3,liberals:2	נציבות למאבק בגזענות	Anti-Racism Commission	مفوضية مكافحة العنصرية
+👶	welfare	sharon	3	6	2	families:4,employees:2	מרכזי הורות שוויונית	Equal Parenting Centers	مراكز الأبوة المتساوية
+🚸	welfare	negev	2	4	2	families:2,arabs:3	תוכנית מניעת נשירה לבנות	Girls Dropout Prevention Program	برنامج منع تسرب الفتيات
+👩‍⚕️	health	center	2	4	2	families:2,liberals:2	מרכז בריאות האישה	Women's Health Center	مركز صحة المرأة
+📊	govServices	center	1	3	2	center:2,liberals:2	יחידת תקצוב מגדרי	Gender Budgeting Unit	وحدة الميزانية المراعية للنوع الاجتماعي

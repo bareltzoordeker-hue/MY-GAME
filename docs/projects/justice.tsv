@@ -1,0 +1,15 @@
+🏛️	govServices	center	5	10	3	center:2,middleClass:2	בית משפט מחוזי חדש במרכז	New District Court in the Center	محكمة مركزية جديدة في المركز
+⚖️	govServices	north	4	8	2	periphery:3,arabs:2	היכל משפט בנצרת	Courthouse in Nazareth	قصر العدل في الناصرة
+💻	govServices	center	3	6	3	center:2,selfEmployed:2	מערכת בתי המשפט הדיגיטלית	Digital Court System	نظام المحاكم الرقمي
+🧑‍⚖️	govServices	negev	3	6	2	periphery:3	בית משפט לענייני משפחה בבאר שבע	Family Court in Beersheba	محكمة شؤون الأسرة في بئر السبع
+🏢	govServices	jerusalem	4	8	2	center:2,publicSector:1	קריית המשפט בירושלים	Justice Campus in Jerusalem	مجمع العدل في القدس
+🔒	govServices	center	2	4	2	liberals:2,youth:2	רשות הגנת הפרטיות	Privacy Protection Authority	هيئة حماية الخصوصية
+🧒	govServices	center	2	5	2	families:3	מרכזי עדות מוגנת לילדים	Protected Testimony Centers for Children	مراكز شهادة محمية للأطفال
+📚	govServices	center	1	3	2	liberals:2,center:1	מאגר החקיקה הפתוח	Open Legislation Database	قاعدة التشريعات المفتوحة
+🤝	govServices	shfela	2	4	2	families:2,center:1	מרכזי גישור ארציים	National Mediation Centers	مراكز الوساطة القطرية
+🧑‍💼	govServices	north	2	5	2	lowIncome:3,arabs:1	מרכזי סיוע משפטי בפריפריה	Legal Aid Centers in the Periphery	مراكز المساعدة القانونية في الأطراف
+🗂️	govServices	center	1	3	2	center:2	דיגיטציה של רישום המקרקעין	Land Registry Digitization	رقمنة سجل الأراضي
+🏛️	govServices	haifa	3	6	2	center:2,periphery:1	בית משפט מנהלי בחיפה	Administrative Court in Haifa	محكمة إدارية في حيفا
+🎗️	govServices	center	2	4	2	families:2,center:1	קרן פיצוי לנפגעי עבירה	Crime Victims Compensation Fund	صندوق تعويض ضحايا الجرائم
+🧑‍🎓	govServices	jerusalem	1	3	2	students:2,publicSector:1	בית הספר הלאומי לשופטים	National School for Judges	المدرسة الوطنية للقضاة
+🔎	govServices	center	2	4	2	center:2,liberals:1	נציבות ביקורת על הפרקליטות	Prosecution Oversight Commission	مفوضية الرقابة على النيابة

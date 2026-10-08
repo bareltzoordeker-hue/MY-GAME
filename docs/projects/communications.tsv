@@ -1,0 +1,15 @@
+📶	infrastructure	north	6	8	3	periphery:4,youth:2	סיבים אופטיים לכל יישוב	Fiber to Every Community	ألياف ضوئية لكل بلدة
+📡	infrastructure	center	5	8	3	youth:3,highIncome:2	רשת דור חמישי ארצית	National 5G Network	شبكة جيل خامس قطرية
+🛰️	infrastructure	negev	4	6	2	periphery:3	אינטרנט לווייני לפריפריה	Satellite Internet for the Periphery	إنترنت عبر الأقمار الصناعية للأطراف
+📮	govServices	center	2	4	2	elderly:2,periphery:2	שדרוג סניפי הדואר	Post Office Upgrade	تحديث فروع البريد
+🛡️	infrastructure	center	3	6	2	center:2,right:2	שרידות רשתות התקשורת בחירום	Emergency Network Survivability	صمود شبكات الاتصال في الطوارئ
+📺	govServices	jerusalem	3	6	2	center:2,youth:2	ערוץ בינלאומי באנגלית ובערבית	International Channel in English and Arabic	قناة دولية بالإنجليزية والعربية
+🎬	govServices	center	3	6	2	liberals:3,employees:2	קרן תוכן מקומי	Local Content Fund	صندوق المحتوى المحلي
+📰	govServices	center	2	4	2	liberals:3,center:1	קרן עיתונות מקומית	Local Journalism Fund	صندوق الصحافة المحلية
+🧒	govServices	center	1	3	2	families:3,religious:1	מערך הגנה על ילדים ברשת	Children's Online Protection System	منظومة حماية الأطفال على الإنترنت
+🎓	govServices	shfela	2	4	2	elderly:2,youth:2	תוכנית אוריינות דיגיטלית	Digital Literacy Program	برنامج محو الأمية الرقمية
+🚨	infrastructure	center	2	4	2	center:2,families:2	מערכת התרעה לכל טלפון	Alert System for Every Phone	نظام إنذار لكل هاتف
+🏢	govServices	center	2	4	2	liberals:2,center:2	רשות תקשורת אחת	Single Communications Authority	هيئة اتصالات واحدة
+🎙️	govServices	north	1	3	2	arabs:3,olim:2	שידורים בערבית, ברוסית ובאמהרית	Broadcasts in Arabic, Russian and Amharic	بث بالعربية والروسية والأمهرية
+🔒	govServices	center	1	3	2	liberals:3	מערך הגנת מידע אישי	Personal Data Protection System	منظومة حماية البيانات الشخصية
+📱	govServices	center	1	3	2	families:2,middleClass:2	מערכת ניוד מספרים מיידית	Instant Number Porting System	نظام نقل الأرقام الفوري

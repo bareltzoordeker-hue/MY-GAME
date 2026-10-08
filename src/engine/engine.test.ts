@@ -683,3 +683,42 @@ describe('chat brain', () => {
     expect(last).not.toContain('במה בדיוק');
   });
 });
+
+describe('every ministry is complete', () => {
+  it('has 15 laws, 15 reforms, 15 projects and 14 peacetime actions, including the ministries the PM can create', async () => {
+    const { MINISTRIES, NEW_MINISTRY_TEMPLATES } = await import('../data/ministries');
+    const { LAWS } = await import('../data/laws');
+    const { PROJECTS } = await import('../data/projects');
+    const { ministryActionSpecs } = await import('./decisions');
+    const s = createGame(cfg('pm'));
+    const ids = [...MINISTRIES.map((m) => m.id), ...NEW_MINISTRY_TEMPLATES.map((m) => m.id)];
+    for (const id of ids) {
+      const laws = LAWS.filter((l) => l.ministries?.includes(id));
+      expect(laws.filter((l) => l.level === 'medium').length, `${id} laws`).toBeGreaterThanOrEqual(15);
+      expect(laws.filter((l) => l.level === 'major').length, `${id} reforms`).toBeGreaterThanOrEqual(15);
+      expect(PROJECTS.filter((p) => p.ministry === id).length, `${id} projects`).toBeGreaterThanOrEqual(15);
+      const m = s.government.ministries.find((x) => x.id === id) ?? { id, origins: [id] } as never;
+      expect(ministryActionSpecs(m, s).length, `${id} actions`).toBeGreaterThanOrEqual(14);
+    }
+  });
+  it('seats the real 2026 ministers, several portfolios each, and gives the player all of them', async () => {
+    const { lawAllowed } = await import('./roles');
+    const { LAWS } = await import('../data/laws');
+    const { PROJECTS } = await import('../data/projects');
+    const s = createGame(cfg('pm'));
+    const holder = (id: string) => s.government.ministries.find((m) => m.id === id)!.ministerId;
+    for (const id of ['health', 'housing', 'welfare', 'tourism']) expect(holder(id), id).toBe('likud_18'); // חיים כץ
+    for (const id of ['justice', 'labor', 'religious', 'jerusalem']) expect(holder(id), id).toBe('likud_4'); // יריב לוין
+    for (const id of ['interior', 'intelligence']) expect(holder(id), id).toBe(s.government.pmId); // held by the prime minister
+    // playing חיים כץ: minister with four portfolios, all of them usable
+    const k = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, personId: 'likud_18' });
+    expect(k.player.role).toBe('minister');
+    expect(k.government.ministries.filter((m) => m.ministerId === k.player.politicianId).map((m) => m.id).sort()).toEqual(['health', 'housing', 'tourism', 'welfare']);
+    for (const id of ['health', 'housing', 'welfare', 'tourism']) {
+      expect(lawAllowed(k, LAWS.find((l) => l.ministries?.includes(id))!), `${id} law`).toBe(true);
+      expect(checkAction(k, 'start_project', { defId: PROJECTS.find((p) => p.ministry === id)!.id }), `${id} project`).toBeNull();
+      expect(checkAction(k, 'ministry_action', { ministryId: id, actionId: (await import('./decisions')).ministryActionSpecs(k.government.ministries.find((m) => m.id === id)!)[0].id }), `${id} action`).toBeNull();
+    }
+    expect(lawAllowed(k, LAWS.find((l) => l.ministries?.includes('defense'))!)).toBe(false);
+  });
+});

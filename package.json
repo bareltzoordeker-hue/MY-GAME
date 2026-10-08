@@ -14,7 +14,7 @@
     "typecheck": "tsc -b",
     "assets:generate": "vite-node scripts/gen-assets.tsx",
     "assets:optimize": "node scripts/optimize-images.mjs",
-    "i18n:build": "node scripts/build-ministry-laws.mjs && node scripts/build-content-dict.mjs"
+    "i18n:build": "node scripts/build-ministry-laws.mjs && node scripts/build-ministry-projects.mjs && node scripts/build-content-dict.mjs"
   },
   "dependencies": {
     "@fontsource/rubik": "^5.3.0",

@@ -1,0 +1,15 @@
+♻️	energy	center	5	8	3	liberals:3,center:2	מתקן מחזור לאומי	National Recycling Plant	منشأة إعادة تدوير وطنية
+🌫️	energy	haifa	6	10	3	families:4,periphery:2	ניקוי האוויר במפרץ חיפה	Haifa Bay Air Cleanup	تنظيف الهواء في خليج حيفا
+🏖️	govServices	center	2	4	2	families:3,youth:2	שיקום החופים	Beach Restoration	إعادة تأهيل الشواطئ
+🌳	govServices	center	3	6	2	families:2,liberals:2	מיליון עצים בערים	A Million Trees in Cities	مليون شجرة في المدن
+💧	infrastructure	north	4	8	2	periphery:3,liberals:2	שיקום נחלי הצפון	Northern Streams Restoration	إعادة تأهيل جداول الشمال
+🗑️	energy	negev	4	8	2	periphery:2,liberals:2	סגירת מטמנות והקמת מתקני טיפול	Closing Landfills and Building Treatment Plants	إغلاق المكبات وإنشاء منشآت معالجة
+🦎	govServices	north	2	4	2	liberals:3,youth:1	שמורות טבע חדשות	New Nature Reserves	محميات طبيعية جديدة
+🧪	govServices	shfela	3	6	2	families:3,center:1	העתקת מפעלים מסוכנים מאזורי מגורים	Moving Hazardous Plants Away from Homes	نقل المصانع الخطرة بعيدًا عن المساكن
+🌊	govServices	haifa	3	6	2	liberals:3,families:2	שמורות ימיות	Marine Reserves	محميات بحرية
+📡	govServices	center	1	3	2	families:2,center:2	מערך ניטור אוויר ארצי	National Air Monitoring Network	شبكة رصد الهواء القطرية
+🌲	govServices	jerusalem	2	4	2	periphery:2,liberals:2	ניהול יערות ומניעת שריפות	Forest Management and Fire Prevention	إدارة الغابات ومنع الحرائق
+☔	infrastructure	center	4	8	2	families:2,periphery:2	ניקוז ומניעת הצפות בערים	Urban Drainage and Flood Prevention	تصريف ومنع الفيضانات في المدن
+🧴	govServices	center	1	3	2	liberals:2,youth:2	הרחבת מערך הפיקדון	Expanded Deposit System	توسيع منظومة الوديعة
+🐝	govServices	north	1	3	2	liberals:2,periphery:1	תוכנית למגוון ביולוגי	Biodiversity Program	برنامج التنوع البيولوجي
+🌡️	govServices	negev	2	4	2	elderly:2,families:2	מרכזי קירור לגלי חום	Cooling Centers for Heatwaves	مراكز تبريد لموجات الحر
