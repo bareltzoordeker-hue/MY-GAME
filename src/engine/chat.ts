@@ -14,7 +14,7 @@ import { addNews, applyEffects, logEvent, remember } from './effects';
 import { chance, pick, rand } from './rng';
 import { shiftPartyRelation } from './relations';
 
-export type Intent = 'threat' | 'promise' | 'request' | 'apology' | 'thanks' | 'insult' | 'question' | 'meet' | 'agree' | 'decline' | 'askwhat' | 'greet' | 'other';
+export type Intent = 'threat' | 'promise' | 'request' | 'apology' | 'thanks' | 'insult' | 'question' | 'meet' | 'agree' | 'decline' | 'askwhat' | 'greet' | 'later' | 'conditional' | 'maybe' | 'other';
 
 const MAX_CHAT = 60;
 
@@ -26,7 +26,10 @@ const PATTERNS: { intent: Intent; re: RegExp }[] = [
   { intent: 'insult', re: /טיפש|שקרן|בוגד|פתטי|מביש|כישלון|תתבייש|מטומטם|אידיוט|חסר ערך|נוכל/ },
   { intent: 'askwhat', re: /מה רצית|מה אתה רוצה|מה את רוצה|מה רצתה|במה מדובר|על מה (רצית|את רוצה|אתה רוצה|מדובר)|מה הנושא|מה הבעיה|מה קרה|מה אתה מציע|מה את מציעה|מה אתה מבקש|מה את מבקשת|ספר לי|תספר|תפרט|תסביר|מה בדיוק|מה הבקשה|מה אפשר לעשות/ },
   { intent: 'meet', re: /בוא נדבר|בואי נדבר|נדבר|נתקשר|בוא נפגש|בואי נפגש|נפגש|נקבע|שנדבר|אשמח לדבר|אשמח להיפגש|אפשר לדבר|נשוחח|בוא נשב|נשב/ },
-  { intent: 'decline', re: /^(לא|אין לי|לא מעוניין|לא מעוניינת|לא יכול|לא יכולה|אסרב|בלי|אין סיכוי|לא עכשיו|לא אעשה)/ },
+  { intent: 'conditional', re: /בתנאי|רק אם|בתמורה|מה אני מקבל|מה תיתן|מה אתה נותן|מה את נותנת|מה יוצא לי|תמורה|אם תתמוך|אם תצביע|אם תעזור|קודם אתה|קודם את/ },
+  { intent: 'later', re: /אחר כך|בתור הבא|תן לי זמן|תני לי זמן|אבדוק|אחשוב על זה|לא עכשיו|בהמשך|בשבוע הבא|אחזור אליך|נחזור לזה|עוד לא|בינתיים לא|צריך זמן|צריכה זמן|אחרי הבחירות|בהזדמנות|תן לי כמה ימים|לא היום/ },
+  { intent: 'maybe', re: /^(אולי|נשקול|אשקול|לא בטוח|לא בטוחה|נראה|תלוי|ייתכן|יכול להיות|אפשרי|קשה לי להגיד|לא יודע|לא יודעת)/ },
+  { intent: 'decline', re: /^(לא|אין לי|לא מעוניין|לא מעוניינת|לא יכול|לא יכולה|אסרב|בלי|אין סיכוי|לא אעשה)/ },
   { intent: 'agree', re: /^(כן|בסדר|אוקיי|אוקי|מסכים|מסכימה|מקובל|סגור|אין בעיה|בטח|ברור|אעשה|אשמח|טוב|נהדר|מצוין|יופי|על כך|אני איתך)/ },
   { intent: 'greet', re: /^(שלום|היי|הי|בוקר טוב|ערב טוב|צהריים טובים|מה נשמע|מה שלומך|מה שלומך|אהלן|הלו)/ },
   { intent: 'thanks', re: /תודה|מעריך|גאה|כל הכבוד|עבודה מצוינת|אני איתך|נעבוד יחד|שיתוף פעולה|פגישה|קפה|שמח לעבוד|מקווה לעבוד|תמיכה/ },
@@ -37,6 +40,15 @@ export function detectIntent(text: string): Intent {
   const t = text.trim();
   for (const p of PATTERNS) if (p.re.test(t)) return p.intent;
   return 'other';
+}
+
+/** A free-text answer that isn't a plain yes/no: read its direction from the words. */
+export function sentiment(text: string): 'yes' | 'no' | null {
+  const neg = /לא אוכל|אי אפשר|קשה לי|לא רלוונטי|לא בא בחשבון|לא מתאים|אין מצב|שכח מזה|שכחי מזה|לא יקרה|לא אתמוך|לא אצביע|לא אעזור|לא מסכים|לא מסכימה|מתנגד|מתנגדת|לא מקובל|אין לי כוונה|תשכח|לא נראה לי|לא רוצה/;
+  const pos = /בשמחה|אין בעיה|אני בעד|אדאג|אטפל|בוודאי|אתמוך|נעשה|אני איתך|סמוך עליי|סמכי עליי|אשתדל|אנסה|אפעל|אעזור|אסדר|נסדר|אעשה|אקדם|מקובל עליי|אני בעניין|נסגור|סגור|אתן|אביא|אעביר|נתמוך|תומך|תומכת|אצביע בעד|קיבלת|יש לך את זה|על זה אני/;
+  if (neg.test(text)) return 'no';
+  if (pos.test(text)) return 'yes';
+  return null;
 }
 
 const STOP = new Set(['חוק', 'חוקי', 'הסדרת', 'הצעת', 'תיקון', 'לחוק', 'בנושא', 'המשרד', 'משרד', 'השר', 'שר']);
@@ -194,11 +206,29 @@ function knowledge(s: GameState, t: Politician, text: string): Reply | null {
   return null;
 }
 
-function dialog(s: GameState, t: Politician, intent: Intent, law: ReturnType<typeof matchLaw>): Reply | null {
+function dialog(s: GameState, t: Politician, intent0: Intent, law: ReturnType<typeof matchLaw>, text = ''): Reply | null {
   const topic = s.chatTopics?.[t.id];
   if (!topic) return null;
   if (s.turn - topic.turn > 3) { setTopic(s, t.id, null); return null; }
   const party = s.parties[t.partyId];
+  // a free-text answer inside an open topic: read its direction instead of asking to repeat
+  const sent = intent0 === 'other' ? sentiment(text) : null;
+  const intent: Intent = sent === 'yes' ? 'agree' : sent === 'no' ? 'decline' : intent0;
+  const ask = topic.kind === 'unhappy' ? (topic.demand === 'law' && topic.lawId ? `שתקדם את ${lawTitle(topic.lawId)}` : topic.demand === 'role' ? 'הבטחה לתפקיד' : topic.demand === 'budget' ? 'תוספת תקציב למשרד' : 'שתתייעץ איתי לפני החלטות')
+    : topic.kind === 'coop' ? (topic.lawId ? `שנקדם יחד את ${lawTitle(topic.lawId)}` : 'שיתוף פעולה בינינו') : 'תשובה';
+  if (intent === 'later') {
+    setTopic(s, t.id, { ...topic, turn: s.turn });
+    return { text: pick(s, [`בסדר, אחכה. אבל לא לנצח: ${ask}, ונדבר שוב בתור הבא.`, `אני יכול לחכות קצת. רק אל תשכח: ${ask}.`]), hint: 'השיחה נשארת פתוחה. הוא יזכור שדחית.' };
+  }
+  if (intent === 'conditional') {
+    setTopic(s, t.id, { ...topic, turn: s.turn });
+    const offer = party?.favoriteLaws.find((l) => !s.activeLaws.includes(l));
+    return { text: topic.kind === 'coop' ? 'סבבה, מה התנאי שלך? אם זה בתחום שלי, נסגור.' : `מה אתה רוצה בתמורה? אם זו תמיכה בהצבעה או בחוק שלך, אני פתוח${offer ? `, ובמיוחד אם נקדם גם את ${lawTitle(offer)}` : ''}. תגיד במפורש.`, hint: 'אפשר לנקוב בחוק או בתפקיד שאתה מבקש בתמורה. הוא ישקול.' };
+  }
+  if (intent === 'maybe') {
+    setTopic(s, t.id, { ...topic, turn: s.turn });
+    return { text: pick(s, [`אני צריך תשובה ברורה: ${ask}. כן או לא?`, `"אולי" לא עוזר לי. ${ask}, זה אפשרי מבחינתך או לא?`]), hint: 'הוא מחכה לתשובה ברורה, או להצעה נגדית.' };
+  }
   const yes = intent === 'agree' || intent === 'promise' || intent === 'request' || intent === 'apology' || intent === 'thanks';
   const talk = TALK_INTENTS.includes(intent);
   const no = intent === 'decline';
@@ -303,9 +333,9 @@ function handle(s: GameState, t: Politician, text: string): Reply {
   const intent = detectIntent(text);
   const tn = tone(t);
   const law = matchLaw(text);
-  const threaded = dialog(s, t, intent, law);
+  const threaded = dialog(s, t, intent, law, text);
   if (threaded) return threaded;
-  const fresh = (intent === 'other' || intent === 'question' || TALK_INTENTS.includes(intent) || intent === 'decline') ? true : once(s, t.id, intent);
+  const fresh = (intent === 'other' || intent === 'question' || TALK_INTENTS.includes(intent) || intent === 'decline' || intent === 'later' || intent === 'conditional' || intent === 'maybe') ? true : once(s, t.id, intent);
   if (!fresh) return { text: pick(s, ['כבר דיברנו על זה היום. נחזור לנושא בהמשך.', 'את הנקודה הבנתי. אין לי מה להוסיף כרגע.']) };
 
   switch (intent) {
@@ -399,6 +429,12 @@ function handle(s: GameState, t: Politician, text: string): Reply {
       }
       return { text: pick(s, ['אין לי בקשה מסוימת כרגע, רציתי להתעדכן. אם חשוב לך משהו – ציין חוק, תקציב או תפקיד.', 'שום דבר דחוף. אם יש משהו שאתה צריך ממני, תגיד.']) };
     }
+    case 'later':
+      return { text: pick(s, ['בסדר, אחכה לשמוע ממך.', 'אין בעיה. כשתהיה מוכן, תכתוב לי.']) };
+    case 'conditional':
+      return { text: 'תגיד מה אתה מציע ומה אתה מבקש בתמורה, ונראה אם יש עסקה.' };
+    case 'maybe':
+      return { text: pick(s, ['כשתחליט, תגיד לי.', 'בסדר. תחשוב על זה, ואני כאן.']) };
     default: {
       // a message with a subject but no clear verb: answer the subject instead of asking to repeat
       if (law) {

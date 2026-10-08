@@ -602,3 +602,27 @@ describe('promise deadlines', () => {
     expect(openPromises(s).some((p) => p.toId === other.id && p.role)).toBe(true);
   });
 });
+
+describe('chat understands free-text answers', () => {
+  it('reads later / conditional / maybe and the direction of a sentence', async () => {
+    const { detectIntent, sentiment } = await import('./chat');
+    expect(detectIntent('תן לי זמן, אחזור אליך')).toBe('later');
+    expect(detectIntent('רק אם תתמוך בחוק שלי')).toBe('conditional');
+    expect(detectIntent('אולי, אני לא בטוח')).toBe('maybe');
+    expect(sentiment('אני אטפל בזה בשבילך')).toBe('yes');
+    expect(sentiment('זה לא בא בחשבון')).toBe('no');
+  });
+  it('keeps an open topic alive on "later" and closes it on a positive free-text answer', async () => {
+    const { createGame } = await import('./newGame');
+    const { sendChat } = await import('./chat');
+    const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, role: 'pm', partyId: 'likud' });
+    const t = Object.values(s.politicians).find((p) => p.active && !p.isPlayer && s.government.coalition.includes(p.partyId) && p.id !== s.government.pmId)!;
+    s.chatTopics = { [t.id]: { kind: 'unhappy', stage: 'explained', turn: s.turn, demand: 'respect' } };
+    sendChat(s, t.id, 'תן לי קצת זמן');
+    expect(s.chatTopics[t.id]).toBeTruthy();
+    expect(s.chats![t.id].at(-1)!.text).toContain('אחכה');
+    sendChat(s, t.id, 'סמוך עליי, אני אדאג לזה');
+    expect(s.chatTopics[t.id]).toBeFalsy();
+    expect(t.memory.some((m) => m.text === 'הבטחת יחס אחר')).toBe(true);
+  });
+});
