@@ -10,7 +10,7 @@ import { REGION_BY_ID, ADVISOR } from '../../data/world';
 import { advisorTips } from '../../engine/advisor';
 import { getCapabilities } from '../../engine/roles';
 import { playerListRank } from '../../engine/elections';
-import { DOMAIN_NAMES } from '../../data/ministries';
+import { MINISTRIES } from '../../data/ministries';
 import { ROLE_NAMES } from '../../engine/roles';
 import { serialize, deserialize, saveGame, storageDiagnostics } from '../../engine/persistence/save';
 import type { Domain } from '../../types/game';
@@ -18,6 +18,12 @@ import { resetTutorial } from '../components/Tutorial';
 import { DecideButton } from '../components/Overlay';
 import { Caricature, ADVISOR_SPEC } from '../../shared/components/Caricature';
 import { ActionButton, Empty, Explain, Meter, ScreenHeader, Section, Tabs } from '../components/ui';
+
+/** Every ministry's field is a place to build a name; a few fields share an expertise domain (national security and justice share law and enforcement). */
+const WORK_AREAS: { id: string; icon: string; label: string; domain: Domain }[] = MINISTRIES.map((m) => ({
+  id: m.id, icon: m.icon, domain: m.domain,
+  label: m.id === 'national_security' ? 'ביטחון לאומי ומשטרה' : m.name.startsWith('המשרד ') ? m.name.slice(6) : m.name.replace(/^משרד /, ''),
+}));
 
 export function NewsScreen() {
   const s = useGame((x) => x.game)!;
@@ -161,7 +167,8 @@ export function AdvisorScreen() {
 export function CareerScreen() {
   const s = useGame((x) => x.game)!;
   const me = s.politicians[s.player.politicianId];
-  const [domain, setDomain] = useState<Domain>('economy');
+  const [area, setArea] = useState('economy');
+  const domain: Domain = WORK_AREAS.find((a) => a.id === area)?.domain ?? 'economy';
   const [target, setTarget] = useState('');
   const c = s.career;
   const ladder = ['ח״כ', 'יו״ר ועדה', 'שר', 'מנהיג מפלגה', 'ראש ממשלה'];
@@ -178,7 +185,7 @@ export function CareerScreen() {
       <div className="grid lg:grid-cols-2 gap-4">
         <Section title="לבנות שם" icon="📈">
           <div className="flex flex-wrap gap-2 items-center">
-            <select aria-label="תחום לעבודת ועדה" value={domain} onChange={(e) => setDomain(e.target.value as Domain)}>{Object.entries(DOMAIN_NAMES).map(([k, v]) => <option key={k} value={k}>{v} ({(me.expertise[k as Domain] ?? 20).toFixed(0)})</option>)}</select>
+            <select aria-label="תחום לעבודת ועדה" value={area} onChange={(e) => setArea(e.target.value)}>{WORK_AREAS.map((a) => <option key={a.id} value={a.id}>{a.icon} {a.label} ({(me.expertise[a.domain] ?? 20).toFixed(0)})</option>)}</select>
             <ActionButton id="committee_work" params={{ domain }} className="btn btn-sm">📑 עבודת ועדה</ActionButton>
           </div>
           <div className="flex flex-wrap gap-2 mt-3">

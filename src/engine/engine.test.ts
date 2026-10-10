@@ -1231,3 +1231,37 @@ describe('the Knesseton speaker has things to do', () => {
     }
   });
 });
+
+describe('offers to join a government after the election', () => {
+  it('a party that is not the largest sees offers with partners and terms, and joining forms the government', async () => {
+    const { runElection, answerCoalitionOffer, offerExtras } = await import('./elections');
+    const { canAdvance } = await import('./turn');
+    let found = 0;
+    for (let seed = 1; seed <= 40 && found < 2; seed++) {
+      const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed, role: 'candidate', partyId: 'yashar' });
+      s.government.caretaker = false;
+      runElection(s);
+      if (s.gameOver || s.elections.phase !== 'offers') continue;
+      found += 1;
+      const offers = s.elections.offers!;
+      expect(offers.length).toBeGreaterThan(0);
+      const o = offers[0];
+      expect(o.terms.length).toBeGreaterThan(0);
+      expect(o.seats).toBeGreaterThanOrEqual(61);
+      expect(canAdvance(s)).not.toBeNull();
+      expect(offerExtras(s, o).length).toBeGreaterThan(0);
+      answerCoalitionOffer(s, o.id, 'ask', 0);
+      if (found === 1) {
+        answerCoalitionOffer(s, o.id, 'accept');
+        expect(s.elections.phase).toBe('none');
+        expect(s.government.coalition).toContain(s.player.partyId);
+        expect(s.government.pmId).toBe(o.formateurId);
+      } else {
+        for (const x of [...s.elections.offers!]) answerCoalitionOffer(s, x.id, 'decline');
+        expect(s.elections.phase).not.toBe('offers');
+        expect(s.government.coalition).not.toContain(s.player.partyId);
+      }
+    }
+    expect(found).toBeGreaterThan(0);
+  });
+});

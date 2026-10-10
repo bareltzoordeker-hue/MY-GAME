@@ -7,7 +7,7 @@ import { StateScreen, PopulationScreen, MapScreen } from './screens/State';
 import { MinistryScreen } from './screens/Ministry';
 import { NewsScreen, ProjectsScreen, CrisesScreen, AdvisorScreen, CareerScreen, SaveScreen, DebugPanel } from './screens/Other';
 import { BriefingModal, ConfirmModal, ExplainModal, GameOverScreen, MeetingModal, ReactionModal } from './components/Modals';
-import { CoalitionModal } from './screens/Coalition';
+import { CoalitionModal, CoalitionOffersModal } from './screens/Coalition';
 import { useLang } from './useLang';
 import { setCustomNames } from '../shared/i18n/contentTranslator';
 import { SpeechModal } from './components/SpeechModal';
@@ -68,6 +68,7 @@ export default function App() {
         </Suspense>
       </Layout>
       <CoalitionModal />
+      <CoalitionOffersModal />
       <Tutorial />
       <DramaModal />
       <MeetingModal />

@@ -17,6 +17,7 @@ export function advisorTips(s: GameState): AdvisorTip[] {
   const pm = isPM(s);
 
   for (const c of s.crises) t.push({ priority: 95, icon: '🚨', text: `${c.title} עדיין לא טופל. כל תור בלי טיפול פוגע בשביעות הרצון ובתמיכה בממשלה.`, screen: 'crises' });
+  if (s.elections.phase === 'offers') t.push({ priority: 100, icon: '📨', text: 'יש הצעות להצטרף לממשלה. בדוק עם מי הן יושבות, אילו תנאים מוצעים, ובחר.' });
   if (s.elections.phase === 'negotiation') t.push({ priority: 100, icon: '🤝', text: `צריך להרכיב ממשלה: ${MAJORITY} מנדטים לפחות. כל שותפה מציבה דרישות לתיקים, לתקציבים ולחוקים.`, screen: 'government' });
   if (pm && !s.budget.passed && !s.government.caretaker) t.push({ priority: 90, icon: '📒', text: `תקציב ${s.budget.fiscalYear} עוד לא אושר. אם הוא לא יעבור בזמן, הכנסטון יתפזר ויתקיימו בחירות.`, screen: 'budget' });
   if (pm && !s.government.caretaker && coalitionSeats(s) < MAJORITY) t.push({ priority: 92, icon: '⚠️', text: `לקואליציה ${coalitionSeats(s)} מנדטים, פחות מרוב. כל הצבעת אי-אמון עלולה להפיל את הממשלה.`, screen: 'government' });

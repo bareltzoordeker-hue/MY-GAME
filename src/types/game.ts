@@ -532,12 +532,28 @@ export interface ElectionResult {
   early: boolean;
 }
 
+export interface CoalitionOffer {
+  id: string;
+  formateurId: string;
+  /** the other parties in that government (besides the formateur's and the player's) */
+  partnerIds: string[];
+  seats: number;
+  /** what the player's party gets */
+  terms: Demand[];
+  /** what it is expected to commit to */
+  asks: string[];
+  /** how many extra requests were already made */
+  tries: number;
+}
 export interface Elections {
   /** election day (the calendar drives elections; scheduledTurn is kept in sync for the UI) */
   date?: GameDate;
   scheduledTurn: number;
-  phase: 'none' | 'negotiation';
+  phase: 'none' | 'negotiation' | 'offers';
   negotiation: Negotiation | null;
+  /** after an election the player's party is not the largest: formateurs who would take it into their government */
+  offers?: CoalitionOffer[];
+  offerCtx?: { order: string[]; roleBefore: string };
   last: ElectionResult | null;
   campaignBoost: Record<string, number>; // partyId -> campaign effect accumulated before election
   count: number;

@@ -10,7 +10,7 @@ import { resolveInbox } from '../../engine/inbox';
 import { markRead } from '../../engine/chat';
 import { answerBargain, answerOffer, playMove, sendChatSmart, type BargainAnswer, type Move, type OfferAnswer } from '../../engine/chatMoves';
 import { resolveCrisis, startCrisis } from '../../engine/crises';
-import { abandonMandate, finalizeCoalition, negotiate } from '../../engine/elections';
+import { abandonMandate, answerCoalitionOffer, finalizeCoalition, negotiate } from '../../engine/elections';
 import { deleteSave, loadGame, saveGame } from '../../engine/persistence/save';
 import { setCast } from '../../data/cast';
 import { CRISES } from '../../data/crises';
@@ -58,6 +58,7 @@ interface Store {
   negotiateWith: (partyId: string, action: 'accept' | 'counter' | 'refuse' | 'sweeten', drop?: number, sweetener?: Demand) => void;
   formCoalition: () => void;
   returnMandate: () => void;
+  chooseOffer: (offerId: string, action: 'accept' | 'decline' | 'ask', extraIndex?: number) => void;
   endTurn: () => void;
   dismissReaction: () => void;
   closeBriefing: () => void;
@@ -192,6 +193,13 @@ export const useGame = create<Store>((set, get) => ({
     if (!g) return;
     const s = clone(g);
     const reaction = finalizeCoalition(s);
+    set((st) => ({ game: s, reactions: [...st.reactions, reaction], saveStatus: s.elections.phase === 'none' ? persist(s) : st.saveStatus }));
+  },
+  chooseOffer: (offerId, action, extraIndex) => {
+    const g = get().game;
+    if (!g) return;
+    const s = clone(g);
+    const reaction = answerCoalitionOffer(s, offerId, action, extraIndex);
     set((st) => ({ game: s, reactions: [...st.reactions, reaction], saveStatus: s.elections.phase === 'none' ? persist(s) : st.saveStatus }));
   },
   returnMandate: () => {

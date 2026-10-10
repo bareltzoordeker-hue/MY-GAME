@@ -1,13 +1,13 @@
 import { LAW_BY_ID } from '../data/laws';
-import { DIFFICULTIES, MAJORITY, TERM_TURNS } from '../data/world';
+import { CATEGORY_BY_ID, DIFFICULTIES, MAJORITY, TERM_TURNS } from '../data/world';
 import { addDays, addMonths, daysBetween, dayNumber, electionDate, turnsUntilElection } from './calendar';
 import { rand } from './rng';
-import type { BudgetCategory, Demand, GameState, Party, PartyOffer, Reaction } from '../types/game';
+import type { BudgetCategory, CoalitionOffer, Demand, GameState, Party, PartyOffer, Reaction } from '../types/game';
 import { SWEETENER_VALUE, demandsFor, writeAgreement } from './coalitionDeals';
 import { partyRelation } from './relations';
 import { clamp, newId } from '../utils';
 import { setGameOver, setRole, syncRole } from './career';
-import { addNews, logEvent, remember } from './effects';
+import { addNews, applyEffects, logEvent, remember } from './effects';
 import { assignMinister, fillVacancies, getMinistry } from './government';
 import { ideologyDistance, proposeBill } from './parliament';
 import { computeShares, seatsFromShares } from './polls';
@@ -147,6 +147,18 @@ export function runElection(s: GameState): void {
 /** The President hands the mandate down the ranking; whoever can reach 61 forms the government. */
 function formationRounds(s: GameState, order: string[], roleBefore: string): void {
   const me = s.politicians[s.player.politicianId];
+  // the player leads a party that is not the formateur's: let the player look at the offers before anything is decided
+  if (!s.flags.excludeMe) {
+    const offers = buildOffers(s, order);
+    if (offers.length) {
+      s.elections.phase = 'offers';
+      s.elections.offers = offers;
+      s.elections.offerCtx = { order, roleBefore };
+      addNews(s, `${offers.length} הצעות להצטרף לממשלה הגיעו ל${s.parties[me.partyId].name}`, 'good', '📨');
+      logEvent(s, '📨', 'הצעות להצטרף לממשלה', 3, 'good', 'election');
+      return;
+    }
+  }
   for (const fid of order) {
     if (fid === me.id) {
       startNegotiation(s);
@@ -186,26 +198,40 @@ function compatible(a: Party, b: Party): boolean {
   return !clash(a, b) && !clash(b, a);
 }
 
-/** An AI formateur builds a coalition from compatible parties. Returns false if it cannot reach 61. */
-export function aiFormGovernment(s: GameState, formateurId: string): boolean {
+/** The government a formateur could build: compatible parties, nearest first. include: a party that must be in it. */
+function planCoalition(s: GameState, formateurId: string, opts: { include?: string; exclude?: string } = {}): { parties: Party[]; total: number } | null {
   const fParty = s.parties[s.politicians[formateurId].partyId];
-  const me = s.politicians[s.player.politicianId];
   // every failed formation makes the next try more flexible: after repeated elections the parties compromise
   const relax = s.flags.formFails ?? 0;
-  const candidates = Object.values(s.parties)
-    .filter((p) => p.id !== fParty.id && p.seats > 0 && compatible(fParty, p))
+  const inc = opts.include ? s.parties[opts.include] : undefined;
+  let candidates = Object.values(s.parties)
+    .filter((p) => p.id !== fParty.id && p.seats > 0 && compatible(fParty, p) && p.id !== opts.exclude && p.id !== inc?.id)
     // Arab parties: Ra'am may join a centre-left government (or any government after repeated failures); the Joint List gives outside support at most
     .filter((p) => p.id !== 'joint' && (p.bloc !== 'arab' || relax >= 2 || (fParty.bloc === 'opp' && partyRelation(s, p.id, fParty.id) >= 0)))
     .filter((p) => relax >= 1 || ideologyDistance(fParty.ideology, p.ideology) < 0.95 || p.bloc === fParty.bloc)
     .sort((a, b) => (a.bloc === fParty.bloc ? 0 : 1) - (b.bloc === fParty.bloc ? 0 : 1) || ideologyDistance(fParty.ideology, a.ideology) - ideologyDistance(fParty.ideology, b.ideology));
   const coalition: Party[] = [fParty];
   let total = fParty.seats;
+  if (inc) {
+    if (!compatible(fParty, inc)) return null;
+    coalition.push(inc);
+    total += inc.seats;
+    candidates = candidates.filter((p) => compatible(inc, p));
+  }
   for (const p of candidates) {
     if (total >= MAJORITY + 2) break;
     // relaxed rounds: partners only have to get along with the formateur, not with each other
     if (relax >= 1 ? true : coalition.every((c) => compatible(c, p))) { coalition.push(p); total += p.seats; }
   }
-  if (total < MAJORITY) return false;
+  return total >= MAJORITY ? { parties: coalition, total } : null;
+}
+
+/** An AI formateur builds a coalition from compatible parties. Returns false if it cannot reach 61. */
+export function aiFormGovernment(s: GameState, formateurId: string): boolean {
+  const me = s.politicians[s.player.politicianId];
+  const plan = planCoalition(s, formateurId, { exclude: s.flags.excludeMe ? me.partyId : undefined });
+  if (!plan) return false;
+  const { parties: coalition, total } = plan;
   s.flags.formFails = 0;
   installGovernment(s, formateurId, coalition.map((p) => p.id), {});
   const pm = s.politicians[formateurId];
@@ -441,4 +467,104 @@ export function abandonMandate(s: GameState): void {
   // the President turns to the next candidates (biggest parties first)
   const order = Object.values(s.parties).filter((p) => p.id !== s.player.partyId && p.seats > 0).sort((a, b) => b.seats - a.seats).slice(0, 2).map((p) => p.leaderId);
   formationRounds(s, order, role);
+}
+
+// ---------------- Offers to the player's party after the election ----------------
+/** When the player leads a party that is not the formateur's: the formateurs who could govern with it, and on what terms. */
+function buildOffers(s: GameState, order: string[]): CoalitionOffer[] {
+  const me = s.politicians[s.player.politicianId];
+  const myParty = s.parties[me.partyId];
+  if (!myParty || myParty.leaderId !== me.id || myParty.seats <= 0) return [];
+  const out: CoalitionOffer[] = [];
+  for (const fid of order) {
+    if (fid === me.id) break;
+    if (out.length >= 3) break;
+    const f = s.politicians[fid];
+    if (!f || f.partyId === myParty.id) continue;
+    const plan = planCoalition(s, fid, { include: myParty.id });
+    if (!plan) continue;
+    const fp = s.parties[f.partyId];
+    const partners = plan.parties.filter((p) => p.id !== myParty.id && p.id !== fp.id);
+    const terms = demandsFor(s, myParty, fp.seats).filter((d) => ['ministry', 'deputy', 'committee', 'budget', 'law'].includes(d.kind));
+    const others = plan.parties.filter((p) => p.id !== myParty.id);
+    const asks: string[] = [];
+    for (const p of others) {
+      for (const l of p.redLines ?? []) if (myParty.favoriteLaws.includes(l) && LAW_BY_ID[l] && !s.activeLaws.includes(l)) asks.push(`לא לקדם את ${LAW_BY_ID[l].title} (קו אדום של ${p.shortName})`);
+    }
+    asks.push('לתמוך בתקציב ובחוקי היסוד של הממשלה', 'להצביע עם הקואליציה בהצבעות אמון');
+    out.push({ id: newId(s, 'off'), formateurId: fid, partnerIds: partners.map((p) => p.id), seats: plan.total, terms, asks: [...new Set(asks)], tries: 0 });
+  }
+  return out;
+}
+
+/** What the player may ask to add to an offer (each one can be refused). */
+export function offerExtras(s: GameState, offer: CoalitionOffer): Demand[] {
+  const myParty = s.parties[s.politicians[s.player.politicianId].partyId];
+  const taken = new Set(offer.terms.filter((d) => d.kind === 'ministry').map((d) => d.ministryId));
+  const out: Demand[] = [];
+  if (myParty.seats >= 8) for (const id of ['finance', 'defense', 'foreign']) { const m = getMinistry(s, id); if (m && !taken.has(id)) out.push({ kind: 'ministry', ministryId: id, label: `תיק בכיר: ${m.name}`, sweetener: true }); }
+  const free = s.government.ministries.filter((m) => !taken.has(m.id) && !['finance', 'defense', 'foreign'].includes(m.id));
+  const extra = free.find((m) => myParty.preferredMinistries.includes(m.id)) ?? free[0];
+  if (extra) out.push({ kind: 'ministry', ministryId: extra.id, label: `תיק נוסף: ${extra.name}`, sweetener: true });
+  const cat = BUDGET_PREF[myParty.id] ?? 'welfare';
+  out.push({ kind: 'budget', category: cat, amount: 1, label: `+₪1B נוסף ל${CATEGORY_BY_ID[cat].name}`, sweetener: true });
+  if (!offer.terms.some((d) => d.kind === 'committee')) out.push({ kind: 'committee', committee: 'ועדת הכספים', label: 'ראשות ועדת הכספים', sweetener: true });
+  if (!offer.terms.some((d) => d.kind === 'deputy')) out.push({ kind: 'deputy', label: 'סגן שר נוסף', sweetener: true });
+  return out;
+}
+
+/** The chance that the formateur accepts this extra request. */
+export function extraChance(s: GameState, offer: CoalitionOffer, d: Demand): number {
+  const myParty = s.parties[s.politicians[s.player.politicianId].partyId];
+  const need = MAJORITY - (offer.seats - myParty.seats); // the seats the formateur is short by without us
+  const key = d.kind === 'ministry' && ['finance', 'defense', 'foreign'].includes(d.ministryId ?? '');
+  return clamp(0.5 + (myParty.seats - 8) / 50 + clamp(need / 30, 0, 0.3) - (key ? 0.3 : d.kind === 'ministry' ? 0.1 : 0) - offer.tries * 0.1, 0.08, 0.85);
+}
+
+export function answerCoalitionOffer(s: GameState, offerId: string, action: 'accept' | 'decline' | 'ask', extraIndex = -1): Reaction {
+  const note = (title: string, status: Reaction['status'], quip: string): Reaction => ({ title, status, stats: [], groups: [], people: [], quip });
+  const offers = s.elections.offers ?? [];
+  const offer = offers.find((o) => o.id === offerId);
+  const ctx = s.elections.offerCtx;
+  if (s.elections.phase !== 'offers' || !offer || !ctx) return note('אין הצעה פעילה', 'info', '');
+  const me = s.politicians[s.player.politicianId];
+  const myParty = s.parties[me.partyId];
+  const f = s.politicians[offer.formateurId];
+  if (action === 'ask') {
+    const d = offerExtras(s, offer)[extraIndex];
+    if (!d || offer.tries >= 3) return note('אי אפשר לבקש עוד', 'info', 'פנית כבר שלוש פעמים. ההצעה על השולחן.');
+    const p = extraChance(s, offer, d);
+    offer.tries += 1;
+    if (rand(s) < p) { offer.terms.push(d); return note('הבקשה התקבלה', 'approved', `${f.name} הסכים: ${d.label}.`); }
+    return note('הבקשה נדחתה', 'rejected', `${f.name} לא מוכן: ${d.label}. ההצעה המקורית עדיין על השולחן.`);
+  }
+  if (action === 'decline') {
+    s.elections.offers = offers.filter((o) => o.id !== offerId);
+    if (s.elections.offers.length > 0) return note('דחית את ההצעה', 'info', 'אפשר עדיין לבחור באחת ההצעות האחרות.');
+    s.elections.phase = 'none';
+    s.elections.offers = undefined;
+    s.elections.offerCtx = undefined;
+    s.flags.excludeMe = 1;
+    formationRounds(s, ctx.order, ctx.roleBefore);
+    s.flags.excludeMe = 0;
+    return note('דחית את כל ההצעות', 'info', 'המפלגה שלך נשארת מחוץ לממשלה, אלא אם יימצא רוב בלעדיה.');
+  }
+  // accept: the government is formed with the player's party in it
+  const agreements: Record<string, string> = {};
+  for (const d of offer.terms) if (d.kind === 'ministry' && d.ministryId && !agreements[d.ministryId]) agreements[d.ministryId] = myParty.id;
+  installGovernment(s, f.id, [f.partyId, myParty.id, ...offer.partnerIds], agreements);
+  for (const d of offer.terms) {
+    if (d.kind === 'law' && d.lawId) proposeBill(s, d.lawId, f.id, true);
+    else if (d.kind === 'budget' && d.category) applyEffects(s, { budget: { [d.category]: d.amount ?? 1 } });
+    else if (d.kind === 'committee') applyEffects(s, { playerReputation: 2 });
+    else if (d.kind === 'deputy') me.power = clamp(me.power + 3);
+  }
+  s.elections.phase = 'none';
+  s.elections.offers = undefined;
+  s.elections.offerCtx = undefined;
+  if (ctx.roleBefore === 'pm' || ctx.roleBefore === 'candidate') s.career.electionsLost += 1;
+  syncRole(s);
+  addNews(s, `${me.name} הצטרף לממשלה של ${f.name}: ${offer.seats} מנדטים`, 'neutral', '🤝');
+  logEvent(s, '🤝', `${myParty.name} הצטרפה לממשלה של ${f.name}`, 3, 'good', 'election');
+  return note('הצטרפת לממשלה', 'approved', `${offer.seats} מנדטים בקואליציה. ההסכמות נכנסו לתוקף.`);
 }

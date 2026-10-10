@@ -40,6 +40,7 @@ import { simulateAlliances } from './alliances';
 
 export function canAdvance(s: GameState): string | null {
   if (s.gameOver) return 'המשחק נגמר';
+  if (s.elections.phase === 'offers') return 'קודם צריך להחליט על הצעות הקואליציה';
   if (s.elections.phase === 'negotiation') return 'קודם צריך להרכיב ממשלה (או להחזיר את המנדט)';
   if (s.drama) return `קודם צריך להחליט: ${s.drama.title}`;
   return null;

@@ -1735,6 +1735,7 @@ export function checkAction(s: GameState, id: string, p: Params = {}): string | 
   const a = ACTIONS[id];
   if (!a) return 'פעולה לא קיימת';
   if (s.gameOver) return 'המשחק נגמר';
+  if (s.elections.phase === 'offers') return 'קודם צריך להחליט על הצעות הקואליציה';
   if (s.elections.phase === 'negotiation') return 'קודם צריך להרכיב ממשלה';
   const r = a.unavailable(s, p);
   if (r) return r;

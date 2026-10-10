@@ -22,7 +22,7 @@ function optionsFor(s: GameState, def: DramaDef): DramaOption[] {
 
 /** At most one dramatic event per turn. Extreme ones need tension; normal ones are frequent. */
 export function generateDrama(s: GameState): void {
-  if (s.drama || s.gameOver || s.elections.phase === 'negotiation') return;
+  if (s.drama || s.gameOver || s.elections.phase !== 'none') return;
   const d = DIFFICULTIES[s.difficulty];
   const ready = (id: string) => (s.flags[`drama_cd_${id}`] ?? 0) <= s.turn;
 
