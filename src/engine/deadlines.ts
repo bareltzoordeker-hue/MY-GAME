@@ -5,6 +5,7 @@
 // functioning government (caretaker, elections, negotiation) they stop altogether:
 // nobody can be blamed for a law the Knesseton could not pass.
 // ============================================================
+import { PROMISE_BY_ID } from '../data/promises';
 import type { GameState } from '../types/game';
 import { LAW_BY_ID } from '../data/laws';
 
@@ -54,6 +55,8 @@ export function openPromises(s: GameState): OpenPromise[] {
   }
   for (const pr of s.promises) {
     if (pr.status !== 'pending') continue;
+    const def = PROMISE_BY_ID[pr.defId];
+    if (def && def.kept(def.measure(s), pr.baseline)) continue; // already done: nothing left to do
     out.push({ key: `p${pr.id}`, source: 'public', text: pr.text, to: 'הציבור', turnsLeft: left(pr.deadlineTurn) });
   }
   return out.sort((a, b) => (a.turnsLeft ?? 99) - (b.turnsLeft ?? 99));

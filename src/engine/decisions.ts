@@ -1601,7 +1601,7 @@ def({
 def({
   id: 'make_promise', title: 'הבטחת בחירות', icon: '🤞', category: 'campaign', level: 'simple', capital: 2,
   description: 'התחייבות פומבית. מושכת מצביעים עכשיו; אם לא תקיים אותה, הציבור יזכור.',
-  unavailable: (s, p) => (!getCapabilities(s).canMakePromises ? 'הבטחות רק כמנהיג מפלגה, בשנה שלפני הבחירות' : !PROMISE_BY_ID[str(p, 'promiseId')] ? 'בחר הבטחה' : null),
+  unavailable: (s, p) => (!getCapabilities(s).canMakePromises ? 'הבטחות רק כמנהיג מפלגה, בשנה שלפני הבחירות' : !PROMISE_BY_ID[str(p, 'promiseId')] ? 'בחר הבטחה' : PROMISE_BY_ID[str(p, 'promiseId')].kept(PROMISE_BY_ID[str(p, 'promiseId')].measure(s), PROMISE_BY_ID[str(p, 'promiseId')].measure(s)) ? 'זה כבר קרה: אי אפשר להבטיח את מה שכבר בוצע' : null),
   run: (s, p) => {
     const r = makePromise(s, str(p, 'promiseId'));
     return { title: r.title, subtitle: r.subtitle, status: r.status, quip: r.quip };

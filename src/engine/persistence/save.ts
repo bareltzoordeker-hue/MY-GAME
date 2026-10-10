@@ -1,3 +1,4 @@
+import { reconcilePromises } from '../promises';
 import type { GameState } from '../../types/game';
 
 export const SAVE_KEY = 'hakise.autosave.v1';
@@ -29,6 +30,7 @@ export function deserialize(raw: string): GameState | null {
     s.partyRelations ??= {};
     s.chats ??= {};
     s.chatUnread ??= {};
+    reconcilePromises(s);
     return s;
   } catch {
     return null;

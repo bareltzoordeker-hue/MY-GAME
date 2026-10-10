@@ -26,22 +26,33 @@ export function makePromise(s: GameState, defId: string): Reaction {
   };
 }
 
+function markKept(s: GameState, p: GameState['promises'][number]): void {
+  const me = s.politicians[s.player.politicianId];
+  p.status = 'kept';
+  me.popularity = clamp(me.popularity + 4);
+  applyEffects(s, { groups: Object.fromEntries(p.groups.map((g) => [g, 4])) });
+  addNews(s, `הבטחה קוימה: ${p.text}`, 'good', '✅');
+  logEvent(s, '✅', `קיימת הבטחת בחירות: ${p.text}`, 2, 'good', 'promise');
+  s.career.achievements.push(`קיים הבטחה: ${p.text}`);
+}
+
+/** A promise whose law is already in force is kept, whenever it was made and wherever the game was saved. */
+export function reconcilePromises(s: GameState): void {
+  for (const p of s.promises ?? []) {
+    if (p.status !== 'pending') continue;
+    const def = PROMISE_BY_ID[p.defId];
+    if (def && def.kept(def.measure(s), p.baseline)) markKept(s, p);
+  }
+}
+
 export function checkPromises(s: GameState): void {
   const me = s.politicians[s.player.politicianId];
   for (const p of s.promises) {
     if (p.status !== 'pending') continue;
     const def = PROMISE_BY_ID[p.defId];
     const now = def.measure(s);
-    // a promise counts only once the election it was made for has passed (deadline = that election + half a term)
-    if (s.turn >= p.deadlineTurn - Math.round(TERM_TURNS / 2) && def.kept(now, p.baseline) && s.turn > p.madeTurn) {
-      p.status = 'kept';
-      me.popularity = clamp(me.popularity + 4);
-      applyEffects(s, { groups: Object.fromEntries(p.groups.map((g) => [g, 4])) });
-      addNews(s, `הבטחה קוימה: ${p.text}`, 'good', '✅');
-      logEvent(s, '✅', `קיימת הבטחת בחירות: ${p.text}`, 2, 'good', 'promise');
-      s.career.achievements.push(`קיים הבטחה: ${p.text}`);
-      continue;
-    }
+    // kept as soon as it is done (a law passed before the election counts too)
+    if (def.kept(now, p.baseline) && s.turn > p.madeTurn) { markKept(s, p); continue; }
     if (s.turn >= p.deadlineTurn) {
       const inPower = s.government.coalition.includes(s.player.partyId);
       if (!inPower) { p.status = 'void'; continue; }

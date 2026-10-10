@@ -1265,3 +1265,25 @@ describe('offers to join a government after the election', () => {
     expect(found).toBeGreaterThan(0);
   });
 });
+
+describe('election promises that were already carried out', () => {
+  it('a promise whose law passed is kept, drops off the open list, and a save made before the fix is repaired on load', async () => {
+    const { reconcilePromises } = await import('./promises');
+    const { openPromises } = await import('./deadlines');
+    const { serialize, deserialize } = await import('./persistence/save');
+    const s = createGame(cfg('pm'));
+    const r = performAction(s, 'make_promise', { promiseId: 'minimum_wage' });
+    expect(r.reaction).not.toBeNull();
+    let g = r.state;
+    expect(g.promises.some((p) => p.defId === 'minimum_wage' && p.status === 'pending')).toBe(true);
+    expect(openPromises(g).some((p) => p.text.includes('שכר המינימום'))).toBe(true);
+    g.activeLaws.push('minimum_wage');
+    expect(openPromises(g).some((p) => p.text.includes('שכר המינימום'))).toBe(false);
+    // a save made before the fix: promise still pending although the law is in force
+    const loaded = deserialize(serialize(g))!;
+    expect(loaded.promises.find((p) => p.defId === 'minimum_wage')!.status).toBe('kept');
+    g = loaded;
+    reconcilePromises(g);
+    expect(checkAction(g, 'make_promise', { promiseId: 'minimum_wage' })).not.toBeNull();
+  });
+});
