@@ -12,6 +12,26 @@ export function crisisProbability(s: GameState, defId: string): number {
   return clamp(def.trigger(s) * DIFFICULTIES[s.difficulty].eventRate, 0, 0.6);
 }
 
+/** The war crisis and the front list on the security screen must tell the same story. */
+function syncFronts(s: GameState, to: 'fighting' | 'ceasefire' | 'tension'): void {
+  const w = s.world;
+  if (!w) return;
+  const fronts = Object.entries(w.fronts);
+  if (to === 'fighting') {
+    // a new war: the most threatening front (Gaza first) is the one that fights
+    if (fronts.some(([, f]) => f.status === 'fighting')) return;
+    const pick = fronts.sort((a, b) => (b[0] === 'gaza' ? 1000 : b[1].threat) - (a[0] === 'gaza' ? 1000 : a[1].threat))[0];
+    if (pick) { pick[1].status = 'fighting'; pick[1].threat = Math.max(pick[1].threat, 60); }
+    return;
+  }
+  for (const [, f] of fronts) {
+    if (f.status !== 'fighting') continue;
+    f.status = to;
+    if (to === 'ceasefire') f.ceasefireUntil = s.turn + 6;
+    f.threat = Math.max(0, f.threat - 15);
+  }
+}
+
 export function startCrisis(s: GameState, defId: string, severity?: 1 | 2 | 3): Crisis {
   const def = CRISIS_BY_ID[defId];
   const sev = severity ?? ((1 + Math.floor(rand(s) * 2.2)) as 1 | 2 | 3);
@@ -21,6 +41,7 @@ export function startCrisis(s: GameState, defId: string, severity?: 1 | 2 | 3): 
     perTurn: def.perTurn, impactLines: def.impact, actions: def.actions, ministryId: def.ministryId,
   };
   s.crises.push(c);
+  if (defId === 'war') syncFronts(s, 'fighting');
   s.flags[`crisis_cd_${defId}`] = s.turn + 12;
   addNews(s, def.headline, 'bad', def.icon);
   logEvent(s, def.icon, `משבר חדש: ${def.title}`, 3, 'bad', 'crisis');
@@ -50,6 +71,7 @@ export function tickCrises(s: GameState): void {
     c.remaining -= 1;
     if (c.remaining <= 0) {
       s.crises = s.crises.filter((x) => x !== c);
+      if (c.defId === 'war') syncFronts(s, 'tension');
       logEvent(s, '✅', `${c.title} דעך מעצמו`, 2, 'neutral', 'crisis');
       addNews(s, `${c.title}: המשבר נרגע`, 'neutral', c.icon);
     }
@@ -91,6 +113,7 @@ export function resolveCrisis(s: GameState, crisisId: string, actionId: string):
   const ok = rand(s) < a.successChance;
   if (ok) {
     s.crises = s.crises.filter((x) => x !== c);
+    if (c.defId === 'war') syncFronts(s, a.id === 'escalate' ? 'tension' : 'ceasefire');
     const me = s.politicians[s.player.politicianId];
     me.popularity = clamp(me.popularity + 3 + c.severity);
     s.player.reputation = clamp(s.player.reputation + 3);

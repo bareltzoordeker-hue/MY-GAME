@@ -19,6 +19,11 @@ import { isPM, isSpeaker } from './roles';
 export function warTick(s: GameState): void {
   const n = s.flags.warTurns ?? 0;
   const w = s.world;
+  // the fronts calmed down (ceasefire, or the fighting died out): the war crisis ends with them
+  if (w && s.crises.some((c) => c.defId === 'war') && !Object.values(w.fronts).some((f) => f.status === 'fighting')) {
+    s.crises = s.crises.filter((c) => c.defId !== 'war');
+    addNews(s, 'הלחימה פסקה בכל החזיתות', 'good', '🕊️');
+  }
   if (!atWar(s) || !w) {
     if (n > 0) {
       const c = w?.casualties ?? { soldiers: 0, civilians: 0 };

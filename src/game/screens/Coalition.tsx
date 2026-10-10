@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useGame } from '../store/gameStore';
-import { negotiationSeats } from '../../engine/elections';
+import { coalitionConflicts, negotiationSeats } from '../../engine/elections';
 import { sweetenerOptions } from '../../engine/coalitionDeals';
 import { MAJORITY } from '../../data/world';
 import { Caricature } from '../../shared/components/Caricature';
@@ -47,6 +47,7 @@ export function CoalitionModal() {
             const leader = s.politicians[p.leaderId];
             const sweets = o.status === 'pending' ? sweetenerOptions(s, o.partyId) : [];
             const chosen = pick[o.partyId] ?? '';
+            const conflicts = o.status === 'pending' ? coalitionConflicts(s, o.partyId) : [];
             return (
               <div key={o.partyId} className="inset" style={{ borderColor: o.status === 'accepted' ? 'var(--good)' : o.status === 'refused' ? 'var(--bad)' : undefined, opacity: o.status === 'refused' ? 0.55 : 1 }}>
                 <div className="flex items-center gap-2">
@@ -54,6 +55,13 @@ export function CoalitionModal() {
                   <div className="flex-1 min-w-0"><b>{p.logo} {p.name}</b><div className="text-xs muted">{p.seats} מנדטים · נכונות {(o.willingness * 100).toFixed(0)}% · סבלנות {o.patience}</div></div>
                   {o.status !== 'pending' && <span className={`chip ${o.status === 'accepted' ? 'chip-good' : 'chip-bad'}`}>{o.status === 'accepted' ? 'בפנים' : 'בחוץ'}</span>}
                 </div>
+                {conflicts.length > 0 && (
+                  <div className="mt-2 text-xs rounded-md p-2" style={{ background: 'rgba(200,60,60,.10)', border: '1px solid var(--bad)' }} role="note">
+                    <b>⚠️ לא תסכים לשבת עם השותפות שכבר בפנים:</b>
+                    <ul className="mt-1 space-y-0.5">{conflicts.map((c, i) => <li key={i}>• {c.reason}</li>)}</ul>
+                    <div className="muted mt-1">גם אם תסכים לכל דרישותיה, הסיכוי שתצטרף נמוך. אפשר לוותר על הדרישה שגורמת לחיכוך, או להשאיר אחת מהשותפות בחוץ.</div>
+                  </div>
+                )}
                 <div className="text-xs mt-2">דרישות והסכמות:</div>
                 <div className="flex flex-wrap gap-1 mt-1">
                   {o.demands.map((d, i) => (

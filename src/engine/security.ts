@@ -152,6 +152,26 @@ export function worldTick(s: GameState, months: number): void {
   for (const c of CHANNELS) w.channels[c.id] = clamp(w.channels[c.id] + (c.id === 'usa' ? 0.4 : -0.6) * months / 4);
 }
 
+/** The other direction: Yishmael takes control of land from A to B, or from B to C. */
+export function takeBackArea(s: GameState, from: 'A' | 'B', to: 'B' | 'C'): DipOutcome {
+  const w = world(s);
+  if (w.areas[from] < 2) return { ok: false, title: 'אין מה להחזיר', text: `לא נשאר שטח ${from} לשינוי.` };
+  w.areas[from] -= 2;
+  w.areas[to] += 2;
+  const big = from === 'A';
+  w.channels.pa = clamp(w.channels.pa - (big ? 25 : 15));
+  w.channels.saudi = clamp(w.channels.saudi - (big ? 10 : 6));
+  w.channels.jordan = clamp(w.channels.jordan - (big ? 8 : 5));
+  w.relations.usa = clamp(w.relations.usa - (big ? 6 : 3));
+  w.relations.eu = clamp(w.relations.eu - (big ? 10 : 6));
+  w.fronts.judea_samaria.threat = clamp(w.fronts.judea_samaria.threat + (big ? 14 : 8));
+  applyEffects(s, { groups: { settlers: big ? 9 : 6, right: big ? 7 : 4, religious: 3, left: big ? -8 : -5, arabs: big ? -9 : -5, liberals: -3 }, stability: big ? -4 : -2, playerReputation: -1 });
+  addNews(s, `הממשלה אישרה העברת 2% משטח ${from} לשטח ${to} ביהודה ושומרון: צעד של ריבונות בפועל`, 'neutral', '🗺️');
+  logEvent(s, '🗺️', `החזרת שליטה ${from}→${to}`, 3, 'neutral', 'security');
+  s.career.memorable.push(`החזיר שליטה בשטח ${from} ל-${to} ביהודה ושומרון`);
+  return { ok: true, title: `שינוי שטח ${from} → ${to}`, text: `שטח A: ${w.areas.A}% · B: ${w.areas.B}% · C: ${w.areas.C}%. ${big ? 'ברשות הפלסטינית מגנים בחריפות, התיווך מתערער והסיכון לאלימות עולה.' : 'הרשות מוחה; מועצת יש״ע מברכת.'}` };
+}
+
 // ---------------- diplomacy ----------------
 export interface DipOutcome { ok: boolean; title: string; text: string; lines?: ReactionLine[] }
 
@@ -230,10 +250,12 @@ export function confidenceMeasure(s: GameState, kind: CbmKind): DipOutcome {
 }
 
 /** Transfer 2% of Judea and Samaria from Area C to B, or from B to A (Oslo terms). */
-export function transferArea(s: GameState, from: 'C' | 'B'): DipOutcome {
+/** Moves 2% between the Oslo areas. C→B and B→A hand land to the Palestinian side; A→B and B→C take it back (annexation). */
+export function transferArea(s: GameState, from: 'C' | 'B' | 'A'): DipOutcome {
   const w = world(s);
-  const to = from === 'C' ? 'B' : 'A';
+  const to = from === 'C' ? 'B' : from === 'B' ? 'A' : 'B';
   if (w.areas[from] < 2) return { ok: false, title: 'אין מה להעביר', text: `לא נשאר שטח ${from} להעברה.` };
+  if (from === 'A') return takeBackArea(s, 'A', 'B');
   w.areas[from] -= 2;
   w.areas[to] += 2;
   w.channels.pa = clamp(w.channels.pa + 15);

@@ -47,8 +47,14 @@ export function SpeechModal() {
             </label>
             <div className="text-sm">
               <span className="label">העמדה שלך</span>
-              <input type="range" min={-100} max={100} step={5} value={stance} onChange={(e) => setStance(Number(e.target.value))} className="w-full" aria-label={`עמדה: מ"${t.con}" ועד "${t.pro}"`} />
-              <div className="flex justify-between text-[11px] muted gap-2"><span>{t.pro}</span><span>{t.con}</span></div>
+              {/* the slider box is LTR on purpose: in a right-to-left page the browser flips the track, so the labels would sit on the wrong ends */}
+              <div dir="ltr">
+                <input type="range" min={-100} max={100} step={5} value={stance} onChange={(e) => setStance(Number(e.target.value))} className="w-full" aria-label={`עמדה: מ"${t.con}" (שמאל) ועד "${t.pro}" (ימין)`} />
+                <div className="flex justify-between text-[11px] muted gap-2">
+                  <span dir="rtl" className="text-left">◀ {t.con}</span>
+                  <span dir="rtl" className="text-right">{t.pro} ▶</span>
+                </div>
+              </div>
             </div>
             <label className="block text-sm"><span className="label">טון</span>
               <select className="w-full" value={tone} onChange={(e) => setTone(e.target.value as Tone)}>{(Object.keys(TONES) as Tone[]).map((x) => <option key={x} value={x}>{TONES[x].name} – {TONES[x].desc}</option>)}</select>

@@ -28,7 +28,7 @@ import { addMonths, daysBetween, electionDate, inCampaign, monthsUntilElection }
 import { BUDGETS, STRATEGY_BY_ID, issueSalience, startCampaign } from './campaign';
 import { TOPIC_BY_ID, VENUES, deliverSpeech, type Tone, type Venue } from './speech';
 import { CHANNEL_BY_ID, FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type ChannelId, type FrontId, type UnitId } from '../data/security';
-import { cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, unitTraining, type CbmKind } from './security';
+import { cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, takeBackArea, unitTraining, type CbmKind } from './security';
 import { assignMinister, createMinistry, getMinistry, mergeMinistries, removeMinistry } from './government';
 import { ideologyDistance, partyStance, proposeBill, repealLaw, voteBudget } from './parliament';
 import { coalitionSeats, computeShares, seatsFromShares } from './polls';
@@ -1450,17 +1450,19 @@ def({
     const kind = str(p, 'kind');
     s.flags[`dip_${kind}`] = s.turn;
     const concession = kind === 'cbm' || kind === 'transfer' || kind === 'normalize';
+    const hardline = kind === 'annex';
     const rej = concession ? pmSecurityApproval(s, -1) : null;
     if (rej) return rej;
     let lines: ReactionLine[] = [];
-    if (kind === 'transfer' || kind === 'cbm') {
-      const v = cabinetVote(s, -1, kind === 'transfer' ? 1 : 0.3);
+    if (kind === 'transfer' || kind === 'cbm' || hardline) {
+      const v = cabinetVote(s, hardline ? 1 : -1, kind === 'cbm' ? 0.3 : 1);
       lines = v.lines;
       if (!v.passed) return { status: 'rejected', title: `הקבינט דחה את המהלך (${v.yes}-${v.no})`, people: lines };
     }
     const o = kind === 'channel_secret' || kind === 'channel_open' ? openChannel(s, str(p, 'channel') as ChannelId, kind === 'channel_open')
       : kind === 'ceasefire' ? mediatedCeasefire(s, str(p, 'front') as FrontId, str(p, 'channel') as ChannelId)
         : kind === 'cbm' ? confidenceMeasure(s, (str(p, 'cbm') || 'permits') as CbmKind)
+          : kind === 'annex' ? takeBackArea(s, str(p, 'from') === 'A' ? 'A' : 'B', str(p, 'from') === 'A' ? 'B' : 'C')
           : kind === 'transfer' ? transferArea(s, str(p, 'from') === 'B' ? 'B' : 'C')
             : normalization(s, 'saudi');
     return { status: o.ok ? 'approved' : 'rejected', title: o.title, quip: o.text, people: [...(o.lines ?? []), ...lines].slice(0, 6) };

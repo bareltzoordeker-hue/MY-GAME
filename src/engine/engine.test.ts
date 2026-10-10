@@ -817,3 +817,82 @@ describe('chat: more to say', () => {
     expect(texts.size).toBeGreaterThan(25);
   });
 });
+
+describe('war crisis and fronts tell the same story', () => {
+  it('a war lights a front, a ceasefire calms it and ends the crisis', async () => {
+    const { startCrisis, resolveCrisis } = await import('./crises');
+    const { warTick } = await import('./aftermath');
+    const s = createGame(cfg('pm'));
+    const fighting = () => Object.values(s.world!.fronts).filter((f) => f.status === 'fighting').length;
+    expect(fighting()).toBe(0);
+    startCrisis(s, 'war', 3);
+    expect(fighting()).toBe(1);
+    const c = s.crises.find((x) => x.defId === 'war')!;
+    for (let i = 0; i < 30 && s.crises.includes(c); i++) { s.player.politicalCapital = 100; resolveCrisis(s, c.id, 'ceasefire'); }
+    expect(s.crises.some((x) => x.defId === 'war')).toBe(false);
+    expect(fighting()).toBe(0);
+    expect(Object.values(s.world!.fronts).some((f) => f.status === 'ceasefire')).toBe(true);
+    // fronts that calm by themselves close the crisis as well
+    startCrisis(s, 'war', 2);
+    for (const f of Object.values(s.world!.fronts)) if (f.status === 'fighting') f.status = 'tension';
+    warTick(s);
+    expect(s.crises.some((x) => x.defId === 'war')).toBe(false);
+  });
+});
+
+describe('Oslo areas move in both directions', () => {
+  it('B→C and A→B shift the map the other way and hurt the channels', async () => {
+    const { takeBackArea } = await import('./security');
+    const s = createGame(cfg('pm'));
+    const w = s.world!;
+    const before = { ...w.areas };
+    const pa0 = w.channels.pa;
+    expect(takeBackArea(s, 'B', 'C').ok).toBe(true);
+    expect(w.areas.C).toBe(before.C + 2);
+    expect(w.areas.B).toBe(before.B - 2);
+    expect(takeBackArea(s, 'A', 'B').ok).toBe(true);
+    expect(w.areas.A).toBe(before.A - 2);
+    expect(w.channels.pa).toBeLessThan(pa0);
+    expect(w.areas.A + w.areas.B + w.areas.C).toBe(before.A + before.B + before.C);
+  });
+});
+
+describe('speech on the draft: the side you pick is the side that reacts', () => {
+  it('"draft for all" (negative stance) pleases secular voters and hurts the Haredim; the exemption does the opposite', async () => {
+    const { deliverSpeech, writeSpeech, TOPIC_BY_ID } = await import('./speech');
+    const reaction = (stance: number) => {
+      const s = createGame(cfg('pm'));
+      const before = { haredim: s.population.groups.haredim.satisfaction, secular: s.population.groups.secular.satisfaction };
+      deliverSpeech(s, { venue: 'tv', topic: 'draft', stance, tone: 'statesman', audience: '', words: 120 });
+      return { haredim: s.population.groups.haredim.satisfaction - before.haredim, secular: s.population.groups.secular.satisfaction - before.secular };
+    };
+    const forAll = reaction(-0.9);
+    expect(forAll.haredim).toBeLessThan(0);
+    expect(forAll.secular).toBeGreaterThan(0);
+    const exemption = reaction(0.9);
+    expect(exemption.haredim).toBeGreaterThan(0);
+    expect(exemption.secular).toBeLessThan(0);
+    // and the drafted text says what the stance says
+    expect(writeSpeech({ venue: 'tv', topic: 'draft', stance: -0.9, tone: 'statesman', audience: '' }, () => 0.1)).toContain(TOPIC_BY_ID.draft.con);
+  });
+});
+
+describe('coalition talks warn about conflicts up front', () => {
+  it('lists why a party will not sit with a partner that is already in', async () => {
+    const { coalitionConflicts } = await import('./elections');
+    const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, role: 'pm', partyId: 'likud' });
+    s.elections.negotiation = {
+      daysLeft: 28, extended: false,
+      offers: {
+        shas: { partyId: 'shas', status: 'pending', willingness: 0.5, patience: 3, demands: [{ kind: 'law', lawId: 'draft_exemption', label: 'לחוקק: חוק הגיוס' }] },
+        yashar: { partyId: 'yashar', status: 'pending', willingness: 0.5, patience: 3, demands: [{ kind: 'law', lawId: 'draft_equality', label: 'לחוקק: חוק השוויון בנטל' }] },
+      },
+    } as never;
+    expect(coalitionConflicts(s, 'yashar')).toEqual([]);
+    (s.elections.negotiation as unknown as { offers: Record<string, { status: string }> }).offers.shas.status = 'accepted';
+    const c = coalitionConflicts(s, 'yashar');
+    expect(c.length).toBeGreaterThan(0);
+    expect(c.every((x) => x.reason.length > 10)).toBe(true);
+    expect(c.some((x) => x.partyId === 'shas')).toBe(true);
+  });
+});

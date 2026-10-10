@@ -57,6 +57,14 @@ function recommendations(s: GameState, seats: Record<string, number>): { formate
     tally[best.id] += seats[p.id];
   }
   const ranking = cands.map((c) => ({ leaderId: c.leaderId, seats: tally[c.id] })).sort((a, b) => b.seats - a.seats);
+  // the mandate follows the seats: the largest party gets it unless the other candidate has a clearly bigger recommendation count
+  const largest = parties[0];
+  const top = ranking[0];
+  const own = ranking.find((r) => r.leaderId === largest.leaderId);
+  if (own && top.leaderId !== own.leaderId && top.seats - own.seats < 10) {
+    ranking.splice(ranking.indexOf(own), 1);
+    ranking.unshift(own);
+  }
   return { formateurId: ranking[0].leaderId, ranking };
 }
 
@@ -159,6 +167,7 @@ function formationRounds(s: GameState, order: string[], roleBefore: string): voi
   s.elections.date = addDays(s.date, 90);
   s.elections.scheduledTurn = s.turn + turnsUntilElection(s);
   s.government.caretaker = true;
+  s.flags.formFails = (s.flags.formFails ?? 0) + 1;
   addNews(s, 'אף מועמד לא הצליח להרכיב ממשלה. הבחירות יחזרו בעוד כ-90 יום', 'bad', '🗳️');
   logEvent(s, '🗳️', 'לא הורכבה ממשלה – בחירות חוזרות', 3, 'bad', 'election');
 }
@@ -181,19 +190,23 @@ function compatible(a: Party, b: Party): boolean {
 export function aiFormGovernment(s: GameState, formateurId: string): boolean {
   const fParty = s.parties[s.politicians[formateurId].partyId];
   const me = s.politicians[s.player.politicianId];
+  // every failed formation makes the next try more flexible: after repeated elections the parties compromise
+  const relax = s.flags.formFails ?? 0;
   const candidates = Object.values(s.parties)
     .filter((p) => p.id !== fParty.id && p.seats > 0 && compatible(fParty, p))
-    // Arab parties: Ra'am may join a centre-left government; the Joint List gives outside support at most
-    .filter((p) => p.id !== 'joint' && (p.bloc !== 'arab' || (fParty.bloc === 'opp' && partyRelation(s, p.id, fParty.id) >= 0)))
-    .filter((p) => ideologyDistance(fParty.ideology, p.ideology) < 0.95 || p.bloc === fParty.bloc)
+    // Arab parties: Ra'am may join a centre-left government (or any government after repeated failures); the Joint List gives outside support at most
+    .filter((p) => p.id !== 'joint' && (p.bloc !== 'arab' || relax >= 2 || (fParty.bloc === 'opp' && partyRelation(s, p.id, fParty.id) >= 0)))
+    .filter((p) => relax >= 1 || ideologyDistance(fParty.ideology, p.ideology) < 0.95 || p.bloc === fParty.bloc)
     .sort((a, b) => (a.bloc === fParty.bloc ? 0 : 1) - (b.bloc === fParty.bloc ? 0 : 1) || ideologyDistance(fParty.ideology, a.ideology) - ideologyDistance(fParty.ideology, b.ideology));
   const coalition: Party[] = [fParty];
   let total = fParty.seats;
   for (const p of candidates) {
     if (total >= MAJORITY + 2) break;
-    if (coalition.every((c) => compatible(c, p))) { coalition.push(p); total += p.seats; }
+    // relaxed rounds: partners only have to get along with the formateur, not with each other
+    if (relax >= 1 ? true : coalition.every((c) => compatible(c, p))) { coalition.push(p); total += p.seats; }
   }
   if (total < MAJORITY) return false;
+  s.flags.formFails = 0;
   installGovernment(s, formateurId, coalition.map((p) => p.id), {});
   const pm = s.politicians[formateurId];
   addNews(s, `${pm.name} הרכיב ממשלה עם ${coalition.length - 1} שותפות (${total} מנדטים)`, 'neutral', '🏛️');
@@ -275,22 +288,39 @@ export function startNegotiation(s: GameState): void {
   s.elections.negotiation = { formateurId: s.player.politicianId, offers, attempt: 1, daysLeft: MANDATE_DAYS, extended: false };
 }
 
-function conflictPenalty(s: GameState, partyId: string): number {
-  const n = s.elections.negotiation!;
+export interface CoalitionConflict { partyId: string; reason: string; weight: number }
+
+/** Who in the coalition-to-be this party will not sit with, and why. Shown before the player tries, and used in the odds. */
+export function coalitionConflicts(s: GameState, partyId: string): CoalitionConflict[] {
+  const n = s.elections.negotiation;
+  if (!n) return [];
   const party = s.parties[partyId];
-  let pen = 0;
-  for (const o of Object.values(n.offers)) {
-    if (o.status !== 'accepted') continue;
-    const other = s.parties[o.partyId];
-    const otherLaws = o.demands.filter((d) => d.kind === 'law').map((d) => d.lawId!);
-    const myLaws = n.offers[partyId].demands.filter((d) => d.kind === 'law').map((d) => d.lawId!);
-    const otherVetoes = o.demands.filter((d) => d.kind === 'veto').map((d) => d.lawId!);
-    if (otherLaws.some((l) => party.hatedLaws.includes(l) || party.redLines?.includes(l)) || myLaws.some((l) => other.hatedLaws.includes(l) || other.redLines?.includes(l) || otherVetoes.includes(l))) pen += 0.35;
-    const otherMins = o.demands.filter((d) => d.kind === 'ministry').map((d) => d.ministryId);
-    if (n.offers[partyId].demands.some((d) => d.kind === 'ministry' && otherMins.includes(d.ministryId))) pen += 0.2;
-    if (o.demands.some((d) => d.kind === 'rotation') && n.offers[partyId].demands.some((d) => d.kind === 'rotation')) pen += 0.5;
+  const mine = n.offers[partyId]?.demands ?? [];
+  const out: CoalitionConflict[] = [];
+  const law = (id: string) => LAW_BY_ID[id]?.title ?? 'חוק';
+  const min = (id?: string) => s.government.ministries.find((m) => m.id === id)?.name ?? 'אותו תיק';
+  const addMe = (c: CoalitionConflict) => out.push(c);
+  const accepted = Object.values(n.offers).filter((o) => o.status === 'accepted' && o.partyId !== partyId);
+  // the player's own party counts as a partner too
+  const others = [...accepted.map((o) => ({ party: s.parties[o.partyId], demands: o.demands })), { party: s.parties[s.player.partyId], demands: [] as typeof mine }];
+  for (const { party: other, demands } of others) {
+    if (!other || other.id === partyId) continue;
+    const otherLaws = demands.filter((d) => d.kind === 'law').map((d) => d.lawId!);
+    const myLaws = mine.filter((d) => d.kind === 'law').map((d) => d.lawId!);
+    const otherVetoes = demands.filter((d) => d.kind === 'veto').map((d) => d.lawId!);
+    const hates = (p: Party, l: string) => p.hatedLaws.includes(l) || !!p.redLines?.includes(l);
+    for (const l of otherLaws) if (hates(party, l)) addMe({ partyId: other.id, weight: 0.35, reason: `${party.shortName} מתנגדת ל"${law(l)}" ש${other.shortName} דורשת` });
+    for (const l of myLaws) if (hates(other, l) || otherVetoes.includes(l)) addMe({ partyId: other.id, weight: 0.35, reason: `${other.shortName} מתנגדת ל"${law(l)}" ש${party.shortName} דורשת` });
+    const otherMins = demands.filter((d) => d.kind === 'ministry').map((d) => d.ministryId);
+    for (const d of mine) if (d.kind === 'ministry' && otherMins.includes(d.ministryId)) addMe({ partyId: other.id, weight: 0.2, reason: `גם ${other.shortName} דורשת את ${min(d.ministryId)}` });
+    if (demands.some((d) => d.kind === 'rotation') && mine.some((d) => d.kind === 'rotation')) addMe({ partyId: other.id, weight: 0.5, reason: `גם ${other.shortName} דורשת רוטציה על ראשות הממשלה` });
+    if (!compatible(party, other)) addMe({ partyId: other.id, weight: 0.4, reason: `קו אדום מול ${other.shortName}: מה ש${other.shortName} רוצה נוגד עיקרון של ${party.shortName}` });
   }
-  return pen;
+  return out;
+}
+
+function conflictPenalty(s: GameState, partyId: string): number {
+  return coalitionConflicts(s, partyId).reduce((a, c) => a + c.weight, 0);
 }
 
 /** Each step of the talks takes days off the mandate. The President grants one 14-day extension. */
@@ -349,7 +379,7 @@ export function negotiate(s: GameState, partyId: string, action: 'accept' | 'cou
   offer.patience -= 1;
   if (offer.patience <= 0) {
     offer.status = 'refused';
-    return { title: `${party.name} עזבה את השולחן`, status: 'rejected', stats: [], groups: [], people: [], quip: conflict > 0 ? 'הם לא מוכנים לשבת עם השותפות שכבר הסכמת איתן.' : 'הסבלנות שלהם נגמרה.' };
+    return { title: `${party.name} עזבה את השולחן`, status: 'rejected', stats: [], groups: [], people: [], quip: conflict > 0 ? `הם לא מוכנים לשבת עם השותפות שכבר הסכמת איתן: ${coalitionConflicts(s, partyId).slice(0, 2).map((c) => c.reason).join('; ')}.` : 'הסבלנות שלהם נגמרה.' };
   }
   return {
     title: `${party.name} לא השתכנעה`, status: 'rejected',

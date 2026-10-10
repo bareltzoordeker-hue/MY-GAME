@@ -289,10 +289,10 @@ export function LawsScreen() {
   );
 }
 
-const AXES: { k: keyof Ideology; neg: string; pos: string }[] = [
-  { k: 'economic', neg: 'שמאל כלכלי', pos: 'ימין כלכלי' },
-  { k: 'security', neg: 'הסדר מדיני', pos: 'הרתעה וכוח' },
-  { k: 'religion', neg: 'חילוני', pos: 'דתי' },
+const AXES: { k: keyof Ideology; title: string; neg: string; pos: string }[] = [
+  { k: 'economic', title: 'כלכלה', neg: 'שמאלני', pos: 'ימני' },
+  { k: 'security', title: 'ביטחון', neg: 'הסדר מדיני', pos: 'הרתעה וכוח' },
+  { k: 'religion', title: 'דת ומדינה', neg: 'חילוני', pos: 'דתי' },
 ];
 
 export function PartyScreen() {
@@ -321,13 +321,21 @@ export function PartyScreen() {
               <ActionButton id="rename_party" params={{ name, logo }} className="btn btn-sm">שמור</ActionButton>
             </div>
             <div className="space-y-2 mt-3">
-              {AXES.map((a) => (
-                <div key={a.k} className="flex items-center gap-2 text-xs">
-                  <ActionButton id="party_line" params={{ axis: a.k, dir: -1 }} className="btn btn-sm">◀ {a.neg}</ActionButton>
-                  <div className="flex-1 relative h-2 rounded-full" style={{ background: '#e8edf5' }}><div className="absolute w-3 h-3 -top-0.5 rounded-full" style={{ background: party.color, right: `${(1 - (party.ideology[a.k] + 1) / 2) * 100}%` }} /></div>
-                  <ActionButton id="party_line" params={{ axis: a.k, dir: 1 }} className="btn btn-sm">{a.pos} ▶</ActionButton>
-                </div>
-              ))}
+              {AXES.map((a) => {
+                const v = party.ideology[a.k];
+                return (
+                  <div key={a.k}>
+                    <div className="text-xs font-bold mb-1">{a.title}: <span className="muted">{v > 0.15 ? `נוטה ל${a.pos.split(':')[0]}` : v < -0.15 ? `נוטה ל${a.neg.split(':')[0]}` : 'באמצע'}</span></div>
+                    {/* the row is LTR so "left" is really on the left: left button moves the party left, right button moves it right */}
+                    <div dir="ltr" className="flex items-center gap-2 text-xs">
+                      <ActionButton id="party_line" params={{ axis: a.k, dir: -1 }} className="btn btn-sm"><span dir="ltr">◀ {a.neg.split(':')[0]}</span></ActionButton>
+                      <div className="flex-1 relative h-2 rounded-full" style={{ background: '#e8edf5' }}><div className="absolute w-3 h-3 -top-0.5 rounded-full" style={{ background: party.color, left: `calc(${((v + 1) / 2) * 100}% - 6px)` }} /></div>
+                      <ActionButton id="party_line" params={{ axis: a.k, dir: 1 }} className="btn btn-sm"><span dir="ltr">{a.pos.split(':')[0]} ▶</span></ActionButton>
+                    </div>
+                    <div dir="ltr" className="flex justify-between text-[10px] muted mt-0.5"><span dir="rtl">שמאל</span><span dir="rtl">ימין</span></div>
+                  </div>
+                );
+              })}
             </div>
             <div className="flex gap-2 flex-wrap mt-3">
               <ActionButton id="recruit_star" className="btn btn-sm">🌟 גיוס כוכב</ActionButton>

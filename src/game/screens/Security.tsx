@@ -96,9 +96,15 @@ export function SecurityScreen() {
               <div style={{ width: `${w.areas.B}%`, background: '#d9a400' }} className="grid place-items-center">B {w.areas.B}%</div>
               <div style={{ width: `${w.areas.C}%`, background: '#5b4bdb' }} className="grid place-items-center">C {w.areas.C}%</div>
             </div>
-            <div className="flex gap-1.5 flex-wrap mt-2">
+            <div className="text-xs muted mt-2">הכיוון המדיני (שטח עובר לפלסטינים):</div>
+            <div className="flex gap-1.5 flex-wrap mt-1">
               <ActionButton id="diplomacy" params={{ kind: 'transfer', from: 'C' }} className="btn btn-sm" confirm="להעביר 2% משטח C לשטח B? מועצת יש״ע והימין יתנגדו בחריפות, ושותפות עלולות לפרוש.">העברת 2% מ-C ל-B</ActionButton>
               <ActionButton id="diplomacy" params={{ kind: 'transfer', from: 'B' }} className="btn btn-sm" confirm="להעביר 2% משטח B לשטח A? צעד משמעותי עם השלכות פוליטיות כבדות.">העברת 2% מ-B ל-A</ActionButton>
+            </div>
+            <div className="text-xs muted mt-2">הכיוון ההפוך (שליטה ישמעאלית מורחבת):</div>
+            <div className="flex gap-1.5 flex-wrap mt-1">
+              <ActionButton id="diplomacy" params={{ kind: 'annex', from: 'B' }} className="btn btn-sm" confirm="להעביר 2% משטח B לשטח C? צעד של ריבונות בפועל. הרשות והעולם יגנו, הימין יברך.">⬅️ B → C: ריבונות בפועל</ActionButton>
+              <ActionButton id="diplomacy" params={{ kind: 'annex', from: 'A' }} className="btn btn-sm btn-danger" confirm="להחזיר 2% משטח A לשטח B? צעד חריף: הרשות הפלסטינית תגיב וסיכון האלימות יעלה.">⬅️ A → B: חזרה לשליטה</ActionButton>
             </div>
           </Section>
         </div>
