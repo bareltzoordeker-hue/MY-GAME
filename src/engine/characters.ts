@@ -54,7 +54,9 @@ export function simulateCharacters(s: GameState): void {
     // ---- memory: promises turn into betrayals when deadlines pass ----
     for (const m of p.memory) {
       if (m.kind === 'promise' && !m.resolved && m.ref) {
-        const kept = m.ref === 'role' ? !!(p.ministryId || p.committee) : s.activeLaws.includes(m.ref);
+        const kept = m.ref === 'role' ? !!(p.ministryId || p.committee)
+          : m.ref.startsWith('budget:') ? s.budget.allocations[m.ref.slice(7) as keyof typeof s.budget.allocations] >= s.budget.needs[m.ref.slice(7) as keyof typeof s.budget.needs] * 0.98
+          : s.activeLaws.includes(m.ref);
         if (kept) {
           m.resolved = true;
           p.memory.push({ turn: s.turn, kind: 'favor', text: `קיימת את ההבטחה: ${m.text}`, weight: 12 });

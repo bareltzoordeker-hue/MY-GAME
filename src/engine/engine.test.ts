@@ -1025,3 +1025,94 @@ describe('reactions follow the decision and the speaker', () => {
     }
   });
 });
+
+describe('guided chat moves', () => {
+  const mk = (role: 'pm' | 'minister', extra = {}) => { const s = createGame(cfg(role, extra)); s.government.caretaker = false; return s; };
+  it('offers only the moves that make sense, and every one of them runs', async () => {
+    const { availableMoves, playMove, lawChoices } = await import('./chatMoves');
+    const { LAWS } = await import('../data/laws');
+    const s = mk('minister', { ministryId: 'transport' });
+    const pm = s.politicians[s.government.pmId];
+    const other = Object.values(s.politicians).find((p) => p.active && !p.isPlayer && p.id !== pm.id && s.government.coalition.includes(p.partyId) && !s.government.ministries.some((m) => m.ministerId === p.id))!;
+    const kinds = (p: typeof pm) => availableMoves(s, p).map((m) => m.kind);
+    expect(kinds(pm)).toEqual(expect.arrayContaining(['request', 'press', 'lobby', 'promise', 'recommend', 'threat', 'ask', 'apology', 'thanks']));
+    expect(availableMoves(s, pm).find((m) => m.kind === 'request')!.subjects).toEqual(expect.arrayContaining(['law', 'budget', 'role']));
+    expect(availableMoves(s, other).find((m) => m.kind === 'request')!.subjects).not.toContain('budget'); // a backbencher cannot fund a ministry
+    expect(lawChoices(s, pm, 'law').some((l) => l.group === 'חוקי המשרד שלך')).toBe(true);
+    const law = LAWS.find((l) => l.ministries?.includes('transport'))!;
+    const moves = [
+      { kind: 'request', subject: 'law', lawId: law.id }, { kind: 'press', subject: 'law', lawId: law.id }, { kind: 'promise', subject: 'law', lawId: law.id },
+      { kind: 'threat', subject: 'law', lawId: law.id }, { kind: 'lobby', subject: 'budget', ministryId: 'transport', viaId: pm.id },
+      { kind: 'ask', subject: 'info', topic: 'polls' }, { kind: 'apology', subject: 'none' }, { kind: 'thanks', subject: 'none' }, { kind: 'recommend', subject: 'role', ministryId: 'health' },
+    ] as const;
+    for (const m of moves) {
+      const t = createGame(cfg('minister', { ministryId: 'transport' }));
+      t.government.caretaker = false;
+      const target = t.politicians[(m.kind === 'lobby' ? other : other).id];
+      expect(playMove(t, target.id, m as never), m.kind).toBe(true);
+      const msgs = t.chats![target.id];
+      expect(msgs.at(-2)!.from).toBe('me');
+      expect(msgs.at(-1)!.from).toBe('them');
+      expect(msgs.at(-1)!.text.length).toBeGreaterThan(5);
+    }
+  });
+  it('a minister asks the PM for budget: granted, or the PM names a price that can be accepted with a quick reply', async () => {
+    const { playMove, answerOffer, pendingOffer, sendChatSmart } = await import('./chatMoves');
+    let offered = 0, granted = 0, closed = 0;
+    for (let seed = 1; seed <= 40; seed++) {
+      const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed, role: 'minister', ministryId: 'transport', partyId: 'likud' });
+      s.government.caretaker = false;
+      const pm = s.politicians[s.government.pmId];
+      pm.loyalty = 55;
+      const before = s.budget.allocations.transport;
+      playMove(s, pm.id, { kind: 'request', subject: 'budget', ministryId: 'transport', amount: 2 });
+      if (s.budget.allocations.transport > before) { granted++; continue; }
+      const o = pendingOffer(s, pm.id);
+      if (!o) continue;
+      offered++;
+      expect(o.options.length).toBeGreaterThan(0);
+      expect(o.action).toBe('fund');
+      // free text "כן" takes the first price and closes the deal
+      if (seed % 2) sendChatSmart(s, pm.id, 'כן, סגור'); else answerOffer(s, pm.id, { type: 'accept', index: 0 });
+      expect(pendingOffer(s, pm.id)).toBeUndefined();
+      expect(s.budget.allocations.transport).toBeGreaterThan(before);
+      closed++;
+      expect(pm.memory.some((m) => m.kind === 'promise' && !m.resolved)).toBe(true);
+    }
+    expect(offered).toBeGreaterThan(0);
+    expect(closed).toBe(offered);
+    expect(granted + offered).toBeGreaterThan(5);
+  });
+  it('a counter-offer of a law he does not like is turned down, one he likes closes the deal; refusing ends it', async () => {
+    const { playMove, answerOffer, pendingOffer } = await import('./chatMoves');
+    for (let seed = 1; seed <= 60; seed++) {
+      const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed, role: 'minister', ministryId: 'transport', partyId: 'likud' });
+      s.government.caretaker = false;
+      const pm = s.politicians[s.government.pmId];
+      playMove(s, pm.id, { kind: 'request', subject: 'budget', ministryId: 'transport', amount: 3 });
+      const o = pendingOffer(s, pm.id);
+      if (!o) continue;
+      const party = s.parties[pm.partyId];
+      const hated = party.hatedLaws.find((l) => !s.activeLaws.includes(l))!;
+      answerOffer(s, pm.id, { type: 'counter', lawId: hated });
+      expect(pendingOffer(s, pm.id)).toBeDefined(); // still waiting
+      const liked = party.favoriteLaws.find((l) => !s.activeLaws.includes(l))!;
+      answerOffer(s, pm.id, { type: 'counter', lawId: liked });
+      expect(pendingOffer(s, pm.id)).toBeUndefined(); // deal closed
+      return;
+    }
+    throw new Error('no offer ever appeared');
+  });
+  it('the PM can promise a budget and the promise is tracked until the ministry is funded', async () => {
+    const { playMove } = await import('./chatMoves');
+    const s = mk('pm');
+    const minister = Object.values(s.politicians).find((p) => p.active && !p.isPlayer && s.government.ministries.some((m) => m.ministerId === p.id))!;
+    playMove(s, minister.id, { kind: 'promise', subject: 'budget', ministryId: 'transport' });
+    const pr = minister.memory.find((m) => m.kind === 'promise' && m.ref === 'budget:transport');
+    expect(pr).toBeDefined();
+    s.budget.allocations.transport = s.budget.needs.transport * 1.01;
+    const { simulateCharacters } = await import('./characters');
+    simulateCharacters(s);
+    expect(minister.memory.find((m) => m.ref === 'budget:transport')!.resolved).toBe(true);
+  });
+});

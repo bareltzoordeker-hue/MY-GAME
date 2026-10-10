@@ -7,7 +7,8 @@ import {
   actionNeedsMeeting, meetingStep, performAction, prepareMeeting, type Meeting, type MeetingChoice, type Params,
 } from '../../engine/decisions';
 import { resolveInbox } from '../../engine/inbox';
-import { markRead, sendChat } from '../../engine/chat';
+import { markRead } from '../../engine/chat';
+import { answerOffer, playMove, sendChatSmart, type Move, type OfferAnswer } from '../../engine/chatMoves';
 import { resolveCrisis, startCrisis } from '../../engine/crises';
 import { abandonMandate, finalizeCoalition, negotiate } from '../../engine/elections';
 import { deleteSave, loadGame, saveGame } from '../../engine/persistence/save';
@@ -35,6 +36,8 @@ interface Store {
   chatWith: string | null;
   openChat: (id: string | null) => void;
   sendChat: (id: string, text: string) => void;
+  chatMove: (id: string, move: Move) => void;
+  chatAnswer: (id: string, answer: OfferAnswer) => void;
   goTo: (screen: ScreenId, focus?: string) => void;
   clearFocus: () => void;
 
@@ -104,7 +107,19 @@ export const useGame = create<Store>((set, get) => ({
     const g = get().game;
     if (!g) return;
     const s = clone(g);
-    if (sendChat(s, id, text)) set({ game: s, saveStatus: persist(s) });
+    if (sendChatSmart(s, id, text)) set({ game: s, saveStatus: persist(s) });
+  },
+  chatMove: (id, move) => {
+    const g = get().game;
+    if (!g) return;
+    const s = clone(g);
+    if (playMove(s, id, move)) set({ game: s, saveStatus: persist(s) });
+  },
+  chatAnswer: (id, answer) => {
+    const g = get().game;
+    if (!g) return;
+    const s = clone(g);
+    if (answerOffer(s, id, answer)) set({ game: s, saveStatus: persist(s) });
   },
 
   act: (id, params = {}) => {

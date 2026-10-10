@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { feminize } from '../../shared/gender';
 import { useGame } from '../store/gameStore';
 import { babble, voiceFor } from '../audio/sound';
@@ -19,7 +19,9 @@ import { servicesAverage } from '../../engine/services';
 export function ReactionModal() {
   const r = useGame((x) => x.reactions[0]);
   const dismiss = useGame((x) => x.dismissReaction);
-  const women = useGame((x) => x.game ? new Set(Object.values(x.game.politicians).filter((p) => p.gender === 'f').map((p) => p.name)) : null);
+  // select the state itself (stable), derive the set outside the selector: a selector that builds a new object every time loops forever
+  const game = useGame((x) => x.game);
+  const women = useMemo(() => (game ? new Set(Object.values(game.politicians).filter((p) => p.gender === 'f').map((p) => p.name)) : null), [game]);
   if (!r) return null;
   const fx = fxKind(r);
   const head = r.status === 'approved' ? { t: 'ההחלטה התקבלה', c: 'var(--good)', i: '✅' }

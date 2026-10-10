@@ -917,3 +917,6 @@ export function chatTick(s: GameState): void {
     logEvent(s, '💬', `${p.name} כתב לך הודעה`, 1, 'neutral', 'chat');
   }
 }
+
+// for the guided moves in chatMoves.ts
+export { push as pushChat, tone as chatTone, lawStance, canAppoint, isPm, setTopic, lawTitle, handle as handleChatText, once as chatOnce };

@@ -270,14 +270,24 @@ export interface Government {
   agreements?: Commitment[];
 }
 
-export type ChatTopicKind = 'unhappy' | 'praise' | 'coop' | 'ask_law' | 'warn_law' | 'campaign';
+export type ChatTopicKind = 'unhappy' | 'praise' | 'coop' | 'ask_law' | 'warn_law' | 'campaign' | 'offer';
 /** An open thread in a conversation: why the politician wrote, and how far the talk has got */
+/** What a politician wants in return for a favour: shown to the player as quick replies. */
+export interface PendingOffer {
+  action: 'law_support' | 'fund' | 'role';
+  lawId?: string;
+  ministryId?: string;
+  amount?: number;
+  /** the price he names: pick one, or answer with another law */
+  options: { kind: 'law' | 'vote' | 'role'; lawId?: string; label: string }[];
+}
 export interface ChatTopic {
   kind: ChatTopicKind;
   stage: 'opened' | 'explained';
   turn: number;
   lawId?: string;
   demand?: 'role' | 'budget' | 'law' | 'respect';
+  offer?: PendingOffer;
 }
 
 export interface ChatMsg {

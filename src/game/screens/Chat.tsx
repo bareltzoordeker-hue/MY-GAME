@@ -4,6 +4,7 @@ import { chatContacts, searchPoliticians } from '../../engine/chat';
 import type { GameState, Politician } from '../../types/game';
 import { Caricature } from '../../shared/components/Caricature';
 import { ScreenHeader } from '../components/ui';
+import { MoveComposer, OfferReplies } from '../components/MoveComposer';
 
 
 function Row({ s, p, active, onPick }: { s: GameState; p: Politician; active: boolean; onPick: () => void }) {
@@ -74,6 +75,8 @@ export function ChatScreen() {
                 ))}
                 <div ref={endRef} />
               </div>
+              <OfferReplies s={s} t={target} />
+              <MoveComposer s={s} t={target} />
               <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); submit(); }}>
                 <input type="text" data-tut="chat-input" className="flex-1" value={text} maxLength={400} onChange={(e) => setText(e.target.value)} placeholder="כתבו הודעה…" aria-label={`הודעה ל${target.name}`} />
                 <button className="btn btn-primary" data-tut="chat-send" type="submit" disabled={!text.trim()}>שליחה</button>
