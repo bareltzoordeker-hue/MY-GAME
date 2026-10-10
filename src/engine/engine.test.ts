@@ -990,3 +990,38 @@ describe('women speak as women', () => {
     for (const w of women) for (const m of s.chats?.[w.id] ?? []) if (m.from === 'them') expect(m.text, `${w.name}: ${m.text}`).not.toMatch(bad);
   });
 });
+
+describe('reactions follow the decision and the speaker', () => {
+  it('a tough security step is never condemned by a hawk or praised by a dove, and the lines vary', async () => {
+    const { decisionReactions, decisionDirection } = await import('./reactions');
+    const hawkish = { right: 4, settlers: 3, families: 2, left: -3, arabs: -3, liberals: -2 };
+    expect(decisionDirection(hawkish)).toMatchObject({ axis: 'security', sign: 1 });
+    expect(decisionDirection({ left: 4, arabs: 3, right: -3, settlers: -3 })).toMatchObject({ axis: 'security', sign: -1 });
+    const texts = new Set<string>();
+    for (let seed = 1; seed <= 12; seed++) {
+      const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed, role: 'pm', partyId: 'likud' });
+      const lines = decisionReactions(s, 'מעצרים נגד מסיתים', hawkish, true);
+      expect(lines.length).toBeGreaterThan(0);
+      for (const l of lines) {
+        const p = Object.values(s.politicians).find((x) => x.name === l.label)!;
+        if (l.tone === 'bad') expect(p.ideology.security, `${p.name} condemned: ${l.text}`).toBeLessThan(0);
+        if (l.tone === 'good') expect(p.ideology.security, `${p.name} praised: ${l.text}`).toBeGreaterThan(0);
+        expect(l.text).not.toContain('ההחלטה מאוחרת');
+        texts.add(l.text);
+      }
+    }
+    expect(texts.size).toBeGreaterThan(6);
+  });
+  it('an arrests operation as a real action: no right-wing leader opposes it, and no "late decision" boilerplate', () => {
+    const s = createGame(cfg('pm'));
+    s.player.politicalCapital = 100;
+    s.government.caretaker = false;
+    const r = performAction(s, 'internal_security', { opId: 'arrests' });
+    const names = new Map(Object.values(r.state.politicians).map((p) => [p.name, p]));
+    for (const l of r.reaction!.people) {
+      expect(l.text).not.toContain('ההחלטה מאוחרת');
+      const p = names.get(l.label);
+      if (p && l.tone === 'bad' && r.reaction!.status === 'approved') expect(p.ideology.security).toBeLessThan(0.25);
+    }
+  });
+});

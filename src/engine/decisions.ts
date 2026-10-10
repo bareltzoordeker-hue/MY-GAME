@@ -28,6 +28,7 @@ import { addMonths, daysBetween, electionDate, inCampaign, monthsUntilElection }
 import { BUDGETS, STRATEGY_BY_ID, issueSalience, startCampaign } from './campaign';
 import { TOPIC_BY_ID, VENUES, deliverSpeech, type Tone, type Venue } from './speech';
 import { CHANNEL_BY_ID, FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type ChannelId, type FrontId, type UnitId } from '../data/security';
+import { decisionReactions } from './reactions';
 import { INTERNAL_BY_ID } from '../data/internalSecurity';
 import { canUseInternalSecurity, cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, takeBackArea, unitTraining, type CbmKind } from './security';
 import { assignMinister, createMinistry, getMinistry, mergeMinistries, removeMinistry } from './government';
@@ -1723,7 +1724,13 @@ export function buildReaction(prev: GameState, next: GameState, rr: RunResult, a
 
   const people = [...(rr.people ?? [])];
   // everyone has an opinion: a rival and a voice of "the people" react to every decision
-  if (people.length < 3 && a.id !== 'drama') people.push(...N.chorus(next, (rr.status ?? 'approved') !== 'rejected', a.category).slice(0, 3 - people.length));
+  if (people.length < 3 && a.id !== 'drama') {
+    // reactions that follow the decision's real direction and each speaker's ideology; the generic chorus only fills in when nothing is clear
+    const moved: Partial<Record<GroupId, number>> = Object.fromEntries(GROUPS.map((g) => [g.id, next.population.groups[g.id].satisfaction - prev.population.groups[g.id].satisfaction]));
+    const named = decisionReactions(next, rr.title ?? a.title, moved, (rr.status ?? 'approved') !== 'rejected');
+    people.push(...named.slice(0, 3 - people.length));
+    if (people.length < 2) people.push(...N.chorus(next, (rr.status ?? 'approved') !== 'rejected', a.category).slice(0, 2 - people.length));
+  }
   if (deficitPct(next) > 4.5 && dSpend > 0.5) {
     people.push({ icon: '🧠', label: 'היועץ', text: `${N.advisorTone(next)} הגירעון כבר ${deficitPct(next).toFixed(1)}%.`, tone: 'bad' });
   }

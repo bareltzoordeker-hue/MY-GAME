@@ -44,7 +44,7 @@ export const TOPICS: SpeechTopic[] = [
 export const TOPIC_BY_ID = Object.fromEntries(TOPICS.map((t) => [t.id, t])) as Record<string, SpeechTopic>;
 
 /** Where each group sits on each axis (-1..1). Positive = right / liberal-market / religious. */
-const GROUP_POS: Partial<Record<GroupId, { security?: number; economic?: number; religion?: number }>> = {
+export const GROUP_POS: Partial<Record<GroupId, { security?: number; economic?: number; religion?: number }>> = {
   right: { security: 0.9 }, left: { security: -0.9 }, settlers: { security: 1, religion: 0.6 }, reservists: { security: 0.3, religion: -0.6 },
   haredim: { religion: 1, security: 0.3 }, religious: { religion: 0.8, security: 0.6 }, secular: { religion: -0.9 }, liberals: { economic: 0.7, religion: -0.6, security: -0.5 },
   socialists: { economic: -0.9 }, highIncome: { economic: 0.8 }, lowIncome: { economic: -0.7 }, selfEmployed: { economic: 0.6 }, publicSector: { economic: -0.7 },
