@@ -69,7 +69,7 @@ const CLOSE: Record<Tone, string[]> = {
 };
 
 /** Assembles a full speech. rnd: a [0,1) source (UI uses Math.random; the text never affects the simulation). */
-export function writeSpeech(p: { venue: Venue; topic: string; stance: number; tone: Tone; audience: GroupId | '' }, rnd: () => number = Math.random): string {
+export function writeSpeechLines(p: { venue: Venue; topic: string; stance: number; tone: Tone; audience: GroupId | '' }, rnd: () => number = Math.random): string[] {
   const t = TOPIC_BY_ID[p.topic] ?? TOPICS[0];
   const one = <T,>(a: T[]) => a[Math.floor(rnd() * a.length)];
   const side = p.stance > 0.25 ? t.pro : p.stance < -0.25 ? t.con : `איזון בין ${t.pro} לבין ${t.con}`;
@@ -85,7 +85,11 @@ export function writeSpeech(p: { venue: Venue; topic: string; stance: number; to
     p.tone === 'combative' ? one(['מי שמתנגד לדרך הזו יצטרך להסביר לציבור למה.', 'לא נקבל עוד תירוצים.']) : p.tone === 'empathetic' ? one(['אני מכיר את הקשיים, ופגשתי אנשים שנאבקים בהם כל יום.', 'מאחורי כל מספר יש משפחה.']) : p.tone === 'optimistic' ? one(['יש לנו את הכלים, את האנשים ואת הרוח.', 'אני רואה הזדמנות גדולה.']) : one(['זה הזמן לאחריות ולא לפלגנות.', 'נפעל לטובת כלל הציבור.']),
     one(CLOSE[p.tone]),
   ];
-  return lines.filter(Boolean).join(' ');
+  return lines.filter(Boolean);
+}
+
+export function writeSpeech(p: { venue: Venue; topic: string; stance: number; tone: Tone; audience: GroupId | '' }, rnd: () => number = Math.random): string {
+  return writeSpeechLines(p, rnd).join(' ');
 }
 
 export interface SpeechParams { venue: Venue; topic: string; stance: number; tone: Tone; audience: GroupId | ''; words: number }

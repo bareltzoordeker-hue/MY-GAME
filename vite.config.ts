@@ -12,6 +12,8 @@ import { readFileSync } from 'node:fs';
 //   pages/how-to-play/index.html  → /how-to-play/
 //   pages/{privacy,terms,about,contact}/index.html
 const PAGES = ['game', 'how-to-play', 'privacy', 'terms', 'about', 'contact', 'accessibility'];
+// The same static pages in English and Arabic, generated from the Hebrew ones by scripts/site-pages.mjs.
+const LANG_PAGES = ['en', 'ar'].flatMap((l) => [`${l}`, ...PAGES.filter((p) => p !== 'game').map((p) => `${l}/${p}`)]);
 const r = (p: string) => resolve(__dirname, p);
 const netlifyCsp = () => readFileSync(r('netlify.toml'), 'utf8').match(/Content-Security-Policy = "([^"]+)"/)?.[1] ?? '';
 
@@ -19,7 +21,7 @@ const netlifyCsp = () => readFileSync(r('netlify.toml'), 'utf8').match(/Content-
 function trailingSlash(): Plugin {
   const redirect = (url: string | undefined) => {
     const path = (url ?? '').split('?')[0];
-    return PAGES.map((p) => `/${p}`).includes(path) ? `${path}/` : null;
+    return [...PAGES, ...LANG_PAGES].map((p) => `/${p}`).includes(path) ? `${path}/` : null;
   };
   const mw = (req: { url?: string }, res: { statusCode: number; setHeader: (k: string, v: string) => void; end: () => void }, next: () => void) => {
     const to = redirect(req.url);
@@ -63,6 +65,7 @@ export default defineConfig({
         main: r('pages/index.html'),
         notFound: r('pages/404.html'),
         ...Object.fromEntries(PAGES.map((p) => [p, r(`pages/${p}/index.html`)])),
+        ...Object.fromEntries(LANG_PAGES.map((p) => [p.replace('/', '_'), r(`pages/${p}/index.html`)])),
       },
     },
   },

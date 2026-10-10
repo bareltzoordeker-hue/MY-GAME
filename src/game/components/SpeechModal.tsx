@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGame } from '../store/gameStore';
-import { TONES, TOPICS, TOPIC_BY_ID, VENUES, writeSpeech, type Tone, type Venue } from '../../engine/speech';
+import { TONES, TOPICS, TOPIC_BY_ID, VENUES, writeSpeechLines, type Tone, type Venue } from '../../engine/speech';
+import { translate } from '../../shared/i18n/contentTranslator';
 import { checkAction } from '../../engine/decisions';
 import { GROUPS } from '../../data/world';
 import type { GroupId } from '../../types/game';
@@ -66,7 +67,7 @@ export function SpeechModal() {
           <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between gap-2">
               <span className="label">הנאום ({words} מילים)</span>
-              <button className="btn btn-sm btn-blue" data-tut="speech-write" onClick={() => setText(writeSpeech({ venue, topic, stance: stance / 100, tone, audience }))} data-tip="טיוטה אוטומטית לפי הבמה, הנושא, העמדה והטון. אפשר לערוך אותה.">✍️ כתוב לי</button>
+              <button className="btn btn-sm btn-blue" data-tut="speech-write" onClick={() => setText(writeSpeechLines({ venue, topic, stance: stance / 100, tone, audience }).map((l) => translate(l) ?? l).join(' '))} data-tip="טיוטה אוטומטית לפי הבמה, הנושא, העמדה והטון. אפשר לערוך אותה.">✍️ כתוב לי</button>
             </div>
             <textarea data-tut="speech-text" aria-label="טקסט הנאום" value={text} onChange={(e) => setText(e.target.value)} rows={12} className="w-full flex-1" style={{ background: 'var(--bg2, #fff)', border: '1px solid var(--line2, #ddd)', borderRadius: 10, padding: 10, resize: 'vertical' }} placeholder="כתוב כאן את הנאום, או לחץ על 'כתוב לי'." />
             <div className="text-[11px] muted">נאום קצר מ-25 מילים לא משאיר רושם; נאום ארוך מ-450 מילים מאבד את הקהל.</div>
