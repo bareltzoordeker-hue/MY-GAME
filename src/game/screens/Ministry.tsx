@@ -4,7 +4,8 @@ import { ACTION_CATS, type ActionCat } from '../../data/ministryActions';
 import { PROJECTS } from '../../data/projects';
 import { ministryActionSpecs } from '../../engine/decisions';
 import { atWar } from '../../data/warActions';
-import { isPM, playerMinistry } from '../../engine/roles';
+import { isPM, isSpeaker, playerMinistry } from '../../engine/roles';
+import { SpeakerPanel } from '../components/SpeakerPanel';
 import { fundingRatio } from '../../engine/services';
 import type { GameState, Ministry } from '../../types/game';
 import { deficitPct, debtPct } from '../../utils';
@@ -76,6 +77,7 @@ export function MinistryScreen() {
   // a minister may hold several portfolios: he can switch between them, the PM between all
   const held = s.government.ministries.filter((x) => x.ministerId === s.player.politicianId);
   const choices = pm ? s.government.ministries : held;
+  if (isSpeaker(s)) return <div className="space-y-4"><ScreenHeader title="🔨 לשכת יו״ר הכנסטון" sub="הפעולות שלך כיו״ר: ניהול המליאה, קשרים עם הסיעות והצעות בדיון." /><SpeakerPanel s={s} /></div>;
   const m = (view ? choices.find((x) => x.id === view) : undefined) ?? playerMinistry(s) ?? (pm ? s.government.ministries[0] : undefined);
   if (!m) return <Empty icon="🏛️" text="אין לך משרד. עדיין." />;
   const minister = m.ministerId ? s.politicians[m.ministerId] : null;

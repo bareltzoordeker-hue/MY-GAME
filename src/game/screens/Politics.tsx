@@ -15,6 +15,7 @@ import { buildCharacterContext } from '../../engine/ai/contextBuilder';
 import type { GameState, Ideology, Politician } from '../../types/game';
 import { Caricature } from '../../shared/components/Caricature';
 import { AlliancesSection } from './Alliances';
+import { SpeakerPanel } from '../components/SpeakerPanel';
 import { DEMAND_ICON } from './Coalition';
 import { CampaignPanel } from './Campaign';
 import { dayNumber, spanText } from '../../engine/calendar';
@@ -183,20 +184,7 @@ export function ParliamentScreen() {
         <div className="flex justify-center"><Hemicycle s={s} /></div>
         <div className="flex flex-wrap gap-1.5 justify-center mt-2">{Object.values(s.parties).filter((p) => p.seats).map((p) => <PartyChip key={p.id} party={p} seats={p.seats} />)}</div>
       </Section>
-      {isSpeaker(s) && (
-        <Section title="יו״ר הכנסטון" icon="🔨">
-          <p className="text-sm muted mb-2">אתה מנהל את המליאה: קובע את סדר היום, שומר על הסדר ומייצג את הכנסטון. כל פעולה משפיעה על המוניטין, על הפופולריות ועל יציבות הממשלה.</p>
-          <div className="flex flex-wrap gap-2">
-            <ActionButton id="speaker_mediate" className="btn btn-sm">🤝 תיווך בין קואליציה לאופוזיציה</ActionButton>
-            <ActionButton id="speaker_debate" className="btn btn-sm">🎙️ דיון מיוחד במליאה</ActionButton>
-            <ActionButton id="speaker_discipline" className="btn btn-sm">🚪 הרחקת ח״כים מפריעים</ActionButton>
-            <ActionButton id="speaker_visit" className="btn btn-sm">🌍 אירוח מנהיג זר</ActionButton>
-            <ActionButton id="speaker_ethics" className="btn btn-sm">⚖️ ועדת האתיקה</ActionButton>
-            <ActionButton id="speaker_open_day" className="btn btn-sm">🏛️ יום פתוח</ActionButton>
-            <ActionButton id="speaker_reform" className="btn btn-sm btn-blue">📘 רפורמה בתקנון</ActionButton>
-          </div>
-        </Section>
-      )}
+      {isSpeaker(s) && <SpeakerPanel s={s} />}
       {dissolved && <div className="card card-tight" role="status">⏸️ הכנסטון התפזר לקראת הבחירות. הצעות חוק שכבר הוגשו ממתינות, וההצבעות עליהן יתקיימו רק אחרי שתקום ממשלה חדשה.</div>}
       <Section title="הצעות חוק בדיון" icon="📝">
         {!active.length ? <Empty icon="🦗" text="אין הצעות בדיון. הגש חוק ממסך החוקים." /> : (
@@ -214,7 +202,7 @@ export function ParliamentScreen() {
                   {dissolved ? <div className="text-xs muted mt-2">⏸️ ממתין לכנסטון החדש</div> : <div className="flex gap-1.5 flex-wrap mt-2">
                     <ActionButton id="push_bill" params={{ billId: b.id }} className="btn btn-sm">📣 גיוס תמיכה</ActionButton>
                     <ActionButton id="soften_bill" params={{ billId: b.id }} className="btn btn-sm">🧈 ריכוך</ActionButton>
-                    {isSpeaker(s) && <><ActionButton id="speaker_schedule" params={{ billId: b.id }} className="btn btn-sm btn-blue">📅 קידום בסדר היום</ActionButton><ActionButton id="speaker_delay" params={{ billId: b.id }} className="btn btn-sm">⏸️ עיכוב</ActionButton></>}
+                    {isSpeaker(s) && <><ActionButton id="speaker_schedule" params={{ billId: b.id }} className="btn btn-sm btn-blue">📅 קידום בסדר היום</ActionButton><ActionButton id="speaker_fast_track" params={{ billId: b.id }} className="btn btn-sm">⏩ קיצור הליכים</ActionButton><ActionButton id="speaker_delay" params={{ billId: b.id }} className="btn btn-sm">⏸️ עיכוב</ActionButton></>}
                     {!isPM(s) && <><ActionButton id="vote_bill" params={{ billId: b.id, vote: 'for' }} className="btn btn-sm btn-good">בעד</ActionButton><ActionButton id="vote_bill" params={{ billId: b.id, vote: 'against' }} className="btn btn-sm btn-danger">נגד</ActionButton></>}
                   </div>}
                 </div>

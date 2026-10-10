@@ -9,6 +9,7 @@ import type {
 import { clamp, sum } from '../utils';
 import { dayNumber, turnsUntilElection } from './calendar';
 import { refreshFiscals } from './economy';
+import { isSpeaker } from './roles';
 import { computeApproval, groupTargetRaw } from './population';
 import { computeShares, seatsFromShares } from './polls';
 import { initWorld } from './security';
@@ -365,6 +366,6 @@ export function roleLabel(s: GameState): string {
       if (m.name.startsWith('המשרד ')) return `${f ? 'השרה' : 'השר'} ${m.name.slice('המשרד '.length)}`;
       return `${f ? 'שרת' : 'שר'} ${m.name.replace(/^משרד /, '')}`;
     }
-    default: return me?.inKnesset ? (f ? 'חברת הכנסטון' : 'חבר הכנסטון') : (f ? 'מועמדת לכנסטון' : 'מועמד לכנסטון');
+    default: if (isSpeaker(s)) return 'יו״ר הכנסטון'; return me?.inKnesset ? (f ? 'חברת הכנסטון' : 'חבר הכנסטון') : (f ? 'מועמדת לכנסטון' : 'מועמד לכנסטון');
   }
 }

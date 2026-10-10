@@ -1666,6 +1666,56 @@ def({
   run: (s) => { s.flags.speakerReform = 1; applyEffects(s, { playerReputation: 5, stability: 3 }); return { title: 'תקנון הכנסטון עודכן', quip: 'הנאומים התקצרו. כמעט.' }; },
 });
 
+def({
+  id: 'speaker_fast_track', title: 'קיצור הליכים להצעה', icon: '⏩', category: 'parliament', level: 'medium', capital: 8, cooldown: 1,
+  description: 'היו״ר מקצר את זמני הדיון בהצעה מסוימת (+25 לסיכוייה). מי שחושב שזה שימוש לא ראוי בסמכות יפגע במוניטין שלך.',
+  unavailable: (s, p) => speakerOnly(s) ?? (activeBill(s, p) ? null : 'ההצעה לא פעילה'),
+  run: (s, p) => { const b = activeBill(s, p)!; b.push += 25; applyEffects(s, { playerReputation: -2 }); return { title: `"${b.title}" קודמה בהליך מקוצר`, quip: 'האופוזיציה טוענת שהיו״ר מנצל את הכיסא.' }; },
+});
+def({
+  id: 'speaker_committees', title: 'חלוקת ועדות הכנסטון', icon: '🗂️', category: 'parliament', level: 'medium', capital: 7, cooldown: 4,
+  description: 'דיון עם ראשי הסיעות על חלוקת ראשות הוועדות. מחזק את היציבות ואת המוניטין, ומשפר יחסים עם הסיעות.',
+  unavailable: speakerOnly,
+  run: (s) => {
+    for (const party of Object.values(s.parties)) if (party.seats > 0 && party.id !== s.player.partyId) shiftPartyRelation(s, s.player.partyId, party.id, 1);
+    applyEffects(s, { stability: 2, playerReputation: 3 });
+    return { title: 'הוסכם על חלוקת הוועדות', quip: 'כל סיעה קיבלה משהו, ואף אחת לא מרוצה לגמרי.' };
+  },
+});
+def({
+  id: 'speaker_question_time', title: 'שעת שאלות לראש הממשלה', icon: '❓', category: 'parliament', level: 'simple', capital: 5, cooldown: 2,
+  description: 'כינוס שעת שאלות שבה ראש הממשלה נדרש להשיב לחברי הכנסטון. מעלה פופולריות, אבל מערער מעט את הממשלה.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { playerPopularity: 3, stability: -1 }); return { title: 'ראש הממשלה ענה לשאלות', quip: 'התשובות היו ארוכות, והשאלות קצרות.' }; },
+});
+def({
+  id: 'speaker_leaders_meeting', title: 'ארוחה עם ראשי הסיעות', icon: '🍽️', category: 'parliament', level: 'simple', capital: 4, cooldown: 3,
+  description: 'פגישה לא רשמית עם ראשי הסיעות. משפרת יחסים עם כל המפלגות, ללא יוצא מן הכלל.',
+  unavailable: speakerOnly,
+  run: (s) => {
+    for (const party of Object.values(s.parties)) if (party.seats > 0 && party.id !== s.player.partyId) shiftPartyRelation(s, s.player.partyId, party.id, 2);
+    return { title: 'ראשי הסיעות נפגשו אצל היו״ר', quip: 'דיברו על הכל חוץ מהדברים החשובים.' };
+  },
+});
+def({
+  id: 'speaker_briefing', title: 'תדריך ביטחוני לחברי הכנסטון', icon: '🛡️', category: 'parliament', level: 'simple', capital: 4, cooldown: 3,
+  description: 'תדריך סגור עם גורמי הביטחון לכל חברי הכנסטון. מעלה אמון ויציבות.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { stability: 2, playerReputation: 2, groups: { right: 1, center: 1 } }); return { title: 'התקיים תדריך ביטחוני לחברי הכנסטון', quip: 'כולם יצאו עם אותם פרטים ועם פרשנות אחרת.' }; },
+});
+def({
+  id: 'speaker_youth', title: 'כנסטון הנוער', icon: '🎓', category: 'parliament', level: 'simple', capital: 3, cooldown: 3,
+  description: 'מפגש נוער במליאה עם דיון בהצעות חוק. מעלה את הפופולריות בקרב צעירים וסטודנטים.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { playerPopularity: 2, groups: { youth: 4, students: 3 } }); return { title: 'בני הנוער ישבו במליאה', quip: 'הם הצביעו מהר יותר מהמבוגרים.' }; },
+});
+def({
+  id: 'speaker_inquiry', title: 'ועדת חקירה פרלמנטרית', icon: '🔎', category: 'parliament', level: 'major', capital: 9, cooldown: 6,
+  description: 'הקמת ועדת חקירה בנושא שהציבור דורש לבדוק. מעלה מוניטין ואמון בכנסטון, אבל פוגעת ביציבות הממשלה ומרגיזה את הקואליציה.',
+  unavailable: speakerOnly,
+  run: (s) => { applyEffects(s, { playerReputation: 4, stability: -3, groups: { liberals: 3, left: 2, right: -1 } }); return { title: 'ועדת חקירה פרלמנטרית הוקמה', quip: 'הקואליציה לא שמחה, והציבור סקרן.' }; },
+});
+
 export const ACTIONS: Record<string, ActionDef> = Object.fromEntries(A.map((a) => [a.id, a]));
 
 export function actionCapital(s: GameState, id: string, p: Params): number {

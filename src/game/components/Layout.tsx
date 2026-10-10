@@ -7,7 +7,7 @@ import { dateLabel, deficitPct } from '../../utils';
 import { roleLabel } from '../../engine/newGame';
 import { canAdvance } from '../../engine/turn';
 import { coalitionSeats } from '../../engine/polls';
-import { getCapabilities } from '../../engine/roles';
+import { getCapabilities, isSpeaker } from '../../engine/roles';
 import { daysBetween, electionCountdown, electionDate, monthsUntilElection, nextTurnDate, spanText } from '../../engine/calendar';
 import { unreadTotal } from '../../engine/chat';
 import { LANGS, dateL, setLang, spanL, t, type Lang } from '../../shared/i18n';
@@ -28,7 +28,7 @@ const NAV: NavItem[] = [
   { id: 'career', icon: '🎖️', label: 'קריירה', tip: 'איך להתקדם: ועדות, ראיונות, פריימריז, מעבר מפלגה או התפטרות' },
   { id: 'promises', icon: '📌', label: 'הבטחות', tip: 'כל ההבטחות שעוד לא קוימו: להסכם הקואליציוני, לפוליטיקאים ולציבור, עם המועד ועם כפתור לקיום מהיר', badge: (s) => openPromises(s).filter((p) => p.turnsLeft !== undefined && p.turnsLeft <= 1 && !deadlinesFrozen(s)).length },
   { id: 'parliament', icon: '🏟️', label: 'כנסטון', tip: '120 המושבים, הצעות חוק בדיון וצפי הצבעה' },
-  { id: 'ministry', icon: '🏛️', label: 'המשרד שלי', tip: 'ניהול המשרד: תקציב, מדדים ייעודיים ופעולות שרק המשרד הזה יכול לעשות', show: (s) => getCapabilities(s).canManageMinistry || s.player.role === 'pm' },
+  { id: 'ministry', icon: '🏛️', label: 'המשרד שלי', tip: 'ניהול המשרד: תקציב, מדדים ייעודיים ופעולות שרק המשרד הזה יכול לעשות', show: (s) => getCapabilities(s).canManageMinistry || s.player.role === 'pm' || isSpeaker(s) },
   { id: 'laws', icon: '📜', label: 'חוקים', tip: 'הגשת חוקים חדשים וביטול חוקים קיימים' },
   { id: 'projects', icon: '🏗️', label: 'פרויקטים', tip: 'פרויקטים לאומיים: כבישים, רכבות, בתי חולים. לוקחים זמן ועולים כסף' },
   { id: 'security', icon: '🛡️', label: 'ביטחון ומדיניות', tip: 'חזיתות, כוחות צה״ל, מבצעים באישור הקבינט, ערוצי הידברות, הפסקות אש, שטחי A/B/C ויחסי חוץ' , show: (s) => securityRole(s) !== null },
@@ -57,7 +57,7 @@ function Sidebar({ onPick }: { onPick?: () => void }) {
         return (
           <button key={n.id} data-tut={`nav-${n.id}`} data-tip={n.tip} className={`side-link ${screen === n.id ? 'side-link-active' : ''}`} onClick={() => { setScreen(n.id); onPick?.(); }}>
             <span className="text-base w-5 text-center">{n.icon}</span>
-            <span className="flex-1">{t(`nav.${n.id}` as Key)}</span>
+            <span className="flex-1">{n.id === 'ministry' && isSpeaker(s) ? 'לשכת היו״ר' : t(`nav.${n.id}` as Key)}</span>
             {b > 0 && <span className="chip chip-bad num" style={{ padding: '0 7px' }}>{b}</span>}
           </button>
         );

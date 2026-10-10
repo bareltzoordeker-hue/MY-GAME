@@ -1211,3 +1211,23 @@ describe('voting on a bill', () => {
     expect(checkAction(after, 'vote_bill', { billId: b.id, vote: 'for' })).not.toBeNull();
   });
 });
+
+describe('the Knesseton speaker has things to do', () => {
+  it('every speaker action works for the speaker and is closed to others', async () => {
+    const { roleLabel } = await import('./newGame');
+    const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, personId: 'likud_3' });
+    s.government.caretaker = false;
+    expect(roleLabel(s)).toBe('יו״ר הכנסטון');
+    const bill = proposeBill(s, 'draft_equality', 'player', true)!;
+    const ids = Object.keys(ACTIONS).filter((id) => id.startsWith('speaker_'));
+    expect(ids.length).toBeGreaterThanOrEqual(14);
+    const other = createGame(cfg('mk'));
+    for (const id of ids) {
+      s.player.politicalCapital = 100;
+      const p = { billId: bill.id };
+      expect(checkAction(s, id, p), id).toBeNull();
+      expect(performAction(s, id, p).reaction, id).not.toBeNull();
+      expect(checkAction(other, id, p), id).not.toBeNull();
+    }
+  });
+});
