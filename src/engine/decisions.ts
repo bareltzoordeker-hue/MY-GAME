@@ -1396,14 +1396,25 @@ def({
 });
 
 // ===== SECURITY & DIPLOMACY (v2) =====
-/** A minister (not PM) needs the PM's approval for a security or diplomatic move. hawkish: +1 escalation, -1 concession. */
+/** A minister (not PM) needs the PM's approval for a security or diplomatic move. hawkish: +1 escalation, -1 concession.
+ *  The defense minister is the PM's closest partner on security: his proposals are usually approved. */
 function pmSecurityApproval(s: GameState, hawkish: number): RunResult | null {
   if (isPM(s)) return null;
   const pm = s.politicians[s.government.pmId];
-  const ok = rand(s) < clamp(0.35 + (pm.loyalty - 50) / 90 + pm.ideology.security * hawkish * 0.35, 0.05, 0.92);
-  if (ok) return null;
-  remember(s, pm.id, 'ignored', 'ביקש לאשר מהלך ביטחוני-מדיני', -2);
-  return { status: 'rejected', title: 'ראש הממשלה לא אישר', people: [{ icon: '🪑', label: pm.name, text: hawkish > 0 ? 'לא בשלב הזה. הסיכון גבוה מדי.' : 'זה לא תואם את מדיניות הממשלה.', tone: 'bad' }] };
+  const defense = securityRole(s) === 'defense';
+  const power = s.politicians[s.player.politicianId]?.power ?? 50;
+  const p = clamp((defense ? 0.72 : 0.35) + (pm.loyalty - 50) / 150 + pm.ideology.security * hawkish * 0.2 + (power - 50) / 400, 0.25, 0.95);
+  if (rand(s) < p) return null;
+  remember(s, pm.id, 'ignored', 'ביקש לאשר מהלך ביטחוני-מדיני', -1);
+  return { status: 'rejected', title: 'ראש הממשלה לא אישר', subtitle: 'ההון הפוליטי והזמינות חוזרים אליך', people: [{ icon: '🪑', label: pm.name, text: hawkish > 0 ? 'לא בשלב הזה. הסיכון גבוה מדי.' : 'זה לא תואם את מדיניות הממשלה.', tone: 'bad' }] };
+}
+
+/** A move the PM or the cabinet turned down costs nothing: the capital comes back and the cooldown is cleared. */
+function refundIfRejected(s: GameState, id: string, p: Params, r: RunResult | null): RunResult | null {
+  if (!r) return r;
+  s.player.politicalCapital = clamp(s.player.politicalCapital + actionCapital(s, id, p));
+  delete s.player.actionCooldowns[cooldownKey(id, p)];
+  return r;
 }
 
 def({
@@ -1445,13 +1456,13 @@ def({
   run: (s, p) => {
     const op = OPERATION_BY_ID[str(p, 'opId')];
     const front = str(p, 'front') as FrontId;
-    const rej = pmSecurityApproval(s, 1);
-    if (rej) return rej;
+    const rej = securityRole(s) === 'defense' && !op.needsCabinet ? null : pmSecurityApproval(s, 1);
+    if (rej) return refundIfRejected(s, 'security_operation', p, rej)!;
     let lines: ReactionLine[] = [];
     if (op.needsCabinet) {
       const v = cabinetVote(s, 1, op.risk);
       lines = v.lines;
-      if (!v.passed) return { status: 'rejected', title: `הקבינט דחה את המבצע (${v.yes}-${v.no})`, subtitle: `${op.name} – ${FRONT_BY_ID[front].name}`, people: lines };
+      if (!v.passed) return refundIfRejected(s, 'security_operation', p, { status: 'rejected', title: `הקבינט דחה את המבצע (${v.yes}-${v.no})`, subtitle: `${op.name} – ${FRONT_BY_ID[front].name}. ההון הפוליטי חוזר אליך`, people: lines })!;
     }
     s.flags[`op_${front}`] = s.turn;
     const o = executeOperation(s, op, front);
@@ -1480,12 +1491,12 @@ def({
     const concession = kind === 'cbm' || kind === 'transfer' || kind === 'normalize';
     const hardline = kind === 'annex';
     const rej = concession ? pmSecurityApproval(s, -1) : null;
-    if (rej) return rej;
+    if (rej) { delete s.flags[`dip_${kind}`]; return refundIfRejected(s, 'diplomacy', p, rej)!; }
     let lines: ReactionLine[] = [];
     if (kind === 'transfer' || kind === 'cbm' || hardline) {
       const v = cabinetVote(s, hardline ? 1 : -1, kind === 'cbm' ? 0.3 : 1);
       lines = v.lines;
-      if (!v.passed) return { status: 'rejected', title: `הקבינט דחה את המהלך (${v.yes}-${v.no})`, people: lines };
+      if (!v.passed) { delete s.flags[`dip_${kind}`]; return refundIfRejected(s, 'diplomacy', p, { status: 'rejected', title: `הקבינט דחה את המהלך (${v.yes}-${v.no})`, subtitle: 'ההון הפוליטי חוזר אליך', people: lines })!; }
     }
     const o = kind === 'channel_secret' || kind === 'channel_open' ? openChannel(s, str(p, 'channel') as ChannelId, kind === 'channel_open')
       : kind === 'ceasefire' ? mediatedCeasefire(s, str(p, 'front') as FrontId, str(p, 'channel') as ChannelId)

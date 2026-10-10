@@ -1287,3 +1287,29 @@ describe('election promises that were already carried out', () => {
     expect(checkAction(g, 'make_promise', { promiseId: 'minimum_wage' })).not.toBeNull();
   });
 });
+
+describe('the defense minister and the PM\'s approval', () => {
+  it('most operations go through, and a refused one costs no capital', () => {
+    let ok = 0;
+    let n = 0;
+    for (let seed = 1; seed <= 60; seed++) {
+      const s = createGame({ ...cfg('minister', { ministryId: 'defense' }), seed });
+      s.government.caretaker = false;
+      s.player.politicalCapital = 100;
+      const before = s.player.politicalCapital;
+      const r = performAction(s, 'security_operation', { opId: 'air_campaign', front: 'gaza' });
+      n += 1;
+      const refused = (r.reaction?.title ?? '').includes('לא אישר') || (r.reaction?.title ?? '').includes('הקבינט דחה');
+      if (!refused) ok += 1;
+      else expect(r.state.player.politicalCapital).toBe(before);
+    }
+    expect(ok / n).toBeGreaterThan(0.55);
+    // a minor operation (no cabinet vote) needs no PM approval at all
+    for (let seed = 1; seed <= 20; seed++) {
+      const s = createGame({ ...cfg('minister', { ministryId: 'defense' }), seed });
+      s.government.caretaker = false;
+      s.player.politicalCapital = 100;
+      expect(performAction(s, 'security_operation', { opId: 'targeted_strike', front: 'gaza' }).reaction?.title ?? '').not.toContain('ראש הממשלה לא אישר');
+    }
+  });
+});

@@ -72,7 +72,7 @@ export function cabinetVote(s: GameState, hawkish: number, weight = 0.5): { yes:
   let no = 0;
   for (const p of cabinetMembers(s)) {
     if (p.isPlayer) { yes += 1; continue; }
-    const stance = p.ideology.security * hawkish * 1.2 + (p.loyalty - 50) / 80 + (rand(s) - 0.5) * 0.5 + (hawkish > 0 ? 0.1 : -0.1) * weight;
+    const stance = p.ideology.security * hawkish * 1.2 + (p.loyalty - 50) / 80 + (rand(s) - 0.5) * 0.5 + (hawkish > 0 ? 0.1 : -0.1) * weight + (securityRole(s) === 'defense' ? 0.15 : 0);
     const ok = stance > -0.05;
     if (ok) yes += 1; else no += 1;
     lines.push({ icon: ok ? '👍' : '👎', label: p.name, text: ok ? (hawkish > 0 ? 'תומך. צריך לפעול.' : 'תומך. זה צעד נכון.') : (hawkish > 0 ? 'מתנגד. הסיכון גבוה מדי.' : 'מתנגד. זה פוגע בביטחון.'), tone: ok ? 'good' : 'bad' });
