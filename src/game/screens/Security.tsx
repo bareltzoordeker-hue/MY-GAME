@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { useGame } from '../store/gameStore';
 import { CHANNELS, FRONTS, OPERATIONS, UNITS, type FrontId } from '../../data/security';
-import { CBM, COUNTRIES, securityRole, world, type CbmKind } from '../../engine/security';
+import { CBM, COUNTRIES, canUseInternalSecurity, securityRole, world, type CbmKind } from '../../engine/security';
+import { INTERNAL_OPTIONS } from '../../data/internalSecurity';
 import type { GameState } from '../../types/game';
-import { ActionButton, Meter, ScreenHeader, Section } from '../components/ui';
+import { ActionButton, Empty, Meter, ScreenHeader, Section } from '../components/ui';
 
 const STATUS: Record<string, { t: string; c: string }> = {
   quiet: { t: 'שקט', c: 'chip-good' }, tension: { t: 'מתיחות', c: 'chip-warn' }, fighting: { t: 'לחימה', c: 'chip-bad' }, ceasefire: { t: 'הפסקת אש', c: 'chip' },
@@ -46,13 +47,31 @@ export function SecurityScreen() {
   const w = world(s);
   const role = securityRole(s);
   const [cbm, setCbm] = useState<CbmKind>('permits');
+  // only the people who run security open this screen: the PM, the defense minister and the national-security minister
+  if (!role) return <Empty icon="🔒" text="מסך הביטחון פתוח לראש הממשלה, לשר הביטחון ולשר לביטחון לאומי." />;
+  const military = role === 'pm' || role === 'defense';
   return (
     <div className="space-y-4">
-      <ScreenHeader title="ביטחון ומדיניות" sub={role ? 'המסלול הצבאי והמסלול המדיני. מבצעים גדולים ומהלכים מדיניים משמעותיים דורשים אישור הקבינט.' : 'מבט על החזיתות והמסלול המדיני. ההחלטות בידי ראש הממשלה, שר הביטחון ושר החוץ.'} />
+      <ScreenHeader title="ביטחון ומדיניות" sub={military ? 'המסלול הצבאי, המסלול המדיני וביטחון הפנים. מבצעים גדולים ומהלכים מדיניים משמעותיים דורשים אישור הקבינט.' : 'ביטחון הפנים: משטרה, שב״כ ושב״ס. החזיתות מוצגות לעיון בלבד.'} />
       <Section title="חזיתות" icon="🧭">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{FRONTS.map((f) => <FrontCard key={f.id} s={s} id={f.id} />)}</div>
       </Section>
-      <div className="grid lg:grid-cols-2 gap-4">
+      {canUseInternalSecurity(s) && (
+        <Section title="ביטחון פנים" icon="🚓">
+          <p className="text-sm muted mb-2">פעולות המשטרה, השב״כ והשב״ס בתוך המדינה. הצלחתן תלויה במימון המשטרה וביעילות המשרד לביטחון לאומי. פתוח לראש הממשלה ולשר לביטחון לאומי.</p>
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-2">
+            {INTERNAL_OPTIONS.map((o) => (
+              <div key={o.id} className="inset flex flex-col gap-1">
+                <b className="text-sm">{o.icon} {o.title}</b>
+                <span className="text-xs muted">{o.desc}</span>
+                <span className="text-[11px] muted">הון: {o.capital}{o.cost ? ` · עלות שנתית: ₪${o.cost}B` : ''}</span>
+                <ActionButton id="internal_security" params={{ opId: o.id }} className="btn btn-sm btn-blue mt-1">לבצע</ActionButton>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+      {military && <div className="grid lg:grid-cols-2 gap-4">
         <Section title="הכוחות" icon="🪖">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
             {UNITS.map((u) => (
@@ -108,7 +127,7 @@ export function SecurityScreen() {
             </div>
           </Section>
         </div>
-      </div>
+      </div>}
       <div className="grid md:grid-cols-2 gap-4">
         <Section title="יחסי חוץ" icon="🌍">
           <div className="space-y-1.5">{COUNTRIES.map((c) => (

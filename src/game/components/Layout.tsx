@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { useGame, type ScreenId } from '../store/gameStore';
 import { deadlinesFrozen, openPromises } from '../../engine/deadlines';
+import { securityRole } from '../../engine/security';
 import type { GameState } from '../../types/game';
 import { dateLabel, deficitPct } from '../../utils';
 import { roleLabel } from '../../engine/newGame';
@@ -29,7 +30,7 @@ const NAV: NavItem[] = [
   { id: 'ministry', icon: '🏛️', label: 'המשרד שלי', tip: 'ניהול המשרד: תקציב, מדדים ייעודיים ופעולות שרק המשרד הזה יכול לעשות', show: (s) => getCapabilities(s).canManageMinistry || s.player.role === 'pm' },
   { id: 'laws', icon: '📜', label: 'חוקים', tip: 'הגשת חוקים חדשים וביטול חוקים קיימים' },
   { id: 'projects', icon: '🏗️', label: 'פרויקטים', tip: 'פרויקטים לאומיים: כבישים, רכבות, בתי חולים. לוקחים זמן ועולים כסף' },
-  { id: 'security', icon: '🛡️', label: 'ביטחון ומדיניות', tip: 'חזיתות, כוחות צה״ל, מבצעים באישור הקבינט, ערוצי הידברות, הפסקות אש, שטחי A/B/C ויחסי חוץ' },
+  { id: 'security', icon: '🛡️', label: 'ביטחון ומדיניות', tip: 'חזיתות, כוחות צה״ל, מבצעים באישור הקבינט, ערוצי הידברות, הפסקות אש, שטחי A/B/C ויחסי חוץ' , show: (s) => securityRole(s) !== null },
   { id: 'government', icon: '🪑', label: 'ממשלה', tip: 'שרים, משרדים וקואליציה: מינויים, פיטורים, איחוד משרדים וכספים קואליציוניים' },
   { id: 'party', icon: '🎌', label: 'מפלגה ובריתות', tip: 'המפלגה שלך, הקמפיין, הבטחות בחירות ובריתות עם מפלגות אחרות' },
   { id: 'relations', icon: '🕸️', label: 'מפת יחסים', tip: 'היחסים בין המפלגות ובינך לבין חברי הכנסטון: פגישות, אירועים משותפים, תמיכה הדדית, הסכמי עודפים ואיחודים' },

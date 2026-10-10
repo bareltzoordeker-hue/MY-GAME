@@ -896,3 +896,40 @@ describe('coalition talks warn about conflicts up front', () => {
     expect(c.some((x) => x.partyId === 'shas')).toBe(true);
   });
 });
+
+describe('security screen access and internal security', () => {
+  it('opens only for the PM, the defense minister and the national-security minister; internal options for the PM and national security', async () => {
+    const { securityRole, canUseInternalSecurity } = await import('./security');
+    const { INTERNAL_OPTIONS } = await import('../data/internalSecurity');
+    const roleOf = (cfgx: Parameters<typeof cfg>[1], r: Parameters<typeof cfg>[0]) => createGame(cfg(r, cfgx));
+    const pm = roleOf({}, 'pm');
+    expect(securityRole(pm)).toBe('pm');
+    expect(canUseInternalSecurity(pm)).toBe(true);
+    const def = roleOf({ ministryId: 'defense' }, 'minister');
+    expect(securityRole(def)).toBe('defense');
+    expect(canUseInternalSecurity(def)).toBe(false);
+    const ns = roleOf({ ministryId: 'national_security' }, 'minister');
+    expect(securityRole(ns)).toBe('internal');
+    expect(canUseInternalSecurity(ns)).toBe(true);
+    expect(securityRole(roleOf({ ministryId: 'foreign' }, 'minister'))).toBeNull();
+    expect(securityRole(roleOf({ ministryId: 'transport' }, 'minister'))).toBeNull();
+    expect(securityRole(roleOf({}, 'mk'))).toBeNull();
+    // the national-security minister can run every option; the defense minister cannot
+    expect(INTERNAL_OPTIONS.length).toBeGreaterThanOrEqual(8);
+    for (const o of INTERNAL_OPTIONS) {
+      ns.player.politicalCapital = 100;
+      expect(checkAction(ns, 'internal_security', { opId: o.id }), o.id).toBeNull();
+      expect(performAction(ns, 'internal_security', { opId: o.id }).reaction, o.id).not.toBeNull();
+      expect(checkAction(def, 'internal_security', { opId: o.id })).not.toBeNull();
+      expect(checkAction(pm, 'internal_security', { opId: o.id }), o.id).toBeNull();
+    }
+    // the military moves are closed to the national-security minister
+    expect(checkAction(ns, 'security_operation', { opId: 'strike', front: 'gaza' })).not.toBeNull();
+  });
+  it('the area annexation buttons are accepted by the diplomacy action', async () => {
+    const s = createGame(cfg('pm'));
+    s.player.politicalCapital = 100;
+    expect(checkAction(s, 'diplomacy', { kind: 'annex', from: 'B' })).toBeNull();
+    expect(checkAction(s, 'diplomacy', { kind: 'annex', from: 'A' })).toBeNull();
+  });
+});

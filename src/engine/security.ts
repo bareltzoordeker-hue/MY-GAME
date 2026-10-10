@@ -14,7 +14,7 @@ import type { GameState, Politician, ReactionLine, WorldState } from '../types/g
 import { clamp } from '../utils';
 import { addNews, applyEffects, logEvent, remember } from './effects';
 import { partyLeavesCoalition } from './government';
-import { isPM, playerMinistry } from './roles';
+import { isPM } from './roles';
 
 export const COUNTRIES: { id: string; name: string; icon: string }[] = [
   { id: 'usa', name: 'ארה״ב', icon: '' }, { id: 'eu', name: 'האיחוד האירופי', icon: '' }, { id: 'uk', name: 'בריטניה', icon: '' },
@@ -39,14 +39,20 @@ export function initWorld(): WorldState {
 export const world = (s: GameState): WorldState => (s.world ??= initWorld());
 
 /** Can the player decide on security matters? (PM, or the defense minister with the PM's approval) */
-export function securityRole(s: GameState): 'pm' | 'defense' | 'foreign' | null {
+/** Who may open the security screen: the PM, the defense minister, and the national-security (internal security) minister. */
+export function securityRole(s: GameState): 'pm' | 'defense' | 'internal' | null {
   if (isPM(s)) return 'pm';
-  const m = playerMinistry(s);
-  const ids = m ? m.origins ?? [m.id] : [];
-  if (s.player.role === 'minister' && ids.includes('defense')) return 'defense';
-  if (s.player.role === 'minister' && (ids.includes('foreign') || ids.includes('regional'))) return 'foreign';
+  if (s.player.role !== 'minister') return null;
+  const held = s.government.ministries.filter((m) => m.ministerId === s.player.politicianId).flatMap((m) => [m.id, ...(m.origins ?? [])]);
+  if (held.includes('defense')) return 'defense';
+  if (held.includes('national_security')) return 'internal';
   return null;
 }
+/** The internal-security options belong to the PM and the national-security minister. */
+export const canUseInternalSecurity = (s: GameState): boolean => {
+  const r = securityRole(s);
+  return r === 'pm' || r === 'internal' || (s.government.ministries.some((m) => m.ministerId === s.player.politicianId && (m.origins ?? [m.id]).includes('national_security')));
+};
 
 /** The security cabinet: PM + key ministers + coalition party leaders. */
 export function cabinetMembers(s: GameState): Politician[] {

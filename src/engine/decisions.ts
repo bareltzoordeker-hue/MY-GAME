@@ -28,7 +28,8 @@ import { addMonths, daysBetween, electionDate, inCampaign, monthsUntilElection }
 import { BUDGETS, STRATEGY_BY_ID, issueSalience, startCampaign } from './campaign';
 import { TOPIC_BY_ID, VENUES, deliverSpeech, type Tone, type Venue } from './speech';
 import { CHANNEL_BY_ID, FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type ChannelId, type FrontId, type UnitId } from '../data/security';
-import { cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, takeBackArea, unitTraining, type CbmKind } from './security';
+import { INTERNAL_BY_ID } from '../data/internalSecurity';
+import { canUseInternalSecurity, cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, takeBackArea, unitTraining, type CbmKind } from './security';
 import { assignMinister, createMinistry, getMinistry, mergeMinistries, removeMinistry } from './government';
 import { ideologyDistance, partyStance, proposeBill, repealLaw, voteBudget } from './parliament';
 import { coalitionSeats, computeShares, seatsFromShares } from './polls';
@@ -1402,11 +1403,34 @@ function pmSecurityApproval(s: GameState, hawkish: number): RunResult | null {
 }
 
 def({
+  id: 'internal_security', title: 'ביטחון פנים', icon: '🚓', category: 'government', level: 'medium',
+  capital: (_s, p) => INTERNAL_BY_ID[str(p, 'opId')]?.capital ?? 3,
+  description: 'פעולות משטרה, שב״כ ושב״ס בתוך המדינה: מבצעים נגד פשיעה וטרור, שיטור קהילתי, אכיפה ותנאי כליאה.',
+  cooldown: 3,
+  unavailable: (s, p) => {
+    if (!canUseInternalSecurity(s)) return 'רק ראש הממשלה והשר לביטחון לאומי';
+    if (!INTERNAL_BY_ID[str(p, 'opId')]) return 'בחר פעולה';
+    return null;
+  },
+  estimate: (_s, p) => INTERNAL_BY_ID[str(p, 'opId')]?.good ?? {},
+  run: (s, p) => {
+    const o = INTERNAL_BY_ID[str(p, 'opId')]!;
+    const police = s.budget.allocations.police / Math.max(0.1, s.budget.needs.police);
+    const m = s.government.ministries.find((x) => x.id === 'national_security');
+    // better funding and a more efficient ministry make the plan work
+    const chanceOk = clamp(o.base + (police - 1) * 0.35 + ((m?.efficiency ?? 50) - 50) / 250, 0.2, 0.95);
+    const ok = rand(s) < chanceOk;
+    applyDecision(s, { ...(ok ? o.good : o.bad), ...(o.cost ? { budget: { police: o.cost } } : {}) });
+    return { title: ok ? `${o.title}: הצליח` : `${o.title}: נתקל בקשיים`, status: ok ? 'approved' : 'rejected', quip: ok ? o.goodText : o.badText };
+  },
+});
+
+def({
   id: 'security_operation', title: 'מבצע צבאי', icon: '🎖️', category: 'government', level: 'major', capital: (_s, p) => (OPERATION_BY_ID[str(p, 'opId')]?.needsCabinet ? 8 : 4),
   description: 'תכנון מבצע בחזית מסוימת. מבצעים גדולים דורשים אישור הקבינט המדיני-ביטחוני.',
   unavailable: (s, p) => {
     const role = securityRole(s);
-    if (!role || role === 'foreign') return 'רק ראש הממשלה ושר הביטחון';
+    if (!role || role === 'internal') return 'רק ראש הממשלה ושר הביטחון';
     const op = OPERATION_BY_ID[str(p, 'opId')];
     const front = str(p, 'front') as FrontId;
     if (!op) return 'בחר סוג מבצע';
@@ -1433,13 +1457,13 @@ def({
 
 def({
   id: 'diplomacy', title: 'מהלך מדיני', icon: '🕊️', category: 'government', level: 'major',
-  capital: (_s, p) => ({ channel_secret: 2, channel_open: 3, ceasefire: 6, cbm: 5, transfer: 12, normalize: 10 } as Record<string, number>)[str(p, 'kind')] ?? 4,
+  capital: (_s, p) => ({ channel_secret: 2, channel_open: 3, ceasefire: 6, cbm: 5, transfer: 12, annex: 12, normalize: 10 } as Record<string, number>)[str(p, 'kind')] ?? 4,
   description: 'ערוצי הידברות, הפסקות אש בתיווך, צעדים בוני אמון, העברת שטחים ונורמליזציה.',
   unavailable: (s, p) => {
     const role = securityRole(s);
-    if (!role) return 'רק ראש הממשלה, שר הביטחון ושר החוץ';
+    if (!role || role === 'internal') return 'רק ראש הממשלה ושר הביטחון';
     const kind = str(p, 'kind');
-    if (!['channel_secret', 'channel_open', 'ceasefire', 'cbm', 'transfer', 'normalize'].includes(kind)) return 'בחר מהלך';
+    if (!['channel_secret', 'channel_open', 'ceasefire', 'cbm', 'transfer', 'annex', 'normalize'].includes(kind)) return 'בחר מהלך';
     if ((kind === 'channel_secret' || kind === 'channel_open' || kind === 'ceasefire') && !CHANNEL_BY_ID[str(p, 'channel') as ChannelId]) return 'בחר ערוץ';
     if (kind === 'ceasefire' && !FRONT_BY_ID[str(p, 'front') as FrontId]) return 'בחר חזית';
     if (kind === 'ceasefire' && !['egypt', 'qatar', 'usa', 'jordan'].includes(str(p, 'channel'))) return 'הפסקת אש מושגת בתיווך מצרים, קטאר, ירדן או ארה״ב';
@@ -1651,7 +1675,7 @@ export function cooldownLeft(s: GameState, id: string, p: Params = {}): number {
   return Math.max(0, (s.player.actionCooldowns[key] ?? 0) - s.turn);
 }
 // per ministry or per bill: voting on (or pushing) one bill doesn't block the others in the same turn
-const cooldownKey = (id: string, p: Params) => (p.ministryId ? `${id}_${p.ministryId}` : p.billId ? `${id}_${p.billId}` : id);
+const cooldownKey = (id: string, p: Params) => (p.ministryId ? `${id}_${p.ministryId}` : p.billId ? `${id}_${p.billId}` : p.opId ? `${id}_${p.opId}` : id);
 
 export function checkAction(s: GameState, id: string, p: Params = {}): string | null {
   const a = ACTIONS[id];
