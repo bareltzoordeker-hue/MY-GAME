@@ -60,12 +60,27 @@ export function SecurityScreen() {
         <Section title="ביטחון פנים" icon="🚓">
           <p className="text-sm muted mb-2">פעולות המשטרה, השב״כ והשב״ס בתוך המדינה. הצלחתן תלויה במימון המשטרה וביעילות המשרד לביטחון לאומי. פתוח לראש הממשלה ולשר לביטחון לאומי.</p>
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-2">
-            {INTERNAL_OPTIONS.map((o) => (
+            {INTERNAL_OPTIONS.filter((o) => !o.op).map((o) => (
               <div key={o.id} className="inset flex flex-col gap-1">
                 <b className="text-sm">{o.icon} {o.title}</b>
                 <span className="text-xs muted">{o.desc}</span>
                 <span className="text-[11px] muted">הון: {o.capital}{o.cost ? ` · עלות שנתית: ₪${o.cost}B` : ''}</span>
                 <ActionButton id="internal_security" params={{ opId: o.id }} className="btn btn-sm btn-blue mt-1">לבצע</ActionButton>
+              </div>
+            ))}
+          </div>
+        </Section>
+      )}
+      {canUseInternalSecurity(s) && (
+        <Section title="מבצעים משטרתיים וביטחוניים" icon="🚨">
+          <p className="text-sm muted mb-2">פשיטות, מעצרים רחבים וסיכולים בתוך המדינה. הם חזקים יותר ממדיניות רגילה, אבל מסוכנים: כשמבצע נכשל, הציבור והתקשורת מגיבים בחריפות. הצלחתם תלויה במימון המשטרה וביעילות המשרד לביטחון לאומי.</p>
+          <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-2">
+            {INTERNAL_OPTIONS.filter((o) => o.op).map((o) => (
+              <div key={o.id} className="inset flex flex-col gap-1">
+                <b className="text-sm">{o.icon} {o.title}</b>
+                <span className="text-xs muted">{o.desc}</span>
+                <span className="text-[11px] muted">הון: {o.capital}{o.cost ? ` · עלות שנתית: ₪${o.cost}B` : ''}</span>
+                <ActionButton id="internal_security" params={{ opId: o.id }} className="btn btn-sm btn-blue mt-1">לצאת למבצע</ActionButton>
               </div>
             ))}
           </div>
