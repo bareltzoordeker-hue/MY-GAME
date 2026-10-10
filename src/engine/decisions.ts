@@ -1403,7 +1403,7 @@ function pmSecurityApproval(s: GameState, hawkish: number): RunResult | null {
   const pm = s.politicians[s.government.pmId];
   const defense = securityRole(s) === 'defense';
   const power = s.politicians[s.player.politicianId]?.power ?? 50;
-  const p = clamp((defense ? 0.72 : 0.35) + (pm.loyalty - 50) / 150 + pm.ideology.security * hawkish * 0.2 + (power - 50) / 400, 0.25, 0.95);
+  const p = clamp((defense ? 0.72 : 0.35) + (pm.loyalty - 50) / 150 + pm.ideology.security * hawkish * 0.2 + (power - 50) / 400, defense ? 0.5 : 0.25, 0.95);
   if (rand(s) < p) return null;
   remember(s, pm.id, 'ignored', 'ביקש לאשר מהלך ביטחוני-מדיני', -1);
   return { status: 'rejected', title: 'ראש הממשלה לא אישר', subtitle: 'ההון הפוליטי והזמינות חוזרים אליך', people: [{ icon: '🪑', label: pm.name, text: hawkish > 0 ? 'לא בשלב הזה. הסיכון גבוה מדי.' : 'זה לא תואם את מדיניות הממשלה.', tone: 'bad' }] };
