@@ -455,9 +455,10 @@ def({
 def({
   id: 'vote_bill', title: 'הצבעה במליאה', icon: '🗳️', category: 'parliament', level: 'simple', capital: 0,
   description: 'ההצבעה שלך על הצעת חוק. הצבעה נגד קו המפלגה פוגעת ביחסים עם המנהיג.',
-  unavailable: (s, p) => (s.bills.find((b) => b.id === str(p, 'billId') && b.status === 'active') ? null : 'ההצעה לא פעילה'),
+  unavailable: (s, p) => (!s.bills.find((b) => b.id === str(p, 'billId') && b.status === 'active') ? 'ההצעה לא פעילה' : (s.flags[`voted_${str(p, 'billId')}`] ?? -1) >= s.turn ? 'כבר הצבעת על ההצעה הזו בתור הזה' : null),
   run: (s, p) => {
     const b = s.bills.find((x) => x.id === str(p, 'billId'))!;
+    s.flags[`voted_${b.id}`] = s.turn;
     const forIt = str(p, 'vote') === 'for';
     b.push = Math.max(-60, Math.min(60, b.push + (forIt ? 4 : -4)));
     const party = s.parties[s.player.partyId];

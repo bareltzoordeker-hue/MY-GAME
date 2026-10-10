@@ -1198,3 +1198,16 @@ describe('answering a politician who asks the player for something', () => {
     expect(answerBargain(s, t.id, { type: 'refuse' })).toBe(true);
   });
 });
+
+describe('voting on a bill', () => {
+  it('the player votes once per bill per turn', () => {
+    const s = createGame(cfg('pm'));
+    s.government.caretaker = false;
+    const b = proposeBill(s, 'draft_equality', 'player', true)!;
+    expect(b).toBeTruthy();
+    expect(checkAction(s, 'vote_bill', { billId: b.id, vote: 'against' })).toBeNull();
+    const after = performAction(s, 'vote_bill', { billId: b.id, vote: 'against' }).state;
+    expect(checkAction(after, 'vote_bill', { billId: b.id, vote: 'against' })).not.toBeNull();
+    expect(checkAction(after, 'vote_bill', { billId: b.id, vote: 'for' })).not.toBeNull();
+  });
+});
