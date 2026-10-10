@@ -1313,3 +1313,19 @@ describe('the defense minister and the PM\'s approval', () => {
     }
   });
 });
+
+describe('the PM warns a minister before firing him', () => {
+  it('low trust brings a warning first; the firing can only come on a later turn', async () => {
+    const { simulateAIGovernment } = await import('./aiGovernment');
+    const s = createGame(cfg('minister', { ministryId: 'defense' }));
+    s.government.caretaker = false;
+    s.politicians[s.government.pmId].loyalty = 5;
+    simulateAIGovernment(s);
+    expect(s.player.role).toBe('minister');
+    expect(s.flags.pm_warned).toBe(s.turn);
+    expect(s.news.some((n) => n.headline.includes('מאבד סבלנות'))).toBe(true);
+    let fired = false;
+    for (let i = 0; i < 40 && !fired; i++) { s.turn += 1; simulateAIGovernment(s); fired = s.player.role !== 'minister'; }
+    expect(fired).toBe(true);
+  });
+});

@@ -88,9 +88,15 @@ export function simulateAIGovernment(s: GameState): void {
 
   // ---- the player's career inside an AI government ----
   const pmTrust = pm.loyalty; // pm's attitude toward the player
-  if (s.player.role === 'minister' && pmTrust < 18 && chance(s, 0.25)) {
+  // a minister is never fired without a warning: first the PM loses patience in public, and only a turn or more later, if nothing changed, does he fire
+  if (s.player.role === 'minister') {
     const min = s.government.ministries.find((m) => m.ministerId === me.id);
-    if (min) {
+    const warned = s.flags.pm_warned;
+    if (min && pmTrust < 30 && (warned === undefined || warned < s.turn - 6)) {
+      s.flags.pm_warned = s.turn;
+      addNews(s, `${pm.name} מאבד סבלנות כלפי ${me.name}: "אם זה ימשיך, ${min.name} יעבור למישהו אחר"`, 'bad', '⚠️');
+      logEvent(s, '⚠️', `ראש הממשלה מאבד אמון בך. כדאי לשפר את היחסים לפני שתפוטר`, 3, 'bad', 'career');
+    } else if (min && pmTrust < 15 && warned !== undefined && warned < s.turn && warned >= s.turn - 8 && chance(s, 0.2)) {
       min.ministerId = null;
       me.ministryId = null;
       s.career.failures.push(`פוטר מ${min.name}`);
