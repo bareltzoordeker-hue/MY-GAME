@@ -1,3 +1,4 @@
+import { MinistryBudgetTable } from '../components/MinistryOverview';
 import { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, BarChart, Bar, Cell } from 'recharts';
 import { useGame } from '../store/gameStore';
@@ -157,6 +158,7 @@ export function BudgetScreen() {
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
         {CATEGORIES.map((c) => <BudgetRow key={c.id} cat={c.id} highlight={myMin?.categories.includes(c.id)} />)}
       </div>
+      <MinistryBudgetTable s={s} />
     </div>
   );
 }

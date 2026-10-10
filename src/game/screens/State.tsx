@@ -1,3 +1,4 @@
+import { MinistryStateGrid } from '../components/MinistryOverview';
 import { useState } from 'react';
 import { useGame } from '../store/gameStore';
 import { COUNTRY_OUTLINE, GAZA_PATH, GROUPS, REGIONS, REGION_Z, SERVICES } from '../../data/world';
@@ -32,6 +33,7 @@ export function StateScreen() {
           );
         })}
       </div>
+      <MinistryStateGrid s={s} />
     </div>
   );
 }

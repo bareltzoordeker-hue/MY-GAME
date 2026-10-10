@@ -131,7 +131,8 @@ export function simulateGovernment(s: GameState): void {
     const leader = s.politicians[s.parties[id].leaderId];
     if (!leader) continue;
     const mood = g.pmId === s.player.politicianId ? leader.loyalty : 50 + (leader.relationships[g.pmId] ?? 0) * 0.4;
-    if (mood < 18 && g.stability < 35 && chance(s, 0.25)) {
+    // not during the honeymoon year, and only when the mood is really bad
+    if (s.turn - (g.formedTurn ?? 0) >= 6 && mood < 15 && g.stability < 30 && chance(s, 0.2)) {
       partyLeavesCoalition(s, id, 'לא נשב בממשלה שמזלזלת בנו');
       break;
     }

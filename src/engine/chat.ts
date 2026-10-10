@@ -158,7 +158,7 @@ function grievance(s: GameState, t: Politician): { demand: NonNullable<ChatTopic
   if (open?.ref === 'role') return { demand: 'role', text: 'הובטח לי תפקיד, והוא עדיין לא ניתן. אני מצפה שהעניין יטופל.' };
   if (open?.ref) return { demand: 'law', lawId: open.ref, text: `הובטח לי שתקדם את ${lawTitle(open.ref)}. עברו חודשים ושום דבר לא זז.` };
   if (t.ministryId && isPm(s) && underfunded(s, t)) return { demand: 'budget', text: 'המשרד שלי לא עומד במשימות בתקציב הנוכחי. אני מצפה לתוספת תקציב לתחום.' };
-  const fav = s.parties[t.partyId]?.favoriteLaws[0];
+  const fav = s.parties[t.partyId]?.favoriteLaws.find((l) => !s.activeLaws.includes(l));
   if (fav) return { demand: 'law', lawId: fav, text: `${lawTitle(fav)} חשוב לנו, ואני לא רואה שאתה מקדם אותו.` };
   return { demand: 'respect', text: 'אני מרגיש שאני לא שותף להחלטות. אני מצפה ליחס אחר: להתייעץ איתי לפני שמחליטים.' };
 }
@@ -307,7 +307,7 @@ function dialog(s: GameState, t: Politician, intent0: Intent, law: ReturnType<ty
       return no ? { text: 'בסדר גמור. אני כאן אם תצטרך.' } : null;
     }
     case 'coop': {
-      const pick1 = lid ?? party?.favoriteLaws[0];
+      const pick1 = lid && !s.activeLaws.includes(lid) ? lid : party?.favoriteLaws.find((l) => !s.activeLaws.includes(l));
       if (topic.stage === 'opened' && (talk || yes)) {
         if (!pick1) { setTopic(s, t.id, null); return { text: 'אשמח לעבוד יחד. תציע נושא ונבדוק.' }; }
         setTopic(s, t.id, { ...topic, stage: 'explained', lawId: pick1 });
@@ -595,6 +595,7 @@ function handleRaw(s: GameState, t: Politician, text: string): Reply {
       return { text: pick(s, ['איומים לא עובדים עליי. אזכור את השיחה הזו.', 'אם זו הדרך שבחרת, התגובה שלי תהיה בהצבעה.']), hint: 'האיום נכשל והיחסים נפגעו.' };
     }
     case 'promise': {
+      if (law && s.activeLaws.includes(law.id)) return { text: `${law.title} כבר עבר. אני מעריך את ההתכוונות, אבל אין מה להבטיח כאן.` };
       if (law) {
         remember(s, t.id, 'promise', `לקדם את ${law.title}`, 8, s.turn + 12, law.id);
         return { text: `${line(s, 'promiseGeneric', tn)} רשמתי: ${law.title}.`, hint: 'נרשמה הבטחה עם מועד (שנתיים). תקבל תזכורת לפני שיגיע.' };
@@ -611,6 +612,7 @@ function handleRaw(s: GameState, t: Politician, text: string): Reply {
       return { text: line(s, 'promiseGeneric', tn), hint: 'הבטחה כללית משפרת מעט את היחסים. כדי להתחייב, נקוב בחוק או בתפקיד מסוים.' };
     }
     case 'request': {
+      if (law && s.activeLaws.includes(law.id)) return { text: `${law.title} כבר עבר ובתוקף. אין מה לקדם בו עכשיו, אולי משהו חדש?` };
       if (law) {
         const st = lawStance(s, t, law.id);
         const bill = s.bills.find((b) => b.lawId === law.id && b.status === 'active');

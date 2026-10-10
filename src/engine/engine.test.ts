@@ -698,7 +698,7 @@ describe('every ministry is complete', () => {
       expect(laws.filter((l) => l.level === 'major').length, `${id} reforms`).toBeGreaterThanOrEqual(15);
       expect(PROJECTS.filter((p) => p.ministry === id).length, `${id} projects`).toBeGreaterThanOrEqual(15);
       const m = s.government.ministries.find((x) => x.id === id) ?? { id, origins: [id] } as never;
-      expect(ministryActionSpecs(m, s).length, `${id} actions`).toBeGreaterThanOrEqual(14);
+      expect(ministryActionSpecs(m).length, `${id} actions`).toBeGreaterThanOrEqual(14);
     }
   });
   it('seats the real 2026 ministers, several portfolios each, and gives the player all of them', async () => {
@@ -931,5 +931,42 @@ describe('security screen access and internal security', () => {
     s.player.politicalCapital = 100;
     expect(checkAction(s, 'diplomacy', { kind: 'annex', from: 'B' })).toBeNull();
     expect(checkAction(s, 'diplomacy', { kind: 'annex', from: 'A' })).toBeNull();
+  });
+});
+
+describe('small fixes: PM budget button, passed laws, unlimited support, honeymoon', () => {
+  it('the PM is not offered "pressure the PM for budget"; a minister is', async () => {
+    const { ministryActionSpecs } = await import('./decisions');
+    const pm = createGame(cfg('pm'));
+    const mm = pm.government.ministries.find((m) => m.id === 'transport')!;
+    expect(ministryActionSpecs(mm, pm).some((a) => a.id === 'gen_pressure_pm')).toBe(false);
+    const min = createGame(cfg('minister', { ministryId: 'transport' }));
+    expect(ministryActionSpecs(min.government.ministries.find((m) => m.id === 'transport')!, min).some((a) => a.id === 'gen_pressure_pm')).toBe(true);
+  });
+  it('rallying support and voting are not limited to once per turn', () => {
+    const s = createGame(cfg('pm'));
+    s.player.politicalCapital = 100;
+    s.government.caretaker = false; // a sitting Knesseton
+    const a = proposeBill(s, 'draft_equality', s.player.politicianId, false)!;
+    const b = proposeBill(s, 'draft_exemption', s.player.politicianId, false)!;
+    expect(checkAction(s, 'push_bill', { billId: a.id })).toBeNull();
+    let r = performAction(s, 'push_bill', { billId: a.id });
+    expect(checkAction(r.state, 'push_bill', { billId: b.id })).toBeNull();
+    r = performAction(r.state, 'push_bill', { billId: b.id });
+    expect(checkAction(r.state, 'push_bill', { billId: a.id })).toBeNull(); // same bill again, same turn
+    expect(r.state.bills.find((x) => x.id === a.id)!.push).toBeLessThanOrEqual(80);
+  });
+  it('a politician never asks to pass a law that is already in force', async () => {
+    const { sendChat, chatTick } = await import('./chat');
+    const { LAWS } = await import('../data/laws');
+    const s = createGame(cfg('pm'));
+    const t = Object.values(s.politicians).find((p) => p.active && !p.isPlayer && p.id !== s.government.pmId && s.government.coalition.includes(p.partyId))!;
+    const law = LAWS.find((l) => !s.activeLaws.includes(l.id) && l.title.length > 12)!;
+    s.activeLaws.push(law.id);
+    sendChat(s, t.id, `תתמוך ב${law.title}`);
+    expect(s.chats![t.id].at(-1)!.text).toContain('כבר');
+    for (const p of Object.values(s.parties)) p.favoriteLaws = [law.id, ...p.favoriteLaws.filter((l) => l !== law.id)];
+    for (let i = 0; i < 25; i++) { s.turn += 1; chatTick(s); }
+    for (const list of Object.values(s.chats ?? {})) for (const m of list) if (m.from === 'them' && m.proactive) expect(m.text.includes(law.title), m.text).toBe(false);
   });
 });

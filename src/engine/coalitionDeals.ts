@@ -127,12 +127,14 @@ const leader = (s: GameState, partyId: string) => s.politicians[s.parties[partyI
 
 function breach(s: GameState, c: Commitment, why: string): void {
   c.status = 'broken';
+  // the first year of a government is a honeymoon: a missed promise is remembered, but partners don't walk out over it
+  const honeymoon = s.turn - (s.government.formedTurn ?? 0) < 6;
   const l = leader(s, c.partyId);
   if (l) remember(s, l.id, 'betrayal', why, -22);
-  applyEffects(s, { stability: -8 });
+  applyEffects(s, { stability: honeymoon ? -3 : -6 });
   addNews(s, `${s.parties[c.partyId].name}: "ההסכם הקואליציוני הופר – ${c.label}"`, 'bad', '📜');
   logEvent(s, '📜', `הפרת התחייבות ל${s.parties[c.partyId].name}: ${c.label}`, 3, 'bad', 'coalition');
-  if (s.government.coalition.includes(c.partyId) && chance(s, 0.4)) partyLeavesCoalition(s, c.partyId, `הפרת ההסכם הקואליציוני: ${c.label}`);
+  if (!honeymoon && s.government.coalition.includes(c.partyId) && chance(s, 0.25)) partyLeavesCoalition(s, c.partyId, `הפרת ההסכם הקואליציוני: ${c.label}`);
 }
 
 function remind(s: GameState, c: Commitment, text: string): void {

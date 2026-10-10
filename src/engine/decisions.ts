@@ -104,7 +104,9 @@ export function ministryActionSpecs(m: Ministry, s?: GameState): MinistryActionS
   const ids = m.origins ?? [m.id];
   const own = ids.flatMap((id) => [...(MINISTRY_ACTIONS[id] ?? []), ...(EXTRA_MINISTRY_ACTIONS[id] ?? [])]);
   const war = ids.flatMap((id) => WAR_ACTIONS[id] ?? []);
-  return [...own, ...(s && !atWar(s) ? [] : war), ...GENERIC_MINISTER_ACTIONS];
+  // the prime minister holds the purse: he can't "pressure the PM for more budget"
+  const generic = GENERIC_MINISTER_ACTIONS.filter((a) => !(s && isPM(s) && a.id === 'gen_pressure_pm'));
+  return [...own, ...(s && !atWar(s) ? [] : war), ...generic];
 }
 
 /** A minister (not PM) asking for money must get the PM's approval. */
@@ -423,12 +425,12 @@ def({
 });
 
 def({
-  id: 'push_bill', title: 'גיוס תמיכה להצעה', icon: '📣', category: 'parliament', level: 'simple', capital: 8, cooldown: 1,
+  id: 'push_bill', title: 'גיוס תמיכה להצעה', icon: '📣', category: 'parliament', level: 'simple', capital: 8,
   description: 'שיחות עם ח״כים ועם ראשי סיעות כדי להגדיל את התמיכה בהצעה (+25 לסיכויי המעבר).',
   unavailable: (s, p) => (s.bills.find((b) => b.id === str(p, 'billId') && b.status === 'active') ? null : 'ההצעה לא פעילה'),
   run: (s, p) => {
     const b = s.bills.find((x) => x.id === str(p, 'billId'))!;
-    b.push += 25;
+    b.push = Math.min(80, b.push + 25);
     return { title: `התמיכה ב"${b.title}" עולה`, quip: 'ח״כים מתנדנדים קיבלו הסברים והבטחות לתיאום בהמשך.' };
   },
 });
@@ -450,13 +452,13 @@ def({
 });
 
 def({
-  id: 'vote_bill', title: 'הצבעה במליאה', icon: '🗳️', category: 'parliament', level: 'simple', capital: 0, cooldown: 1,
+  id: 'vote_bill', title: 'הצבעה במליאה', icon: '🗳️', category: 'parliament', level: 'simple', capital: 0,
   description: 'ההצבעה שלך על הצעת חוק. הצבעה נגד קו המפלגה פוגעת ביחסים עם המנהיג.',
   unavailable: (s, p) => (s.bills.find((b) => b.id === str(p, 'billId') && b.status === 'active') ? null : 'ההצעה לא פעילה'),
   run: (s, p) => {
     const b = s.bills.find((x) => x.id === str(p, 'billId'))!;
     const forIt = str(p, 'vote') === 'for';
-    b.push += forIt ? 4 : -4;
+    b.push = Math.max(-60, Math.min(60, b.push + (forIt ? 4 : -4)));
     const party = s.parties[s.player.partyId];
     const partyFor = party.favoriteLaws.includes(b.lawId) || (b.isGovernment && s.government.coalition.includes(party.id));
     const leader = s.politicians[party.leaderId];
