@@ -10,7 +10,8 @@ import { coalitionSeats } from '../../engine/polls';
 import { getCapabilities } from '../../engine/roles';
 import { daysBetween, electionCountdown, electionDate, monthsUntilElection, nextTurnDate, spanText } from '../../engine/calendar';
 import { unreadTotal } from '../../engine/chat';
-import { dateL, spanL, t } from '../../shared/i18n';
+import { LANGS, dateL, setLang, spanL, t, type Lang } from '../../shared/i18n';
+import { useLang } from '../useLang';
 import type { Key } from '../../shared/i18n/dict';
 import { Caricature } from '../../shared/components/Caricature';
 import { setMusic, setSfx, soundPrefs } from '../audio/sound';
@@ -114,6 +115,7 @@ export function Header({ onMenu }: { onMenu: () => void }) {
           {saveStatus === 'saved' ? `💾 ${t('hdr.saved')}` : saveStatus === 'failed' ? '⚠️ לא נשמר' : ''}
         </span>
         <button className="btn btn-sm" data-tut="speech" onClick={openSpeech} data-tip="כתיבת נאום ונשיאתו: בטלוויזיה, במליאה, בכנס או ברשתות" aria-label={t('hdr.speech')}>🎤<span className="hidden lg:inline"> {t('hdr.speech')}</span></button>
+        <LangPicker />
         <SoundToggles />
         <button className="btn btn-primary" data-tut="next-turn" onClick={endTurn} disabled={!!blocked} data-tip={blocked ?? `הזמן מתקדם ב${span} (עד ${dateLabel(next, true)}): הכלכלה, הציבור והפוליטיקאים מגיבים`}>
           <span className="hidden xl:inline">{t('hdr.next', { span })}</span><span className="xl:hidden">{span} ⏭</span> <span className="hidden xl:inline">⏭</span>
@@ -121,6 +123,16 @@ export function Header({ onMenu }: { onMenu: () => void }) {
       </div>
       <div className="ticker" aria-hidden><div>{[0, 1].map((k) => <span key={k}>{s.news.slice(0, 8).map((n) => `${n.icon} ${n.headline}`).join('   ✦   ')}</span>)}</div></div>
     </header>
+  );
+}
+
+/** Language picker kept in the header so the language can be changed during play, not only from the menu. */
+function LangPicker() {
+  const lang = useLang();
+  return (
+    <select className="text-xs lang-pick" value={lang} onChange={(e) => setLang(e.target.value as Lang)} aria-label="Language / שפה / اللغة" data-tip="Language / שפה / اللغة">
+      {LANGS.map((l) => <option key={l.id} value={l.id} lang={l.id}>{l.name}</option>)}
+    </select>
   );
 }
 

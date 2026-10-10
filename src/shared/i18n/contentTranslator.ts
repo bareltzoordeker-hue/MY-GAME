@@ -8,6 +8,7 @@ import { LANG_EVENT, getLang, type Lang } from './index';
 import { PATTERNS as BASE_PATTERNS, type Pattern } from './patterns';
 import { EXTRA_PATTERNS } from './patterns.extra';
 import { CAST_EVENT, castDictionary, getCast } from '../../data/cast';
+import { masculinize } from '../gender';
 
 // most specific (longest fixed text) first, so a general "{0} seats" never shadows a full sentence
 const PATTERNS: Pattern[] = [...BASE_PATTERNS, ...EXTRA_PATTERNS].sort(
@@ -22,10 +23,39 @@ const dicts: Partial<Record<Lang, Dict>> = {};
 const base: Partial<Record<Lang, Dict>> = {};
 
 /** The dictionary in use: the content dictionary plus, in a fictional game, the made-up names. */
+// names the player chose (their own, a custom party) have no entry in the dictionary: they are transliterated
+const EN_LET: Record<string, string> = { א: '', ב: 'b', ג: 'g', ד: 'd', ה: 'h', ו: 'o', ז: 'z', ח: 'ch', ט: 't', י: 'i', כ: 'k', ך: 'kh', ל: 'l', מ: 'm', ם: 'm', נ: 'n', ן: 'n', ס: 's', ע: 'a', פ: 'p', ף: 'f', צ: 'tz', ץ: 'tz', ק: 'k', ר: 'r', ש: 'sh', ת: 't' };
+const AR_LET: Record<string, string> = { א: 'ا', ב: 'ب', ג: 'ج', ד: 'د', ה: 'ه', ו: 'و', ז: 'ز', ח: 'ح', ט: 'ط', י: 'ي', כ: 'ك', ך: 'ك', ל: 'ل', מ: 'م', ם: 'م', נ: 'ن', ן: 'ن', ס: 'س', ע: 'ع', פ: 'ف', ף: 'ف', צ: 'ص', ץ: 'ص', ק: 'ق', ר: 'ر', ש: 'ش', ת: 'ت' };
+export function transliterate(name: string, lang: Lang): string {
+  if (lang === 'ar') return [...name].map((c) => AR_LET[c] ?? c).join('');
+  const parts = name.split(' ').map((w) => {
+    let out = '';
+    for (const c of w) {
+      const l = EN_LET[c];
+      if (l === undefined) { out += c; continue; }
+      // a vowel between two consonants makes the name readable ("brk" -> "barak")
+      if (l && out && /[bcdfghjklmnpqrstvwxyz]$/i.test(out) && /^[bcdfghjklmnpqrstvwxyz]/i.test(l)) out += 'a';
+      out += l;
+    }
+    return out ? out[0].toUpperCase() + out.slice(1) : out;
+  });
+  return parts.join(' ');
+}
+let customNames: string[] = [];
+/** Tell the translator which names are the player's own (called when a game starts or loads). */
+export function setCustomNames(names: string[]): void {
+  customNames = [...new Set(names.filter((n) => n && HEB.test(n)))];
+  for (const lang of ['en', 'ar'] as Lang[]) rebuild(lang);
+  compiled = null;
+  if (typeof document !== 'undefined' && getLang() !== 'he') void apply();
+}
+
 function rebuild(lang: Lang): void {
   const b = base[lang];
   if (!b || lang === 'he') return;
-  dicts[lang] = getCast() === 'fictional' ? { ...b, ...castDictionary()[lang] } : b;
+  const names: Dict = {};
+  for (const n of customNames) if (!(n in b)) names[n] = transliterate(n, lang);
+  dicts[lang] = getCast() === 'fictional' ? { ...names, ...b, ...castDictionary()[lang] } : { ...names, ...b };
 }
 
 interface Compiled { re: RegExp; idx: number; num: boolean[] }
@@ -115,6 +145,13 @@ function whole(norm: string, d: Dict, lang: Lang): string | null {
   if (hit !== undefined) return hit;
   const p = fromPattern(norm, lang);
   if (p !== null) return p;
+  // the same sentence stored without its closing mark ("בסדר." for "בסדר")
+  const end = /[.!?]$/.exec(norm)?.[0];
+  if (end && norm.length > 3) {
+    const core0 = norm.slice(0, -1);
+    const h2 = d[core0] ?? fromPattern(core0, lang);
+    if (h2 !== undefined && h2 !== null && !/[.!?؟]$/.test(h2)) return h2 + (end === '?' && lang === 'ar' ? '؟' : end);
+  }
   const sym = LEAD.exec(norm)?.[0] ?? '';
   if (!sym) return null;
   const core = norm.slice(sym.length);
@@ -147,9 +184,39 @@ function pieces(norm: string, sep: RegExp, fn: (p: string) => string | null): st
   return any ? out.join('') : null;
 }
 
+/** "a, b, c" – every item must translate on its own. */
+function byList(norm: string, lang: Lang): string | null {
+  const items = norm.split(/, /);
+  if (items.length < 2) return null;
+  const out: string[] = [];
+  for (const it of items) {
+    const r = HEB.test(it) ? translate(it, lang) : it;
+    if (r === null || HEB.test(r)) return null;
+    out.push(r);
+  }
+  return out.join(lang === 'ar' ? '، ' : ', ');
+}
+
 /** Translates a longer text piece by piece: "a · b" lists first, then sentence by sentence. */
 function bySegments(norm: string, d: Dict, lang: Lang): string | null {
-  const sentences = (seg: string) => pieces(seg, SENTENCE, (s) => whole(s, d, lang) ?? inline(s, d, lang));
+  // sentence by sentence, but first try the longest run of neighbours that the dictionary knows as one text
+  const sentences = (seg: string) => {
+    const parts = seg.split(SENTENCE).filter((p) => p !== ' ' && p !== '');
+    if (parts.length < 2) return null;
+    const out: string[] = [];
+    let any = false;
+    for (let i = 0; i < parts.length;) {
+      let done = false;
+      for (let j = parts.length; j > i && !done; j--) {
+        const chunk = parts.slice(i, j).join(' ');
+        const r = j - i === 1 ? (whole(chunk, d, lang) ?? inline(chunk, d, lang)) : whole(chunk, d, lang);
+        if (r === null) continue;
+        out.push(r); any = true; i = j; done = true;
+      }
+      if (!done) out.push(parts[i++]);
+    }
+    return any ? out.join(' ') : null;
+  };
   return pieces(norm, COARSE, (seg) => whole(seg, d, lang) ?? inline(seg, d, lang) ?? sentences(seg)) ?? sentences(norm);
 }
 
@@ -163,8 +230,10 @@ export function translate(text: string, lang: Lang = getLang()): string | null {
   const lead = text.slice(0, text.length - text.trimStart().length);
   const tail = text.slice(text.trimEnd().length);
   const norm = trimmed.replace(/\s+/g, ' ');
-  const run = (s: string): string | null => d[s] ?? fromPattern(s, lang) ?? bySegments(s, d, lang) ?? byColon(s, d, lang) ?? inline(s, d, lang);
+  const run = (s: string): string | null => d[s] ?? fromPattern(s, lang) ?? bySegments(s, d, lang) ?? byColon(s, d, lang) ?? byList(s, lang) ?? inline(s, d, lang);
   let out = run(norm);
+  // a woman's line is written in the feminine: look the masculine original up
+  if (out === null || HEB.test(out)) { const m = masculinize(norm); if (m !== norm) { const alt = run(m); if (alt !== null && !HEB.test(alt)) out = alt; } }
   if (out === null) {
     // leading bullets, arrows, emoji or ": " – translate what follows and keep the symbols
     const sym = LEAD.exec(norm)?.[0] ?? '';

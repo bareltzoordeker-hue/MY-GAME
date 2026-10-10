@@ -155,7 +155,7 @@ export function NewGame({ onBack }: { onBack: () => void }) {
         {step === 2 && (
           <div className="rise">
             <h1 className="screen-title mb-1">{mode === 'real' ? `בחרו פוליטיקאי – ${party.name}` : `את מי הדמות שלך מחליפה? – ${party.name}`}</h1>
-            <p className="h-sub mb-4">הרשימה לפי הסדר האמיתי. לפי הסקרים, המקומות הריאליים הם 1–{realistic}.</p>
+            <p className="h-sub mb-4">{`הרשימה לפי הסדר האמיתי. לפי הסקרים, המקומות הריאליים הם 1–${realistic}.`}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
               {roster.map((p) => (
                 <button key={p.id} onClick={() => setPersonId(p.id)} className={`inset text-right flex items-center gap-3 ${personId === p.id ? 'card-selected' : ''}`} aria-pressed={personId === p.id}>

@@ -20,3 +20,11 @@ export function feminize(text: string): string {
     .replace(FIRST, (m, pron: string, adv: string, w: string) => (PAIRS[w] ? `${pron}${adv} ${PAIRS[w]}` : m))
     .replace(STANDALONE, (m, w: string) => PAIRS[w] ?? m);
 }
+
+const REVERSE: Record<string, string> = Object.fromEntries(Object.entries(PAIRS).filter(([m, f]) => m !== f).map(([m, f]) => [f, m]));
+/** The inverse of feminize: used only to find the translation of a line that a female politician "said". */
+export function masculinize(text: string): string {
+  return text
+    .replace(FIRST, (m, pron: string, adv: string, w: string) => (REVERSE[w] ? `${pron}${adv} ${REVERSE[w]}` : m))
+    .replace(/(?<![א-ת])(שמחה|מופתעת|מאוכזבת)(?![א-ת])(?=\s+(?:לשמוע|לראות|מהתגובה|מההחלטה|מהמהלך|מהדרך|מאוד))/g, (m) => REVERSE[m] ?? m);
+}

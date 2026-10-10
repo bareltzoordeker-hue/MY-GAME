@@ -7,6 +7,7 @@ import { StatusBar, fxKind } from './Fx';
 import { EXPLAIN } from '../content/explain';
 import { Caricature, ADVISOR_SPEC } from '../../shared/components/Caricature';
 import { dateLabel } from '../../utils';
+import { dateL } from '../../shared/i18n';
 import { daysBetween, spanText } from '../../engine/calendar';
 import { ACTIONS } from '../../engine/decisions';
 import { LAW_BY_ID } from '../../data/laws';
@@ -165,7 +166,7 @@ export function BriefingModal() {
         <div className="p-5 border-b flex gap-3 items-center" style={{ borderColor: 'var(--line)' }}>
           <Caricature spec={ADVISOR_SPEC} size={52} />
           <div>
-            <div className="text-xs font-bold" style={{ color: 'var(--gold)' }}>📋 תדריך · {dateLabel(s.date)}</div>
+            <div className="text-xs font-bold" style={{ color: 'var(--gold)' }}><span>📋 תדריך</span> · <span>{dateL(s.date) || dateLabel(s.date)}</span></div>
             <div className="text-xl font-black">{b.turn === 0 ? 'ברוכים הבאים' : 'סיכום התור'}</div>
           </div>
         </div>
@@ -252,7 +253,7 @@ export function GameOverScreen() {
       <div className="w-full max-w-3xl space-y-4 rise">
         <div className="card text-center">
           <div className="text-5xl">🏛️</div>
-          <div className="text-xs muted mt-2">סוף הקריירה הפוליטית · {dateLabel(s.date, true)}</div>
+          <div className="text-xs muted mt-2"><span>סוף הקריירה הפוליטית</span> · <span>{dateL(s.date) || dateLabel(s.date, true)}</span></div>
           <h1 className="text-3xl font-black mt-1">{g.title}</h1>
           <p className="mt-2 text-lg" style={{ color: 'var(--gold)' }}>"{g.text}"</p>
           <div className="flex justify-center mt-4"><Caricature spec={me.caricature} size={110} tie={s.parties[s.player.partyId]?.color} mood="bad" /></div>

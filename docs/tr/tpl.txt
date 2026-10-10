@@ -487,3 +487,222 @@
 אני יכול לשקול תוספת ל{}, אבל לא בחינם. מה אתה נותן לי? ||| I can consider an addition for {0}, but not for free. What are you giving me? ||| يمكنني النظر في زيادة لـ{0}، لكن ليس مجانًا. ماذا تعطيني؟
 אין לי מאיפה להוסיף ל{} עכשיו. הגירעון והלחצים מכל כיוון. ||| I have nowhere to add from for {0} right now. The deficit and pressures from every direction. ||| ليس لدي من أين أضيف لـ{0} الآن. العجز والضغوط من كل اتجاه.
 סגור. {} מצידי, ואתה מתחייב {} מצידך. אני אזכור את החלק שלך. ||| Done. {0} from me, and you commit to {1} from you. I'll remember your part. ||| اتفقنا. {0} من جهتي، وأنت تلتزم {1} من جهتك. سأتذكر الجزء الخاص بك.
+מעבר לתצוגה "{}". לא משנה דבר במשחק, רק מה שמוצג על המסך ||| Switch to the "{0}" view. Changes nothing in the game, only what is shown on screen ||| الانتقال إلى عرض "{0}". لا يغيّر شيئًا في اللعبة، فقط ما يُعرض على الشاشة
+{}: {} מנדטים. לחיצה מציגה את היחסים של המפלגה עם כל השאר, ואת הפעולות האפשריות מולה ||| {0}: {1} seats. Clicking shows the party's relations with all the others and the possible actions toward it ||| {0}: {1} مقعدًا. النقر يعرض علاقات الحزب بالجميع والإجراءات الممكنة تجاهه
+פותח שיחה עם {}. אפשר לכתוב איום, הבטחה, בקשה, התנצלות או מילה טובה, וההשפעה תלויה ביחסים ובאופי של הצד השני ||| Opens a chat with {0}. You can write a threat, a promise, a request, an apology or a kind word, and the effect depends on the relationship and on the other side's character ||| يفتح محادثة مع {0}. يمكنك كتابة تهديد أو وعد أو طلب أو اعتذار أو كلمة طيبة، ويعتمد الأثر على العلاقة وطبيعة الطرف الآخر
+{} · זוכר: {} ||| {0} · remembers: {1} ||| {0} · يتذكر: {1}
+
+בסדר, תודה. יום עמוס ב{}. ומה איתך? ||| Fine, thanks. A busy day in {0}. And you? ||| بخير، شكرًا. يوم مزدحم في {0}. وأنت؟
+מחזיק מעמד. ב{} יש הרבה עבודה עכשיו. ||| Holding up. There is a lot of work in {0} right now. ||| أصمد. هناك عمل كثير في {0} الآن.
+{} מקבל {}% מהצורך שלו (₪{} מיליארד מתוך ₪{}). {} ||| {0} gets {1}% of its need (₪{2} billion out of ₪{3}). {4} ||| {0} تحصل على {1}% من حاجتها (₪{2} مليار من ₪{3}). {4}
+אני צריך תשובה ברורה: {}. כן או לא? ||| I need a clear answer: {0}. Yes or no? ||| أحتاج إلى جواب واضح: {0}. نعم أم لا؟
+"אולי" לא עוזר לי. {}, זה אפשרי מבחינתך או לא? ||| "Maybe" doesn't help me. {0}, is that possible for you or not? ||| "ربما" لا تساعدني. {0}، هل هذا ممكن بالنسبة لك أم لا؟
+{} כבר עבר. אני מעריך את ההתכוונות, אבל אין מה להבטיח כאן. ||| {0} has already passed. I appreciate the intention, but there is nothing to promise here. ||| {0} أُقرّ بالفعل. أقدّر النية، لكن لا شيء نعد به هنا.
+{} כבר עבר ובתוקף. אין מה לקדם בו עכשיו, אולי משהו חדש? ||| {0} has already passed and is in force. There is nothing to advance in it now, maybe something new? ||| {0} أُقرّ وهو ساري المفعول. لا شيء لدفعه الآن، ربما شيء جديد؟
+אני מתנגד ל{}. אין לי עניין לתמוך. ||| I oppose {0}. I have no interest in supporting it. ||| أعارض {0}. لا مصلحة لي في دعمه.
+בסדר, אתמוך ב{}. ||| Fine, I'll support {0}. ||| حسنًا، سأدعم {0}.
+אפעל בעד {} בסיעה שלי. ||| I'll work in favor of {0} in my faction. ||| سأعمل لصالح {0} في كتلتي.
+בסדר, אתמוך ב{}, אבל לא אהבתי את הלחץ. ||| Fine, I'll support {0}, but I didn't like the pressure. ||| حسنًا، سأدعم {0}، لكنني لم أحب الضغط.
+אם לא תתמוך ב{}, אצביע נגדך. ||| If you don't support {0}, I'll vote against you. ||| إن لم تدعم {0} فسأصوّت ضدك.
+אם לא תצביע בעד "{}", אפרוש מהתמיכה בך. ||| If you don't vote for "{0}", I'll withdraw my support for you. ||| إن لم تصوّت لصالح "{0}" فسأسحب دعمي لك.
+אם התקציב של {} לא יאושר, אצביע נגד התקציב כולו. ||| If the budget of {0} isn't approved, I'll vote against the entire budget. ||| إن لم تُقرّ ميزانية {0} فسأصوّت ضد الميزانية كلها.
+אם זה לא ישתנה, {} תפרוש מהקואליציה. ||| If this doesn't change, {0} will leave the coalition. ||| إن لم يتغير ذلك فستنسحب {0} من الائتلاف.
+ראית את הכותרת "{}"? {} ||| Did you see the headline "{0}"? {1} ||| هل رأيت العنوان "{0}"؟ {1}
+
+אשמח לתמיכה שלך בהצבעה על "{}". ||| I'd appreciate your support in the vote on "{0}". ||| سأكون ممتنًا لدعمك في التصويت على "{0}".
+אשמח שתשקול אותי לתפקיד {}. ||| I'd be glad if you'd consider me for the role of {0}. ||| يسعدني أن تدرسني لمنصب {0}.
+אני מבקש שתתמוך ב{}. ||| I ask that you support {0}. ||| أطلب أن تدعم {0}.
+אני מבקשת שתתמוך ב{}. ||| I ask that you support {0}. ||| أطلب أن تدعم {0}.
+אני דורש תוספת של ₪{} מיליארד ל{}. זה לא יכול לחכות. ||| I demand an extra ₪{0} billion for {1}. It can't wait. ||| أطالب بزيادة ₪{0} مليار لـ{1}. لا يمكن أن ينتظر ذلك.
+אני דורשת תוספת של ₪{} מיליארד ל{}. זה לא יכול לחכות. ||| I demand an extra ₪{0} billion for {1}. It can't wait. ||| أطالب بزيادة ₪{0} مليار لـ{1}. لا يمكن أن ينتظر ذلك.
+אני מצפה שתצביע בעד "{}". ||| I expect you to vote for "{0}". ||| أتوقع أن تصوّت لصالح "{0}".
+אני לוחץ עליך לחוקק את {}. הגיע הזמן. ||| I'm pressing you to enact {0}. It's time. ||| أضغط عليك لسنّ {0}. حان الوقت.
+אני לוחצת עליך לחוקק את {}. הגיע הזמן. ||| I'm pressing you to enact {0}. It's time. ||| أضغط عليك لسنّ {0}. حان الوقت.
+תוכל לדבר עם {} על {}? ||| Could you speak with {0} about {1}? ||| هل يمكنك التحدث مع {0} بشأن {1}؟
+אני מבטיח לך את {}. ||| I promise you {0}. ||| أعدك بـ{0}.
+אני מבטיחה לך את {}. ||| I promise you {0}. ||| أعدك بـ{0}.
+אני מבטיח תוספת תקציב ל{}. ||| I promise a budget increase for {0}. ||| أعد بزيادة ميزانية لـ{0}.
+אני מבטיחה תוספת תקציב ל{}. ||| I promise a budget increase for {0}. ||| أعد بزيادة ميزانية لـ{0}.
+אני מבטיח לקדם את {}. ||| I promise to advance {0}. ||| أعد بدفع {0}.
+אני מבטיחה לקדם את {}. ||| I promise to advance {0}. ||| أعد بدفع {0}.
+אני מציע לך את {}. ||| I offer you {0}. ||| أعرض عليك {0}.
+אני מציעה לך את {}. ||| I offer you {0}. ||| أعرض عليك {0}.
+אני ממליץ עליך לתפקיד {}. ||| I recommend you for the role of {0}. ||| أوصي بك لمنصب {0}.
+אני ממליצה עליך לתפקיד {}. ||| I recommend you for the role of {0}. ||| أوصي بك لمنصب {0}.
+לקדם את {} ||| To advance {0} ||| دفع {0}
+הבטחת לקדם את {} (נרשמה עם מועד) ||| Promised to advance {0} (recorded with a deadline) ||| وعدت بدفع {0} (سُجّل مع موعد)
+{} זה קו אדום עבורי ועבור {}. לא נתמוך בשום מצב. ||| {0} is a red line for me and for {1}. We will not support it under any circumstances. ||| {0} خط أحمر بالنسبة لي ولـ{1}. لن ندعمه في أي ظرف.
+נענה לבקשה בנושא {} ||| Responded to a request on {0} ||| استجاب لطلب بشأن {0}
+בסדר, אתמוך ב{}{}. ||| Fine, I'll support {0}{1}. ||| حسنًا، سأدعم {0}{1}.
+אני לא יכול להתחייב על {} כך סתם. אצטרך משהו בתמורה: מה שחשוב ל{}. ||| I can't commit to {0} just like that. I'll need something in return: what matters to {1}. ||| لا أستطيع الالتزام بـ{0} هكذا ببساطة. سأحتاج إلى شيء مقابل: ما يهمّ {1}.
+אני לא יכולה להתחייב על {} כך סתם. אצטרך משהו בתמורה: מה שחשוב ל{}. ||| I can't commit to {0} just like that. I'll need something in return: what matters to {1}. ||| لا أستطيع الالتزام بـ{0} هكذا ببساطة. سأحتاج إلى شيء مقابل: ما يهمّ {1}.
+אישר תוספת ל{} ||| Approved an increase for {0} ||| وافق على زيادة لـ{0}
+התקציב עודכן, גם בזכות {} תומכים שגייסת. ||| The budget was updated, partly thanks to the {0} supporters you recruited. ||| تم تحديث الميزانية، وذلك أيضًا بفضل {0} من الداعمين الذين جندتهم.
+אחכה לראות את זה בתקציב של {}. ||| I'll wait to see it in the budget of {0}. ||| سأنتظر أن أراه في ميزانية {0}.
+נרשמה הבטחה עם מועד. היא מתקיימת כשהמשרד ממומן במלואו. ||| A promise with a deadline was recorded. It is kept when the ministry is fully funded. ||| سُجّل وعد له موعد. يُعتبر منفذًا عندما تُموَّل الوزارة بالكامل.
+תמך בהעלאת התקציב ל{} ||| Backed raising the budget of {0} ||| دعم رفع ميزانية {0}
+נרשמה תמיכה. כל תומך מעלה את הסיכוי שראש הממשלה ושר האוצר יאשרו תוספת ל{}. ||| Support recorded. Every supporter raises the chance that the prime minister and finance minister will approve an increase for {0}. ||| سُجّل الدعم. كل داعم يرفع احتمال أن يوافق رئيس الحكومة ووزير المالية على زيادة لـ{0}.
+{} תפוס ב{}, ואני לא מתכנן להחליף אותו. ||| {0} is taken by {1}, and I don't plan to replace them. ||| {0} مشغولة بيد {1}، ولا أنوي استبداله.
+מינה אותי ל{} ||| Appointed me to {0} ||| عيّنني في {0}
+בסדר, אני ממנה אותך ל{}. ||| Fine, I'm appointing you to {0}. ||| حسنًا، أعيّنك في {0}.
+בסדר, אני ממנה אותך ל{}. ||| Fine, I'm appointing you to {0}. ||| حسنًا، أعيّنك في {0}.
+אני לא מוכן למנות אותך ל{} עכשיו. תוכיח את עצמך בתפקיד הנוכחי, ונדבר. ||| I'm not willing to appoint you to {0} now. Prove yourself in your current role, and we'll talk. ||| لست مستعدًا لتعيينك في {0} الآن. أثبت نفسك في منصبك الحالي وسنتحدث.
+{} לא מקשיב לי בימים אלה. אם אדבר איתו, זה רק יזיק לך. נסה דרך מישהו אחר. ||| {0} isn't listening to me these days. If I talk to him, it will only hurt you. Try going through someone else. ||| {0} لا يصغي إليّ هذه الأيام. إن تحدثت معه فسيضرك ذلك فقط. جرّب عبر شخص آخر.
+{} דיבר איתי בעד {} ||| {0} spoke with me in favor of {1} ||| {0} تحدث معي لصالح {1}
+{} שמע ממנו מילה טובה (+{}). בשמונה התורות הקרובים זה מעלה את הסיכוי לאישור. ||| {0} heard a good word from him (+{1}). Over the next eight turns this raises the chance of approval. ||| {0} سمع منه كلمة طيبة (+{1}). في الأدوار الثمانية القادمة يرفع ذلك احتمال الموافقة.
+למנות ל{} ||| Appoint to {0} ||| التعيين في {0}
+תודה. אני מצפה לתפקיד {} כפי שהובטח, ואזכור. ||| Thanks. I'm expecting the role of {0} as promised, and I will remember. ||| شكرًا. أنتظر منصب {0} كما وُعدت، وسأتذكر.
+תודה על ההמלצה. אני מעריך שחשבת עליי ל{}. ||| Thanks for the recommendation. I appreciate that you thought of me for {0}. ||| شكرًا على التوصية. أقدّر أنك فكرت بي لـ{0}.
+תודה על ההמלצה. אני מעריכה שחשבת עליי ל{}. ||| Thanks for the recommendation. I appreciate that you thought of me for {0}. ||| شكرًا على التوصية. أقدّر أنك فكرت بي لـ{0}.
+{} אני מגיש את ההצעה בעצמי. ||| {0} I'm submitting the bill myself. ||| {0} سأقدّم المشروع بنفسي.
+תמיכה בהעלאת התקציב של {} ||| Support for raising the budget of {0} ||| دعم رفع ميزانية {0}
+₪{} מיליארד נוספים ל{} ||| ₪{0} billion more for {1} ||| ₪{0} مليار إضافية لـ{1}
+סיכם לתמוך ב{} ||| Agreed to support {0} ||| اتفق على دعم {0}
+תמיכה ב{} ||| Support for {0} ||| دعم {0}
+מסכים: {}. ||| Agreed: {0}. ||| موافق: {0}.
+מה דעתך על {} במקום? ||| What about {0} instead? ||| ما رأيك بـ{0} بدلًا من ذلك؟
+{}? זה בכלל לא מה שחשוב לנו. תציע משהו אחר. ||| {0}? That's not what matters to us at all. Offer something else. ||| {0}؟ هذا ليس ما يهمنا إطلاقًا. اقترح شيئًا آخر.
+{} לא מספיק עבורי. תציע משהו שחשוב באמת ל{}. ||| {0} isn't enough for me. Offer something that really matters to {1}. ||| {0} لا يكفيني. اقترح شيئًا يهمّ {1} حقًا.
+העסקה נרשמה: {}. ||| The deal is recorded: {0}. ||| سُجّلت الصفقة: {0}.
+מועדפים על {} ||| Favorites of {0} ||| المفضلة لدى {0}
+מה המצב של תקציב {}? ||| What's the state of the {0} budget? ||| ما وضع ميزانية {0}؟
+מה דעתך על {}? ||| What do you think of {0}? ||| ما رأيك في {0}؟
+תמיכה זה התחלה, אבל לא מספיק בשביל {}. אם תוסיף גם את {}, סגרנו. ||| Support is a start, but not enough for {0}. If you also add {1}, we have a deal. ||| الدعم بداية، لكنه لا يكفي لـ{0}. إن أضفت أيضًا {1} فقد اتفقنا.
+תמיכה זה התחלה, אבל לא מספיק בשביל {}. אם תוסיף גם את {}, סגרנו. ||| Support is a start, but not enough for {0}. If you also add {1}, we have a deal. ||| الدعم بداية، لكنه لا يكفي لـ{0}. إن أضفت أيضًا {1} فقد اتفقنا.
+הרעיון: שנקדם יחד את {}. הצעה משותפת תגדיל את הסיכוי שתעבור, ושנינו נרוויח מזה. מה דעתך? ||| The idea: let's advance {0} together. A joint bill will raise the chance that it passes, and we'll both gain from it. What do you think? ||| الفكرة: أن ندفع {0} معًا. اقتراح مشترك يزيد احتمال إقراره، وسنستفيد كلانا من ذلك. ما رأيك؟
+בנושא {}: אני {}. אם אתה מבקש משהו ממני, תגיד זאת במפורש. ||| On {0}: I am {1}. If you're asking something of me, say so explicitly. ||| بشأن {0}: أنا {1}. إن كنت تطلب مني شيئًا فقلها صراحة.
+לפי הסקר האחרון {} ב-{} מנדטים. אנחנו במגמה טובה. ||| According to the latest poll {0} has {1} seats. We're on a good trend. ||| وفق آخر استطلاع لدى {0} {1} مقعدًا. نحن في اتجاه جيد.
+לפי הסקר האחרון {} ב-{} מנדטים ו{} ב-{}. אנחנו במגמה טובה. ||| According to the latest poll {0} has {1} seats and {2} has {3}. We're on a good trend. ||| وفق آخر استطلاع لدى {0} {1} مقعدًا ولدى {2} {3}. نحن في اتجاه جيد.
+{} מחזיק מעמד. ||| {0} holds up. ||| {0} صامد.
+{} הועבר מתפקידו כשר האוצר ||| {0} was moved from his post as finance minister ||| نُقل {0} من منصبه كوزير للمالية
+{} הועברה מתפקידה כשרת האוצר ||| {0} was moved from her post as finance minister ||| نُقلت {0} من منصبها كوزيرة للمالية
+הקואליציה מתנדנדת, ו{} יודע שהוא צריך אותנו. אם לא יקיימו את ההסכמים, נשקול את צעדינו. ||| The coalition is wobbling, and {0} knows he needs us. If the agreements aren't kept, we'll consider our steps. ||| الائتلاف يترنح، و{0} يعرف أنه يحتاجنا. إن لم تُنفَّذ الاتفاقات فسنراجع خطواتنا.
+{} עולה בסקרים. מי שרוצה לעבוד איתנו, שידבר עכשיו. ||| {0} is rising in the polls. Whoever wants to work with us should speak now. ||| {0} يرتفع في الاستطلاعات. من يريد العمل معنا فليتحدث الآن.
+יד קשה זה מה שהאויב מבין. "{}" הוא צעד בכיוון הנכון. ||| A firm hand is what the enemy understands. "{0}" is a step in the right direction. ||| اليد الحازمة هي ما يفهمه العدو. "{0}" خطوة في الاتجاه الصحيح.
+סוף סוף מדיניות ביטחונית ברורה: "{}". צריך להמשיך ולהעמיק. ||| Finally a clear security policy: "{0}". We must continue and deepen it. ||| أخيرًا سياسة أمنية واضحة: "{0}". يجب المواصلة والتعميق.
+"{}" מחזיר הרתעה. אנחנו מברכים. ||| "{0}" restores deterrence. We welcome it. ||| "{0}" يعيد الردع. نرحب بذلك.
+מי שמבין את המזרח התיכון יודע ש"{}" הכרחי. ||| Anyone who understands the Middle East knows "{0}" is necessary. ||| من يفهم الشرق الأوسط يعرف أن "{0}" ضروري.
+כוח לבד לא יפתור את זה. "{}" בלי אופק מדיני יוביל לסבב נוסף. ||| Force alone won't solve this. "{0}" without a political horizon will lead to another round. ||| القوة وحدها لن تحل هذا. "{0}" بلا أفق سياسي سيقود إلى جولة أخرى.
+"{}" הוא מתכון למחיר דמים. מי ישלם? תושבי הפריפריה והמילואימניקים. ||| "{0}" is a recipe for a bloody price. Who will pay? Residents of the periphery and reservists. ||| "{0}" وصفة لثمن دموي. من سيدفع؟ سكان الأطراف وجنود الاحتياط.
+ממשלה שיודעת רק להפעיל כוח מפסידה את היום שאחרי. "{}" לא יפתור כלום. ||| A government that only knows how to use force loses the day after. "{0}" won't solve anything. ||| حكومة لا تعرف سوى استخدام القوة تخسر اليوم التالي. "{0}" لن يحل شيئًا.
+אנחנו לא נתנגד לביטחון, אבל "{}" נעשה בלי שום תכנית ליום שאחרי. ||| We won't oppose security, but "{0}" was done with no plan for the day after. ||| لن نعارض الأمن، لكن "{0}" تم بلا أي خطة لليوم التالي.
+נבחן את "{}" לפי התוצאות בשטח, לא לפי ההודעות. ||| We'll judge "{0}" by results on the ground, not by announcements. ||| سنحكم على "{0}" بحسب النتائج على الأرض لا بحسب البيانات.
+אם "{}" ייושם נכון ובלי פגיעה באזרחים, אין לנו התנגדות עקרונית. ||| If "{0}" is implemented properly and without harming civilians, we have no principled objection. ||| إن نُفّذ "{0}" بشكل صحيح ودون المساس بالمدنيين فلا اعتراض مبدئي لدينا.
+נבקש תדריך בוועדת החוץ והביטחון על "{}". ||| We'll request a briefing in the Foreign Affairs and Defense Committee on "{0}". ||| سنطلب إحاطة في لجنة الخارجية والأمن بشأن "{0}".
+"{}" פותח חלון הזדמנויות מדיני. מברכים על האומץ. ||| "{0}" opens a diplomatic window of opportunity. We welcome the courage. ||| "{0}" يفتح نافذة فرص سياسية. نرحب بالجرأة.
+מי שרוצה ביטחון אמיתי צריך גם מהלכים מדיניים. "{}" בכיוון הנכון. ||| Whoever wants real security needs diplomatic moves too. "{0}" is in the right direction. ||| من يريد أمنًا حقيقيًا يحتاج أيضًا إلى خطوات سياسية. "{0}" في الاتجاه الصحيح.
+סוף סוף מישהו מדבר על יום שאחרי: "{}". ||| Finally someone talks about the day after: "{0}". ||| أخيرًا شخص يتحدث عن اليوم التالي: "{0}".
+"{}" משדר חולשה לאויב, והאויב מקשיב. ||| "{0}" signals weakness to the enemy, and the enemy is listening. ||| "{0}" يرسل إشارة ضعف إلى العدو، والعدو يصغي.
+זו הרמת ידיים. הרתעה לא בונים ככה: "{}" יעלה לנו בדם. ||| This is giving up. Deterrence isn't built this way: "{0}" will cost us in blood. ||| هذا استسلام. الردع لا يُبنى هكذا: "{0}" سيكلفنا دمًا.
+לא נשב בשקט כשמוותרים על ביטחון: "{}" מסוכן. ||| We won't sit quietly while security is given up: "{0}" is dangerous. ||| لن نجلس صامتين بينما يُتنازل عن الأمن: "{0}" خطير.
+"{}" יכול להיות מהלך נכון, אם יש גב מדיני ובדיקה מסודרת. ||| "{0}" could be the right move, if it has political backing and proper review. ||| "{0}" قد يكون خطوة صحيحة إن كان له غطاء سياسي وفحص منظم.
+נבדוק את "{}" לפני שנחליט. ||| We'll examine "{0}" before we decide. ||| سنفحص "{0}" قبل أن نقرر.
+"{}" משחרר את המשק. כך מייצרים צמיחה ומשרות. ||| "{0}" frees the economy. This is how you create growth and jobs. ||| "{0}" يحرر الاقتصاد. هكذا يُصنع النمو وفرص العمل.
+פחות רגולציה ויותר תחרות: "{}" הוא בדיוק מה שהמשק צריך. ||| Less regulation and more competition: "{0}" is exactly what the economy needs. ||| تنظيم أقل ومنافسة أكثر: "{0}" هو بالضبط ما يحتاجه الاقتصاد.
+סוף סוף מדיניות כלכלית אחראית: "{}". ||| Finally a responsible economic policy: "{0}". ||| أخيرًا سياسة اقتصادية مسؤولة: "{0}".
+"{}" פוגע בחלשים ובמעמד הביניים, והם ישלמו על זה. ||| "{0}" hurts the weak and the middle class, and they will pay for it. ||| "{0}" يضرّ بالضعفاء والطبقة الوسطى وهم من سيدفع الثمن.
+זו מדיניות לטובת העשירים: "{}" לא ירגיש בשכר המינימום. ||| This is a policy for the rich: "{0}" won't be felt at minimum wage. ||| هذه سياسة لصالح الأغنياء: "{0}" لن يشعر به أصحاب الحد الأدنى للأجور.
+נילחם נגד "{}" בכנסטון ובמחאה הציבורית. ||| We'll fight "{0}" in the Knesseton and in public protest. ||| سنحارب "{0}" في الكنيستون وفي الاحتجاج الشعبي.
+נבחן אם "{}" באמת יוריד מחירים או רק ישפר את המאזן. ||| We'll examine whether "{0}" really lowers prices or only improves the balance sheet. ||| سندرس هل "{0}" يخفض الأسعار فعلًا أم يحسّن الميزانية فقط.
+נעקוב אחרי ההשפעה של "{}" על יוקר המחיה. ||| We'll track the impact of "{0}" on the cost of living. ||| سنتابع تأثير "{0}" على غلاء المعيشة.
+סוף סוף השקעה אמיתית באנשים: "{}". ||| Finally a real investment in people: "{0}". ||| أخيرًا استثمار حقيقي في الناس: "{0}".
+"{}" הוא מה שמדינה צריכה לעשות כשיש פערים. מברכים. ||| "{0}" is what a country should do when there are gaps. We welcome it. ||| "{0}" هو ما يجب على الدولة فعله عند وجود فجوات. نرحب بذلك.
+הציבור מחכה לצעד כזה: "{}". חבל שלקח כל כך הרבה זמן. ||| The public has been waiting for such a step: "{0}". A pity it took so long. ||| الجمهور ينتظر خطوة كهذه: "{0}". للأسف استغرق الأمر وقتًا طويلًا.
+"{}" נראה טוב בכותרת ועולה לנו בגירעון. מי יממן? ||| "{0}" looks good in the headline and costs us in the deficit. Who will fund it? ||| "{0}" يبدو جيدًا في العنوان ويكلفنا في العجز. من سيموّل؟
+הממשלה מבזבזת כסף שאין לה על "{}". הדור הבא ישלם. ||| The government is spending money it doesn't have on "{0}". The next generation will pay. ||| الحكومة تهدر مالًا لا تملكه على "{0}". الجيل القادم سيدفع.
+התערבות ממשלתית כזאת, "{}", רק תעלה מחירים. ||| Government intervention like this, "{0}", will only raise prices. ||| تدخل حكومي كهذا، "{0}"، لن يؤدي إلا إلى رفع الأسعار.
+לא ברור איך "{}" ימומן. נדרוש מקור תקציבי. ||| It's unclear how "{0}" will be funded. We'll demand a budget source. ||| لا يتضح كيف سيُموَّل "{0}". سنطالب بمصدر ميزانية.
+נעקוב אחרי היישום של "{}". ||| We'll follow the implementation of "{0}". ||| سنتابع تنفيذ "{0}".
+"{}" שומר על אופי המדינה ועל המסורת. אנחנו מברכים. ||| "{0}" preserves the character of the state and tradition. We welcome it. ||| "{0}" يحافظ على طابع الدولة والتقاليد. نرحب بذلك.
+סוף סוף מישהו מקשיב לציבור שומר המצוות: "{}". ||| Finally someone listens to the observant public: "{0}". ||| أخيرًا شخص يصغي إلى الجمهور المتدين: "{0}".
+"{}" מחזק את הזהות היהודית של המדינה. ||| "{0}" strengthens the state's Jewish identity. ||| "{0}" يعزز الهوية اليهودية للدولة.
+"{}" הוא כפייה דתית שהציבור החילוני לא ישתוק עליה. ||| "{0}" is religious coercion that the secular public will not stay silent about. ||| "{0}" إكراه ديني لن يسكت عنه الجمهور العلماني.
+מדינה מודרנית לא מכתיבה אורח חיים: "{}" פוגע בחופש. ||| A modern state doesn't dictate a way of life: "{0}" harms freedom. ||| الدولة الحديثة لا تفرض نمط حياة: "{0}" يمسّ بالحرية.
+לא נאפשר ל"{}" לעבור בלי מאבק. ||| We won't let "{0}" pass without a fight. ||| لن نسمح بمرور "{0}" دون صراع.
+נבחן את "{}" מול העקרונות של החקיקה הקיימת. ||| We'll examine "{0}" against the principles of existing legislation. ||| سندرس "{0}" في ضوء مبادئ التشريع القائم.
+"{}" ידרוש הסברים בוועדה. ||| "{0}" will require explanations in committee. ||| "{0}" سيتطلب توضيحات في اللجنة.
+סוף סוף חופש בחירה: "{}". ||| Finally freedom of choice: "{0}". ||| أخيرًا حرية الاختيار: "{0}".
+"{}" הוא צעד לכיוון מדינה של כל אזרחיה. מברכים. ||| "{0}" is a step toward a state of all its citizens. We welcome it. ||| "{0}" خطوة نحو دولة لكل مواطنيها. نرحب بذلك.
+הציבור החילוני מחכה לצעד כזה כבר שנים: "{}". ||| The secular public has been waiting for such a step for years: "{0}". ||| الجمهور العلماني ينتظر خطوة كهذه منذ سنوات: "{0}".
+"{}" פוגע בצביון היהודי של המדינה, ואנחנו לא נשתוק. ||| "{0}" harms the state's Jewish character, and we will not stay silent. ||| "{0}" يمسّ بالطابع اليهودي للدولة ولن نسكت.
+זו פגיעה במסורת: "{}" חוצה קו אדום. ||| This is an attack on tradition: "{0}" crosses a red line. ||| هذا مساس بالتقاليد: "{0}" يتجاوز خطًا أحمر.
+הציבור הדתי יגיב ל"{}" בכל דרך. ||| The religious public will respond to "{0}" in every way. ||| الجمهور المتدين سيرد على "{0}" بكل وسيلة.
+נבדוק את "{}" לעומק לפני שנחליט. ||| We'll examine "{0}" in depth before we decide. ||| سندرس "{0}" بعمق قبل أن نقرر.
+מדובר בנושא רגיש, ונשמע את כל הצדדים לגבי "{}". ||| This is a sensitive issue, and we'll hear all sides regarding "{0}". ||| هذا موضوع حساس وسنسمع جميع الأطراف بشأن "{0}".
+חבל ש"{}" לא הצליח. זה היה צעד נכון. ||| A pity "{0}" didn't succeed. It was the right step. ||| للأسف لم ينجح "{0}". كانت خطوة صحيحة.
+הכיוון של "{}" נכון. הביצוע נכשל, וצריך לתקן. ||| The direction of "{0}" is right. The execution failed, and it needs fixing. ||| اتجاه "{0}" صحيح. التنفيذ فشل ويجب تصحيحه.
+"{}" נכשל, כמו שהזהרנו. ||| "{0}" failed, as we warned. ||| "{0}" فشل، كما حذّرنا.
+הכישלון של "{}" מוכיח שהמהלך לא נבנה כראוי. ||| The failure of "{0}" proves the move wasn't built properly. ||| فشل "{0}" يثبت أن الخطوة لم تُبنَ كما يجب.
+מי שהתעלם מאזהרות קיבל את התוצאה: "{}" נכשל. ||| Whoever ignored warnings got the result: "{0}" failed. ||| من تجاهل التحذيرات حصل على النتيجة: "{0}" فشل.
+הציבור יבחן את התוצאות ולא את ההודעות על "{}". ||| The public will judge the results, not the announcements about "{0}". ||| الجمهور سيحكم على النتائج لا على البيانات بشأن "{0}".
+נעקוב אחרי היישום של "{}" ונדרוש דוחות. ||| We'll follow the implementation of "{0}" and demand reports. ||| سنتابع تنفيذ "{0}" وسنطالب بتقارير.
+"{}": כיוון סביר, והביצוע יקבע. ||| "{0}": a reasonable direction, and the execution will decide. ||| "{0}": اتجاه معقول والتنفيذ هو الحاسم.
+מי יממן את "{}"? נדרוש מקור תקציבי. ||| Who will fund "{0}"? We'll demand a budget source. ||| من سيموّل "{0}"؟ سنطالب بمصدر ميزانية.
+ננסח שאילתה לשר על "{}". ||| We'll draft a query to the minister about "{0}". ||| سنصوغ استجوابًا للوزير بشأن "{0}".
+
+{} פוטר ||| {0} was fired ||| أُقيل {0}
+בחירות: {} קיבלה {} מנדטים (לפני: {}) ||| Elections: {0} got {1} seats (before: {2}) ||| الانتخابات: حصلت {0} على {1} مقعدًا (قبل: {2})
+בחירות: {} קיבל {} מנדטים (לפני: {}) ||| Elections: {0} got {1} seats (before: {2}) ||| الانتخابات: حصل {0} على {1} مقعدًا (قبل: {2})
+סקר: {} צונחת ל-{} מנדטים ||| Poll: {0} plunges to {1} seats ||| استطلاع: {0} تهوي إلى {1} مقعدًا
+סקר: {} מזנקת ל-{} מנדטים ||| Poll: {0} jumps to {1} seats ||| استطلاع: {0} تقفز إلى {1} مقعدًا
+סקר: {} צונח ל-{} מנדטים ||| Poll: {0} plunges to {1} seats ||| استطلاع: {0} يهوي إلى {1} مقعدًا
+סקר: {} מזנק ל-{} מנדטים ||| Poll: {0} jumps to {1} seats ||| استطلاع: {0} يقفز إلى {1} مقعدًا
+{} כתב לך הודעה ||| {0} wrote you a message ||| كتب لك {0} رسالة
+{} כתבה לך הודעה ||| {0} wrote you a message ||| كتبت لك {0} رسالة
+
+ראש הממשלה המיועד מציע ל{} להצטרף לקואליציה עם {}. אפשר להסכים, לדרוש תיק בכיר (אוצר, ביטחון או חוץ) בסיכון שהממשלה תקום בלעדיך, או להישאר באופוזיציה. ||| The prime minister-designate offers {0} to join the coalition with {1}. You can agree, demand a senior portfolio (finance, defense or foreign affairs) at the risk that the government forms without you, or stay in the opposition. ||| رئيس الحكومة المكلّف يعرض على {0} الانضمام إلى الائتلاف مع {1}. يمكن الموافقة، أو المطالبة بحقيبة رفيعة (المالية أو الأمن أو الخارجية) مع خطر تشكيل الحكومة بدونك، أو البقاء في المعارضة.
+{} מקדמת את החלת ריבונות על שטחי C. אולי נוכל לשתף פעולה? ||| {0} is advancing the application of sovereignty over Area C. Maybe we can cooperate? ||| {0} تدفع بتطبيق السيادة على مناطق C. ربما يمكننا التعاون؟
+{} מקדם את החלת ריבונות על שטחי C. אולי נוכל לשתף פעולה? ||| {0} is advancing the application of sovereignty over Area C. Maybe we can cooperate? ||| {0} يدفع بتطبيق السيادة على مناطق C. ربما يمكننا التعاون؟
+אני צריך תשובה ברורה: {}. כן או לא? נמשיך מכאן. ||| I need a clear answer: {0}. Yes or no? We'll continue from here. ||| أحتاج إلى جواب واضح: {0}. نعم أم لا؟ سنكمل من هنا.
+עוד לא עיכלתי את זה ש{}. אז אין לנו על מה לדבר. אצטרך לשקול את צעדיי. ||| I still haven't gotten over the fact that {0}. So we have nothing to talk about. I'll have to consider my steps. ||| لم أستوعب بعد أنّ {0}. إذًا لا شيء نتحدث عنه. سأضطر إلى مراجعة خطواتي.
+
+המלחמה הסתיימה אחרי {} תורות: {} חללים ו-{} אזרחים הרוגים ||| The war ended after {0} turns: {1} soldiers and {2} civilians killed ||| انتهت الحرب بعد {0} أدوار: {1} جنود و{2} مدنيين قتلى
+{} חיילים נפלו בלחימה ב{} ||| {0} soldiers fell fighting in {1} ||| سقط {0} جنود في القتال في {1}
+{} חללים בלחימה ||| {0} fallen in combat ||| {0} قتلى في القتال
+{} מפגינים נגד {} ||| {0} protest against {1} ||| {0} يتظاهرون ضد {1}
+{} מברכים: {} נכנס לתוקף ||| {0} welcome it: {1} takes effect ||| {0} يرحبون: دخول {1} حيز التنفيذ
+העלות של {} מתבררת: ₪{} מיליארד בשנה ||| The cost of {0} becomes clear: ₪{1} billion a year ||| تتضح كلفة {0}: ₪{1} مليار في السنة
+דוח ראשון: {} משפר את {} ||| First report: {0} improves {1} ||| التقرير الأول: {0} يحسّن {1}
+חשד לשחיתות במכרז של {} ||| Suspected corruption in a tender of {0} ||| اشتباه بالفساد في مناقصة {0}
+חשד לשחיתות במכרז: {} ||| Suspected corruption in a tender: {0} ||| اشتباه بالفساد في مناقصة: {0}
+{} גזר את הסרט ב{} ||| {0} cut the ribbon at {1} ||| {0} قصّ الشريط في {1}
+ועדת הכספים דורשת הסברים על העיכובים ב{} ||| The Finance Committee demands explanations for the delays in {0} ||| لجنة المالية تطالب بتوضيحات بشأن التأخيرات في {0}
+המבצע השיג את מטרותיו. רמת האיום בחזית ירדה ב-{}. ||| The operation achieved its goals. The threat level on the front fell by {0}. ||| حققت العملية أهدافها. انخفض مستوى التهديد على الجبهة بمقدار {0}.
+המבצע השיג תוצאות חלקיות בלבד. רמת האיום ירדה ב-{}. ||| The operation achieved only partial results. The threat level fell by {0}. ||| حققت العملية نتائج جزئية فقط. انخفض مستوى التهديد بمقدار {0}.
+{}: המבצע הושלם ||| {0}: operation completed ||| {0}: اكتملت العملية
+{}: תוצאות חלקיות ||| {0}: partial results ||| {0}: نتائج جزئية
+לא נשאר שטח {} לשינוי. ||| No Area {0} left to change. ||| لم تبق مساحة {0} للتغيير.
+לא נשאר שטח {} להעברה. ||| No Area {0} left to transfer. ||| لم تبق مساحة {0} للنقل.
+הממשלה אישרה העברת 2% משטח {} לשטח {} ביהודה ושומרון: צעד של ריבונות בפועל ||| The government approved transferring 2% of Area {0} to Area {1} in Judea and Samaria: a step of de facto sovereignty ||| وافقت الحكومة على نقل 2% من مساحة {0} إلى مساحة {1} في يهودا والسامرة: خطوة سيادة فعلية
+הממשלה אישרה העברת 2% משטח {} לשטח {} ביהודה ושומרון ||| The government approved transferring 2% of Area {0} to Area {1} in Judea and Samaria ||| وافقت الحكومة على نقل 2% من مساحة {0} إلى مساحة {1} في يهودا والسامرة
+החזרת שליטה {}→{} ||| Restoring control {0}→{1} ||| إعادة السيطرة {0}→{1}
+החזיר שליטה בשטח {} ל-{} ביהודה ושומרון ||| Restored control of Area {0} to {1} in Judea and Samaria ||| أعاد السيطرة على المساحة {0} إلى {1} في يهودا والسامرة
+שינוי שטח {} → {} ||| Area change {0} → {1} ||| تغيير المساحة {0} → {1}
+העברת שטח {}→{} ||| Area transfer {0}→{1} ||| نقل المساحة {0}→{1}
+העברת שטח {} → {} ||| Area transfer {0} → {1} ||| نقل المساحة {0} → {1}
+העבירה שטח {} לשטח {} ||| Transferred Area {0} to Area {1} ||| نقلت المساحة {0} إلى المساحة {1}
+העביר שטח {} ל-{} ביהודה ושומרון ||| Transferred Area {0} to {1} in Judea and Samaria ||| نقل المساحة {0} إلى {1} في يهودا والسامرة
+שטח A: {}% · B: {}% · C: {}%. {} ||| Area A: {0}% · B: {1}% · C: {2}%. {3} ||| المنطقة A: {0}% · B: {1}% · C: {2}%. {3}
+שטח A: {}% · B: {}% · C: {}%. מועצת יש״ע והימין מוחים בחריפות; בעולם ובמפרץ מברכים. ||| Area A: {0}% · B: {1}% · C: {2}%. The Yesha Council and the right protest sharply; the world and the Gulf welcome it. ||| المنطقة A: {0}% · B: {1}% · C: {2}%. مجلس يشع واليمين يحتجون بشدة؛ والعالم والخليج يرحبون.
+
+בג״ץ דחה את העתירה נגד {} ||| The High Court rejected the petition against {0} ||| رفضت المحكمة العليا الالتماس ضد {0}
+בג״ץ פסל את {} ||| The High Court struck down {0} ||| ألغت المحكمة العليا {0}
+{} תוקן בעקבות העתירה ||| {0} was amended following the petition ||| عُدّل {0} إثر الالتماس
+לא הגבת: "{}" — הוחלט כברירת מחדל ||| You did not respond: "{0}" — decided by default ||| لم تردّ: "{0}" — تم القرار افتراضيًا
+הדרך שלי ברורה: {}. ||| My path is clear: {0}. ||| طريقي واضح: {0}.
+מבזק: {} ||| Breaking: {0} ||| عاجل: {0}
+{} מתנגדת ל"{}" ש{} דורשת ||| {0} opposes "{1}", which {2} demands ||| {0} تعارض "{1}" الذي تطالب به {2}
+{} מתנגד ל"{}" ש{} דורש ||| {0} opposes "{1}", which {2} demands ||| {0} يعارض "{1}" الذي يطالب به {2}
+גם {} דורשת את {} ||| {0} also demands {1} ||| {0} تطالب أيضًا بـ{1}
+גם {} דורש את {} ||| {0} also demands {1} ||| {0} يطالب أيضًا بـ{1}
+גם {} דורשת רוטציה על ראשות הממשלה ||| {0} also demands a rotation of the premiership ||| {0} تطالب أيضًا بتناوب على رئاسة الحكومة
+גם {} דורש רוטציה על ראשות הממשלה ||| {0} also demands a rotation of the premiership ||| {0} يطالب أيضًا بتناوب على رئاسة الحكومة
+קו אדום מול {}: מה ש{} רוצה נוגד עיקרון של {} ||| Red line against {0}: what {1} wants contradicts a principle of {2} ||| خط أحمر أمام {0}: ما تريده {1} يناقض مبدأ لدى {2}
+{}: "נהיה באופוזיציה." ||| {0}: "We will be in the opposition." ||| {0}: "سنكون في المعارضة."
+הם לא מוכנים לשבת עם השותפות שכבר הסכמת איתן: {}. ||| They are not willing to sit with the partners you already agreed with: {0}. ||| هم غير مستعدين للجلوس مع الشريكات اللواتي اتفقت معهن: {0}.
+רק {} מנדטים – צריך {} ||| Only {0} seats – {1} needed ||| {0} مقعدًا فقط – المطلوب {1}
+הרכיב ממשלה עם {} מנדטים ||| Formed a government with {0} seats ||| شكّل حكومة بـ{0} مقعدًا
+
+שר/ה {} ||| Minister of {0} ||| وزير/ة {0}
+הרשימה לפי הסדר האמיתי. לפי הסקרים, המקומות הריאליים הם 1–{#0}. ||| The list follows the real order. According to the polls, the realistic places are 1–{0}. ||| القائمة وفق الترتيب الحقيقي. وفق الاستطلاعات، الأماكن الواقعية هي 1–{0}.
+אותיות: {} ||| Ballot letters: {0} ||| رموز الاقتراع: {0}

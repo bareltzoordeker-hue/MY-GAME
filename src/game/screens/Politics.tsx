@@ -260,7 +260,7 @@ export function LawsScreen() {
           <option value="major">רפורמות</option>
         </select>
         <input type="search" aria-label="חיפוש חוק" placeholder="חיפוש…" value={q} onChange={(e) => { setQ(e.target.value); setLimit(60); }} className="flex-1" style={{ minWidth: 140 }} />
-        <span className="text-xs muted">{shown.length} תוצאות</span>
+        <span className="text-xs muted">{`${shown.length} תוצאות`}</span>
       </div>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
         {shown.slice(0, limit).map((l) => {

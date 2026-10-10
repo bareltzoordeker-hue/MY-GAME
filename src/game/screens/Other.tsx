@@ -242,8 +242,8 @@ export function SaveScreen() {
         <div className="text-sm muted">Seed: {s.seed} · רמת קושי: {s.difficulty} · תור {s.turn}</div>
         {(() => { const d = storageDiagnostics(s); return (
           <div className="text-xs muted inset">
-            <div>אחסון בדפדפן: <b className={d.available ? 'good' : 'bad'}>{d.available ? 'זמין' : 'חסום'}</b> · שמירה אחרונה בדפדפן: <b>{d.savedTurn === null ? 'אין' : `תור ${d.savedTurn}`}</b> · גודל: {d.sizeKB}KB · כתובת: {d.origin}</div>
-            {d.error && <div className="bad mt-1">שגיאה: {d.error}</div>}
+            <div>{`אחסון בדפדפן: ${d.available ? 'זמין' : 'חסום'} · שמירה אחרונה בדפדפן: ${d.savedTurn === null ? 'אין' : `תור ${d.savedTurn}`} · גודל: ${d.sizeKB}KB · כתובת: ${d.origin}`}</div>
+            {d.error && <div className="bad mt-1">{`שגיאה: ${d.error}`}</div>}
             {!d.available && <div className="mt-1">הדפדפן לא מאפשר לשמור (גלישה פרטית, או הגדרת פרטיות שחוסמת אחסון). צא מגלישה פרטית, או השתמש ב"ייצוא שמירה" כדי לשמור קובץ.</div>}
           </div>
         ); })()}

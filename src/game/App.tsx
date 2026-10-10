@@ -9,6 +9,7 @@ import { NewsScreen, ProjectsScreen, CrisesScreen, AdvisorScreen, CareerScreen, 
 import { BriefingModal, ConfirmModal, ExplainModal, GameOverScreen, MeetingModal, ReactionModal } from './components/Modals';
 import { CoalitionModal } from './screens/Coalition';
 import { useLang } from './useLang';
+import { setCustomNames } from '../shared/i18n/contentTranslator';
 import { SpeechModal } from './components/SpeechModal';
 import { CampaignStartModal, ElectionNightModal } from './screens/Campaign';
 import { Tutorial } from './components/Tutorial';
@@ -39,6 +40,12 @@ export default function App() {
   const [creating, setCreating] = useState(false);
   const running = !!game;
   useEffect(() => { if (running) { loadEconomy(); loadPolitics(); } }, [running]);
+  // the player's own name (and a renamed party) are not in the dictionary: they are transliterated in English and Arabic
+  const myName = game?.player.name;
+  const myPartyName = game ? game.parties[game.player.partyId]?.name : undefined;
+  const myShortName = game ? game.parties[game.player.partyId]?.shortName : undefined;
+  const myPolName = game ? game.politicians[game.player.politicianId]?.name : undefined;
+  useEffect(() => { setCustomNames([myName ?? '', myPolName ?? '', myPartyName ?? '', myShortName ?? '']); }, [myName, myPolName, myPartyName, myShortName]);
 
   if (!game) {
     return <><SoundManager /><TipLayer /><Disclaimer />{creating ? <NewGame onBack={() => setCreating(false)} /> : <MainMenu onNew={() => setCreating(true)} />}</>;
