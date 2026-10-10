@@ -1037,7 +1037,7 @@ describe('guided chat moves', () => {
     const kinds = (p: typeof pm) => availableMoves(s, p).map((m) => m.kind);
     expect(kinds(pm)).toEqual(expect.arrayContaining(['request', 'press', 'lobby', 'promise', 'recommend', 'threat', 'ask', 'apology', 'thanks']));
     expect(availableMoves(s, pm).find((m) => m.kind === 'request')!.subjects).toEqual(expect.arrayContaining(['law', 'budget', 'role']));
-    expect(availableMoves(s, other).find((m) => m.kind === 'request')!.subjects).not.toContain('budget'); // a backbencher cannot fund a ministry
+    expect(availableMoves(s, other).find((m) => m.kind === 'press')?.subjects ?? []).not.toContain('budget'); // a backbencher cannot be pressed to fund a ministry (he can only back the raise)
     expect(lawChoices(s, pm, 'law').some((l) => l.group === 'חוקי המשרד שלך')).toBe(true);
     const law = LAWS.find((l) => l.ministries?.includes('transport'))!;
     const moves = [
@@ -1114,5 +1114,50 @@ describe('guided chat moves', () => {
     const { simulateCharacters } = await import('./characters');
     simulateCharacters(s);
     expect(minister.memory.find((m) => m.ref === 'budget:transport')!.resolved).toBe(true);
+  });
+});
+
+describe('budget moves: raise it with the PM / finance minister, back the raise with anyone else', () => {
+  it('offers "raise the budget" to the PM and the finance minister, and "back the raise" to other MKs, each with a price', async () => {
+    const { availableMoves, subjectLabel, playMove, pendingOffer, answerOffer } = await import('./chatMoves');
+    const s = createGame(cfg('minister', { ministryId: 'transport' }));
+    s.government.caretaker = false;
+    const pm = s.politicians[s.government.pmId];
+    const fin = s.politicians[s.government.ministries.find((m) => m.id === 'finance')!.ministerId!];
+    const mk = Object.values(s.politicians).find((p) => p.active && !p.isPlayer && p.id !== pm.id && p.id !== fin.id && s.government.coalition.includes(p.partyId))!;
+    for (const funder of [pm, fin]) {
+      expect(availableMoves(s, funder).find((m) => m.kind === 'request')!.subjects).toContain('budget');
+      expect(subjectLabel(s, funder, 'request', 'budget')).toContain('יעלה את התקציב');
+    }
+    expect(availableMoves(s, mk).find((m) => m.kind === 'request')!.subjects).toContain('budget');
+    expect(subjectLabel(s, mk, 'request', 'budget')).toContain('יתמוך בהעלאת');
+    // backing: a backer raises the odds with the funders, and a price can be accepted
+    let priced = 0, backed = 0;
+    for (let seed = 1; seed <= 40; seed++) {
+      const g = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed, role: 'minister', ministryId: 'transport', partyId: 'likud' });
+      g.government.caretaker = false;
+      const who = Object.values(g.politicians).find((p) => p.active && !p.isPlayer && p.id !== g.government.pmId && g.government.coalition.includes(p.partyId) && !g.government.ministries.some((m) => m.ministerId === p.id))!;
+      who.loyalty = 40;
+      playMove(g, who.id, { kind: 'request', subject: 'budget', ministryId: 'transport', amount: 2 });
+      const o = pendingOffer(g, who.id);
+      if (o) { priced++; expect(o.action).toBe('back_budget'); answerOffer(g, who.id, { type: 'accept', index: 0 }); }
+      if ((g.flags.backers_transport ?? 0) >= 1) backed++;
+      expect(g.chats![who.id].at(-1)!.text.length).toBeGreaterThan(5);
+    }
+    expect(priced).toBeGreaterThan(0);
+    expect(backed).toBeGreaterThan(priced); // some backed outright, the priced ones backed after the deal
+    // more backers, better odds with the PM
+    let base = 0, boosted = 0;
+    for (let seed = 1; seed <= 60; seed++) {
+      for (const backers of [0, 3]) {
+        const g = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed, role: 'minister', ministryId: 'transport', partyId: 'likud' });
+        g.government.caretaker = false;
+        g.flags.backers_transport = backers;
+        const before = g.budget.allocations.transport;
+        playMove(g, g.government.pmId, { kind: 'request', subject: 'budget', ministryId: 'transport', amount: 2 });
+        if (g.budget.allocations.transport > before) (backers ? boosted++ : base++);
+      }
+    }
+    expect(boosted).toBeGreaterThan(base);
   });
 });

@@ -1,7 +1,7 @@
 // The guided way to talk: pick a move, pick what it is about, send. Plus the quick replies to a price the politician names.
 import { useMemo, useState } from 'react';
 import { useGame } from '../store/gameStore';
-import { ASK_TOPICS, BUDGET_STEPS, SUBJECT_LABEL, availableMoves, lawChoices, pendingOffer, type Move, type MoveKind, type Subject } from '../../engine/chatMoves';
+import { ASK_TOPICS, BUDGET_STEPS, availableMoves, subjectLabel, lawChoices, pendingOffer, type Move, type MoveKind, type Subject } from '../../engine/chatMoves';
 import { LAW_BY_ID } from '../../data/laws';
 import type { GameState, Politician } from '../../types/game';
 
@@ -92,7 +92,7 @@ export function MoveComposer({ s, t }: { s: GameState; t: Politician }) {
           {def && def.subjects.length > 1 && (
             <div>
               <div className="text-xs font-bold mb-1">2. בנושא מה?</div>
-              <div className="flex flex-wrap gap-1.5">{def.subjects.map((sb) => <button key={sb} className={`btn btn-sm ${subject === sb ? 'btn-primary' : ''}`} onClick={() => setSubject(sb)}>{SUBJECT_LABEL[sb]}</button>)}</div>
+              <div className="flex flex-wrap gap-1.5">{def.subjects.map((sb) => <button key={sb} className={`btn btn-sm ${subject === sb ? 'btn-primary' : ''}`} onClick={() => setSubject(sb)}>{subjectLabel(s, t, kind!, sb)}</button>)}</div>
             </div>
           )}
           {kind && subject && (

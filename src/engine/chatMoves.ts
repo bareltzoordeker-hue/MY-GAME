@@ -22,6 +22,11 @@ export interface Move { kind: MoveKind; subject: Subject; lawId?: string; minist
 export type OfferAnswer = { type: 'accept'; index: number } | { type: 'counter'; lawId: string } | { type: 'refuse' } | { type: 'later' };
 
 export const SUBJECT_LABEL: Record<Subject, string> = { law: 'חוק', vote: 'הצבעה על הצעה בדיון', budget: 'תקציב למשרד', role: 'תפקיד', info: 'מידע', coalition: 'הקואליציה', none: '' };
+/** The label of a subject for this move and this politician: "raise the budget" from those who hold the purse, "back the raise" from the rest. */
+export function subjectLabel(s: GameState, t: Politician, kind: MoveKind, subject: Subject): string {
+  if (kind === 'request' && subject === 'budget') return canFund(s, t) ? 'שיעלה את התקציב של משרד' : 'שיתמוך בהעלאת התקציב של משרד';
+  return SUBJECT_LABEL[subject];
+}
 export const ASK_TOPICS: { id: string; label: string }[] = [
   { id: 'polls', label: 'מה אומרים הסקרים' }, { id: 'economy', label: 'מצב הכלכלה' }, { id: 'security', label: 'המצב הביטחוני' }, { id: 'coalition', label: 'מצב הקואליציה' },
   { id: 'party', label: 'מה קורה בסיעה שלו' }, { id: 'news', label: 'החדשות האחרונות' }, { id: 'ministry', label: 'תקציב של משרד' }, { id: 'politician', label: 'דעתו על פוליטיקאי' }, { id: 'law', label: 'דעתו על חוק' },
@@ -44,7 +49,7 @@ export function availableMoves(s: GameState, t: Politician): MoveDef[] {
   const bills = activeBills(s).length > 0;
   const request: Subject[] = ['law'];
   if (bills) request.push('vote');
-  if (canFund(s, t)) request.push('budget');
+  if (!isPm(s)) request.push('budget'); // from the PM / finance minister: raise it; from anyone else: back the raise
   if (canGiveRole(s, t)) request.push('role');
   out.push({ kind: 'request', icon: '🙏', label: 'בקשה', desc: 'לבקש ממנו תמיכה בחוק, בהצבעה, בתקציב למשרד או בתפקיד', subjects: request });
   const press: Subject[] = [];
@@ -101,7 +106,7 @@ const askText = (s: GameState, m: Move): string => {
 };
 
 /** What the player "says" for a move. */
-export function moveText(s: GameState, _t: Politician, m: Move): string {
+export function moveText(s: GameState, t: Politician, m: Move): string {
   const law = lawTitle(m.lawId);
   const min = ministryName(s, m.ministryId);
   const amount = m.amount ?? 1;
@@ -109,7 +114,7 @@ export function moveText(s: GameState, _t: Politician, m: Move): string {
   const lobbyAbout = m.subject === 'budget' ? `תוספת תקציב ל${min}` : m.subject === 'law' ? `קידום ${law}` : `תפקיד בשבילי`;
   switch (m.kind) {
     case 'request':
-      return m.subject === 'vote' ? `אשמח לתמיכה שלך בהצבעה על "${law}".` : m.subject === 'budget' ? `אשמח שתוסיף ₪${amount} מיליארד לתקציב של ${min}.` : m.subject === 'role' ? `אשמח שתשקול אותי לתפקיד ${min}.` : `אני מבקש שתתמוך ב${law}.`;
+      return m.subject === 'vote' ? `אשמח לתמיכה שלך בהצבעה על "${law}".` : m.subject === 'budget' ? (canFund(s, t) ? `תוכל להעלות את התקציב של ${min} ב-₪${amount} מיליארד?` : `אשמח לתמיכתך בהעלאת התקציב של ${min} ב-₪${amount} מיליארד.`) : m.subject === 'role' ? `אשמח שתשקול אותי לתפקיד ${min}.` : `אני מבקש שתתמוך ב${law}.`;
     case 'press':
       return m.subject === 'budget' ? `אני דורש תוספת של ₪${amount} מיליארד ל${min}. זה לא יכול לחכות.` : m.subject === 'vote' ? `אני מצפה שתצביע בעד "${law}".` : `אני לוחץ עליך לחוקק את ${law}. הגיע הזמן.`;
     case 'lobby':
@@ -166,17 +171,34 @@ function fundMinistry(s: GameState, t: Politician, ministryId: string, amount: n
   const cat = category(s, ministryId);
   const pol = me(s);
   const funding = s.budget.allocations[cat] / Math.max(0.1, s.budget.needs[cat]);
-  const p = clamp(0.3 + (t.loyalty - 50) / 100 + (pol.power - 50) / 250 + clamp((funding - 0.85) * 1.2, -0.3, 0.4) - (funding >= 1 ? 0 : Math.max(0, deficitPct(s) - 3) * 0.1) - amount * 0.04 + bonusFromLobby(s, t) - (pressure ? 0.08 : 0), 0.04, 0.9);
+  const p = clamp(0.3 + (t.loyalty - 50) / 100 + (pol.power - 50) / 250 + clamp((funding - 0.85) * 1.2, -0.3, 0.4) - (funding >= 1 ? 0 : Math.max(0, deficitPct(s) - 3) * 0.1) - amount * 0.04 + bonusFromLobby(s, t) + Math.min(0.25, 0.07 * (s.flags[`backers_${ministryId}`] ?? 0)) - (pressure ? 0.08 : 0), 0.04, 0.9);
   if (chance(s, p)) {
     applyDecision(s, { budget: { [cat]: amount } });
     remember(s, t.id, 'favor', `אישר תוספת ל${min}`, 4);
-    return { text: `בסדר. ₪${amount} מיליארד נוספים ל${min}. אל תבקש שוב מהר.`, hint: 'התקציב עודכן.' };
+    const backers = s.flags[`backers_${ministryId}`] ?? 0;
+    s.flags[`backers_${ministryId}`] = 0;
+    return { text: `בסדר. ₪${amount} מיליארד נוספים ל${min}. אל תבקש שוב מהר.`, hint: backers ? `התקציב עודכן, גם בזכות ${backers} תומכים שגייסת.` : 'התקציב עודכן.' };
   }
   if (p < 0.15) {
     if (pressure) remember(s, t.id, 'ignored', 'לחץ עליי על תקציב', -2);
     return { text: `אין לי מאיפה להוסיף ל${min} עכשיו. הגירעון והלחצים מכל כיוון.`, hint: 'הסיכוי עולה כשהמשרד ממומן פחות, כשהיחסים טובים, וכשמישהו שוכנע לדבר עליך קודם.' };
   }
   return { text: `אני יכול לשקול תוספת ל${min}, אבל לא בחינם. מה אתה נותן לי?`, hint: 'בחר מה לתת בתמורה.', offer: { action: 'fund', ministryId, amount, options: priceOptions(s, t) } };
+}
+
+/** A politician who cannot fund a ministry can still back the raise: it makes the PM / finance minister more willing later. */
+function backBudget(s: GameState, t: Politician, ministryId: string, amount: number): Out {
+  const min = ministryName(s, ministryId);
+  const inGov = s.government.coalition.includes(t.partyId);
+  const p = clamp(0.35 + (t.loyalty - 50) / 100 + (inGov ? 0.1 : -0.05) + (t.ministryId === ministryId ? 0.3 : 0), 0.05, 0.92);
+  if (chance(s, p)) return backed(s, t, ministryId, `בסדר, אתמוך בהעלאת התקציב של ${min}. כשזה יגיע לשולחן, אדבר בעד.`);
+  if (p < 0.15) return { text: `אני לא יכול לתמוך בהעלאה ל${min} עכשיו: יש לנו סדרי עדיפויות אחרים.`, hint: 'היחסים והעמדה של המפלגה שלו קובעים.' };
+  return { text: `אתמוך בהעלאה ל${min}, אבל אני צריך משהו בתמורה. מה אתה נותן לי?`, hint: 'בחר מה לתת בתמורה.', offer: { action: 'back_budget', ministryId, amount, options: priceOptions(s, t) } };
+}
+function backed(s: GameState, t: Politician, ministryId: string, text: string): Out {
+  remember(s, t.id, 'support', `תמך בהעלאת התקציב ל${ministryName(s, ministryId)}`, 3);
+  s.flags[`backers_${ministryId}`] = (s.flags[`backers_${ministryId}`] ?? 0) + 1;
+  return { text, hint: `נרשמה תמיכה. כל תומך מעלה את הסיכוי שראש הממשלה ושר האוצר יאשרו תוספת ל${ministryName(s, ministryId)}.` };
 }
 
 function askRole(s: GameState, t: Politician, ministryId: string): Out {
@@ -231,7 +253,7 @@ export function playMove(s: GameState, targetId: string, m: Move): boolean {
   let out: Out;
   switch (m.kind) {
     case 'request':
-      out = m.subject === 'budget' ? fundMinistry(s, t, m.ministryId ?? '', m.amount ?? 1, false) : m.subject === 'role' ? askRole(s, t, m.ministryId ?? '') : askLaw(s, t, m.lawId ?? '', false);
+      out = m.subject === 'budget' ? (canFund(s, t) ? fundMinistry(s, t, m.ministryId ?? '', m.amount ?? 1, false) : backBudget(s, t, m.ministryId ?? '', m.amount ?? 1)) : m.subject === 'role' ? askRole(s, t, m.ministryId ?? '') : askLaw(s, t, m.lawId ?? '', false);
       break;
     case 'press':
       out = m.subject === 'budget' ? fundMinistry(s, t, m.ministryId ?? '', m.amount ?? 1, true) : askLaw(s, t, m.lawId ?? '', true);
@@ -260,6 +282,7 @@ const pendingOffer = (s: GameState, id: string): PendingOffer | undefined => (s.
 export { pendingOffer };
 
 function grant(s: GameState, t: Politician, o: PendingOffer): string {
+  if (o.action === 'back_budget') { backed(s, t, o.ministryId ?? '', ''); return `תמיכה בהעלאת התקציב של ${ministryName(s, o.ministryId)}`; }
   if (o.action === 'fund') {
     const cat = category(s, o.ministryId);
     applyDecision(s, { budget: { [cat]: o.amount ?? 1 } });

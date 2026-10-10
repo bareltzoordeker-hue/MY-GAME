@@ -274,7 +274,7 @@ export type ChatTopicKind = 'unhappy' | 'praise' | 'coop' | 'ask_law' | 'warn_la
 /** An open thread in a conversation: why the politician wrote, and how far the talk has got */
 /** What a politician wants in return for a favour: shown to the player as quick replies. */
 export interface PendingOffer {
-  action: 'law_support' | 'fund' | 'role';
+  action: 'law_support' | 'fund' | 'role' | 'back_budget';
   lawId?: string;
   ministryId?: string;
   amount?: number;

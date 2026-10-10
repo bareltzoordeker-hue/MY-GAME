@@ -478,3 +478,12 @@
 אני זוכר לטובה ש{}. ||| I remember well that {0}. ||| أتذكر بالخير أن {0}.
 אחרי ש{}, יש לך אצלי קרדיט. ||| After {0}, you have credit with me. ||| بعد أن {0}، لديك رصيد عندي.
 עוד לא עיכלתי את זה ש{}. ||| I still haven't digested that {0}. ||| لم أستوعب بعد أن {0}.
+תוכל להעלות את התקציב של {} ב-₪{} מיליארד? ||| Could you raise the budget of {0} by ₪{1} billion? ||| هل يمكنك رفع ميزانية {0} بمقدار ₪{1} مليار؟
+אשמח לתמיכתך בהעלאת התקציב של {} ב-₪{} מיליארד. ||| I would appreciate your support in raising the budget of {0} by ₪{1} billion. ||| سأكون ممتنًا لدعمك في رفع ميزانية {0} بمقدار ₪{1} مليار.
+בסדר, אתמוך בהעלאת התקציב של {}. כשזה יגיע לשולחן, אדבר בעד. ||| Fine, I'll back raising the budget of {0}. When it reaches the table, I'll speak in favor. ||| حسنًا، سأدعم رفع ميزانية {0}. عندما يصل الأمر إلى الطاولة سأتحدث لصالحه.
+אתמוך בהעלאה ל{}, אבל אני צריך משהו בתמורה. מה אתה נותן לי? ||| I'll back the raise for {0}, but I need something in return. What are you giving me? ||| سأدعم الزيادة لـ{0}، لكنني أحتاج إلى شيء مقابل ذلك. ماذا تعطيني؟
+אני לא יכול לתמוך בהעלאה ל{} עכשיו: יש לנו סדרי עדיפויות אחרים. ||| I can't back a raise for {0} right now: we have other priorities. ||| لا أستطيع دعم زيادة لـ{0} الآن: لدينا أولويات أخرى.
+בסדר. ₪{} מיליארד נוספים ל{}. אל תבקש שוב מהר. ||| Fine. ₪{0} billion more for {1}. Don't ask again soon. ||| حسنًا. ₪{0} مليار إضافية لـ{1}. لا تطلب مجددًا قريبًا.
+אני יכול לשקול תוספת ל{}, אבל לא בחינם. מה אתה נותן לי? ||| I can consider an addition for {0}, but not for free. What are you giving me? ||| يمكنني النظر في زيادة لـ{0}، لكن ليس مجانًا. ماذا تعطيني؟
+אין לי מאיפה להוסיף ל{} עכשיו. הגירעון והלחצים מכל כיוון. ||| I have nowhere to add from for {0} right now. The deficit and pressures from every direction. ||| ليس لدي من أين أضيف لـ{0} الآن. العجز والضغوط من كل اتجاه.
+סגור. {} מצידי, ואתה מתחייב {} מצידך. אני אזכור את החלק שלך. ||| Done. {0} from me, and you commit to {1} from you. I'll remember your part. ||| اتفقنا. {0} من جهتي، وأنت تلتزم {1} من جهتك. سأتذكر الجزء الخاص بك.
