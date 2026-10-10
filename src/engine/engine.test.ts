@@ -1161,3 +1161,40 @@ describe('budget moves: raise it with the PM / finance minister, back the raise 
     expect(boosted).toBeGreaterThan(base);
   });
 });
+
+describe('answering a politician who asks the player for something', () => {
+  const setup = () => {
+    const s = createGame(cfg('minister', { ministryId: 'transport' }));
+    const t = Object.values(s.politicians).find((p) => p.partyId === s.player.partyId && !p.isPlayer && p.active && p.id !== s.government.pmId)!;
+    return { s, t };
+  };
+  it('"what do you offer?" lists his offers, and taking one commits the player to his request', async () => {
+    const { answerBargain, incomingAsk, pendingBargain } = await import('./chatMoves');
+    const { setTopic } = await import('./chat');
+    const { s, t } = setup();
+    const lawId = 'draft_equality';
+    setTopic(s, t.id, { kind: 'ask_law', lawId, stage: 'opened', turn: s.turn });
+    expect(incomingAsk(s, t.id)).toBeDefined();
+    expect(answerBargain(s, t.id, { type: 'whatOffer' })).toBe(true);
+    const b = pendingBargain(s, t.id)!;
+    expect(b.give!.options.length).toBeGreaterThan(0);
+    expect(answerBargain(s, t.id, { type: 'take', index: 0 })).toBe(true);
+    expect(s.chatTopics?.[t.id]?.kind).not.toBe('bargain');
+    const last = s.chats![t.id].slice(-1)[0];
+    expect(last.from).toBe('them');
+    expect(t.memory.some((m) => m.kind === 'promise')).toBe(true);
+  });
+  it('naming a price is answered, and refusing or waiting keeps the thread sensible', async () => {
+    const { answerBargain } = await import('./chatMoves');
+    const { setTopic } = await import('./chat');
+    const { s, t } = setup();
+    setTopic(s, t.id, { kind: 'unhappy', demand: 'respect', stage: 'explained', turn: s.turn });
+    const n = s.chats?.[t.id]?.length ?? 0;
+    expect(answerBargain(s, t.id, { type: 'want', want: { kind: 'vote' } })).toBe(true);
+    expect(s.chats![t.id].length).toBeGreaterThan(n + 1);
+    setTopic(s, t.id, { kind: 'coop', stage: 'opened', turn: s.turn });
+    expect(answerBargain(s, t.id, { type: 'later' })).toBe(true);
+    expect(s.chatTopics?.[t.id]).toBeDefined();
+    expect(answerBargain(s, t.id, { type: 'refuse' })).toBe(true);
+  });
+});

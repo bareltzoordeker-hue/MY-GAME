@@ -4,7 +4,7 @@
 // politician answers. When he wants something in return, his price appears as quick replies.
 // ============================================================
 import { LAWS, LAW_BY_ID } from '../data/laws';
-import type { GameState, PendingOffer, Politician } from '../types/game';
+import type { ChatTopic, GameState, GiveOption, PendingOffer, Politician } from '../types/game';
 import { feminize } from '../shared/gender';
 import { clamp, deficitPct } from '../utils';
 import { chance } from './rng';
@@ -131,7 +131,7 @@ export function moveText(s: GameState, t: Politician, m: Move): string {
   }
 }
 
-interface Out { text: string; hint?: string; offer?: PendingOffer }
+interface Out { text: string; hint?: string; offer?: PendingOffer; ok?: boolean }
 /** Records what the player owes. `phrase` is what he says back ("you commit to ..."), `note` is the hint under the message. */
 const recordObligation = (s: GameState, t: Politician, kind: 'law' | 'vote' | 'role', lawId?: string): { phrase: string; note: string } => {
   if (kind === 'law' && lawId) { remember(s, t.id, 'promise', `לקדם את ${lawTitle(lawId)}`, 8, s.turn + 12, lawId); return { phrase: `לקדם את ${lawTitle(lawId)}`, note: `הבטחת לקדם את ${lawTitle(lawId)} (נרשמה עם מועד)` }; }
@@ -160,7 +160,7 @@ function askLaw(s: GameState, t: Politician, lawId: string, pressure: boolean): 
     if (bill) bill.push = Math.min(80, bill.push + (pressure ? 14 : 10));
     remember(s, t.id, 'support', `נענה לבקשה בנושא ${title}`, 3);
     s.flags[`lobby_${t.id}`] = s.turn;
-    return { text: `בסדר, אתמוך ב${title}${pressure ? ', אבל לא אהבתי את הלחץ' : ''}.`, hint: bill ? 'התמיכה בהצעה גדלה.' : 'אין כרגע הצעה פעילה. הבקשה נרשמה.' };
+    return { ok: true, text: `בסדר, אתמוך ב${title}${pressure ? ', אבל לא אהבתי את הלחץ' : ''}.`, hint: bill ? 'התמיכה בהצעה גדלה.' : 'אין כרגע הצעה פעילה. הבקשה נרשמה.' };
   }
   if (pressure) remember(s, t.id, 'ignored', 'לחץ עליי', -2);
   return { text: `אני לא יכול להתחייב על ${title} כך סתם. אצטרך משהו בתמורה: מה שחשוב ל${s.parties[t.partyId]?.shortName ?? 'סיעה'}.`, hint: 'בחר מה לתת בתמורה.', offer: { action: 'law_support', lawId, options: priceOptions(s, t, lawId) } };
@@ -177,7 +177,7 @@ function fundMinistry(s: GameState, t: Politician, ministryId: string, amount: n
     remember(s, t.id, 'favor', `אישר תוספת ל${min}`, 4);
     const backers = s.flags[`backers_${ministryId}`] ?? 0;
     s.flags[`backers_${ministryId}`] = 0;
-    return { text: `בסדר. ₪${amount} מיליארד נוספים ל${min}. אל תבקש שוב מהר.`, hint: backers ? `התקציב עודכן, גם בזכות ${backers} תומכים שגייסת.` : 'התקציב עודכן.' };
+    return { ok: true, text: `בסדר. ₪${amount} מיליארד נוספים ל${min}. אל תבקש שוב מהר.`, hint: backers ? `התקציב עודכן, גם בזכות ${backers} תומכים שגייסת.` : 'התקציב עודכן.' };
   }
   if (p < 0.15) {
     if (pressure) remember(s, t.id, 'ignored', 'לחץ עליי על תקציב', -2);
@@ -198,7 +198,7 @@ function backBudget(s: GameState, t: Politician, ministryId: string, amount: num
 function backed(s: GameState, t: Politician, ministryId: string, text: string): Out {
   remember(s, t.id, 'support', `תמך בהעלאת התקציב ל${ministryName(s, ministryId)}`, 3);
   s.flags[`backers_${ministryId}`] = (s.flags[`backers_${ministryId}`] ?? 0) + 1;
-  return { text, hint: `נרשמה תמיכה. כל תומך מעלה את הסיכוי שראש הממשלה ושר האוצר יאשרו תוספת ל${ministryName(s, ministryId)}.` };
+  return { ok: true, text, hint: `נרשמה תמיכה. כל תומך מעלה את הסיכוי שראש הממשלה ושר האוצר יאשרו תוספת ל${ministryName(s, ministryId)}.` };
 }
 
 function askRole(s: GameState, t: Politician, ministryId: string): Out {
@@ -211,7 +211,7 @@ function askRole(s: GameState, t: Politician, ministryId: string): Out {
     assignMinister(s, m.id, pol.id);
     syncRole(s);
     remember(s, t.id, 'appointed', `מינה אותי ל${m.name}`, 6);
-    return { text: `בסדר, אני ממנה אותך ל${m.name}.`, hint: 'מונית לתפקיד.' };
+    return { ok: true, text: `בסדר, אני ממנה אותך ל${m.name}.`, hint: 'מונית לתפקיד.' };
   }
   return { text: `אני לא מוכן למנות אותך ל${m.name} עכשיו. תוכיח את עצמך בתפקיד הנוכחי, ונדבר.`, hint: 'הכוח הפוליטי והיחסים משפיעים על ההחלטה.' };
 }
@@ -344,3 +344,105 @@ export function sendChatSmart(s: GameState, targetId: string, text: string): boo
 }
 
 export { matchMinistry };
+
+// ===== the player answers a request that a politician made =====
+export interface Want { kind: 'law' | 'vote' | 'role' | 'budget'; lawId?: string; ministryId?: string; amount?: number }
+export type BargainAnswer = { type: 'agree' } | { type: 'refuse' } | { type: 'later' } | { type: 'whatOffer' } | { type: 'back' } | { type: 'want'; want: Want } | { type: 'take'; index: number };
+const ASKED: ChatTopic['kind'][] = ['ask_law', 'unhappy', 'coop'];
+
+export const incomingAsk = (s: GameState, id: string): ChatTopic | undefined => {
+  const t = s.chatTopics?.[id];
+  return t && ASKED.includes(t.kind) ? t : undefined;
+};
+export const pendingBargain = (s: GameState, id: string): ChatTopic | undefined => (s.chatTopics?.[id]?.kind === 'bargain' ? s.chatTopics[id] : undefined);
+
+/** What he is asking the player for, in a few words. */
+export function askLabel(_s: GameState, topic: ChatTopic): string {
+  if (topic.kind === 'unhappy') return topic.demand === 'law' && topic.lawId ? `שתקדם את ${lawTitle(topic.lawId)}` : topic.demand === 'role' ? 'הבטחה לתפקיד' : topic.demand === 'budget' ? 'תוספת תקציב למשרד' : 'שתתייעץ איתי לפני החלטות';
+  if (topic.kind === 'coop') return topic.lawId ? `שנקדם יחד את ${lawTitle(topic.lawId)}` : 'שיתוף פעולה בינינו';
+  return topic.lawId ? `שתקדם את ${lawTitle(topic.lawId)}` : 'בקשה';
+}
+
+const wantLabel = (s: GameState, w: Want): string =>
+  w.kind === 'law' ? `תקדם את ${lawTitle(w.lawId)}` : w.kind === 'vote' ? 'תצביע איתי בהצבעות הקרובות' : w.kind === 'role' ? `תיתן לי תפקיד: ${ministryName(s, w.ministryId)}` : `תוסיף ₪${w.amount ?? 1} מיליארד ל${ministryName(s, w.ministryId)}`;
+
+/** The player's side of what he asked, in the player's own voice. */
+function myPart(topic: ChatTopic): string {
+  if (topic.kind === 'unhappy') return topic.demand === 'law' && topic.lawId ? `אקדם את ${lawTitle(topic.lawId)}` : topic.demand === 'role' ? 'אבטיח לך תפקיד' : topic.demand === 'budget' ? 'אתמוך בתוספת תקציב למשרד שלך' : 'אתייעץ איתך לפני החלטות';
+  if (topic.kind === 'coop') return topic.lawId ? `נקדם יחד את ${lawTitle(topic.lawId)}` : 'נשתף פעולה';
+  return topic.lawId ? `אקדם את ${lawTitle(topic.lawId)}` : 'אעזור לך';
+}
+
+/** Would he give this, if the player does what he asked? Same rules as asking for it outright. */
+function tryWant(s: GameState, t: Politician, w: Want): Out {
+  const tn = chatTone(t);
+  if (w.kind === 'law') return askLaw(s, t, w.lawId ?? '', false);
+  if (w.kind === 'budget') return canFund(s, t) ? fundMinistry(s, t, w.ministryId ?? '', w.amount ?? 1, false) : backBudget(s, t, w.ministryId ?? '', w.amount ?? 1);
+  if (w.kind === 'role') return canGiveRole(s, t) ? askRole(s, t, w.ministryId ?? '') : recommendMove(s, t, { kind: 'recommend', subject: 'role', ministryId: w.ministryId });
+  if (tn !== 'hostile' && chance(s, clamp(0.5 + (t.loyalty - 50) / 100, 0.2, 0.9))) {
+    remember(s, t.id, 'favor', 'הבטיח להצביע איתי', 6);
+    return { ok: true, text: 'בסדר, אצביע איתך בהצבעות הקרובות.', hint: 'נרשמה התחייבות הדדית.' };
+  }
+  return { text: 'לא אתחייב להצביע איתך מראש. תבקש משהו מוגדר יותר.' };
+}
+
+function giveOptions(s: GameState, t: Politician): GiveOption[] {
+  const out: GiveOption[] = [];
+  for (const b of activeBills(s)) { if (out.length >= 2) break; if (lawStance(s, t, b.lawId) === 'for') out.push({ kind: 'law', lawId: b.lawId, label: `תמיכה ב${lawTitle(b.lawId)}` }); }
+  out.push({ kind: 'vote', label: 'תמיכה בהצבעות הקרובות' });
+  const mine = s.government.ministries.find((m) => m.ministerId === s.player.politicianId);
+  if (mine) out.push(canFund(s, t) ? { kind: 'budget', ministryId: mine.id, amount: 1, fund: true, label: `₪1 מיליארד נוספים ל${mine.name}` } : { kind: 'budget', ministryId: mine.id, amount: 1, label: `תמיכה בהעלאת התקציב של ${mine.name}` });
+  if (canGiveRole(s, t)) out.push({ kind: 'role', label: 'המלצה חמה עליי לתפקיד' });
+  return out.slice(0, 4);
+}
+
+/** The player answers a politician's request: agree, refuse, wait, name a price, or ask what he offers. */
+export function answerBargain(s: GameState, targetId: string, a: BargainAnswer): boolean {
+  const t = s.politicians[targetId];
+  const open = s.chatTopics?.[targetId];
+  if (!t || t.isPlayer || !open) return false;
+  const origin: ChatTopic | undefined = open.kind === 'bargain' ? open.give?.origin : open;
+  if (!origin || !ASKED.includes(origin.kind)) return false;
+  const say = (text: string) => pushChat(s, targetId, { from: 'me', text: me(s).gender === 'f' ? feminize(text) : text });
+  const restore = () => setTopic(s, targetId, { ...origin, turn: s.turn });
+  /** He answers in his own conversation handler (records the promise, thanks me, or reacts to a refusal). */
+  const handle = (text: string) => { restore(); const r = handleChatText(s, t, text); pushChat(s, targetId, { from: 'them', text: r.text, hint: r.hint }); };
+  switch (a.type) {
+    case 'back': restore(); return true;
+    case 'agree': say('כן, מסכים.'); handle('כן, מסכים'); return true;
+    case 'refuse': say('לא, אני לא יכול.'); handle('לא'); return true;
+    case 'later': say('אחר כך, תן לי לחשוב.'); handle('אחר כך'); return true;
+    case 'whatOffer': {
+      say('ומה אתה מציע בתמורה?');
+      const options = giveOptions(s, t);
+      setTopic(s, targetId, { kind: 'bargain', stage: 'explained', turn: s.turn, give: { origin, options } });
+      pushChat(s, targetId, { from: 'them', text: 'יש לי כמה דברים להציע בתמורה. בחר.', hint: 'בחר מה הוא נותן בתמורה. אם תסכים, תתחייב לבקשה שלו.' });
+      return true;
+    }
+    case 'take': {
+      const o = open.give?.options[a.index];
+      if (!o) return false;
+      say(`מסכים: ${o.label}.`);
+      if (o.kind === 'law') { const bill = s.bills.find((b) => b.lawId === o.lawId && b.status === 'active'); if (bill) bill.push = Math.min(80, bill.push + 12); remember(s, t.id, 'support', `סיכם לתמוך ב${lawTitle(o.lawId)}`, 3); }
+      else if (o.kind === 'vote') remember(s, t.id, 'favor', 'הבטיח להצביע איתי', 6);
+      else if (o.kind === 'budget') grant(s, t, { action: o.fund ? 'fund' : 'back_budget', ministryId: o.ministryId, amount: o.amount, options: [] });
+      else { remember(s, t.id, 'favor', 'המליץ עליי לתפקיד', 6); s.flags[`rec_${t.id}`] = s.turn; }
+      pushChat(s, targetId, { from: 'them', text: `סגור. ${o.label} מצידי, ואתה מתחייב למה שביקשתי.`, hint: 'העסקה נרשמה משני הצדדים.' });
+      handle('כן, מסכים');
+      return true;
+    }
+    case 'want': {
+      const w = a.want;
+      say(`${myPart(origin)} אם בתמורה ${wantLabel(s, w)}.`);
+      const out = tryWant(s, t, w);
+      if (out.ok) {
+        pushChat(s, targetId, { from: 'them', text: out.text, hint: out.hint });
+        handle('כן, מסכים');
+      } else {
+        restore();
+        pushChat(s, targetId, { from: 'them', text: out.offer ? 'זה יותר מדי בשבילי. תבקש משהו קטן יותר, או שנסגור על מה שביקשתי.' : out.text, hint: out.offer ? 'הוא לא הסכים לתמורה הזו. אפשר לבקש משהו אחר.' : out.hint });
+      }
+      return true;
+    }
+  }
+}

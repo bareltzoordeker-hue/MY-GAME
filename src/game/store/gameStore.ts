@@ -8,7 +8,7 @@ import {
 } from '../../engine/decisions';
 import { resolveInbox } from '../../engine/inbox';
 import { markRead } from '../../engine/chat';
-import { answerOffer, playMove, sendChatSmart, type Move, type OfferAnswer } from '../../engine/chatMoves';
+import { answerBargain, answerOffer, playMove, sendChatSmart, type BargainAnswer, type Move, type OfferAnswer } from '../../engine/chatMoves';
 import { resolveCrisis, startCrisis } from '../../engine/crises';
 import { abandonMandate, finalizeCoalition, negotiate } from '../../engine/elections';
 import { deleteSave, loadGame, saveGame } from '../../engine/persistence/save';
@@ -38,6 +38,7 @@ interface Store {
   sendChat: (id: string, text: string) => void;
   chatMove: (id: string, move: Move) => void;
   chatAnswer: (id: string, answer: OfferAnswer) => void;
+  chatBargain: (id: string, answer: BargainAnswer) => void;
   goTo: (screen: ScreenId, focus?: string) => void;
   clearFocus: () => void;
 
@@ -114,6 +115,12 @@ export const useGame = create<Store>((set, get) => ({
     if (!g) return;
     const s = clone(g);
     if (playMove(s, id, move)) set({ game: s, saveStatus: persist(s) });
+  },
+  chatBargain: (id, answer) => {
+    const g = get().game;
+    if (!g) return;
+    const s = clone(g);
+    if (answerBargain(s, id, answer)) set({ game: s, saveStatus: persist(s) });
   },
   chatAnswer: (id, answer) => {
     const g = get().game;

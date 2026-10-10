@@ -4,7 +4,7 @@ import { chatContacts, searchPoliticians } from '../../engine/chat';
 import type { GameState, Politician } from '../../types/game';
 import { Caricature } from '../../shared/components/Caricature';
 import { ScreenHeader } from '../components/ui';
-import { MoveComposer, OfferReplies } from '../components/MoveComposer';
+import { AskReplies, MoveComposer, OfferReplies } from '../components/MoveComposer';
 
 
 function Row({ s, p, active, onPick }: { s: GameState; p: Politician; active: boolean; onPick: () => void }) {
@@ -75,6 +75,7 @@ export function ChatScreen() {
                 ))}
                 <div ref={endRef} />
               </div>
+              <AskReplies s={s} t={target} />
               <OfferReplies s={s} t={target} />
               <MoveComposer s={s} t={target} />
               <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); submit(); }}>

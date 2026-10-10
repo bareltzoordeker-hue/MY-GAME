@@ -270,7 +270,7 @@ export interface Government {
   agreements?: Commitment[];
 }
 
-export type ChatTopicKind = 'unhappy' | 'praise' | 'coop' | 'ask_law' | 'warn_law' | 'campaign' | 'offer';
+export type ChatTopicKind = 'unhappy' | 'praise' | 'coop' | 'ask_law' | 'warn_law' | 'campaign' | 'offer' | 'bargain';
 /** An open thread in a conversation: why the politician wrote, and how far the talk has got */
 /** What a politician wants in return for a favour: shown to the player as quick replies. */
 export interface PendingOffer {
@@ -281,6 +281,8 @@ export interface PendingOffer {
   /** the price he names: pick one, or answer with another law */
   options: { kind: 'law' | 'vote' | 'role'; lawId?: string; label: string }[];
 }
+/** What a politician offers in return when the player asks "what do you offer?" */
+export interface GiveOption { kind: 'law' | 'vote' | 'budget' | 'role'; lawId?: string; ministryId?: string; amount?: number; fund?: boolean; label: string }
 export interface ChatTopic {
   kind: ChatTopicKind;
   stage: 'opened' | 'explained';
@@ -288,6 +290,8 @@ export interface ChatTopic {
   lawId?: string;
   demand?: 'role' | 'budget' | 'law' | 'respect';
   offer?: PendingOffer;
+  /** kind 'bargain': his offers, and the request that is still open underneath */
+  give?: { origin: ChatTopic; options: GiveOption[] };
 }
 
 export interface ChatMsg {

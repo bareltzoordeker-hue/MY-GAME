@@ -1,7 +1,8 @@
 // The guided way to talk: pick a move, pick what it is about, send. Plus the quick replies to a price the politician names.
 import { useMemo, useState } from 'react';
 import { useGame } from '../store/gameStore';
-import { ASK_TOPICS, BUDGET_STEPS, availableMoves, subjectLabel, lawChoices, pendingOffer, type Move, type MoveKind, type Subject } from '../../engine/chatMoves';
+import { isPm } from '../../engine/chat';
+import { ASK_TOPICS, BUDGET_STEPS, askLabel, incomingAsk, type Want, availableMoves, subjectLabel, lawChoices, pendingOffer, type Move, type MoveKind, type Subject } from '../../engine/chatMoves';
 import { LAW_BY_ID } from '../../data/laws';
 import type { GameState, Politician } from '../../types/game';
 
@@ -128,6 +129,72 @@ export function MoveComposer({ s, t }: { s: GameState; t: Politician }) {
             <button className="btn btn-primary btn-sm" disabled={!ready} onClick={send}>שליחה</button>
           </div>
         </div>
+      )}
+    </div>
+  );
+}
+
+/** Quick replies when a politician asks the player for something: agree, name a price, or ask what he offers. */
+export function AskReplies({ s, t }: { s: GameState; t: Politician }) {
+  const bargain = useGame((x) => x.chatBargain);
+  const [picking, setPicking] = useState(false);
+  const [kind, setKind] = useState<Want['kind']>('law');
+  const [lawId, setLawId] = useState('');
+  const [ministryId, setMinistryId] = useState('');
+  const [amount, setAmount] = useState(1);
+  const open = s.chatTopics?.[t.id];
+  if (!open || (open.kind !== 'bargain' && !incomingAsk(s, t.id))) return null;
+  const origin = open.kind === 'bargain' ? open.give?.origin : open;
+  if (!origin) return null;
+  const pm = isPm(s);
+  const kinds: { id: Want['kind']; label: string }[] = [
+    { id: 'law', label: 'שתקדם חוק' },
+    { id: 'vote', label: 'תמיכה בהצבעות' },
+    ...(pm ? [] : [{ id: 'budget' as const, label: 'תוספת תקציב למשרד' }]),
+    ...(!pm && t.id === s.government.pmId ? [{ id: 'role' as const, label: 'תפקיד' }] : []),
+  ];
+  const needsMinistry = kind === 'budget' || kind === 'role';
+  const ready = kind === 'vote' || (kind === 'law' && !!lawId) || (needsMinistry && !!ministryId);
+  const send = () => {
+    bargain(t.id, { type: 'want', want: { kind, lawId: lawId || undefined, ministryId: ministryId || undefined, amount: kind === 'budget' ? amount : undefined } });
+    setPicking(false); setLawId(''); setMinistryId('');
+  };
+  return (
+    <div className="rounded-xl p-2 mb-2" style={{ background: 'rgba(40,160,110,.08)', border: '1px solid var(--good, #2a9d6e)' }} role="group" aria-label="תשובה לבקשה">
+      <div className="text-xs font-bold mb-1">{`📨 ${t.name} מבקש: ${askLabel(s, origin)}`}</div>
+      {open.kind === 'bargain' ? (
+        <>
+          <div className="text-xs muted mb-1">מה הוא מציע בתמורה: בחר</div>
+          <div className="flex flex-wrap gap-1.5">
+            {open.give?.options.map((o, i) => <button key={i} className="btn btn-sm btn-good" onClick={() => bargain(t.id, { type: 'take', index: i })}>✔ {o.label}</button>)}
+            <button className="btn btn-sm" onClick={() => bargain(t.id, { type: 'back' })}>↩ חזרה</button>
+          </div>
+        </>
+      ) : (
+        <>
+          <div className="flex flex-wrap gap-1.5">
+            <button className="btn btn-sm btn-good" onClick={() => bargain(t.id, { type: 'agree' })}>✔ אסכים</button>
+            <button className={`btn btn-sm ${picking ? 'btn-primary' : 'btn-blue'}`} onClick={() => setPicking(!picking)} aria-expanded={picking}>🤝 בתמורה אני רוצה…</button>
+            <button className="btn btn-sm" onClick={() => bargain(t.id, { type: 'whatOffer' })}>❓ מה אתה מציע בתמורה?</button>
+            <button className="btn btn-sm" onClick={() => bargain(t.id, { type: 'later' })}>⏳ אחשוב על זה</button>
+            <button className="btn btn-sm btn-danger" onClick={() => bargain(t.id, { type: 'refuse' })}>✖ מסרב</button>
+          </div>
+          {picking && (
+            <div className="mt-2 space-y-1.5">
+              <div className="text-xs muted">מה אתה רוצה בתמורה?</div>
+              <div className="flex flex-wrap gap-1.5">{kinds.map((k) => <button key={k.id} className={`btn btn-sm ${kind === k.id ? 'btn-primary' : ''}`} onClick={() => setKind(k.id)}>{k.label}</button>)}</div>
+              {kind === 'law' && <LawPicker s={s} t={t} subject="law" value={lawId} onChange={setLawId} />}
+              {needsMinistry && (
+                <select className="w-full text-sm select-ministry" value={ministryId} onChange={(e) => setMinistryId(e.target.value)} aria-label="משרד">
+                  <option value="">{kind === 'role' ? 'בחר תפקיד (משרד)…' : 'בחר משרד…'}</option>
+                  {s.government.ministries.map((m) => <option key={m.id} value={m.id}>{m.icon} {m.name}</option>)}
+                </select>
+              )}
+              {kind === 'budget' && <div className="flex items-center gap-1.5 flex-wrap"><span className="text-xs">סכום לשנה:</span>{BUDGET_STEPS.map((a) => <button key={a} className={`btn btn-sm ${amount === a ? 'btn-primary' : ''}`} onClick={() => setAmount(a)}>₪{a}B</button>)}</div>}
+              <button className="btn btn-sm btn-blue" disabled={!ready} onClick={send}>להציע</button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
