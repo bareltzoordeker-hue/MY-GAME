@@ -1,3 +1,4 @@
+import { feminize } from '../shared/gender';
 // ============================================================
 // Chat with ministers and party leaders (and anyone found by name).
 // The player writes freely; a local language engine (no server, no API key)
@@ -90,6 +91,8 @@ const once = (s: GameState, id: string, intent: string) => {
 function push(s: GameState, id: string, m: Omit<ChatMsg, 'turn'>) {
   s.chats ??= {};
   const list = (s.chats[id] ??= []);
+  // a female politician speaks about herself in the feminine
+  if (m.from === 'them' && s.politicians[id]?.gender === 'f') m = { ...m, text: feminize(m.text) };
   list.push({ ...m, turn: s.turn });
   if (list.length > MAX_CHAT) list.shift();
   if (m.from === 'them') { s.chatUnread ??= {}; s.chatUnread[id] = (s.chatUnread[id] ?? 0) + 1; }

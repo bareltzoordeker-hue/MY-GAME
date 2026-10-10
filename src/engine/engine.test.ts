@@ -970,3 +970,23 @@ describe('small fixes: PM budget button, passed laws, unlimited support, honeymo
     for (const list of Object.values(s.chats ?? {})) for (const m of list) if (m.from === 'them' && m.proactive) expect(m.text.includes(law.title), m.text).toBe(false);
   });
 });
+
+describe('women speak as women', () => {
+  it('feminizes first-person forms and leaves the rest alone', async () => {
+    const { feminize } = await import('../shared/gender');
+    expect(feminize('אני מתלבט. אני לא מעריך את זה.')).toBe('אני מתלבטת. אני לא מעריכה את זה.');
+    expect(feminize('ואני מצפה לתשובה, אני גם מוכן לשוחח')).toBe('ואני מצפה לתשובה, אני גם מוכנה לשוחח');
+    expect(feminize('שמח לשמוע. הוא מתלבט.')).toBe('שמחה לשמוע. הוא מתלבט.');
+    expect(feminize('אני כאן. אזכור את זה.')).toBe('אני כאן. אזכור את זה.');
+  });
+  it('a female politician never writes about herself in the masculine in chat', async () => {
+    const { sendChat, chatTick } = await import('./chat');
+    const s = createGame(cfg('pm'));
+    const women = Object.values(s.politicians).filter((p) => p.active && !p.isPlayer && p.gender === 'f').slice(0, 4);
+    expect(women.length).toBeGreaterThan(0);
+    for (const w of women) { w.loyalty = 50; for (const msg of ['אולי', 'מה דעתך על התקציב?', 'תודה רבה', 'אני מבטיח לתמוך בך']) sendChat(s, w.id, msg); }
+    for (let i = 0; i < 20; i++) { s.turn += 1; chatTick(s); }
+    const bad = /אני (לא |גם )?(מתלבט|מעריך|מבקש|מצפה לא|סומך|מתנגד|תומך|זוכר|מרגיש|מעדיף|מופתע|חושב|שוקל)(?![א-ת])/;
+    for (const w of women) for (const m of s.chats?.[w.id] ?? []) if (m.from === 'them') expect(m.text, `${w.name}: ${m.text}`).not.toMatch(bad);
+  });
+});

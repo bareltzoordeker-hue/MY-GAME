@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { feminize } from '../../shared/gender';
 import { useGame } from '../store/gameStore';
 import { babble, voiceFor } from '../audio/sound';
 import { voiceOf } from './Drama';
@@ -18,6 +19,7 @@ import { servicesAverage } from '../../engine/services';
 export function ReactionModal() {
   const r = useGame((x) => x.reactions[0]);
   const dismiss = useGame((x) => x.dismissReaction);
+  const women = useGame((x) => x.game ? new Set(Object.values(x.game.politicians).filter((p) => p.gender === 'f').map((p) => p.name)) : null);
   if (!r) return null;
   const fx = fxKind(r);
   const head = r.status === 'approved' ? { t: 'ההחלטה התקבלה', c: 'var(--good)', i: '✅' }
@@ -64,7 +66,7 @@ export function ReactionModal() {
                 <div key={i} className="flex items-start gap-2 text-sm">
                   <span className="w-6 text-center">{p.icon}</span>
                   <b className="shrink-0">{p.label}:</b>
-                  <span className="muted">"{p.text}"</span>
+                  <span className="muted">"{women?.has(p.label) ? feminize(p.text) : p.text}"</span>
                 </div>
               ))}
             </div>
