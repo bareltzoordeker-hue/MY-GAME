@@ -1080,3 +1080,80 @@ A ומעלה: מצוין. BBB: גבולי. מתחת לזה: מסוכן.	A and ab
 חיפוש מדינה…	Search a country…	ابحث عن دولة…
 חיפוש חזית, כוח או פעולה…	Search a front, a force or an action…	ابحث عن جبهة أو قوة أو إجراء…
 אין פעולות שמתאימות לחיפוש.	No actions match the search.	لا توجد إجراءات تطابق البحث.
+
+שר הכלכלה	Economy minister	وزير الاقتصاد
+יו״ר מפלגה	Party leader	رئيس حزب
+כלכלה ותקציב	Economy and budget	الاقتصاد والميزانية
+ממשלה וביטחון	Government and security	الحكومة والأمن
+כנסטון וחקיקה	Knesseton and legislation	الكنيستون والتشريع
+ניהול משרד	Ministry management	إدارة الوزارة
+תקשורת ונאומים	Media and speeches	الإعلام والخطابات
+קמפיין ובחירות	Campaign and elections	الحملة والانتخابات
+פעולות מיוחדות של המשרד	Special ministry actions	إجراءات خاصة بالوزارة
+בוחרים מטרה, כוח מוביל, יחידות מחפות, מודיעין, הנדסה קרבית וסיוע, שעה וכללי פתיחה באש. רואים סיכוי להצלחה, נפגעים צפויים, אזרחים בצד השני, מחיר בינלאומי ועמדת הקבינט, ומבצעים.	You choose a target, a leading force, covering units, intelligence, combat engineering and support, an hour and the rules of engagement. You see the chance of success, expected casualties, civilians on the other side, the international price and the cabinet's position, and then carry it out.	تختار هدفًا وقوة قائدة ووحدات مغطية واستخبارات وهندسة قتالية وإسنادًا وساعة وقواعد اشتباك. ترى احتمال النجاح والخسائر المتوقعة والمدنيين في الطرف الآخر والثمن الدولي وموقف المجلس الوزاري، ثم تنفذ.
+ביטחון ומדיניות ← "לתכנן" בכרטיס החזית	Security and diplomacy ← "Plan" on the front's card	الأمن والسياسة ← "تخطيط" في بطاقة الجبهة
+שומרים תוכנית בלי לבצע אותה, ומבצעים אותה כשהמצב מתאים. הסיכוי מתעדכן לפי המצב הנוכחי. אפשר לשמור גם הצעה של שר הביטחון.	You save a plan without carrying it out, and carry it out when the situation fits. The chance updates to the current situation. You can also save a proposal from the defense minister.	تحفظ خطة دون تنفيذها وتنفذها عندما تناسب الظروف. يتحدث الاحتمال حسب الوضع الحالي. يمكنك أيضًا حفظ اقتراح من وزير الأمن.
+ביטחון ומדיניות ← תוכניות שמורות	Security and diplomacy ← Saved plans	الأمن والسياسة ← خطط محفوظة
+אחרי כל מבצע מתוכנן: שלבי הביצוע, נפגעים לפי יחידה, מטרה שנפגעה, כשלי מודיעין והשלכות ארוכות טווח.	After every planned operation: the phases of execution, casualties by unit, the target hit, intelligence failures and long-term consequences.	بعد كل عملية مخططة: مراحل التنفيذ والخسائر حسب الوحدة والهدف الذي أصيب وإخفاقات الاستخبارات والعواقب طويلة الأمد.
+ביטחון ומדיניות ← בראש המסך	Security and diplomacy ← at the top of the screen	الأمن والسياسة ← أعلى الشاشة
+שכנוע הקבינט והסברה	Persuading the cabinet and public diplomacy	إقناع المجلس الوزاري والتوضيح
+שיחה אישית עם חבר קבינט (3 הון), תדריך מודיעין לכולם (2 הון), והכנת הסברה שמקטינה את המחיר הבינלאומי (2 הון).	A personal talk with a cabinet member (3 capital), an intelligence briefing for everyone (2 capital), and preparing public diplomacy that lowers the international price (2 capital).	محادثة شخصية مع عضو في المجلس الوزاري (3 رصيد) وإحاطة استخباراتية للجميع (2 رصيد) وإعداد حملة توضيح تقلل الثمن الدولي (2 رصيد).
+חמ״ל התכנון	The planning room	غرفة التخطيط
+מלאי תחמושת מדויקת ויירוטים, ורעננות המודיעין לפי חזית. מלאי נמוך ומודיעין ישן מורידים את סיכויי ההצלחה.	The stock of precision munitions and interceptors, and the freshness of intelligence by front. A low stock and old intelligence lower the chances of success.	مخزون الذخيرة الدقيقة والاعتراضات وحداثة المعلومات الاستخباراتية حسب الجبهة. المخزون المنخفض والمعلومات القديمة يقللان فرص النجاح.
+ביטחון ומדיניות ← מלאים ומודיעין	Security and diplomacy ← Stocks and intelligence	الأمن والسياسة ← المخزون والاستخبارات
+הצעת תקיפה משר הביטחון	A strike proposal from the defense minister	اقتراح ضربة من وزير الأمن
+כראש ממשלה, שר הביטחון מביא הצעה מלאה עם דוח: יעד, כוחות, רמת איום, סיכוי, ביטחון מודיעיני, נפגעים ועמדת הקבינט. אפשר לאשר, לדחות או לשמור לתכנון.	As prime minister, the defense minister brings a full proposal with a report: target, forces, threat level, chance, intelligence confidence, casualties and the cabinet's position. You can approve, decline or save it for planning.	كرئيس للحكومة، يقدم وزير الأمن اقتراحًا كاملًا مع تقرير: الهدف والقوات ومستوى التهديد والاحتمال والثقة الاستخباراتية والخسائر وموقف المجلس الوزاري. يمكنك الموافقة أو الرفض أو الحفظ للتخطيط.
+לוח בקרה ← החלטות ממתינות	Dashboard ← Pending decisions	لوحة القيادة ← قرارات معلقة
+בקשות מהשרים	Requests from ministers	طلبات من الوزراء
+השרים פונים אליך: שר החוץ ושר הכלכלה בהצעות מדיניות וסחר, שרים בבקשה להשיק פרויקט, והשר לביטחון לאומי במבצע משטרתי. התדירות נקבעת בהגדרות.	Ministers come to you: the foreign and economy ministers with diplomatic and trade proposals, ministers asking to launch a project, and the national security minister with a police operation. The frequency is set in the settings.	يتوجه إليك الوزراء: وزيرا الخارجية والاقتصاد باقتراحات سياسية وتجارية ووزراء يطلبون إطلاق مشروع ووزير الأمن القومي بعملية شرطية. تُحدد وتيرتها في الإعدادات.
+לוח בקרה ← החלטות ממתינות; שמירה והגדרות	Dashboard ← Pending decisions; Save and settings	لوحة القيادة ← قرارات معلقة؛ الحفظ والإعدادات
+חלוקת תיקים בקואליציה	Dividing the portfolios in the coalition	توزيع الحقائب في الائتلاف
+כיו״ר מפלגה שמצטרפת לקואליציה, בוחרים מי מהמפלגה מקבל כל תיק: לפי מומחיות, לפי דירוג ברשימה או ידנית.	As the leader of a party joining the coalition, you choose who from the party gets each portfolio: by expertise, by rank on the list or manually.	كرئيس حزب ينضم إلى الائتلاف، تختار من في الحزب يحصل على كل حقيبة: حسب الخبرة أو حسب الترتيب في القائمة أو يدويًا.
+הצעות קואליציוניות	Coalition offers	عروض ائتلافية
+סינון לפי משרד וחיפוש חופשי	Filter by ministry and free search	تصفية حسب الوزارة وبحث حر
+במסכי הפרויקטים, החוקים, המשרד שלי, הביטחון ולשכות יש שורת משרדים עם "כל המשרדים" ושדה חיפוש חופשי.	On the projects, laws, my ministry, security and office screens there is a bar of ministries with "All ministries" and a free search field.	في شاشات المشاريع والقوانين ووزارتي والأمن والمكاتب يوجد شريط وزارات مع "كل الوزارات" وحقل بحث حر.
+מסכי הפרויקטים והחוקים	The projects and laws screens	شاشتا المشاريع والقوانين
+אפשרויות ומסכים	Features and screens	ميزات وشاشات
+🎯 הון: משתנה	🎯 Capital: varies	🎯 الرصيد: متغير
+מדריך הפעולות	Actions guide	دليل الإجراءات
+כל מה שאפשר לעשות במשחק, לפי תפקיד. הרשימה נבנית מהפעולות עצמן, ולכן היא תמיד מעודכנת.	Everything you can do in the game, by role. The list is built from the actions themselves, so it is always up to date.	كل ما يمكن فعله في اللعبة حسب الدور. تُبنى القائمة من الإجراءات نفسها، لذلك هي محدثة دائمًا.
+סינון לפי תפקיד וחיפוש	Filter by role and search	تصفية حسب الدور والبحث
+🔍 חיפוש פעולה, מבצע או נושא…	🔍 Search an action, an operation or a topic…	🔍 ابحث عن إجراء أو عملية أو موضوع…
+⭐ התפקיד שלי	⭐ My role	⭐ دوري
+📚 כל התפקידים	📚 All roles	📚 كل الأدوار
+כולם	Everyone	الجميع
+לא נמצאו פעולות שמתאימות לחיפוש.	No actions match the search.	لم يتم العثور على إجراءات تطابق البحث.
+📖 מדריך הפעולות	📖 Actions guide	📖 دليل الإجراءات
+כל הפעולות במשחק לפי תפקיד, עם חיפוש. נבנה מהפעולות עצמן ולכן תמיד מעודכן	All the actions in the game by role, with search. Built from the actions themselves, so it is always up to date	كل الإجراءات في اللعبة حسب الدور مع بحث. يُبنى من الإجراءات نفسها لذلك هو محدث دائمًا
+הבחירות יתקיימו במועדן.	The elections will be held on time.	ستجرى الانتخابات في موعدها.
+קודם צריך להחליט על הצעות הקואליציה	First you need to decide on the coalition offers	يجب أولًا البت في عروض الائتلاف
+הנושא שבחרת בוער כרגע בציבור. האסטרטגיה צפויה להיות אפקטיבית.	The topic you chose is burning for the public right now. The strategy is expected to be effective.	الموضوع الذي اخترته ملتهب لدى الجمهور الآن. من المتوقع أن تكون الاستراتيجية فعالة.
+פעולות משטרה, שב״כ ושב״ס בתוך המדינה: מבצעים נגד פשיעה וטרור, שיטור קהילתי, אכיפה ותנאי כליאה.	Police, Shin Bet and prison service actions inside the country: operations against crime and terror, community policing, enforcement and prison conditions.	إجراءات الشرطة والشاباك ومصلحة السجون داخل الدولة: عمليات ضد الجريمة والإرهاب وشرطة مجتمعية وإنفاذ وظروف الاعتقال.
+רק ראש הממשלה והשר לביטחון לאומי	Only the prime minister and the national security minister	رئيس الحكومة ووزير الأمن القومي فقط
+היו״ר קובע מה עולה למליאה. קידום מהיר מגדיל את סיכויי ההצעה (+15).	The speaker decides what goes to the plenum. Fast-tracking raises the proposal's chances (+15).	رئيس الكنيستون يقرر ما يُعرض على الهيئة العامة. التسريع يزيد فرص الاقتراح (+15).
+מי שקובע את סדר היום קובע הרבה.	Whoever sets the agenda decides a lot.	من يحدد جدول الأعمال يحدد الكثير.
+דחיית הדיון בהצעה. מקטין את סיכוייה (-15), אבל תומכיה יכעסו.	Postponing the debate on a proposal. It lowers its chances (-15), but its supporters will be angry.	تأجيل النقاش في اقتراح. يقلل فرصه (-15) لكن مؤيديه سيغضبون.
+התומכים טוענים לשימוש פוליטי בסמכות.	The supporters claim a political use of authority.	يدعي المؤيدون استخدامًا سياسيًا للصلاحية.
+פגישה משותפת להורדת המתחים. מעלה את יציבות הממשלה ואת המוניטין שלך.	A joint meeting to lower tensions. It raises the government's stability and your reputation.	اجتماع مشترك لخفض التوتر. يرفع استقرار الحكومة وسمعتك.
+הצלחת להרגיע את המליאה	You managed to calm the plenum	نجحت في تهدئة الهيئة العامة
+שני הצדדים יצאו וטענו שניצחו.	Both sides came out claiming victory.	خرج الطرفان وكلاهما يدعي الانتصار.
+כינוס דיון מיוחד בנושא שבוער לציבור. מעלה את הפופולריות שלך.	Convening a special debate on a topic that burns for the public. It raises your popularity.	عقد نقاش خاص حول موضوع ملتهب لدى الجمهور. يرفع شعبيتك.
+דיון מיוחד התקיים במליאה	A special debate was held in the plenum	عُقد نقاش خاص في الهيئة العامة
+הציבור ראה שהכנסטון עוסק במה שחשוב לו.	The public saw that the Knesseton deals with what matters to it.	رأى الجمهور أن الكنيستون يعالج ما يهمه.
+אכיפת הסדר במליאה. מעלה מוניטין ויציבות, אבל מרגיז את המורחקים.	Enforcing order in the plenum. It raises reputation and stability, but angers those removed.	فرض النظام في الهيئة العامة. يرفع السمعة والاستقرار لكنه يغضب المبعدين.
+הסדר במליאה הוחזר	Order in the plenum was restored	استُعيد النظام في الهيئة العامة
+המורחקים כבר בדרך לאולפנים.	Those removed are already on their way to the studios.	المبعدون في طريقهم إلى الاستوديوهات.
+נאום של מנהיג זר במליאה. מחזק את מעמדך הבינלאומי ואת המוניטין.	A speech by a foreign leader in the plenum. It strengthens your international standing and reputation.	خطاب لزعيم أجنبي في الهيئة العامة. يعزز مكانتك الدولية وسمعتك.
+מנהיג זר נאם בכנסטון	A foreign leader spoke in the Knesseton	ألقى زعيم أجنبي خطابًا في الكنيستون
+התמונות מהטקס הגיעו לכל העולם.	The pictures from the ceremony reached the whole world.	وصلت صور الحفل إلى العالم كله.
+בירור תלונות על התנהגות חברי כנסטון. משפר את אמון הציבור במוסד.	Looking into complaints about the conduct of Knesseton members. It improves the public's trust in the institution.	فحص شكاوى حول سلوك أعضاء الكنيستون. يحسن ثقة الجمهور بالمؤسسة.
+ועדת האתיקה פסקה	The ethics committee ruled	قررت لجنة الأخلاقيات
+הציבור אהב, החברים פחות.	The public liked it, the members less so.	أعجب الجمهور، وأقل منه الأعضاء.
+אלפי אזרחים מבקרים בכנסטון. מעלה פופולריות.	Thousands of citizens visit the Knesseton. It raises popularity.	آلاف المواطنين يزورون الكنيستون. يرفع الشعبية.
+יום פתוח מוצלח בכנסטון	A successful open day in the Knesseton	يوم مفتوح ناجح في الكنيستون
+תורים ארוכים, צילומים ליד המנורה.	Long lines, photos next to the menorah.	طوابير طويلة وصور بجانب الشمعدان.
+קיצור נאומים, שקיפות בהצבעות ושידור הוועדות. מוניטין גבוה ויציבות.	Shorter speeches, transparency in votes and broadcasting of committees. High reputation and stability.	اختصار الخطابات وشفافية في التصويت وبث اللجان. سمعة عالية واستقرار.
+תקנון הכנסטון עודכן	The Knesseton rules were updated	تم تحديث نظام الكنيستون
+הנאומים התקצרו. כמעט.	The speeches got shorter. Almost.	أصبحت الخطابات أقصر. تقريبًا.
+
+⏳ המתנה: תור אחד	⏳ Cooldown: one turn	⏳ فترة الانتظار: دور واحد

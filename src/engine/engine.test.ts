@@ -1766,3 +1766,17 @@ describe('step 4e: stocks, fading intelligence, advice and hasbara', () => {
     expect(evaluatePlan(pm, plan).intlEst).toBeLessThan(a);
   });
 });
+
+describe('step 6: the actions guide', () => {
+  it('every action has at least one role, so a new action cannot be left out of the guide', async () => {
+    const { ACTIONS } = await import('./decisions');
+    const { actionRoles, GUIDE_FEATURES } = await import('../data/actionGuide');
+    for (const a of Object.values(ACTIONS)) {
+      expect(actionRoles(a.id, a.category).length, a.id).toBeGreaterThan(0);
+      expect(a.title.length, a.id).toBeGreaterThan(0);
+      expect(a.description.length, a.id).toBeGreaterThan(0);
+    }
+    expect(Object.keys(ACTIONS)).toContain('refresh_intel');
+    expect(GUIDE_FEATURES.length).toBeGreaterThan(5);
+  });
+});

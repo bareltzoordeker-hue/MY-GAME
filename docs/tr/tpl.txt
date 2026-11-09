@@ -876,3 +876,38 @@
 {}: רעננות {} ||| {0}: freshness {1} ||| {0}: الحداثة {1}
 
 פעולות {} ||| {0} actions ||| إجراءات {0}
+
+קיצצת לו ₪{}B ||| You cut ₪{0}B from it ||| قمت بتقليص ₪{0}B منه
+{}: {}₪{} מיליארד ||| {0}: {1}₪{2} billion ||| {0}: {1}₪{2} مليار
+הממשלה משיקה חבילת גירוי של ₪{} מיליארד ||| The government launches a stimulus package of ₪{0} billion ||| الحكومة تطلق حزمة تحفيز بقيمة ₪{0} مليار
+הוגש: {} ||| Submitted: {0} ||| قُدّم: {0}
+הכנסטון סירב לבטל את {} ||| The Knesseton refused to repeal {0} ||| رفض الكنيستون إلغاء {0}
+ביטלת את {} ||| You repealed {0} ||| ألغيت {0}
+הכנסטון ביטל את {} ||| The Knesseton repealed {0} ||| ألغى الكنيستون {0}
+בוטל: {} ||| Repealed: {0} ||| أُلغي: {0}
+התמיכה ב"{}" עולה ||| Support for "{0}" is rising ||| الدعم لـ"{0}" يرتفع
+"{}" רוכך ||| "{0}" was softened ||| تم تخفيف "{0}"
+הצביע נגד הקו ב{} ||| Voted against the line on {0} ||| صوّت ضد الخط في {0}
+הצבעת {} {} ||| You voted {0} {1} ||| صوّتَّ {0} {1}
+אי-האמון נכשל ({} נגד) ||| The no-confidence motion failed ({0} against) ||| فشل سحب الثقة ({0} ضد)
+זמין שוב בעוד {} ||| Available again in {0} ||| متاح مجددًا بعد {0}
+פעל על דעת עצמו: {} ||| Acted on their own: {0} ||| تصرف من تلقاء نفسه: {0}
+בנק ישמעאל מזהיר מלחץ אינפלציוני.{} ||| The Bank of Ishmael warns of inflationary pressure.{0} ||| بنك إسماعيل يحذر من ضغط تضخمي.{0}
+ההצעה לדחיית הבחירות נפלה: {} תומכים, נדרשו 80 ||| The proposal to postpone the elections failed: {0} supporters, 80 were needed ||| سقط اقتراح تأجيل الانتخابات: {0} مؤيدين، وكان المطلوب 80
+{} תומכים מתוך 80 הנדרשים ||| {0} supporters out of the 80 required ||| {0} مؤيدين من أصل 80 مطلوبين
+לסיעה {} מנדטים בכנסטון ||| The faction has {0} seats in the Knesseton ||| للكتلة {0} مقاعد في الكنيستون
+{}. מועמד/ת חדש/ה בפוליטיקה (דמות בדיונית). ||| {0}. A new candidate in politics (a fictional character). ||| {0}. مرشح/ة جديد/ة في السياسة (شخصية خيالية).
+יחסים בין המפלגות: {} ||| Relations between the parties: {0} ||| العلاقات بين الأحزاب: {0}
+אין מספיק כסף בקופת המפלגה (נדרש ₪{} מיליון) ||| Not enough money in the party treasury (₪{0} million needed) ||| لا يوجد مال كافٍ في خزينة الحزب (مطلوب ₪{0} مليون)
+{} · תקציב {} ||| {0} · budget {1} ||| {0} · ميزانية {1}
+הסקר הפנימי: {}–{} מנדטים ||| The internal poll: {0}–{1} seats ||| الاستطلاع الداخلي: {0}–{1} مقاعد
+{} תומך/ת בך ||| {0} supports you ||| {0} يدعمك
+"{}" עלתה לראש סדר היום ||| "{0}" rose to the top of the agenda ||| "{0}" صعد إلى رأس جدول الأعمال
+הדיון ב"{}" נדחה ||| The debate on "{0}" was postponed ||| تأجّل النقاش في "{0}"
+אני ממליץ לקחת בחשבון שהגירעון כבר {}%. ||| I recommend taking into account that the deficit is already {0}%. ||| أوصي بالأخذ في الحسبان أن العجز بلغ {0}% بالفعل.
+🎯 הון: {} ||| 🎯 Capital: {0} ||| 🎯 الرصيد: {0}
+
+הון: {} ||| Capital: {0} ||| الرصيد: {0}
+הון: {} · עלות שנתית: ₪{}B ||| Capital: {0} · annual cost: ₪{1}B ||| الرصيد: {0} · التكلفة السنوية: ₪{1}B
+
+⏳ המתנה: {} תורות ||| ⏳ Cooldown: {0} turns ||| ⏳ فترة الانتظار: {0} أدوار

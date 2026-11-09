@@ -1,3 +1,4 @@
+import { GuideScreen } from './screens/Guide';
 import { lazy, Suspense, useEffect, useState } from 'react';
 import { useGame } from './store/gameStore';
 import { Layout } from './components/Layout';
@@ -58,7 +59,7 @@ export default function App() {
     dashboard: <Dashboard />, state: <StateScreen />, economy: <EconomyScreen />, budget: <BudgetScreen />, population: <PopulationScreen />,
     parliament: <ParliamentScreen />, government: <GovernmentScreen />, party: <PartyScreen />, ministry: <MinistryScreen />, news: <NewsScreen />,
     polls: <PollsScreen />, projects: <ProjectsScreen />, laws: <LawsScreen />, crises: <CrisesScreen />, map: <MapScreen />, advisor: <AdvisorScreen />,
-    career: <CareerScreen />, save: <SaveScreen />, relations: <RelationsScreen />, security: <SecurityScreen />, chat: <ChatScreen />, promises: <PromisesScreen />, foreign: <ForeignOfficeScreen />, econoffice: <EconomyOfficeScreen />,
+    career: <CareerScreen />, save: <SaveScreen />, relations: <RelationsScreen />, security: <SecurityScreen />, chat: <ChatScreen />, promises: <PromisesScreen />, foreign: <ForeignOfficeScreen />, econoffice: <EconomyOfficeScreen />, guide: <GuideScreen />,
   } as const;
 
   return (

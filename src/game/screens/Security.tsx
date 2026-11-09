@@ -76,7 +76,7 @@ export function SecurityScreen() {
               <div key={o.id} className="inset flex flex-col gap-1">
                 <b className="text-sm">{o.icon} {o.title}</b>
                 <span className="text-xs muted">{o.desc}</span>
-                <span className="text-[11px] muted">הון: {o.capital}{o.cost ? ` · עלות שנתית: ₪${o.cost}B` : ''}</span>
+                <span className="text-[11px] muted">{`הון: ${o.capital}${o.cost ? ` · עלות שנתית: ₪${o.cost}B` : ''}`}</span>
                 <ActionButton id="internal_security" params={{ opId: o.id }} className="btn btn-sm btn-blue mt-1">לבצע</ActionButton>
               </div>
             ))}
@@ -91,7 +91,7 @@ export function SecurityScreen() {
               <div key={o.id} className="inset flex flex-col gap-1">
                 <b className="text-sm">{o.icon} {o.title}</b>
                 <span className="text-xs muted">{o.desc}</span>
-                <span className="text-[11px] muted">הון: {o.capital}{o.cost ? ` · עלות שנתית: ₪${o.cost}B` : ''}</span>
+                <span className="text-[11px] muted">{`הון: ${o.capital}${o.cost ? ` · עלות שנתית: ₪${o.cost}B` : ''}`}</span>
                 <ActionButton id="internal_security" params={{ opId: o.id }} className="btn btn-sm btn-blue mt-1">לצאת למבצע</ActionButton>
               </div>
             ))}
