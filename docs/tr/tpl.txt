@@ -742,3 +742,25 @@
 {} מנדטים. התנאים שמופיעים בהצעה ייכנסו לתוקף. ||| {0} seats. The terms in the offer will take effect. ||| {0} مقعدًا. ستدخل الشروط المذكورة في العرض حيز التنفيذ.
 {} – {}. ההון הפוליטי חוזר אליך ||| {0} – {1}. Your political capital comes back to you ||| {0} – {1}. يعود إليك الرصيد السياسي
 {} מאבד סבלנות כלפי {}: "אם זה ימשיך, {} יעבור למישהו אחר" ||| {0} is losing patience with {1}: "If this continues, {2} will go to someone else" ||| {0} يفقد صبره تجاه {1}: "إن استمر هذا فستنتقل {2} إلى شخص آخر"
+
+{} הכריז על התמודדות על ראשות {} מול {} ||| {0} announced a run for the leadership of {1} against {2} ||| أعلن {0} الترشح لرئاسة {1} ضد {2}
+פתחת במירוץ על ראשות {} ||| You opened a race for the leadership of {0} ||| فتحت سباقًا على رئاسة {0}
+הכנס עבר טוב: התמיכה בך עלתה ב-{}. ||| The rally went well: your support rose by {0}. ||| نجح المهرجان: ارتفع دعمك بمقدار {0}.
+{} הצטרף לתומכים שלך (+{}). ||| {0} joined your supporters (+{1}). ||| انضم {0} إلى مؤيديك (+{1}).
+{} סירב לתמוך בך כרגע. ||| {0} refused to support you for now. ||| رفض {0} دعمك حاليًا.
+ניצחת בבחירות לראשות {} ({}% סיכוי) ||| You won the election for the leadership of {0} ({1}% chance) ||| فزت في الانتخابات على رئاسة {0} (احتمال {1}%)
+הפסדת בבחירות לראשות {} (סיכוי ניצחון {}%) ||| You lost the election for the leadership of {0} (win chance {1}%) ||| خسرت الانتخابات على رئاسة {0} (احتمال الفوز {1}%)
+ההכרעה בעוד {} תורות. ההצבעה נקבעת לפי התמיכה בכל צד בין חברי המפלגה. ||| The decision is in {0} turns. The vote is determined by each side's support among party members. ||| الحسم بعد {0} أدوار. يُحدَّد التصويت وفق دعم كل طرف بين أعضاء الحزب.
+תומכים: {} ||| Supporters: {0} ||| المؤيدون: {0}
+{} פרשה והקואליציה נשארה בלי רוב ||| {0} left and the coalition was left without a majority ||| انسحبت {0} وبقي الائتلاف بلا أغلبية
+{} באופוזיציה ||| {0} in the opposition ||| {0} في المعارضة
+הסיבה: {}. הממשלה ממשיכה עם {} מנדטים. ||| The reason: {0}. The government continues with {1} seats. ||| السبب: {0}. تستمر الحكومة بـ{1} مقعدًا.
+{}: "אין כרגע תיק שאפשר לתת לך. נדבר כשיתפנה משהו." ||| {0}: "There is no portfolio I can give you right now. We'll talk when something opens up." ||| {0}: "لا توجد حقيبة يمكنني منحك إياها الآن. سنتحدث عندما تشغر واحدة."
+חזר לממשלה כ{} ||| Returned to the government as {0} ||| عاد إلى الحكومة بصفة {0}
+חזרת לממשלה: {} ||| You returned to the government: {0} ||| عدت إلى الحكومة: {0}
+{}: "אני נותן לך הזדמנות נוספת. אל תאכזב אותי." ||| {0}: "I'm giving you another chance. Don't let me down." ||| {0}: "أمنحك فرصة أخرى. لا تخذلني."
+סיכוי ההצלחה היה {}% ||| The chance of success was {0}% ||| كانت نسبة النجاح {0}%
+{}: "עוד מוקדם. תוכיח את עצמך ונחזור לזה." ||| {0}: "It's still early. Prove yourself and we'll come back to it." ||| {0}: "ما زال الوقت مبكرًا. أثبت نفسك وسنعود إلى ذلك."
+ההכרעה בעוד {} תורות ||| The decision is in {0} turns ||| الحسم بعد {0} أدوار
+{} הפסיד בבחירות לראשות {} ||| {0} lost the election for the leadership of {1} ||| خسر {0} الانتخابات على رئاسة {1}
+{} ניצח את {} בבחירות לראשות {} ||| {0} beat {1} in the election for the leadership of {2} ||| فاز {0} على {1} في الانتخابات على رئاسة {2}

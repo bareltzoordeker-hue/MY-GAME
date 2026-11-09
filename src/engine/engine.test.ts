@@ -1329,3 +1329,60 @@ describe('the PM warns a minister before firing him', () => {
     expect(fired).toBe(true);
   });
 });
+
+describe('step 1: leaving the coalition, the leadership race, returning after being fired, security expertise', () => {
+  it('a coalition party leader can leave the coalition; the PM and caretaker governments cannot', () => {
+    const s = createGame(cfg('candidate', { partyId: 'rzp' }));
+    s.government.caretaker = false;
+    expect(s.government.coalition).toContain('rzp');
+    s.player.politicalCapital = 100;
+    expect(checkAction(s, 'leave_coalition', { reason: 'law' })).toBeNull();
+    const r = performAction(s, 'leave_coalition', { reason: 'broken_deal' });
+    expect(r.reaction).not.toBeNull();
+    expect(r.state.government.coalition).not.toContain('rzp');
+    expect(checkAction(r.state, 'leave_coalition', { reason: 'law' })).not.toBeNull();
+    expect(checkAction(createGame(cfg('pm')), 'leave_coalition', { reason: 'law' })).not.toBeNull();
+  });
+  it('the leadership race runs for a few turns and then ends in a vote', async () => {
+    const { advanceTurn } = await import('./turn');
+    let s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 5, personId: 'likud_18' });
+    s.politicians[s.player.politicianId].power = 60;
+    s.player.politicalCapital = 100;
+    expect(checkAction(s, 'run_primaries')).toBeNull();
+    s = performAction(s, 'run_primaries').state;
+    expect(s.leadershipRace).toBeDefined();
+    expect(checkAction(s, 'run_primaries')).not.toBeNull();
+    s.player.politicalCapital = 100;
+    const mine = s.leadershipRace!.mine;
+    s = performAction(s, 'race_campaign', { kind: 'rally' }).state;
+    expect(s.leadershipRace!.mine).toBeGreaterThan(mine);
+    expect(checkAction(s, 'race_campaign', { kind: 'rally' })).not.toBeNull();
+    for (let i = 0; i < 6 && s.leadershipRace && !s.gameOver; i++) s = advanceTurn({ ...s, drama: null });
+    expect(s.leadershipRace).toBeUndefined();
+  });
+  it('a minister fired by the PM can ask to come back', async () => {
+    const { simulateAIGovernment } = await import('./aiGovernment');
+    const s = createGame(cfg('minister', { ministryId: 'defense' }));
+    s.government.caretaker = false;
+    const pm = s.politicians[s.government.pmId];
+    pm.loyalty = 5;
+    simulateAIGovernment(s);
+    let fired = false;
+    for (let i = 0; i < 40 && !fired; i++) { s.turn += 1; simulateAIGovernment(s); fired = s.player.role !== 'minister'; }
+    expect(fired).toBe(true);
+    expect(s.flags.fired_turn).toBeDefined();
+    pm.loyalty = 100;
+    s.politicians[s.player.politicianId].power = 90;
+    let back = false;
+    for (let i = 0; i < 12 && !back; i++) { s.turn += 4; s.player.politicalCapital = 100; const r = performAction(s, 'ask_return'); Object.assign(s, r.state); back = s.player.role === 'minister'; }
+    expect(back).toBe(true);
+    expect(s.flags.fired_turn).toBeUndefined();
+  });
+  it('the national-security minister has an expertise of his own', async () => {
+    const { MINISTRIES, DOMAIN_NAMES } = await import('../data/ministries');
+    expect(MINISTRIES.find((m) => m.id === 'national_security')!.domain).toBe('security');
+    expect(DOMAIN_NAMES.security).toBeTruthy();
+    const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed: 3, personId: 'otzma_1' });
+    expect(s.politicians[s.player.politicianId].expertise.security).toBe(65);
+  });
+});

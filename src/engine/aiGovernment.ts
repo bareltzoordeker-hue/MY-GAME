@@ -99,6 +99,8 @@ export function simulateAIGovernment(s: GameState): void {
     } else if (min && pmTrust < 15 && warned !== undefined && warned < s.turn && warned >= s.turn - 8 && chance(s, 0.2)) {
       min.ministerId = null;
       me.ministryId = null;
+      s.flags.fired_turn = s.turn;
+      s.flags[`fired_from_${min.id}`] = s.turn;
       s.career.failures.push(`פוטר מ${min.name}`);
       addNews(s, `${pm.name} פיטר את ${me.name} מ${min.name}`, 'bad', '🔥');
       logEvent(s, '🔥', `ראש הממשלה פיטר אותך מ${min.name}`, 3, 'bad', 'career');

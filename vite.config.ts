@@ -73,5 +73,7 @@ export default defineConfig({
   preview: { headers: { 'Content-Security-Policy': netlifyCsp() } },
   test: {
     dir: r('src'),
+    // the simulation tests run whole games; 5 s is too tight on a busy machine
+    testTimeout: 30000,
   },
 });

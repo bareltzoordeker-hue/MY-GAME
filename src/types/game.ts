@@ -23,7 +23,7 @@ export type ServiceId =
 export type Domain =
   | 'economy' | 'finance' | 'defense' | 'education' | 'health' | 'transport' | 'law'
   | 'foreign' | 'infrastructure' | 'management' | 'welfare' | 'energy' | 'agriculture'
-  | 'interior' | 'media' | 'housing' | 'science' | 'culture';
+  | 'interior' | 'media' | 'housing' | 'science' | 'culture' | 'security';
 
 export type RegionId =
   | 'north' | 'haifa' | 'sharon' | 'center' | 'jerusalem' | 'shfela' | 'judea_samaria' | 'negev' | 'eilat';
@@ -545,6 +545,20 @@ export interface CoalitionOffer {
   /** how many extra requests were already made */
   tries: number;
 }
+/** The race for the leadership of the player's party. */
+export interface LeadershipRace {
+  incumbentId: string;
+  partyId: string;
+  startTurn: number;
+  endTurn: number;
+  /** support inside the party, 0..100 */
+  mine: number;
+  theirs: number;
+  /** moves already made this turn: key -> turn */
+  used: Record<string, number>;
+  backers: string[];
+}
+
 export interface Elections {
   /** election day (the calendar drives elections; scheduledTurn is kept in sync for the UI) */
   date?: GameDate;
@@ -609,6 +623,7 @@ export interface GameState {
   chatUnread?: Record<string, number>;
   /** what each conversation is currently about (set when the politician writes first) */
   chatTopics?: Record<string, ChatTopic>;
+  leadershipRace?: LeadershipRace;
   /** security fronts, forces and the diplomatic track */
   world?: WorldState;
   /** the player party's election campaign (set when the campaign opens) */

@@ -676,3 +676,62 @@
 ההון הפוליטי חוזר אליך	Your political capital comes back to you	يعود إليك الرصيد السياسي
 
 ראש הממשלה מאבד אמון בך. כדאי לשפר את היחסים לפני שתפוטר	The prime minister is losing trust in you. Improve the relationship before you are fired	رئيس الحكومة يفقد الثقة بك. حسّن العلاقة قبل أن تُقال
+
+כנס חברי מפלגה	Party members' rally	مهرجان لأعضاء الحزب
+כנס עם פעילי המפלגה. מעלה את התמיכה בך, יותר אם אתה פופולרי.	A rally with party activists. Raises your support, more so if you are popular.	مهرجان مع نشطاء الحزب. يرفع دعمك، أكثر إن كنت شعبيًا.
+לגייס תמיכה של ח״כ	Win the support of an MK	كسب دعم عضو كنيست
+פנייה לחבר מפלגה בולט. מצליח לפי הכוח שלו והיחסים איתך.	An approach to a prominent party member. Success depends on his power and your relations.	التوجه إلى عضو بارز في الحزب. النجاح يتوقف على قوته وعلاقتك به.
+עסקה עם תומכים	A deal with supporters	صفقة مع المؤيدين
+הבטחת תפקידים אחרי הניצחון. מעלה את התמיכה מהר, אבל פוגעת קצת במוניטין.	Promising posts after the victory. Raises support fast, but slightly hurts your reputation.	وعد بمناصب بعد الفوز. يرفع الدعم بسرعة لكنه يضر بالسمعة قليلًا.
+להתקיף את המנהיג	Attack the leader	مهاجمة الزعيم
+מוריד את התמיכה במנהיג, אבל עלול להיות בומרנג על המוניטין שלך.	Lowers support for the leader, but may backfire on your reputation.	يخفض الدعم للزعيم لكنه قد ينقلب على سمعتك.
+הכריז על התמודדות נגדי	Announced a run against me	أعلن الترشح ضدي
+הבטחת תפקידים לתומכים. התמיכה בך עלתה ב-10, והמוניטין ירד מעט.	You promised posts to supporters. Your support rose by 10, and your reputation dropped slightly.	وعدت المؤيدين بمناصب. ارتفع دعمك 10 وانخفضت السمعة قليلًا.
+ההתקפה חזרה אליך כבומרנג: התמיכה בך ירדה והמוניטין נפגע.	The attack backfired: your support dropped and your reputation was hurt.	انقلب الهجوم عليك: انخفض دعمك وتضررت سمعتك.
+ההתקפה פגעה: התמיכה במנהיג ירדה ב-6.	The attack landed: support for the leader dropped by 6.	أصاب الهجوم: انخفض الدعم للزعيم 6.
+תמך בי במירוץ על ראשות המפלגה	Backed me in the race for the party leadership	دعمني في السباق على رئاسة الحزب
+אין מירוץ פעיל	No active race	لا يوجد سباق فعّال
+בחר חבר מפלגה	Choose a party member	اختر عضوًا في الحزب
+הוא כבר תומך בך	He already supports you	هو يدعمك بالفعل
+כבר עשית את זה בתור הזה	You already did this this turn	فعلت ذلك بالفعل في هذا الدور
+המירוץ על ראשות המפלגה	The race for the party leadership	السباق على رئاسة الحزب
+חבר מפלגה לגיוס	Party member to recruit	عضو حزب للتجنيد
+קמפיין במירוץ על ראשות המפלגה	Campaign in the party leadership race	حملة في السباق على رئاسة الحزب
+פעולה במהלך המירוץ הפנימי על ראשות המפלגה: כנס, גיוס תומכים, עסקאות או התקפה על המנהיג.	An action during the internal race for the party leadership: a rally, recruiting supporters, deals or an attack on the leader.	إجراء خلال السباق الداخلي على رئاسة الحزب: مهرجان أو تجنيد مؤيدين أو صفقات أو هجوم على الزعيم.
+אין מירוץ פעיל על ראשות המפלגה	There is no active race for the party leadership	لا يوجد سباق فعّال على رئاسة الحزب
+בחר פעולה	Choose an action	اختر إجراءً
+לא ניתן לבצע עכשיו.	Cannot be done right now.	لا يمكن تنفيذه الآن.
+פרישה מהקואליציה	Leaving the coalition	الانسحاب من الائتلاف
+המפלגה שלך פורשת מהקואליציה ועוברת לאופוזיציה, והשרים שלה עוזבים. אם לא נשאר לקואליציה רוב, הממשלה נופלת והולכים לבחירות.	Your party leaves the coalition and moves to the opposition, and its ministers leave. If the coalition is left without a majority, the government falls and elections follow.	ينسحب حزبك من الائتلاف وينتقل إلى المعارضة ويغادر وزراؤه. إن لم تبقَ للائتلاف أغلبية تسقط الحكومة وتُجرى انتخابات.
+ראש הממשלה לא פורש מהממשלה שלו	The prime minister doesn't leave his own government	رئيس الحكومة لا ينسحب من حكومته
+המפלגה שלך לא בקואליציה	Your party is not in the coalition	حزبك ليس في الائتلاف
+לא ניתן לפרוש עכשיו	You can't leave now	لا يمكن الانسحاب الآن
+הפרת ההסכם הקואליציוני	Breach of the coalition agreement	خرق الاتفاق الائتلافي
+לא נשב בממשלה שמקדמת חוקים שאנחנו מתנגדים להם	We will not sit in a government that advances laws we oppose	لن نجلس في حكومة تدفع قوانين نعارضها
+המקום שלנו באופוזיציה	Our place is in the opposition	مكاننا في المعارضة
+הפרישה מהקואליציה	Leaving the coalition	الانسحاب من الائتلاف
+לקואליציה לא נשאר רוב. הכנסטון מתפזר ויוצאים לבחירות.	The coalition has no majority left. The Knesseton dissolves and elections follow.	لم تبقَ للائتلاف أغلبية. يُحلّ الكنيستون وتُجرى انتخابات.
+פרשת מהקואליציה	You left the coalition	انسحبت من الائتلاف
+בקשה לחזור לממשלה	Request to return to the government	طلب العودة إلى الحكومة
+פנייה לראש הממשלה בבקשה לחזור לממשלה אחרי שפוטרת. הסיכוי עולה עם הזמן, עם האמון שלו בך ועם הכוח הפוליטי שלך.	An appeal to the prime minister to return to the government after being fired. The chance rises with time, his trust in you and your political power.	التوجه إلى رئيس الحكومة بطلب العودة إلى الحكومة بعد إقالتك. يزداد الاحتمال مع الوقت وثقته بك وقوتك السياسية.
+כבר יש לך תפקיד בממשלה	You already have a role in the government	لديك بالفعل منصب في الحكومة
+לא פוטרת מהממשלה	You were not fired from the government	لم تُقَل من الحكومة
+אתה ראש הממשלה	You are the prime minister	أنت رئيس الحكومة
+אין תיק פנוי	No portfolio available	لا توجد حقيبة شاغرة
+ביקש לחזור וקיבל הזדמנות שנייה	Asked to return and got a second chance	طلب العودة وحصل على فرصة ثانية
+התמודדות על ראשות המפלגה	Running for the party leadership	الترشح لرئاسة الحزب
+פותח מירוץ פנימי על ראשות המפלגה מול המנהיג המכהן: שלושה תורות של קמפיין בין חברי המפלגה, ואז ההכרעה. הפסד יעלה ביוקר.	Opens an internal race for the party leadership against the incumbent: three turns of campaigning among party members, then the decision. Losing will be costly.	يفتح سباقًا داخليًا على رئاسة الحزب ضد الزعيم الحالي: ثلاثة أدوار من الحملة بين أعضاء الحزب ثم الحسم. الخسارة ستكلف غاليًا.
+המירוץ כבר התחיל	The race has already started	السباق بدأ بالفعل
+פתחת במירוץ על ראשות המפלגה	You opened a race for the party leadership	فتحت سباقًا على رئاسة الحزب
+עכשיו צריך לגייס תומכים: כנסים, פניות לחברי כנסטון ועסקאות. המנהיג גם יפעל נגדך.	Now you need to win supporters: rallies, appeals to Knesseton members and deals. The leader will act against you too.	الآن عليك كسب مؤيدين: مهرجانات وتوجه إلى أعضاء الكنيستون وصفقات. وسيعمل الزعيم ضدك أيضًا.
+📜 הפרת ההסכם	📜 Breach of the agreement	📜 خرق الاتفاق
+⚖️ חוקים שאנחנו מתנגדים להם	⚖️ Laws we oppose	⚖️ قوانين نعارضها
+🗳️ המקום שלנו באופוזיציה	🗳️ Our place is in the opposition	🗳️ مكاننا في المعارضة
+↩️ לבקש לחזור לממשלה	↩️ Ask to return to the government	↩️ طلب العودة إلى الحكومة
+⚔️ להתמודד על ראשות המפלגה	⚔️ Run for the party leadership	⚔️ الترشح لرئاسة الحزب
+לפתוח במירוץ על ראשות המפלגה? שלושה תורות של קמפיין פנימי, והפסד יעלה ביוקר.	Open a race for the party leadership? Three turns of internal campaigning, and losing will be costly.	هل تفتح سباقًا على رئاسة الحزب؟ ثلاثة أدوار من الحملة الداخلية والخسارة ستكلف غاليًا.
+המפלגה שלך יוצאת לאופוזיציה והשרים שלה עוזבים. אם לא נשאר לקואליציה רוב, הממשלה נופלת והולכים לבחירות. הסיבה שתבחר משפיעה על מה שהציבור יחשוב.	Your party goes into the opposition and its ministers leave. If the coalition is left without a majority, the government falls and elections follow. The reason you choose affects what the public will think.	يذهب حزبك إلى المعارضة ويغادر وزراؤه. إن لم تبقَ للائتلاف أغلبية تسقط الحكومة وتُجرى انتخابات. السبب الذي تختاره يؤثر على ما سيعتقده الجمهور.
+לפרוש בגלל הפרת ההסכם הקואליציוני? המפלגה עוברת לאופוזיציה.	Leave over the breach of the coalition agreement? The party moves to the opposition.	هل تنسحب بسبب خرق الاتفاق الائتلافي؟ ينتقل الحزب إلى المعارضة.
+לפרוש בגלל חוקים שאתה מתנגד להם? המפלגה עוברת לאופוזיציה.	Leave over laws you oppose? The party moves to the opposition.	هل تنسحب بسبب قوانين تعارضها؟ ينتقل الحزب إلى المعارضة.
+לפרוש מסיבות פוליטיות? המפלגה עוברת לאופוזיציה.	Leave for political reasons? The party moves to the opposition.	هل تنسحب لأسباب سياسية؟ ينتقل الحزب إلى المعارضة.
+אתה	You	أنت

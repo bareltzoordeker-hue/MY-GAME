@@ -47,7 +47,7 @@ export function getCapabilities(s: GameState): RoleCapabilities {
 /** Law domains each ministry is responsible for (a minister proposes laws only in their own field). */
 const MINISTRY_LAW_DOMAINS: Record<string, string[]> = {
   finance: ['economy'], economy: ['economy'], defense: ['defense'], education: ['education'], health: ['health'], transport: ['transport'],
-  housing: ['housing'], welfare: ['welfare'], interior: ['management', 'housing'], national_security: ['law'], justice: ['law'],
+  housing: ['housing'], welfare: ['welfare'], interior: ['management', 'housing'], national_security: ['law', 'security'], justice: ['law'],
   energy: ['energy', 'infrastructure'], agriculture: ['agriculture'], science: ['economy', 'management'], culture: ['culture'],
   foreign: ['foreign', 'defense'], intelligence: ['defense'], regional: ['foreign'], diaspora: ['foreign'], communications: ['media', 'management'],
   labor: ['welfare', 'economy'], tourism: ['economy'], environment: ['energy'], religious: ['management'], jerusalem: ['housing', 'management'],

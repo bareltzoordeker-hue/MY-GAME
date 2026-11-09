@@ -31,13 +31,14 @@ import { CHANNEL_BY_ID, FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type ChannelId
 import { decisionReactions } from './reactions';
 import { INTERNAL_BY_ID } from '../data/internalSecurity';
 import { canUseInternalSecurity, cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, takeBackArea, unitTraining, type CbmKind } from './security';
-import { assignMinister, createMinistry, getMinistry, mergeMinistries, removeMinistry } from './government';
+import { assignMinister, createMinistry, getMinistry, mergeMinistries, partyLeavesCoalition, removeMinistry } from './government';
 import { ideologyDistance, partyStance, proposeBill, repealLaw, voteBudget } from './parliament';
 import { coalitionSeats, computeShares, seatsFromShares } from './polls';
 import { cancelProject, startProject } from './projects';
 import { makePromise } from './promises';
 import { allyHurt } from './alliances';
 import { mergeParties, partyRelation, shiftPartyRelation } from './relations';
+import { RACE_MOVES, raceMove, raceMoveBlocked, startRace, type RaceMove } from './leadership';
 import { getCapabilities, isPM, isPartyLeader, lawAllowed, isSpeaker, playerMinistry } from './roles';
 
 export type Params = Record<string, string | number>;
@@ -963,39 +964,13 @@ def({
 });
 
 def({
-  id: 'run_primaries', title: 'התמודדות על ראשות המפלגה', icon: '⚔️', category: 'career', level: 'major', capital: 20, cooldown: 4,
-  description: 'התמודדות מול המנהיג המכהן. הסיכוי נקבע לפי הכוח, הפופולריות ותמיכת חברי המפלגה. הפסד יעלה ביוקר.',
-  unavailable: (s) => (isPartyLeader(s) ? 'אתה כבר המנהיג' : me(s).power < 35 ? 'צריך לפחות 35 כוח פוליטי' : null),
+  id: 'run_primaries', title: 'התמודדות על ראשות המפלגה', icon: '⚔️', category: 'career', level: 'major', capital: 10, cooldown: 4,
+  description: 'פותח מירוץ פנימי על ראשות המפלגה מול המנהיג המכהן: שלושה תורות של קמפיין בין חברי המפלגה, ואז ההכרעה. הפסד יעלה ביוקר.',
+  unavailable: (s) => (isPartyLeader(s) ? 'אתה כבר המנהיג' : s.leadershipRace ? 'המירוץ כבר התחיל' : me(s).power < 35 ? 'צריך לפחות 35 כוח פוליטי' : null),
   run: (s) => {
-    const party = s.parties[s.player.partyId];
-    const leader = s.politicians[party.leaderId];
-    const pl = me(s);
-    const members = party.memberIds.map((id) => s.politicians[id]).filter((x) => x && x.active && !x.isPlayer && x.id !== leader.id);
-    const support = members.reduce((a, m) => a + m.loyalty, 0) / Math.max(1, members.length);
-    const score = pl.power + pl.popularity * 0.5 + support * 0.4 - (leader.power + leader.popularity * 0.5 + 25);
-    const pWin = clamp(0.5 + score / 60, 0.05, 0.92);
-    if (rand(s) < pWin) {
-      party.leaderId = pl.id;
-      remember(s, leader.id, 'betrayal', 'הדיח אותי מראשות המפלגה', -40);
-      pl.power = clamp(pl.power + 15);
-      s.player.listRank = 1;
-      s.career.memorable.push(`ניצח בפריימריז ב${party.name}`);
-      addNews(s, `${pl.name} ניצח את ${leader.name} בבחירות לראשות ${party.name}`, 'good', '👑');
-      if (s.government.pmId === leader.id) {
-        s.government.pmId = pl.id;
-        if (pl.ministryId) { const m = getMinistry(s, pl.ministryId); if (m) m.ministerId = pl.id; }
-        for (const m of s.government.ministries) if (m.ministerId === leader.id) m.ministerId = pl.id;
-        s.career.governmentsFormed += 1;
-      }
-      syncRole(s);
-      return { title: 'ניצחת בפריימריז', status: 'approved', subtitle: `אתה ${s.player.role === 'pm' ? 'ראש הממשלה' : 'יו״ר ' + party.name}` };
-    }
-    remember(s, leader.id, 'betrayal', 'ניסה להדיח אותי', -35);
-    pl.power = clamp(pl.power - 15);
-    s.flags.failed_primaries = s.turn;
-    addNews(s, `${pl.name} הפסיד בבחירות לראשות ${party.name}`, 'bad', '🗳️');
-    s.career.failures.push(`הפסיד בפריימריז ב${party.name}`);
-    return { title: 'הפסדת בפריימריז', status: 'rejected', subtitle: `סיכויי הניצחון היו ${Math.round(pWin * 100)}%`, quip: 'היחסים עם המנהיג נפגעו קשות.' };
+    startRace(s);
+    const r = s.leadershipRace!;
+    return { title: 'פתחת במירוץ על ראשות המפלגה', status: 'approved', subtitle: `ההכרעה בעוד ${r.endTurn - s.turn} תורות`, quip: 'עכשיו צריך לגייס תומכים: כנסים, פניות לחברי כנסטון ועסקאות. המנהיג גם יפעל נגדך.' };
   },
 });
 
@@ -1726,6 +1701,75 @@ def({
   unavailable: speakerOnly,
   run: (s) => { applyEffects(s, { playerReputation: 4, stability: -3, groups: { liberals: 3, left: 2, right: -1 } }); return { title: 'ועדת חקירה פרלמנטרית הוקמה', quip: 'הקואליציה לא שמחה, והציבור סקרן.' }; },
 });
+
+def({
+  id: 'race_campaign', title: 'קמפיין במירוץ על ראשות המפלגה', icon: '🗳️', category: 'career', level: 'simple',
+  capital: (_s, p) => RACE_MOVES[str(p, 'kind') as RaceMove]?.capital ?? 3,
+  description: 'פעולה במהלך המירוץ הפנימי על ראשות המפלגה: כנס, גיוס תומכים, עסקאות או התקפה על המנהיג.',
+  unavailable: (s, p) => {
+    const kind = str(p, 'kind') as RaceMove;
+    if (!s.leadershipRace) return 'אין מירוץ פעיל על ראשות המפלגה';
+    if (!RACE_MOVES[kind]) return 'בחר פעולה';
+    return raceMoveBlocked(s, kind, str(p, 'targetId') || undefined);
+  },
+  run: (s, p) => {
+    const kind = str(p, 'kind') as RaceMove;
+    const r = raceMove(s, kind, str(p, 'targetId') || undefined);
+    return { title: RACE_MOVES[kind].label, status: r?.ok ? 'approved' : 'rejected', quip: r?.text ?? 'לא ניתן לבצע עכשיו.' };
+  },
+});
+
+def({
+  id: 'leave_coalition', title: 'פרישה מהקואליציה', icon: '🚪', category: 'parliament', level: 'major', capital: 8, cooldown: 4,
+  description: 'המפלגה שלך פורשת מהקואליציה ועוברת לאופוזיציה, והשרים שלה עוזבים. אם לא נשאר לקואליציה רוב, הממשלה נופלת והולכים לבחירות.',
+  unavailable: (s) => (!isPartyLeader(s) ? 'רק מנהיג מפלגה' : isPM(s) ? 'ראש הממשלה לא פורש מהממשלה שלו' : !s.government.coalition.includes(s.player.partyId) ? 'המפלגה שלך לא בקואליציה' : s.government.caretaker || s.elections.phase !== 'none' ? 'לא ניתן לפרוש עכשיו' : null),
+  run: (s, p) => {
+    const reason = str(p, 'reason') || 'politics';
+    const party = s.parties[s.player.partyId];
+    const pm = s.politicians[s.government.pmId];
+    const broken = (s.government.agreements ?? []).filter((c) => c.partyId === party.id && c.status === 'broken').length;
+    const text = reason === 'broken_deal' ? 'הפרת ההסכם הקואליציוני' : reason === 'law' ? 'לא נשב בממשלה שמקדמת חוקים שאנחנו מתנגדים להם' : 'המקום שלנו באופוזיציה';
+    partyLeavesCoalition(s, party.id, text);
+    syncRole(s);
+    shiftPartyRelation(s, party.id, pm.partyId, reason === 'broken_deal' && broken > 0 ? -6 : -12);
+    remember(s, pm.id, 'betrayal', 'הפרישה מהקואליציה', -10);
+    // the voters judge the reason: a broken deal is credible, "politics" is not
+    if (reason === 'broken_deal') applyEffects(s, broken > 0 ? { playerPopularity: 3, playerReputation: 2, partyMomentum: { [party.id]: 2 } } : { playerPopularity: -1, playerReputation: -2 });
+    else if (reason === 'law') applyEffects(s, { playerPopularity: 1, partyMomentum: { [party.id]: 1 } });
+    else applyEffects(s, s.government.approval < 35 ? { partyMomentum: { [party.id]: 2 } } : { playerPopularity: -2, partyMomentum: { [party.id]: -1 } });
+    if (coalitionSeats(s) < MAJORITY) {
+      callEarlyElections(s, `${party.name} פרשה והקואליציה נשארה בלי רוב`);
+      return { title: 'הממשלה נפלה', status: 'approved', subtitle: `${party.name} באופוזיציה`, quip: 'לקואליציה לא נשאר רוב. הכנסטון מתפזר ויוצאים לבחירות.' };
+    }
+    return { title: 'פרשת מהקואליציה', status: 'approved', subtitle: `${party.name} באופוזיציה`, quip: `הסיבה: ${text}. הממשלה ממשיכה עם ${coalitionSeats(s)} מנדטים.` };
+  },
+});
+
+def({
+  id: 'ask_return', title: 'בקשה לחזור לממשלה', icon: '↩️', category: 'career', level: 'simple', capital: 5, cooldown: 3,
+  description: 'פנייה לראש הממשלה בבקשה לחזור לממשלה אחרי שפוטרת. הסיכוי עולה עם הזמן, עם האמון שלו בך ועם הכוח הפוליטי שלך.',
+  unavailable: (s) => (s.player.role === 'minister' ? 'כבר יש לך תפקיד בממשלה' : s.flags.fired_turn === undefined ? 'לא פוטרת מהממשלה' : !s.government.coalition.includes(s.player.partyId) ? 'המפלגה שלך לא בקואליציה' : isPM(s) ? 'אתה ראש הממשלה' : null),
+  run: (s) => {
+    const pm = s.politicians[s.government.pmId];
+    const pl = me(s);
+    const leader = s.politicians[s.parties[pl.partyId].leaderId];
+    const prevId = Object.keys(s.flags).find((k) => k.startsWith('fired_from_'))?.slice('fired_from_'.length);
+    const free = (s.government.ministries.find((m) => m.id === prevId && !m.ministerId) ?? s.government.ministries.find((m) => m.agreementPartyId === pl.partyId && !m.ministerId));
+    const since = s.turn - (s.flags.fired_turn ?? s.turn);
+    const p = clamp(0.25 + (pm.loyalty - 50) / 80 + (pl.power - 40) / 200 + Math.min(0.3, since * 0.05) + ((leader?.loyalty ?? 50) - 50) / 200, 0.05, 0.85);
+    if (!free) return { title: 'אין תיק פנוי', status: 'rejected', quip: `${pm.name}: "אין כרגע תיק שאפשר לתת לך. נדבר כשיתפנה משהו."` };
+    if (rand(s) < p) {
+      assignMinister(s, free.id, pl.id);
+      setRole(s, 'minister', `חזר לממשלה כ${free.name}`);
+      for (const k of Object.keys(s.flags)) if (k === 'fired_turn' || k.startsWith('fired_from_')) delete s.flags[k];
+      remember(s, pm.id, 'support', 'ביקש לחזור וקיבל הזדמנות שנייה', 4);
+      return { title: `חזרת לממשלה: ${free.name}`, status: 'approved', quip: `${pm.name}: "אני נותן לך הזדמנות נוספת. אל תאכזב אותי."` };
+    }
+    pm.loyalty = clamp(pm.loyalty - 2);
+    return { title: 'הבקשה נדחתה', status: 'rejected', subtitle: `סיכוי ההצלחה היה ${Math.round(p * 100)}%`, quip: `${pm.name}: "עוד מוקדם. תוכיח את עצמך ונחזור לזה."` };
+  },
+});
+
 
 export const ACTIONS: Record<string, ActionDef> = Object.fromEntries(A.map((a) => [a.id, a]));
 

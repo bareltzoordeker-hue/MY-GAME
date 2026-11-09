@@ -199,7 +199,7 @@ P('utj', 11, 'משה רוט', 'm', 2, 'welfare', { mk: true, look: hat });
 P('utj', 0, 'משה גפני', 'm', 4, 'finance', { mk: true, skills: { finance: 70 }, look: { ...hat, hairColor: '#e0e0e0', glasses: true }, bio: 'לשעבר יו״ר ועדת הכספים' });
 
 // ---------------- עוצמה יהודית ----------------
-P('otzma', 1, 'איתמר בן גביר', 'm', 5, 'law', { mk: true, role: 'national_security', skills: { law: 60, media: 80 }, look: { hair: 'kippah', hairColor: '#2a1a12', beard: 'stubble' }, bio: 'השר לביטחון לאומי' });
+P('otzma', 1, 'איתמר בן גביר', 'm', 5, 'security', { mk: true, role: 'national_security', skills: { security: 65, law: 45, media: 80 }, look: { hair: 'kippah', hairColor: '#2a1a12', beard: 'stubble' }, bio: 'השר לביטחון לאומי' });
 P('otzma', 2, 'טלי גוטליב', 'f', 3, 'law', { mk: true, skills: { law: 70, media: 70 }, look: { hair: 'long', hairColor: '#e0b060' } });
 P('otzma', 3, 'יצחק וסרלאוף', 'm', 2, 'interior', { mk: true, role: 'negev_galilee', skills: { interior: 55 }, look: { hair: 'kippah', beard: 'full' }, bio: 'השר לפיתוח הנגב, הגליל והחוסן הלאומי' });
 P('otzma', 4, 'עמיחי אליהו', 'm', 2, 'culture', { mk: true, role: 'heritage', skills: { culture: 50 }, look: { hair: 'kippah', beard: 'full' }, bio: 'שר המורשת' });

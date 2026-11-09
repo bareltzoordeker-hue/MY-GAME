@@ -8,7 +8,7 @@ import { GROUP_BY_ID } from '../../data/world';
 import { coalitionSeats } from '../../engine/polls';
 import { ministerCandidates } from '../../engine/government';
 import { computeVote, partyStance } from '../../engine/parliament';
-import { getCapabilities, isPM, isSpeaker, lawAllowed } from '../../engine/roles';
+import { getCapabilities, isPM, isPartyLeader, isSpeaker, lawAllowed } from '../../engine/roles';
 import { playerListRank } from '../../engine/elections';
 import { getProvider } from '../../engine/ai/provider';
 import { buildCharacterContext } from '../../engine/ai/contextBuilder';
@@ -89,6 +89,16 @@ export function GovernmentScreen() {
   return (
     <div className="space-y-4">
       <ScreenHeader title="הממשלה" sub={`ראש הממשלה: ${s.politicians[s.government.pmId]?.name} · ${coalitionSeats(s)} מנדטים · יציבות ${s.government.stability.toFixed(0)}`} />
+      {!pm && isPartyLeader(s) && s.government.coalition.includes(s.player.partyId) && !s.government.caretaker && (
+        <Section title="פרישה מהקואליציה" icon="🚪">
+          <p className="text-sm muted mb-2">המפלגה שלך יוצאת לאופוזיציה והשרים שלה עוזבים. אם לא נשאר לקואליציה רוב, הממשלה נופלת והולכים לבחירות. הסיבה שתבחר משפיעה על מה שהציבור יחשוב.</p>
+          <div className="flex flex-wrap gap-2">
+            <ActionButton id="leave_coalition" params={{ reason: 'broken_deal' }} className="btn btn-sm btn-danger" confirm="לפרוש בגלל הפרת ההסכם הקואליציוני? המפלגה עוברת לאופוזיציה.">📜 הפרת ההסכם</ActionButton>
+            <ActionButton id="leave_coalition" params={{ reason: 'law' }} className="btn btn-sm btn-danger" confirm="לפרוש בגלל חוקים שאתה מתנגד להם? המפלגה עוברת לאופוזיציה.">⚖️ חוקים שאנחנו מתנגדים להם</ActionButton>
+            <ActionButton id="leave_coalition" params={{ reason: 'politics' }} className="btn btn-sm btn-danger" confirm="לפרוש מסיבות פוליטיות? המפלגה עוברת לאופוזיציה.">🗳️ המקום שלנו באופוזיציה</ActionButton>
+          </div>
+        </Section>
+      )}
       <Section title="הקואליציה" icon="🤝" right={<Explain k="stability" />}>
         <div className="flex flex-wrap gap-2">{s.government.coalition.map((id) => <PartyChip key={id} party={s.parties[id]} seats={s.parties[id].seats} />)}</div>
         {pm && <div className="flex flex-wrap gap-2 mt-3">{s.government.coalition.filter((id) => id !== s.player.partyId).map((id) => <ActionButton key={id} id="coalition_gift" params={{ partyId: id }} className="btn btn-sm">🎁 כספים ל{s.parties[id].shortName}</ActionButton>)}

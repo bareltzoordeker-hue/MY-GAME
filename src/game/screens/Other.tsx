@@ -16,6 +16,7 @@ import { serialize, deserialize, saveGame, storageDiagnostics } from '../../engi
 import type { Domain } from '../../types/game';
 import { resetTutorial } from '../components/Tutorial';
 import { DecideButton } from '../components/Overlay';
+import { RacePanel } from '../components/RacePanel';
 import { Caricature, ADVISOR_SPEC } from '../../shared/components/Caricature';
 import { ActionButton, Empty, Explain, Meter, ScreenHeader, Section, Tabs } from '../components/ui';
 
@@ -199,11 +200,13 @@ export function CareerScreen() {
             {Object.keys(REGION_BY_ID).slice(0, 9).map((r) => <ActionButton key={r} id="visit_region" params={{ regionId: r }} className="btn btn-sm">🚐 {REGION_BY_ID[r as keyof typeof REGION_BY_ID].name}</ActionButton>)}
           </div>
         </Section>
+        <RacePanel s={s} />
         <Section title="להתקדם" icon="🪜">
           <div className="flex flex-wrap gap-2">
             <ActionButton id="support_leader" className="btn btn-sm">🙌 גיבוי למנהיג</ActionButton>
             <ActionButton id="ask_position" className="btn btn-sm">🙋 לבקש תפקיד</ActionButton>
-            <ActionButton id="run_primaries" className="btn btn-sm btn-danger" confirm="פריימריז נגד המנהיג. הפסד יעלה ביוקר.">⚔️ קריאת תיגר</ActionButton>
+            <ActionButton id="run_primaries" className="btn btn-sm btn-danger" confirm="לפתוח במירוץ על ראשות המפלגה? שלושה תורות של קמפיין פנימי, והפסד יעלה ביוקר.">⚔️ להתמודד על ראשות המפלגה</ActionButton>
+            {s.flags.fired_turn !== undefined && <ActionButton id="ask_return" className="btn btn-sm btn-blue">↩️ לבקש לחזור לממשלה</ActionButton>}
           </div>
           <div className="flex flex-wrap gap-2 mt-3 items-center">
             <select aria-label="מפלגה לעבור אליה" value={target} onChange={(e) => setTarget(e.target.value)}><option value="">מעבר למפלגה…</option>{Object.values(s.parties).filter((p) => p.id !== s.player.partyId && p.seats > 0).map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}</select>

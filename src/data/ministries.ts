@@ -19,7 +19,7 @@ export const MINISTRIES: MinistryDef[] = [
   M('finance', 'משרד האוצר', '💰', 'finance', [], [], true, 'rzp', 'מכין את התקציב, קובע מסים ומפקח על ההוצאה הממשלתית.'),
   M('foreign', 'משרד החוץ', '🌍', 'foreign', [], [], true, 'likud', 'אחראי על יחסי החוץ, השגרירויות וההסברה בעולם.'),
   M('justice', 'משרד המשפטים', '⚖️', 'law', [], [], true, 'likud', 'אחראי על מערכת המשפט, החקיקה הממשלתית והייעוץ המשפטי.'),
-  M('national_security', 'המשרד לביטחון לאומי', '🚓', 'law', ['security'], ['police'], true, 'otzma', 'אחראי על המשטרה, שירות בתי הסוהר והכבאות.'),
+  M('national_security', 'המשרד לביטחון לאומי', '🚓', 'security', ['security'], ['police'], true, 'otzma', 'אחראי על המשטרה, שירות בתי הסוהר והכבאות.'),
   M('interior', 'משרד הפנים', '🪪', 'interior', ['govServices'], ['government'], true, 'likud', 'אחראי על הרשויות המקומיות, רשות האוכלוסין והתכנון.'),
   M('health', 'משרד הבריאות', '🏥', 'health', ['health'], ['health'], true, 'likud', 'אחראי על בתי החולים, קופות החולים וסל הבריאות.'),
   M('education', 'משרד החינוך', '🎓', 'education', ['education'], ['education'], true, 'likud', 'אחראי על מערכת החינוך, המורים ותוכניות הלימודים.'),
@@ -59,5 +59,5 @@ export const NEW_MINISTRY_TEMPLATES: { id: string; name: string; icon: string; d
 export const DOMAIN_NAMES: Record<Domain, string> = {
   economy: 'כלכלה', finance: 'אוצר', defense: 'ביטחון', education: 'חינוך', health: 'בריאות', transport: 'תחבורה',
   law: 'משפט ואכיפה', foreign: 'חוץ', infrastructure: 'תשתיות', management: 'ניהול', welfare: 'רווחה', energy: 'אנרגיה וסביבה',
-  agriculture: 'חקלאות', interior: 'פנים', media: 'תקשורת', housing: 'דיור', science: 'מדע', culture: 'תרבות',
+  agriculture: 'חקלאות', interior: 'פנים', media: 'תקשורת', housing: 'דיור', science: 'מדע', culture: 'תרבות', security: 'ביטחון לאומי ומשטרה',
 };
