@@ -4,7 +4,7 @@ import { useGame } from '../store/gameStore';
 import { babble, voiceFor } from '../audio/sound';
 import { voiceOf } from './Drama';
 import { StatusBar, fxKind } from './Fx';
-import { EXPLAIN } from '../content/explain';
+import { EXPLAIN, EXPLAIN_RANGE } from '../content/explain';
 import { Caricature, ADVISOR_SPEC } from '../../shared/components/Caricature';
 import { dateLabel } from '../../utils';
 import { dateL } from '../../shared/i18n';
@@ -213,6 +213,7 @@ export function ExplainModal() {
           <div className="text-xl font-black mb-2">{e.title}</div>
           <p className="text-sm leading-relaxed">{e.text}</p>
           {e.tip && <div className="inset text-sm mt-3">💡 {e.tip}</div>}
+          {EXPLAIN_RANGE[k] && <div className="inset text-sm mt-3"><b>📏 הטווח התקין:</b> {EXPLAIN_RANGE[k]}</div>}
           <div className="flex justify-end mt-4"><button className="btn btn-primary btn-sm" data-tut="modal-ok" onClick={() => close(null)}>הבנתי</button></div>
         </div>
       </div>

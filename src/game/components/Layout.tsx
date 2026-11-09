@@ -7,7 +7,7 @@ import { dateLabel, deficitPct } from '../../utils';
 import { roleLabel } from '../../engine/newGame';
 import { canAdvance } from '../../engine/turn';
 import { coalitionSeats } from '../../engine/polls';
-import { getCapabilities, isForeignMinister, isSpeaker } from '../../engine/roles';
+import { getCapabilities, isEconomyMinister, isForeignMinister, isSpeaker } from '../../engine/roles';
 import { daysBetween, electionCountdown, electionDate, monthsUntilElection, nextTurnDate, spanText } from '../../engine/calendar';
 import { unreadTotal } from '../../engine/chat';
 import { LANGS, dateL, setLang, spanL, t, type Lang } from '../../shared/i18n';
@@ -33,6 +33,7 @@ const NAV: NavItem[] = [
   { id: 'projects', icon: '🏗️', label: 'פרויקטים', tip: 'פרויקטים לאומיים: כבישים, רכבות, בתי חולים. לוקחים זמן ועולים כסף' },
   { id: 'security', icon: '🛡️', label: 'ביטחון ומדיניות', tip: 'חזיתות, כוחות צה״ל, מבצעים באישור הקבינט, ערוצי הידברות, הפסקות אש, שטחי A/B/C ויחסי חוץ' , show: (s) => securityRole(s) !== null },
   { id: 'foreign', icon: '🌍', label: 'לשכת שר החוץ', tip: 'יחסי החוץ ופעולות דיפלומטיות: ביקורים, הסכמים, הצהרות ושגרירים', show: (s) => isForeignMinister(s) || s.player.role === 'pm' },
+  { id: 'econoffice', icon: '📊', label: 'לשכת שר הכלכלה', tip: 'תמ״ג, סחר חוץ לפי מדינה ופעולות כלכליות: הסכמי סחר, מבצעי ייצוא, מכסים וסיוע לענפים', show: (s) => isEconomyMinister(s) || s.player.role === 'pm' },
   { id: 'government', icon: '🪑', label: 'ממשלה', tip: 'שרים, משרדים וקואליציה: מינויים, פיטורים, איחוד משרדים וכספים קואליציוניים' },
   { id: 'party', icon: '🎌', label: 'מפלגה ובריתות', tip: 'המפלגה שלך, הקמפיין, הבטחות בחירות ובריתות עם מפלגות אחרות' },
   { id: 'relations', icon: '🕸️', label: 'מפת יחסים', tip: 'היחסים בין המפלגות ובינך לבין חברי הכנסטון: פגישות, אירועים משותפים, תמיכה הדדית, הסכמי עודפים ואיחודים' },

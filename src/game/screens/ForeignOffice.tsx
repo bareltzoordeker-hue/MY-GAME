@@ -4,7 +4,7 @@ import { useGame } from '../store/gameStore';
 import { FOREIGN_LIST, foreignValue, hasAmbassador, hasPact, isContested } from '../../engine/foreign';
 import { world } from '../../engine/security';
 import { isForeignMinister } from '../../engine/roles';
-import { ActionButton, Empty, Meter, ScreenHeader, Section } from '../components/ui';
+import { ActionButton, Empty, Explain, Meter, ScreenHeader, Section } from '../components/ui';
 
 export function ForeignOfficeScreen() {
   const s = useGame((x) => x.game)!;
@@ -17,7 +17,7 @@ export function ForeignOfficeScreen() {
   return (
     <div className="space-y-4">
       <ScreenHeader title="לשכת שר החוץ" sub="יחסי החוץ של ישמעאל והפעולות הדיפלומטיות. מהלכים חריפים דורשים את אישור ראש הממשלה." />
-      <Section title="יחסי חוץ" icon="🌍">
+      <Section title="יחסי חוץ" icon="🌍" right={<Explain k="relation" />}>
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-2">
           {FOREIGN_LIST.map((c) => {
             const v = foreignValue(s, c.id);

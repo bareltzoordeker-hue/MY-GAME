@@ -783,3 +783,19 @@
 ↑ +{} מאז התור הקודם ||| ↑ +{0} since the previous turn ||| ↑ +{0} منذ الدور السابق
 ↓ {} מאז התור הקודם ||| ↓ {0} since the previous turn ||| ↓ {0} منذ الدور السابق
 המדינה שנבחרה: {}. לחץ על כרטיס מדינה למעלה כדי לבחור אחרת. ||| The selected country: {0}. Click a country card above to choose another. ||| البلد المختار: {0}. انقر على بطاقة بلد في الأعلى لاختيار بلد آخر.
+
+{} לא מוכנה להסכם סחר ||| {0} is not ready for a trade agreement ||| {0} غير مستعدة لاتفاق تجاري
+נחתם הסכם סחר עם {} ||| A trade agreement was signed with {0} ||| وُقّع اتفاق تجاري مع {0}
+הסכם סחר עם {} ||| A trade agreement with {0} ||| اتفاق تجاري مع {0}
+המשא ומתן על סחר עם {} נתקע ||| The trade negotiations with {0} are stuck ||| تعثرت المفاوضات التجارية مع {0}
+מבצע ייצוא ל{} ||| An export drive to {0} ||| حملة تصدير إلى {0}
+הוטלו מכסים על סחורות מ{} ||| Tariffs were imposed on goods from {0} ||| فُرضت رسوم جمركية على بضائع من {0}
+בוטלו המכסים על {} ||| The tariffs on {0} were removed ||| أُلغيت الرسوم الجمركية على {0}
+סיוע לענף {} ||| Aid to the {0} sector ||| دعم قطاع {0}
+צמיחה {}% ||| Growth {0}% ||| النمو {0}%
+אינפלציה {}% ||| Inflation {0}% ||| التضخم {0}%
+{}% מהתמ״ג ||| {0}% of GDP ||| {0}% من الناتج
+₪{}B ייצוא, {}% מכלל הייצוא ||| ₪{0}B exports, {1}% of all exports ||| ₪{0}B صادرات، {1}% من إجمالي الصادرات
+⚠️ תלות מסוכנת: {}. הן שותפות גדולות ליצוא, והיחסים איתן נמוכים. ||| ⚠️ Dangerous dependence: {0}. They are major export partners, and relations with them are low. ||| ⚠️ اعتماد خطير: {0}. هي شركاء تصدير كبار والعلاقات معها منخفضة.
+המדינה שנבחרה: {}. ||| The selected country: {0}. ||| البلد المختار: {0}.
+{} – {} (תור {}) ||| {0} – {1} (turn {2}) ||| {0} – {1} (الدور {2})

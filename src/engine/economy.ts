@@ -1,4 +1,5 @@
 import { LAW_BY_ID } from '../data/laws';
+import { tradeGrowthEffect } from './trade';
 import { DIFFICULTIES } from '../data/world';
 import { gauss } from './rng';
 import type { BudgetCategory, GameState } from '../types/game';
@@ -69,6 +70,7 @@ export function growthDrivers(s: GameState): { label: string; value: number }[] 
     { label: 'ריבית', value: -(e.interestRate - 4) * 0.12 },
     { label: 'שירותים ציבוריים', value: (servicesAvg - 55) * 0.03 },
     { label: 'יציבות שלטונית', value: (s.government.stability - 50) * 0.01 },
+    { label: 'סחר חוץ', value: tradeGrowthEffect(s) },
     { label: 'זעזועים ומשברים', value: e.shocks.growth + e.structural.growth },
   ];
 }

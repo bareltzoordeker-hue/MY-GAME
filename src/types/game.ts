@@ -322,6 +322,14 @@ export interface WorldState {
   ambassadors?: string[];
 }
 
+/** Foreign trade state: tariffs, trade deals and temporary export boosts. */
+export interface TradeState {
+  tariffs: string[];
+  deals: string[];
+  boosts: Record<string, { pct: number; until: number }>;
+  industry?: { pct: number; until: number };
+}
+
 export interface CampaignState {
   /** day number of the election this campaign is for */
   electionDay: number;
@@ -629,6 +637,7 @@ export interface GameState {
   /** what each conversation is currently about (set when the politician writes first) */
   chatTopics?: Record<string, ChatTopic>;
   leadershipRace?: LeadershipRace;
+  trade?: TradeState;
   /** security fronts, forces and the diplomatic track */
   world?: WorldState;
   /** the player party's election campaign (set when the campaign opens) */

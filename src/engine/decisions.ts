@@ -38,9 +38,10 @@ import { cancelProject, startProject } from './projects';
 import { makePromise } from './promises';
 import { allyHurt } from './alliances';
 import { mergeParties, partyRelation, shiftPartyRelation } from './relations';
-import { FOREIGN_BY_ID, changeAmbassador, hasAmbassador, hasPact, signAgreement, statement, summonAmbassador, unCoalition, visitCountry, type ForeignResult } from './foreign';
+import { SECTORS, TRADE_BASE, exportDrive, industryAid, tariff, tradeDeal, tradeState, type TradeResult } from './trade';
+import { FOREIGN_BY_ID, foreignValue, changeAmbassador, hasAmbassador, hasPact, signAgreement, statement, summonAmbassador, unCoalition, visitCountry, type ForeignResult } from './foreign';
 import { RACE_MOVES, raceMove, raceMoveBlocked, startRace, type RaceMove } from './leadership';
-import { getCapabilities, isForeignMinister, isPM, isPartyLeader, lawAllowed, isSpeaker, playerMinistry } from './roles';
+import { getCapabilities, isEconomyMinister, isForeignMinister, isPM, isPartyLeader, lawAllowed, isSpeaker, playerMinistry } from './roles';
 
 export type Params = Record<string, string | number>;
 export type ActionCategory = 'economy' | 'government' | 'parliament' | 'ministry' | 'media' | 'party' | 'campaign' | 'career' | 'projects';
@@ -1790,13 +1791,45 @@ const fm = (
 const warmWithContested = (p: Params) => (['qatar', 'pa'].includes(str(p, 'country')) ? -1 : 0);
 fm('fm_visit', 'ביקור רשמי', '✈️', 4, 1, 'ביקור של שר החוץ במדינה. משפר את היחסים אם הוא מצליח; לפעמים תקרית פרוטוקולית מקלקלת.', warmWithContested, null, (s, p) => visitCountry(s, str(p, 'country')));
 fm('fm_agreement', 'הסכם שיתוף פעולה', '🤝', 6, 2, 'הסכם בתחומי סחר, תעופה ומדע. דורש יחסים טובים (35+), משפר אותם משמעותית ופותח הזדמנויות לסחר.', warmWithContested,
-  (s, p) => (hasPact(s, str(p, 'country')) ? 'כבר נחתם הסכם עם המדינה הזו' : null), (s, p) => signAgreement(s, str(p, 'country')));
+  (s, p) => (hasPact(s, str(p, 'country')) ? 'כבר נחתם הסכם עם המדינה הזו' : foreignValue(s, str(p, 'country')) < 35 ? 'צריך יחסים של 35 לפחות עם המדינה' : null), (s, p) => signAgreement(s, str(p, 'country')));
 fm('fm_statement', 'הצהרה חריפה', '📢', 2, 1, 'הצהרה פומבית נגד מדינה. מוצאת חן בעיני הימין בבית, אבל פוגעת ביחסים איתה.', () => 1, null, (s, p) => statement(s, str(p, 'country')));
 fm('fm_summon', 'שיחת נזיפה עם שגריר', '☎️', 2, 1, 'זימון השגריר לשיחה חריפה. מסר מתון יותר מהצהרה, עם סיכון קטן לבומרנג.', () => 1, null, (s, p) => summonAmbassador(s, str(p, 'country')));
 fm('fm_ambassador', 'מינוי או החזרת שגריר', '🏛️', 3, 2, 'מינוי שגריר משפר את היחסים; החזרת שגריר היא צעד חריף שפוגע בהם קשות.', (p) => (str(p, 'mode') === 'recall' ? 1 : 0),
   (s, p) => (str(p, 'mode') !== 'appoint' && str(p, 'mode') !== 'recall' ? 'בחר מינוי או החזרה' : str(p, 'mode') === 'appoint' && hasAmbassador(s, str(p, 'country')) ? 'כבר יש שגריר במדינה הזו' : str(p, 'mode') === 'recall' && !hasAmbassador(s, str(p, 'country')) ? 'אין שגריר להחזיר' : null),
   (s, p) => changeAmbassador(s, str(p, 'country'), str(p, 'mode') === 'recall' ? 'recall' : 'appoint'));
 fm('fm_un_coalition', 'קואליציה באו״ם', '🌐', 7, 3, 'גיוס מדינות ידידותיות להצבעה באו״ם. הסיכוי תלוי ביחסים עם ארה״ב, אירופה ובריטניה.', () => 0, null, (s) => unCoalition(s), false);
+
+// ===== ECONOMY MINISTER =====
+const economyOnly = (s: GameState) => (isPM(s) || isEconomyMinister(s) ? null : 'רק שר הכלכלה וראש הממשלה');
+/** A move that costs money needs the PM's nod (and the finance minister's): usually given, and a refusal costs nothing. */
+function pmEconomyApproval(s: GameState): RunResult | null {
+  if (isPM(s)) return null;
+  const pm = s.politicians[s.government.pmId];
+  if (rand(s) < clamp(0.8 + (pm.loyalty - 50) / 150, 0.5, 0.95)) return null;
+  remember(s, pm.id, 'ignored', 'ביקש לאשר מהלך כלכלי', -1);
+  return { status: 'rejected', title: 'ראש הממשלה לא אישר', subtitle: 'ההון הפוליטי חוזר אליך', people: [{ icon: '🪑', label: pm.name, text: 'התקציב לא מאפשר את זה כרגע.', tone: 'bad' }] };
+}
+const eco = (
+  id: string, title: string, icon: string, capital: number, cooldown: number, description: string, costly: (p: Params) => boolean,
+  check: ((s: GameState, p: Params) => string | null) | null, act: (s: GameState, p: Params) => TradeResult, needsCountry = true,
+) => def({
+  id, title, icon, category: 'government', level: 'medium', capital, cooldown, description,
+  unavailable: (s, p) => economyOnly(s) ?? (needsCountry && !TRADE_BASE[str(p, 'country')] ? 'בחר מדינה' : null) ?? (check ? check(s, p) : null),
+  run: (s, p) => {
+    if (costly(p)) { const rej = pmEconomyApproval(s); if (rej) return refundIfRejected(s, id, p, rej)!; }
+    const r = act(s, p);
+    return { title: r.title, status: r.ok ? 'approved' : 'rejected', quip: r.text };
+  },
+});
+eco('eco_trade_deal', 'הסכם סחר', '📦', 6, 2, 'הסכם סחר עם מדינה: הייצוא עולה ב-10% והייבוא ב-6%. דורש יחסים טובים (35+) או הסכם שיתוף פעולה של שר החוץ.', () => false,
+  (s, p) => (tradeState(s).deals.includes(str(p, 'country')) ? 'כבר נחתם הסכם סחר עם המדינה הזו' : foreignValue(s, str(p, 'country')) < 35 && !hasPact(s, str(p, 'country')) ? 'צריך יחסים של 35 לפחות עם המדינה, או הסכם שיתוף פעולה' : null), (s, p) => tradeDeal(s, str(p, 'country')));
+eco('eco_export_drive', 'מבצע ייצוא', '🚢', 4, 1, 'קידום ייצוא למדינה: הייצוא אליה גדל ב-8% במשך שלושה תורות (עלות ₪0.2 מיליארד).', () => true,
+  (s, p) => ((tradeState(s).boosts[str(p, 'country')]?.until ?? -1) >= s.turn ? 'מבצע ייצוא כבר פעיל למדינה הזו' : null), (s, p) => exportDrive(s, str(p, 'country')));
+eco('eco_tariff', 'מכסים', '🚧', 4, 1, 'הטלת מכסים על סחורות ממדינה או ביטולם. מכסים מורידים ייבוא ב-35% אבל פוגעים בייצוא, ביחסים ובמחירים.', (p) => str(p, 'mode') === 'impose',
+  (s, p) => (str(p, 'mode') !== 'impose' && str(p, 'mode') !== 'remove' ? 'בחר הטלה או ביטול' : str(p, 'mode') === 'impose' && tradeState(s).tariffs.includes(str(p, 'country')) ? 'כבר יש מכסים על המדינה הזו' : str(p, 'mode') === 'remove' && !tradeState(s).tariffs.includes(str(p, 'country')) ? 'אין מכסים להסרה' : null),
+  (s, p) => tariff(s, str(p, 'country'), str(p, 'mode') === 'remove' ? 'remove' : 'impose'));
+eco('eco_industry_aid', 'סיוע לענף', '🏭', 5, 2, 'מענקים והקלות לענף: הצמיחה עולה מעט והייצוא גדל ב-3% בשני התורות הקרובים (עלות ₪0.5 מיליארד).', () => true,
+  (s, p) => (!SECTORS[str(p, 'sector')] ? 'בחר ענף' : (tradeState(s).industry?.until ?? -1) >= s.turn ? 'יש כבר סיוע לענף פעיל' : null), (s, p) => industryAid(s, str(p, 'sector')), false);
 
 export const ACTIONS: Record<string, ActionDef> = Object.fromEntries(A.map((a) => [a.id, a]));
 

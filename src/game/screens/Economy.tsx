@@ -32,7 +32,7 @@ export function EconomyScreen() {
     <div className="space-y-4">
       <ScreenHeader title="כלכלה" sub="המספרים מגיעים מהסימולציה. ההסברים – מהיועץ." />
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Stat icon="🏭" label="תוצר שנתי" value={`₪${(e.gdp / 1000).toFixed(2)}T`} sub={`הכנסה ממוצעת ₪${Math.round(e.avgIncome).toLocaleString()}`} />
+        <Stat icon="🏭" label="תוצר שנתי" value={`₪${(e.gdp / 1000).toFixed(2)}T`} k="gdp" sub={`הכנסה ממוצעת ₪${Math.round(e.avgIncome).toLocaleString()}`} />
         <Stat icon="📈" label="צמיחה" value={`${e.growth.toFixed(1)}%`} k="growth" />
         <Stat icon="🔥" label="אינפלציה" value={`${e.inflation.toFixed(1)}%`} k="inflation" tone={e.inflation > 4.5 ? 'bad' : undefined} />
         <Stat icon="👷" label="אבטלה" value={`${e.unemployment.toFixed(1)}%`} k="unemployment" />

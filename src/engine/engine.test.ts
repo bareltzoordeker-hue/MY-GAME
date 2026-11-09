@@ -1432,3 +1432,49 @@ describe('step 2: the foreign minister\'s office', () => {
     expect(refused).toBeLessThan(20);
   });
 });
+
+describe('step 3: the economy minister\'s office and foreign trade', () => {
+  it('the trade picture starts neutral and reacts to relations, tariffs and deals', async () => {
+    const { computeTrade, tradeGrowthEffect, TRADE_PARTNERS } = await import('./trade');
+    const { shiftForeign } = await import('./foreign');
+    const s = createGame(cfg('pm'));
+    const t0 = computeTrade(s);
+    expect(t0.rows.length).toBe(TRADE_PARTNERS.length);
+    expect(t0.totalExports).toBeGreaterThan(0);
+    expect(Math.abs(tradeGrowthEffect(s))).toBeLessThan(0.05); // the game starts where it always did
+    // relations with the biggest partner collapse: trade and growth suffer
+    shiftForeign(s, 'usa', -50);
+    expect(computeTrade(s).totalExports).toBeLessThan(t0.totalExports);
+    expect(tradeGrowthEffect(s)).toBeLessThan(0);
+  });
+  it('trade moves: permissions, effects and the PM-approval rule', async () => {
+    const { computeTrade, tradeState } = await import('./trade');
+    const { isEconomyMinister } = await import('./roles');
+    const eco = createGame(cfg('minister', { ministryId: 'economy' }));
+    expect(isEconomyMinister(eco)).toBe(true);
+    const other = createGame(cfg('minister', { ministryId: 'transport' }));
+    for (const id of ['eco_trade_deal', 'eco_export_drive']) {
+      expect(checkAction(eco, id, { country: 'usa' }), id).toBeNull();
+      expect(checkAction(other, id, { country: 'usa' }), id).not.toBeNull();
+    }
+    expect(checkAction(eco, 'eco_trade_deal', {})).not.toBeNull();
+    const s = createGame(cfg('pm'));
+    s.player.politicalCapital = 100;
+    const base = computeTrade(s).rows.find((r) => r.id === 'china')!.imports;
+    let g = performAction(s, 'eco_tariff', { country: 'china', mode: 'impose' }).state;
+    expect(tradeState(g).tariffs).toContain('china');
+    expect(computeTrade(g).rows.find((r) => r.id === 'china')!.imports).toBeLessThan(base);
+    g.turn += 2; g.player.politicalCapital = 100;
+    g = performAction(g, 'eco_tariff', { country: 'china', mode: 'remove' }).state;
+    expect(tradeState(g).tariffs).not.toContain('china');
+    g.turn += 2; g.player.politicalCapital = 100;
+    const before = computeTrade(g).rows.find((r) => r.id === 'india')!.exports;
+    g = performAction(g, 'eco_export_drive', { country: 'india' }).state;
+    expect(computeTrade(g).rows.find((r) => r.id === 'india')!.exports).toBeGreaterThan(before);
+    expect(checkAction(g, 'eco_export_drive', { country: 'india' })).not.toBeNull();
+    // a deal is possible with good relations
+    let d = createGame(cfg('pm'));
+    for (let i = 0; i < 12 && !tradeState(d).deals.includes('usa'); i++) { d.turn += 3; d.player.politicalCapital = 100; d = performAction(d, 'eco_trade_deal', { country: 'usa' }).state; }
+    expect(tradeState(d).deals).toContain('usa');
+  });
+});
