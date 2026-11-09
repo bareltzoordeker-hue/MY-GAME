@@ -817,3 +817,18 @@
 אישרת את {} ||| You approved {0} ||| وافقت على {0}
 {} יוצא לדרך ||| {0} is under way ||| انطلق {0}
 {}: "תודה על האמון." ||| {0}: "Thank you for the trust." ||| {0}: "شكرًا على الثقة."
+
+הפסקת האש בחזית {} לא מחזיקה: רמת האיום עלתה ל-{}. ||| The ceasefire on the {0} front is not holding: the threat level rose to {1}. ||| وقف إطلاق النار على جبهة {0} لا يصمد: ارتفع مستوى التهديد إلى {1}.
+בחזית {} נמשכת לחימה, ורמת האיום {}. ||| Fighting continues on the {0} front, and the threat level is {1}. ||| يتواصل القتال على جبهة {0} ومستوى التهديد {1}.
+רמת האיום בחזית {} עומדת על {}. ||| The threat level on the {0} front stands at {1}. ||| مستوى التهديد على جبهة {0} عند {1}.
+ביטחון הפנים במצב קשה: איכות השירות {}. ||| Internal security is in a bad state: service quality {0}. ||| الأمن الداخلي في وضع صعب: جودة الخدمة {0}.
+היחסים עם {} טובים ({}) ואפשר לחזק אותם. ||| Relations with {0} are good ({1}) and can be strengthened. ||| العلاقات مع {0} جيدة ({1}) ويمكن تعزيزها.
+היחסים עם {} מבשילים להסכם ({}). ||| Relations with {0} are ripe for an agreement ({1}). ||| العلاقات مع {0} ناضجة لاتفاق ({1}).
+היחסים עם {} הידרדרו ({}). ||| Relations with {0} have deteriorated ({1}). ||| تدهورت العلاقات مع {0} ({1}).
+{} מהווה כ-{}% מהייצוא, והיחסים איתה טובים מספיק. ||| {0} accounts for about {1}% of exports, and relations with it are good enough. ||| تشكّل {0} نحو {1}% من الصادرات والعلاقات معها جيدة بما يكفي.
+איכות השירות במשרד שלו עומדת על {}. הפרויקט ישפר אותה. ||| The service quality in his ministry stands at {0}. The project will improve it. ||| جودة الخدمة في وزارته عند {0}. سيحسّنها المشروع.
+
+🪪 {} מצטרפת לממשלה של {} ||| 🪪 {0} is joining the government of {1} ||| 🪪 تنضم {0} إلى حكومة {1}
+מי יקבל את {} ||| Who gets {0} ||| من سيحصل على {0}
+אתה: {} · מומחיות {} · מקום {} ||| You: {0} · expertise {1} · place {2} ||| أنت: {0} · الخبرة {1} · المكان {2}
+{} · מומחיות {} · מקום {} ||| {0} · expertise {1} · place {2} ||| {0} · الخبرة {1} · المكان {2}

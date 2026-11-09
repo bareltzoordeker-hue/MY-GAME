@@ -1529,3 +1529,61 @@ describe('step 3b: ministers come to the prime minister with requests', () => {
     }
   });
 });
+
+describe('step 3b: the requests make sense', () => {
+  it('no strike when the fronts are quiet, no internal operation when security is fine, and foreign moves fit the relations', async () => {
+    const { generateMinisterRequests } = await import('./ministerRequests');
+    const { world } = await import('./security');
+    const { foreignValue } = await import('./foreign');
+    const s = createGame(cfg('pm'));
+    s.government.caretaker = false; s.flags.reqFreq = 2;
+    for (const f of Object.values(world(s).fronts)) { f.threat = 10; f.status = 'ceasefire'; }
+    s.services.security.quality = 90;
+    const seen: { kind: string; payload: Record<string, string | number> }[] = [];
+    for (let i = 0; i < 80; i++) { s.turn += 1; generateMinisterRequests(s); for (const it of s.inbox.filter((x) => x.kind.startsWith('mreq_'))) seen.push({ kind: it.kind, payload: it.payload }); s.inbox = s.inbox.filter((x) => !x.kind.startsWith('mreq_')); }
+    expect(seen.some((x) => x.kind === 'mreq_strike')).toBe(false);
+    expect(seen.some((x) => x.kind === 'mreq_internal')).toBe(false);
+    for (const x of seen.filter((y) => y.kind === 'mreq_foreign')) {
+      const v = foreignValue(s, String(x.payload.country));
+      if (x.payload.act === 'statement') expect(['usa', 'eu']).not.toContain(x.payload.country);
+      if (x.payload.act === 'visit') expect(v).toBeGreaterThanOrEqual(25);
+    }
+    // a front on fire does bring strike requests
+    const w = world(s);
+    w.fronts.gaza.status = 'fighting'; w.fronts.gaza.threat = 85;
+    let got = false;
+    for (let i = 0; i < 80 && !got; i++) { s.turn += 3; generateMinisterRequests(s); got = s.inbox.some((x) => x.kind === 'mreq_strike'); s.inbox = []; }
+    expect(got).toBe(true);
+  });
+});
+
+describe('step 3c: the party leader decides who takes the party\'s portfolios', () => {
+  it('portfolios are proposed by expertise or by list rank, and a manual choice is applied when joining', async () => {
+    const { runElection, answerCoalitionOffer, proposeAssignments } = await import('./elections');
+    let done = false;
+    for (let seed = 1; seed <= 40 && !done; seed++) {
+      const s = createGame({ playerName: 'x', gender: 'm', difficulty: 'normal', seed, role: 'candidate', partyId: 'yashar' });
+      s.government.caretaker = false;
+      runElection(s);
+      if (s.gameOver || s.elections.phase !== 'offers') continue;
+      const o = s.elections.offers!.find((x) => x.terms.filter((d) => d.kind === 'ministry').length >= 1);
+      if (!o) continue;
+      const ids = o.terms.filter((d) => d.kind === 'ministry').map((d) => d.ministryId!);
+      const party = s.parties[s.player.partyId];
+      const byExp = proposeAssignments(s, party.id, ids, 'expertise');
+      const byRank = proposeAssignments(s, party.id, ids, 'rank');
+      expect(Object.keys(byExp).sort()).toEqual([...ids].sort());
+      expect(Object.keys(byRank).sort()).toEqual([...ids].sort());
+      // by rank: the first ministry goes to the person with the best list position
+      const top = party.memberIds.map((i) => s.politicians[i]).filter((p) => p.active && p.inKnesset).sort((a, b) => (a.listRank ?? 99) - (b.listRank ?? 99))[0];
+      expect(Object.values(byRank)).toContain(top.id);
+      // a manual choice: the second member in the Knesseton takes the first ministry
+      const other = party.memberIds.map((i) => s.politicians[i]).filter((p) => p.active && p.inKnesset && !p.isPlayer)[0];
+      answerCoalitionOffer(s, o.id, 'accept', -1, { manual: { [ids[0]]: other.id } });
+      expect(s.elections.phase).toBe('none');
+      expect(s.government.ministries.find((m) => m.id === ids[0])!.ministerId).toBe(other.id);
+      done = true;
+    }
+    expect(done).toBe(true);
+  });
+});

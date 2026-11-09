@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useGame } from '../store/gameStore';
-import { coalitionConflicts, extraChance, negotiationSeats, offerExtras } from '../../engine/elections';
+import { coalitionConflicts, extraChance, negotiationSeats, offerExtras, proposeAssignments } from '../../engine/elections';
 import { sweetenerOptions } from '../../engine/coalitionDeals';
 import { MAJORITY } from '../../data/world';
 import { Caricature } from '../../shared/components/Caricature';
@@ -108,7 +108,9 @@ export function CoalitionOffersModal() {
   const ask = useGame((x) => x.ask);
   const hasReaction = useGame((x) => x.reactions.length > 0);
   const [pick, setPick] = useState<Record<string, string>>({});
+  const [step, setStep] = useState<string | null>(null);
   if (!s || s.elections.phase !== 'offers' || !s.elections.offers || hasReaction) return null;
+  if (step && s.elections.offers.some((o) => o.id === step)) return <PortfolioPicker offerId={step} onBack={() => setStep(null)} />;
   const myParty = s.parties[s.player.partyId];
   const offers = s.elections.offers;
   return (
@@ -152,7 +154,7 @@ export function CoalitionOffersModal() {
                   <button className="btn btn-sm btn-blue" disabled={chosen === '' || left === 0} onClick={() => { choose(o.id, 'ask', Number(chosen)); setPick({ ...pick, [o.id]: '' }); }}>לבקש</button>
                 </div>
                 <div className="flex gap-1.5 mt-2 flex-wrap">
-                  <button className="btn btn-sm btn-good" onClick={() => ask({ title: `להצטרף לממשלה של ${f.name}?`, text: `${o.seats} מנדטים. התנאים שמופיעים בהצעה ייכנסו לתוקף.`, onYes: () => choose(o.id, 'accept') })}>✔ להצטרף לממשלה הזו</button>
+                  <button className="btn btn-sm btn-good" onClick={() => (o.terms.some((d) => d.kind === 'ministry') ? setStep(o.id) : ask({ title: `להצטרף לממשלה של ${f.name}?`, text: `${o.seats} מנדטים. התנאים שמופיעים בהצעה ייכנסו לתוקף.`, onYes: () => choose(o.id, 'accept') }))}>✔ להצטרף לממשלה הזו</button>
                   <button className="btn btn-sm btn-danger" onClick={() => choose(o.id, 'decline')}>✖ לדחות</button>
                 </div>
               </div>
@@ -160,6 +162,49 @@ export function CoalitionOffersModal() {
           })}
         </div>
         <div className="p-4 pt-0 text-xs muted">אם תדחה את כל ההצעות, המפלגה שלך נשארת באופוזיציה, אלא אם הם לא ימצאו רוב בלעדיה: אז הנשיא ימשיך לפנות למועמדים אחרים, ובמקרה הגרוע הבחירות יחזרו.</div>
+      </div>
+    </div>
+  );
+}
+
+/** Joining a government: the party leader decides who gets each portfolio the party was given. */
+function PortfolioPicker({ offerId, onBack }: { offerId: string; onBack: () => void }) {
+  const s = useGame((x) => x.game)!;
+  const choose = useGame((x) => x.chooseOffer);
+  const offer = s.elections.offers!.find((o) => o.id === offerId)!;
+  const party = s.parties[s.player.partyId];
+  const ministryIds = offer.terms.filter((d) => d.kind === 'ministry' && d.ministryId).map((d) => d.ministryId as string);
+  const pool = party.memberIds.map((id) => s.politicians[id]).filter((p) => p && p.active && p.inKnesset).sort((a, b) => (a.listRank ?? 99) - (b.listRank ?? 99));
+  const [sel, setSel] = useState<Record<string, string>>(() => proposeAssignments(s, party.id, ministryIds, 'expertise'));
+  const f = s.politicians[offer.formateurId];
+  const domainOf = (mid: string) => s.government.ministries.find((m) => m.id === mid)?.domain;
+  const nameOf = (mid: string) => s.government.ministries.find((m) => m.id === mid)?.name ?? mid;
+  return (
+    <div className="backdrop">
+      <div className="modal modal-wide" role="dialog" aria-label="חלוקת התיקים">
+        <div className="p-5 border-b" style={{ borderColor: 'var(--line)' }}>
+          <div className="text-xs font-bold" style={{ color: 'var(--gold)' }}>{`🪪 ${party.name} מצטרפת לממשלה של ${f.name}`}</div>
+          <div className="text-xl font-black">חלוקת התיקים</div>
+          <div className="text-sm muted mt-1">בחר מי יקבל כל תיק שהמפלגה קיבלה: אתה בעצמך או חברי מפלגה אחרים. אפשר לפי מומחיות, לפי הדירוג ברשימה, או ידנית.</div>
+          <div className="flex flex-wrap gap-2 mt-3">
+            <button className="btn btn-sm" onClick={() => setSel(proposeAssignments(s, party.id, ministryIds, 'expertise'))}>🎓 לפי מומחיות</button>
+            <button className="btn btn-sm" onClick={() => setSel(proposeAssignments(s, party.id, ministryIds, 'rank'))}>🔢 לפי דירוג ברשימה</button>
+          </div>
+        </div>
+        <div className="p-5 space-y-2">
+          {ministryIds.map((mid) => (
+            <div key={mid} className="inset flex flex-wrap items-center gap-2">
+              <b className="flex-1 min-w-[160px]">{`🏛️ ${nameOf(mid)}`}</b>
+              <select aria-label={`מי יקבל את ${nameOf(mid)}`} className="min-w-[220px]" value={sel[mid] ?? ''} onChange={(e) => setSel({ ...sel, [mid]: e.target.value })}>
+                {pool.map((p) => <option key={p.id} value={p.id}>{`${p.isPlayer ? 'אתה: ' : ''}${p.name} · מומחיות ${((domainOf(mid) ? p.expertise[domainOf(mid)!] : undefined) ?? 20).toFixed(0)} · מקום ${p.listRank ?? '-'}`}</option>)}
+              </select>
+            </div>
+          ))}
+        </div>
+        <div className="p-4 pt-0 flex justify-between gap-2 flex-wrap">
+          <button className="btn btn-sm" onClick={onBack}>חזרה להצעות</button>
+          <button className="btn btn-primary" onClick={() => { choose(offerId, 'accept', undefined, { manual: sel }); onBack(); }}>✔ אישור והצטרפות לממשלה</button>
+        </div>
       </div>
     </div>
   );

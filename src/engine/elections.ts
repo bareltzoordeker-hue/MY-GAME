@@ -2,7 +2,7 @@ import { LAW_BY_ID } from '../data/laws';
 import { CATEGORY_BY_ID, DIFFICULTIES, MAJORITY, TERM_TURNS } from '../data/world';
 import { addDays, addMonths, daysBetween, dayNumber, electionDate, turnsUntilElection } from './calendar';
 import { rand } from './rng';
-import type { BudgetCategory, CoalitionOffer, Demand, GameState, Party, PartyOffer, Reaction } from '../types/game';
+import type { BudgetCategory, CoalitionOffer, Demand, GameState, Party, PartyOffer, Politician, Reaction } from '../types/game';
 import { SWEETENER_VALUE, demandsFor, writeAgreement } from './coalitionDeals';
 import { partyRelation } from './relations';
 import { clamp, newId } from '../utils';
@@ -521,7 +521,34 @@ export function extraChance(s: GameState, offer: CoalitionOffer, d: Demand): num
   return clamp(0.5 + (myParty.seats - 8) / 50 + clamp(need / 30, 0, 0.3) - (key ? 0.3 : d.kind === 'ministry' ? 0.1 : 0) - offer.tries * 0.1, 0.08, 0.85);
 }
 
-export function answerCoalitionOffer(s: GameState, offerId: string, action: 'accept' | 'decline' | 'ask', extraIndex = -1): Reaction {
+export type PortfolioAssignment = { mode?: 'expertise' | 'rank'; manual?: Record<string, string> };
+
+/** Who would take each of the party's ministries: by expertise (and power), or by place on the list. */
+export function proposeAssignments(s: GameState, partyId: string, ministryIds: string[], mode: 'expertise' | 'rank'): Record<string, string> {
+  const party = s.parties[partyId];
+  const pool = party.memberIds.map((id) => s.politicians[id]).filter((p) => p && p.active && p.inKnesset);
+  const KEY = ['finance', 'defense', 'foreign', 'justice', 'national_security', 'interior', 'economy', 'education', 'health'];
+  const order = [...ministryIds].sort((a, b) => (KEY.indexOf(a) < 0 ? 99 : KEY.indexOf(a)) - (KEY.indexOf(b) < 0 ? 99 : KEY.indexOf(b)));
+  const out: Record<string, string> = {};
+  const taken = new Set<string>();
+  if (!pool.length) return out;
+  if (mode === 'rank') {
+    const ranked = [...pool].sort((a, b) => (a.listRank ?? 99) - (b.listRank ?? 99));
+    order.forEach((mid, i) => { out[mid] = ranked[i % ranked.length].id; });
+    return out;
+  }
+  for (const mid of order) {
+    const domain = s.government.ministries.find((m) => m.id === mid)?.domain;
+    const score = (p: Politician) => (domain ? p.expertise[domain] ?? 20 : 20) + p.power * 0.4;
+    const free = pool.filter((p) => !taken.has(p.id));
+    const best = [...(free.length ? free : pool)].sort((a, b) => score(b) - score(a))[0];
+    out[mid] = best.id;
+    taken.add(best.id);
+  }
+  return out;
+}
+
+export function answerCoalitionOffer(s: GameState, offerId: string, action: 'accept' | 'decline' | 'ask', extraIndex = -1, assign?: PortfolioAssignment): Reaction {
   const note = (title: string, status: Reaction['status'], quip: string): Reaction => ({ title, status, stats: [], groups: [], people: [], quip });
   const offers = s.elections.offers ?? [];
   const offer = offers.find((o) => o.id === offerId);
@@ -553,6 +580,12 @@ export function answerCoalitionOffer(s: GameState, offerId: string, action: 'acc
   const agreements: Record<string, string> = {};
   for (const d of offer.terms) if (d.kind === 'ministry' && d.ministryId && !agreements[d.ministryId]) agreements[d.ministryId] = myParty.id;
   installGovernment(s, f.id, [f.partyId, myParty.id, ...offer.partnerIds], agreements);
+  // the party leader decides who takes the party's portfolios
+  const mineIds = s.government.ministries.filter((m) => m.agreementPartyId === myParty.id).map((m) => m.id);
+  if (mineIds.length) {
+    const chosen = { ...proposeAssignments(s, myParty.id, mineIds, assign?.mode ?? 'expertise'), ...(assign?.manual ?? {}) };
+    for (const [mid, pid] of Object.entries(chosen)) if (mineIds.includes(mid) && s.politicians[pid]?.partyId === myParty.id) assignMinister(s, mid, pid);
+  }
   for (const d of offer.terms) {
     if (d.kind === 'law' && d.lawId) proposeBill(s, d.lawId, f.id, true);
     else if (d.kind === 'budget' && d.category) applyEffects(s, { budget: { [d.category]: d.amount ?? 1 } });

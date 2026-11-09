@@ -5,10 +5,10 @@ import { INTERNAL_OPTIONS } from '../data/internalSecurity';
 import { PROJECTS } from '../data/projects';
 import { FRONTS, OPERATIONS, OPERATION_BY_ID, type FrontId } from '../data/security';
 import type { GameState, InboxItem, Politician, Reaction } from '../types/game';
-import { clamp } from '../utils';
+import { clamp, deficitPct } from '../utils';
 import { addInbox } from './characters';
 import { addNews, applyEffects, logEvent, remember } from './effects';
-import { FOREIGN_BY_ID, FOREIGN_LIST, foreignValue, shiftForeign, signAgreement, statement, visitCountry } from './foreign';
+import { FOREIGN_BY_ID, FOREIGN_LIST, foreignValue, hasPact, isContested, shiftForeign, signAgreement, statement, visitCountry } from './foreign';
 import { startProject } from './projects';
 import { chance, pick, rand } from './rng';
 import { isPM } from './roles';
@@ -37,34 +37,51 @@ export function ministerSkillEffects(s: GameState): void {
 
 interface Draft { fromId: string; kind: string; title: string; text: string; payload: Record<string, string | number>; approveLabel?: string }
 
+const hawk = (p: Politician) => p.ideology.security;
+
+/** A request must make sense: it follows the situation, and says why now. */
 function strikeRequest(s: GameState): Draft | null {
   const m = ministerOf(s, 'defense');
   if (!m) return null;
+  if (hawk(m) < -0.2 && chance(s, 0.6)) return null; // a dovish minister asks less
   const w = world(s);
-  const fronts = FRONTS.filter((f) => w.fronts[f.id].threat >= 25).sort((a, b) => w.fronts[b.id].threat - w.fronts[a.id].threat);
-  if (!fronts.length) return null;
-  const front = fronts[Math.min(fronts.length - 1, Math.floor(rand(s) * 3))];
-  const ops = OPERATIONS.filter((o) => o.fronts.includes(front.id as FrontId) && (s.flags[`op_${front.id}`] ?? -1) < s.turn);
+  const cands = FRONTS.filter((f) => {
+    const st = w.fronts[f.id];
+    if ((s.flags[`op_${f.id}`] ?? -9) >= s.turn - 1) return false; // something just happened there
+    if (st.status === 'ceasefire' && st.threat < 60) return false; // the ceasefire is holding
+    return st.threat >= 40 || st.status === 'fighting';
+  }).sort((a, b) => w.fronts[b.id].threat - w.fronts[a.id].threat);
+  if (!cands.length) return null;
+  const front = cands[Math.min(cands.length - 1, Math.floor(rand(s) * 2))];
+  const st = w.fronts[front.id];
+  const fits = (o: (typeof OPERATIONS)[number]) => o.fronts.includes(front.id as FrontId) && (!o.needsCabinet || st.threat >= 65)
+    && (o.id !== 'iran_strike' || (st.threat >= 75 && !s.flags.iran_strike_done)) && (o.id !== 'wide_ground' || st.status === 'fighting' || st.threat >= 80);
+  const ops = OPERATIONS.filter(fits);
   if (!ops.length) return null;
   const op = pick(s, ops);
   const e = exp(m, 'defense');
   const p = operationChance(s, op, front.id as FrontId, (e - 50) / 400);
+  const why = st.status === 'ceasefire' ? `הפסקת האש בחזית ${front.name} לא מחזיקה: רמת האיום עלתה ל-${st.threat.toFixed(0)}.` : st.status === 'fighting' ? `בחזית ${front.name} נמשכת לחימה, ורמת האיום ${st.threat.toFixed(0)}.` : `רמת האיום בחזית ${front.name} עומדת על ${st.threat.toFixed(0)}.`;
   return {
     fromId: m.id, kind: 'mreq_strike', title: `${m.name} מבקש לאשר: ${op.name} ב${front.name}`, payload: { opId: op.id, front: front.id },
-    text: `"אני מבקש לאשר ${op.name} בחזית ${front.name}. רמת האיום בחזית: ${w.fronts[front.id].threat.toFixed(0)}. הערכת הסיכוי להצלחה: ${Math.round(p * 100)}%. מומחיות הביטחון שלי ${level(e)}."${op.needsCabinet ? ' (מבצע גדול: מחיר בנפגעים ובלחץ בינלאומי.)' : ''}`,
+    text: `${why}\n"אני מבקש לאשר ${op.name} בחזית ${front.name}. רמת האיום בחזית: ${st.threat.toFixed(0)}. הערכת הסיכוי להצלחה: ${Math.round(p * 100)}%. מומחיות הביטחון שלי ${level(e)}."${op.needsCabinet ? ' (מבצע גדול: מחיר בנפגעים ובלחץ בינלאומי.)' : ''}`,
   };
 }
 
 function internalRequest(s: GameState): Draft | null {
   const m = ministerOf(s, 'national_security');
   if (!m) return null;
-  const o = pick(s, INTERNAL_OPTIONS.filter((x) => x.op));
+  const quality = s.services.security.quality;
+  if (quality >= 72) return null; // internal security is fine: no reason to launch an operation
+  const options = INTERNAL_OPTIONS.filter((x) => x.op && (s.flags[`mreq_opt_${x.id}`] ?? -9) < s.turn - 6);
+  if (!options.length) return null;
+  const o = pick(s, options);
   const e = exp(m, 'security');
   const police = s.budget.allocations.police / Math.max(0.1, s.budget.needs.police);
   const p = clamp(o.base + (police - 1) * 0.35 + (e - 50) / 300, 0.2, 0.95);
   return {
     fromId: m.id, kind: 'mreq_internal', title: `${m.name} מבקש לאשר: ${o.title}`, payload: { optId: o.id },
-    text: `"${o.desc} אני מבקש אישור לצאת למבצע. הערכת הסיכוי להצלחה: ${Math.round(p * 100)}%. המומחיות שלי בתחום ${level(e)}."`,
+    text: `ביטחון הפנים במצב קשה: איכות השירות ${quality.toFixed(0)}.\n"${o.desc} אני מבקש אישור לצאת למבצע. הערכת הסיכוי להצלחה: ${Math.round(p * 100)}%. המומחיות שלי בתחום ${level(e)}."`,
   };
 }
 
@@ -72,14 +89,22 @@ function foreignRequest(s: GameState): Draft | null {
   const m = ministerOf(s, 'foreign');
   if (!m) return null;
   const e = exp(m, 'foreign');
-  const c = pick(s, FOREIGN_LIST);
-  const v = foreignValue(s, c.id);
-  const sharp = v < 40 && chance(s, 0.4);
-  const act = sharp ? 'statement' : v >= 45 && chance(s, 0.5) ? 'agreement' : 'visit';
-  const what = act === 'visit' ? `ביקור רשמי ב${c.name}` : act === 'agreement' ? `הסכם שיתוף פעולה עם ${c.name}` : `הצהרה חריפה נגד ${c.name}`;
+  const hawkish = hawk(m) > 0.2;
+  const options = FOREIGN_LIST.filter((c) => c.id !== 'un').flatMap((c) => {
+    const v = foreignValue(s, c.id);
+    const out: { act: 'visit' | 'agreement' | 'statement'; id: string; name: string; v: number }[] = [];
+    if (v >= 30 && !(isContested(c.id) && hawkish)) out.push({ act: 'visit', id: c.id, name: c.name, v });
+    if (v >= 45 && !hasPact(s, c.id)) out.push({ act: 'agreement', id: c.id, name: c.name, v });
+    if (v < 30 && isContested(c.id) && hawkish && c.id !== 'usa' && c.id !== 'eu') out.push({ act: 'statement', id: c.id, name: c.name, v });
+    return out;
+  });
+  if (!options.length) return null;
+  const o = pick(s, options);
+  const what = o.act === 'visit' ? `ביקור רשמי ב${o.name}` : o.act === 'agreement' ? `הסכם שיתוף פעולה עם ${o.name}` : `הצהרה חריפה נגד ${o.name}`;
+  const why = o.act === 'visit' ? `היחסים עם ${o.name} טובים (${o.v.toFixed(0)}) ואפשר לחזק אותם.` : o.act === 'agreement' ? `היחסים עם ${o.name} מבשילים להסכם (${o.v.toFixed(0)}).` : `היחסים עם ${o.name} הידרדרו (${o.v.toFixed(0)}).`;
   return {
-    fromId: m.id, kind: 'mreq_foreign', title: `${m.name} מציע: ${what}`, payload: { act, country: c.id },
-    text: `"אני מציע ${what}. היחסים עם ${c.name} עומדים על ${v.toFixed(0)}. הניסיון שלי בדיפלומטיה ${level(e)}."`,
+    fromId: m.id, kind: 'mreq_foreign', title: `${m.name} מציע: ${what}`, payload: { act: o.act, country: o.id },
+    text: `${why}\n"אני מציע ${what}. היחסים עם ${o.name} עומדים על ${o.v.toFixed(0)}. הניסיון שלי בדיפלומטיה ${level(e)}."`,
   };
 }
 
@@ -87,34 +112,44 @@ function tradeRequest(s: GameState): Draft | null {
   const m = ministerOf(s, 'economy');
   if (!m) return null;
   const e = exp(m, 'economy');
-  const ids = Object.keys(TRADE_BASE);
-  const c = pick(s, ids);
   const t = tradeState(s);
-  const options: string[] = [];
-  if (!t.deals.includes(c) && foreignValue(s, c) >= 35) options.push('deal');
-  if ((t.boosts[c]?.until ?? -1) < s.turn) options.push('export');
+  const options: { act: 'deal' | 'export'; id: string }[] = [];
+  for (const id of Object.keys(TRADE_BASE)) {
+    const v = foreignValue(s, id);
+    const big = TRADE_BASE[id].ex >= 1;
+    if (big && !t.deals.includes(id) && v >= 35) options.push({ act: 'deal', id });
+    if (big && (t.boosts[id]?.until ?? -1) < s.turn && v >= 30) options.push({ act: 'export', id });
+  }
   if (!options.length) return null;
-  const act = pick(s, options);
-  const name = FOREIGN_BY_ID[c]?.name ?? c;
-  const what = act === 'deal' ? `הסכם סחר עם ${name}` : `מבצע ייצוא ל${name}`;
+  const o = pick(s, options);
+  const name = FOREIGN_BY_ID[o.id]?.name ?? o.id;
+  const share = Math.round((TRADE_BASE[o.id].ex / Object.values(TRADE_BASE).reduce((a, b) => a + b.ex, 0)) * 100);
+  const what = o.act === 'deal' ? `הסכם סחר עם ${name}` : `מבצע ייצוא ל${name}`;
   return {
-    fromId: m.id, kind: 'mreq_trade', title: `${m.name} מציע: ${what}`, payload: { act, country: c },
-    text: `"אני מציע ${what}. הסחר עם ${name} חשוב למשק. המומחיות שלי בכלכלה ${level(e)}."${act === 'export' ? ' (עלות ₪0.2 מיליארד.)' : ''}`,
+    fromId: m.id, kind: 'mreq_trade', title: `${m.name} מציע: ${what}`, payload: { act: o.act, country: o.id },
+    text: `${name} מהווה כ-${share}% מהייצוא, והיחסים איתה טובים מספיק.\n"אני מציע ${what}. הסחר עם ${name} חשוב למשק. המומחיות שלי בכלכלה ${level(e)}."${o.act === 'export' ? ' (עלות ₪0.2 מיליארד.)' : ''}`,
   };
 }
 
 function projectRequest(s: GameState): Draft | null {
-  const cands: { m: Politician; d: (typeof PROJECTS)[number] }[] = [];
+  const deficit = deficitPct(s);
+  const cands: { m: Politician; d: (typeof PROJECTS)[number]; q: number }[] = [];
   for (const min of s.government.ministries) {
     const p = min.ministerId ? s.politicians[min.ministerId] : undefined;
     if (!p || !p.active || p.isPlayer || ['defense', 'foreign', 'economy', 'national_security'].includes(min.id)) continue;
-    for (const d of PROJECTS) if ((min.origins ?? [min.id]).includes(d.ministry) && d.cost < 14 && !s.projects.some((x) => x.defId === d.id && x.status !== 'cancelled')) cands.push({ m: p, d });
+    for (const d of PROJECTS) {
+      if (!(min.origins ?? [min.id]).includes(d.ministry) || s.projects.some((x) => x.defId === d.id && x.status !== 'cancelled')) continue;
+      const q = s.services[d.service]?.quality ?? 60;
+      if (q >= 70 || d.cost >= 14) continue; // a service that works needs no project, and a huge one needs more than a request
+      if (deficit > 5 && d.cost > 4) continue; // the deficit is high: only small projects
+      cands.push({ m: p, d, q });
+    }
   }
   if (!cands.length) return null;
-  const { m, d } = pick(s, cands);
+  const { m, d, q } = pick(s, cands);
   return {
     fromId: m.id, kind: 'mreq_project', title: `${m.name} מבקש להשיק: ${d.name}`, payload: { defId: d.id },
-    text: `"אני מבקש אישור להשיק את הפרויקט ${d.name}. עלות ₪${d.cost} מיליארד, ${d.turns * 2} חודשים, שיפור איכות +${d.bonus}."`,
+    text: `איכות השירות במשרד שלו עומדת על ${q.toFixed(0)}. הפרויקט ישפר אותה.\n"אני מבקש אישור להשיק את הפרויקט ${d.name}. עלות ₪${d.cost} מיליארד, ${d.turns * 2} חודשים, שיפור איכות +${d.bonus}."`,
   };
 }
 
@@ -132,6 +167,7 @@ export function generateMinisterRequests(s: GameState): void {
     const draft = pick(s, builders)(s);
     if (!draft || (s.flags[`mreq_${draft.fromId}`] ?? -9) >= s.turn - 1) continue;
     s.flags[`mreq_${draft.fromId}`] = s.turn;
+    if (draft.kind === 'mreq_internal') s.flags[`mreq_opt_${draft.payload.optId}`] = s.turn;
     addInbox(s, {
       kind: draft.kind, title: draft.title, fromId: draft.fromId, expiresTurn: s.turn + 2, text: draft.text, payload: draft.payload,
       options: [{ id: 'approve', label: 'לאשר' }, { id: 'decline', label: 'לדחות' }], defaultOptionId: 'decline',
