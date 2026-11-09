@@ -1692,3 +1692,34 @@ describe('step 4c: saved plans', () => {
     expect(listSavedPlans(pm).length).toBe(MAX_SAVED_PLANS - 1);
   });
 });
+
+describe('step 4d: the defense minister brings a strike proposal with a report', () => {
+  it('the proposal carries a report, can be saved or approved, and approving runs the plan', async () => {
+    const { generateMinisterRequests } = await import('./ministerRequests');
+    const { resolveInbox } = await import('./inbox');
+    const { world } = await import('./security');
+    const { listSavedPlans } = await import('./strikePlan');
+    let found = 0;
+    for (let seed = 1; seed <= 12 && found < 2; seed++) {
+      const s = createGame({ ...cfg('pm'), seed } as ReturnType<typeof cfg>);
+      s.government.caretaker = false; s.flags.reqFreq = 2;
+      for (const f of Object.values(world(s).fronts)) { f.threat = 80; f.status = 'tension'; }
+      for (let i = 0; i < 25 && !s.inbox.some((x) => x.kind === 'mreq_strike'); i++) { s.turn += 1; generateMinisterRequests(s); }
+      const it = s.inbox.find((x) => x.kind === 'mreq_strike' && x.report);
+      if (!it) continue;
+      found += 1;
+      const labels = it.report!.map((r) => r.label);
+      for (const need of ['יעד', 'רמת איום בחזית', 'סיכוי להצלחה', 'ביטחון מודיעיני', 'מחיר בינלאומי']) expect(labels).toContain(need);
+      expect(it.options.map((o) => o.id)).toContain('save');
+      if (found === 1) {
+        const r = resolveInbox(s, it.id, 'save');
+        expect(listSavedPlans(r.state)).toHaveLength(1);
+        expect(world(r.state).lastReport).toBeUndefined();
+      } else {
+        const r = resolveInbox(s, it.id, 'approve');
+        expect(world(r.state).lastReport).toBeTruthy();
+      }
+    }
+    expect(found).toBe(2);
+  });
+});

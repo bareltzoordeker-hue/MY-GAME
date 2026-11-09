@@ -240,3 +240,51 @@ export function deleteSavedPlan(s: GameState, id: string): boolean {
   w.savedPlans = (w.savedPlans ?? []).filter((x) => x.id !== id);
   return w.savedPlans.length < n;
 }
+
+// ------------------------------------------------------------ a minister's proposal comes as a full plan with a report
+type ReportRow = { label: string; value: string; tone?: 'good' | 'bad' | 'warn' };
+
+/** How sure the intelligence picture is: the quality of the information on the target and the readiness of the unit that gathers it. */
+export const intelConfidence = (s: GameState, plan: StrikePlan, t: TargetDef) => Math.round(0.6 * t.intel + 0.4 * readiness(s, plan.intel ?? 'u8200'));
+
+/** The plan the defense minister would bring: the best-prepared forces and the most valuable target. skill: his expertise bonus on the odds. */
+export function proposeStrikePlan(s: GameState, opId: string, front: FrontId, hawkLean: number, skill: number): { plan: StrikePlan; ev: PlanEval } | null {
+  if (!OP_PLAN[opId] || !FRONT_TARGETS[front]) return null;
+  const targets = targetsFor(front, opId);
+  if (!targets.length || !allowedUnits(opId, 'lead').length) return null;
+  const roe: RoeId = hawkLean > 0.5 ? 'maximum' : hawkLean < -0.2 ? 'cautious' : 'balanced';
+  const plan: StrikePlan = { ...defaultPlan(s, opId, front), target: [...targets].sort((a, b) => b.value - a.value)[0].id, roe };
+  const ev = evaluatePlan(s, plan);
+  if (!ev.ok) return null;
+  const chance = clamp(ev.chance + skill, 0.12, 0.92);
+  return { plan, ev: { ...ev, chance, mods: { ...ev.mods, chance } } };
+}
+
+/** The report that comes with the proposal, as rows. */
+export function proposalReport(s: GameState, plan: StrikePlan, ev: PlanEval): ReportRow[] {
+  const t = ev.target!;
+  const threat = world(s).fronts[plan.front].threat;
+  const members = cabinetPreview(s, plan);
+  const yes = members.filter((m) => m.stance === 'support').length;
+  const conf = intelConfidence(s, plan, t);
+  const cover = [...new Set(plan.cover)].filter((u) => u !== plan.lead).map((u) => UNIT_BY_ID[u].name).join(', ');
+  const rows: ReportRow[] = [
+    { label: 'יעד', value: t.name },
+    { label: 'כוח מוביל', value: UNIT_BY_ID[plan.lead].name },
+  ];
+  if (cover) rows.push({ label: 'כוחות מחפים', value: cover });
+  rows.push(
+    { label: 'רמת איום בחזית', value: String(Math.round(threat)), tone: threat >= 65 ? 'bad' : undefined },
+    { label: 'סיכוי להצלחה', value: `${Math.round(ev.chance * 100)}%`, tone: ev.chance >= 0.7 ? 'good' : ev.chance < 0.5 ? 'bad' : 'warn' },
+    { label: 'ביטחון מודיעיני', value: String(conf), tone: conf >= 70 ? 'good' : conf < 55 ? 'bad' : 'warn' },
+    { label: 'נפגעים צפויים בצה״ל', value: `עד ${ev.fallenEst}` },
+    { label: 'נפגעים בעורף מירי בתגובה', value: `עד ${ev.homeCivEst}` },
+    { label: 'אזרחים בצד השני (הערכה)', value: String(ev.enemyCivEst), tone: ev.enemyCivEst >= 10 ? 'warn' : undefined },
+    { label: 'הפחתת איום צפויה', value: String(ev.cutEst) },
+    { label: 'מחיר בינלאומי', value: ev.intlEst.toFixed(1) },
+    { label: 'עלות', value: `₪${OPERATION_BY_ID[plan.opId].cost}B` },
+  );
+  if (OPERATION_BY_ID[plan.opId].needsCabinet) rows.push({ label: 'עמדת הקבינט', value: `${yes} מתוך ${members.length} תומכים`, tone: yes > members.length / 2 ? 'good' : 'warn' });
+  for (const w of ev.warnings) rows.push({ label: 'אזהרה', value: w, tone: 'warn' });
+  return rows;
+}

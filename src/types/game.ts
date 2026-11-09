@@ -486,6 +486,8 @@ export interface InboxItem {
   options: InboxOption[];
   defaultOptionId: string;
   payload: Record<string, string | number>;
+  /** a structured report shown under the text (for example the defense minister's strike proposal) */
+  report?: { label: string; value: string; tone?: 'good' | 'bad' | 'warn' }[];
 }
 
 export interface TurnEvent {

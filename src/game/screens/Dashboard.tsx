@@ -171,6 +171,11 @@ function Inbox() {
                   <div className="flex-1 min-w-0">
                     <div className="font-bold text-sm">{it.title}</div>
                     <div className="text-sm muted mt-0.5">{it.text}</div>
+                    {it.report && (
+                      <div className="grid grid-cols-1 gap-y-1 mt-2 text-sm" role="table" aria-label="דוח">
+                        {it.report.map((r, i) => <div key={i} className="flex justify-between gap-2 border-b" style={{ borderColor: 'var(--line)' }}><span className="muted">{r.label}</span><b className={r.tone === 'good' ? 'good' : r.tone === 'bad' ? 'bad' : r.tone === 'warn' ? 'warn' : ''}>{r.value}</b></div>)}
+                      </div>
+                    )}
                     <InboxOptions itemId={it.id} />
 
                     <div className="text-[10px] muted mt-1">{it.expiresTurn - s.turn <= 0 ? 'יוחלט אוטומטית בסוף התור' : `נשארו ${it.expiresTurn - s.turn === 1 ? 'תור אחד' : `${it.expiresTurn - s.turn} תורות`} להחליט`}</div>
@@ -200,7 +205,7 @@ function InboxOptions({ itemId }: { itemId: string }) {
           </button>
         ))}
       </div>
-      {rec && <div className="text-[11px] mt-1.5" style={{ color: 'var(--violet)' }}>🧠 היועץ ממליץ: "{it.options.find((o) => o.id === rec.bestId)?.label}" – {rec.reason}</div>}
+      {rec && <div className="text-[11px] mt-1.5" style={{ color: 'var(--violet)' }}>{`🧠 היועץ ממליץ: "${it.options.find((o) => o.id === rec.bestId)?.label}" – ${rec.reason}`}</div>}
     </>
   );
 }

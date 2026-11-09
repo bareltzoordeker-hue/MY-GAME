@@ -65,3 +65,16 @@ export function runShotMode(): void {
   startCrisis(s, 'war');
   useGame.setState({ game: s });
 };
+/** DEV ONLY: window.__strike() makes the defense minister bring a strike proposal to the inbox. */
+(window as unknown as { __strike: () => Promise<boolean> }).__strike = async () => {
+  const g = useGame.getState().game;
+  if (!g) return false;
+  const { generateMinisterRequests } = await import('../engine/ministerRequests');
+  const { world } = await import('../engine/security');
+  const s = structuredClone(g);
+  s.flags.reqFreq = 2; s.government.caretaker = false;
+  for (const f of Object.values(world(s).fronts)) { f.threat = 80; f.status = 'tension'; }
+  for (let i = 0; i < 40 && !s.inbox.some((x) => x.kind === 'mreq_strike'); i++) { s.turn += 1; generateMinisterRequests(s); }
+  useGame.setState({ game: s, screen: 'dashboard' as ScreenId });
+  return s.inbox.some((x) => x.kind === 'mreq_strike');
+};

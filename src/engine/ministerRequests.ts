@@ -13,6 +13,7 @@ import { startProject } from './projects';
 import { chance, pick, rand } from './rng';
 import { isPM } from './roles';
 import { executeOperation, operationChance, world } from './security';
+import { buildAfterAction, evaluatePlan, planFromParams, planToParams, proposalReport, proposeStrikePlan, savePlan } from './strikePlan';
 import { TRADE_BASE, exportDrive, tradeDeal, tradeState } from './trade';
 
 /** How often ministers come with requests: 0 = rarely, 1 = normal, 2 = often (a setting the player can change). */
@@ -35,7 +36,7 @@ export function ministerSkillEffects(s: GameState): void {
   if (em) applyEffects(s, { economy: { growth: (exp(em, 'economy') - 50) / 800 } });
 }
 
-interface Draft { fromId: string; kind: string; title: string; text: string; payload: Record<string, string | number>; approveLabel?: string }
+interface Draft { fromId: string; kind: string; title: string; text: string; payload: Record<string, string | number>; approveLabel?: string; report?: InboxItem['report'] }
 
 const hawk = (p: Politician) => p.ideology.security;
 
@@ -60,11 +61,21 @@ function strikeRequest(s: GameState): Draft | null {
   if (!ops.length) return null;
   const op = pick(s, ops);
   const e = exp(m, 'defense');
-  const p = operationChance(s, op, front.id as FrontId, (e - 50) / 400);
+  const skill = (e - 50) / 400;
   const why = st.status === 'ceasefire' ? `הפסקת האש בחזית ${front.name} לא מחזיקה: רמת האיום עלתה ל-${st.threat.toFixed(0)}.` : st.status === 'fighting' ? `בחזית ${front.name} נמשכת לחימה, ורמת האיום ${st.threat.toFixed(0)}.` : `רמת האיום בחזית ${front.name} עומדת על ${st.threat.toFixed(0)}.`;
+  // a full proposal: a plan with a report. An operation that has no plan keeps the short request.
+  const prop = proposeStrikePlan(s, op.id, front.id as FrontId, hawk(m), skill);
+  if (prop) {
+    return {
+      fromId: m.id, kind: 'mreq_strike', title: `${m.name} מבקש לאשר: ${op.name} ב${front.name}`, payload: { ...planToParams(prop.plan), skill },
+      text: `${why} "אני מבקש לאשר ${op.name} בחזית ${front.name}. מומחיות הביטחון שלי ${level(e)}. הדוח המלא מצורף."`,
+      report: proposalReport(s, prop.plan, prop.ev),
+    };
+  }
+  const p = operationChance(s, op, front.id as FrontId, skill);
   return {
     fromId: m.id, kind: 'mreq_strike', title: `${m.name} מבקש לאשר: ${op.name} ב${front.name}`, payload: { opId: op.id, front: front.id },
-    text: `${why}\n"אני מבקש לאשר ${op.name} בחזית ${front.name}. רמת האיום בחזית: ${st.threat.toFixed(0)}. הערכת הסיכוי להצלחה: ${Math.round(p * 100)}%. מומחיות הביטחון שלי ${level(e)}."${op.needsCabinet ? ' (מבצע גדול: מחיר בנפגעים ובלחץ בינלאומי.)' : ''}`,
+    text: `${why} "אני מבקש לאשר ${op.name} בחזית ${front.name}. רמת האיום בחזית: ${st.threat.toFixed(0)}. הערכת הסיכוי להצלחה: ${Math.round(p * 100)}%. מומחיות הביטחון שלי ${level(e)}."${op.needsCabinet ? ' (מבצע גדול: מחיר בנפגעים ובלחץ בינלאומי.)' : ''}`,
   };
 }
 
@@ -169,8 +180,8 @@ export function generateMinisterRequests(s: GameState): void {
     s.flags[`mreq_${draft.fromId}`] = s.turn;
     if (draft.kind === 'mreq_internal') s.flags[`mreq_opt_${draft.payload.optId}`] = s.turn;
     addInbox(s, {
-      kind: draft.kind, title: draft.title, fromId: draft.fromId, expiresTurn: s.turn + 2, text: draft.text, payload: draft.payload,
-      options: [{ id: 'approve', label: 'לאשר' }, { id: 'decline', label: 'לדחות' }], defaultOptionId: 'decline',
+      kind: draft.kind, title: draft.title, fromId: draft.fromId, expiresTurn: s.turn + 2, text: draft.text, payload: draft.payload, report: draft.report,
+      options: [{ id: 'approve', label: 'לאשר' }, ...(draft.kind === 'mreq_strike' && draft.payload.lead ? [{ id: 'save', label: 'לשמור לתכנון' }] : []), { id: 'decline', label: 'לדחות' }], defaultOptionId: 'decline',
     });
   }
 }
@@ -181,6 +192,11 @@ const note = (title: string, status: Reaction['status'], quip: string): Reaction
 export function resolveMinisterRequest(s: GameState, it: InboxItem, opt: string): Reaction {
   const m = it.fromId ? s.politicians[it.fromId] : undefined;
   if (!m) return note('הבקשה בוטלה', 'info', '');
+  if (opt === 'save' && it.kind === 'mreq_strike') {
+    const saved = planFromParams(it.payload);
+    const ok = !!saved && savePlan(s, saved);
+    return note(ok ? 'ההצעה נשמרה בתוכניות' : 'אי אפשר לשמור את ההצעה', 'info', ok ? `${m.name}: "אחכה להחלטתך." התוכנית ממתינה במסך הביטחון.` : '');
+  }
   if (opt !== 'approve') {
     remember(s, m.id, 'ignored', 'דחית את בקשתי', -2);
     m.loyalty = clamp(m.loyalty - 1);
@@ -191,7 +207,11 @@ export function resolveMinisterRequest(s: GameState, it: InboxItem, opt: string)
     const op = OPERATION_BY_ID[String(it.payload.opId)];
     const front = String(it.payload.front) as FrontId;
     s.flags[`op_${front}`] = s.turn;
-    const o = executeOperation(s, op, front, (exp(m, 'defense') - 50) / 400);
+    const plan = planFromParams(it.payload);
+    const ev = plan ? evaluatePlan(s, plan) : null;
+    const mods = ev?.ok ? { ...ev.mods, chance: clamp(ev.chance + Number(it.payload.skill ?? 0), 0.12, 0.92) } : undefined;
+    const o = executeOperation(s, op, front, mods ? 0 : (exp(m, 'defense') - 50) / 400, mods);
+    if (plan && ev?.ok) world(s).lastReport = buildAfterAction(s, plan, ev, o);
     return { title: o.headline, status: o.success ? 'approved' : 'rejected', stats: [], groups: [], people: o.lines, quip: o.text, subtitle: `בקשת שר הביטחון, באישורך` };
   }
   if (it.kind === 'mreq_internal') {
