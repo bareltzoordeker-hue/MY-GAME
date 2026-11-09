@@ -67,7 +67,7 @@ export function warTick(s: GameState): void {
   if (n >= 2 && (n - 2) % 2 === 0 && isPM(s) && !s.inbox.some((i) => i.kind === 'war_pressure')) {
     addInbox(s, {
       kind: 'war_pressure', title: 'לחץ בינלאומי להפסקת אש', expiresTurn: s.turn + 1,
-      text: 'ארה״ב ומדינות אירופה דורשות להיכנס למשא ומתן על הפסקת אש. סירוב יעלה במחיר מדיני; הסכמה תרגיז את הימין ואת השותפים הניציים.',
+      text: 'ארה״ב ומדינות אירופה דורשות להיכנס למשא ומתן על הפסקת אש. סירוב יעלה במחיר מדיני; הסכמה תרגיז את הימין ואת השותפים שתומכים בפעולה צבאית.',
       options: [{ id: 'talks', label: 'להסכים לשיחות על הפסקת אש' }, { id: 'refuse', label: 'לסרב ולהמשיך במערכה' }], defaultOptionId: 'refuse', payload: {},
     });
   }
