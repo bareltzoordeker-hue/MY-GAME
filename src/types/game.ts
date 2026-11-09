@@ -315,6 +315,11 @@ export interface WorldState {
   operations: { id: string; opId: string; front: string; turn: number }[];
   measures: string[];
   normalized: string[];
+  /** values at the previous turn (for the trend shown to the foreign minister) */
+  relPrev?: Record<string, number>;
+  /** countries with a signed cooperation agreement, and countries with an ambassador */
+  pacts?: string[];
+  ambassadors?: string[];
 }
 
 export interface CampaignState {

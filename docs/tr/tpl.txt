@@ -764,3 +764,22 @@
 ההכרעה בעוד {} תורות ||| The decision is in {0} turns ||| الحسم بعد {0} أدوار
 {} הפסיד בבחירות לראשות {} ||| {0} lost the election for the leadership of {1} ||| خسر {0} الانتخابات على رئاسة {1}
 {} ניצח את {} בבחירות לראשות {} ||| {0} beat {1} in the election for the leadership of {2} ||| فاز {0} على {1} في الانتخابات على رئاسة {2}
+
+{} ביקר ב{}: היחסים התחממו ||| {0} visited {1}: relations warmed ||| زار {0} {1}: تحسنت العلاقات
+ביקור מוצלח ב{} ||| A successful visit to {0} ||| زيارة ناجحة إلى {0}
+היחסים עם {} השתפרו ב-{}. ||| Relations with {0} improved by {1}. ||| تحسنت العلاقات مع {0} بمقدار {1}.
+הביקור ב{} לא הצליח ||| The visit to {0} was not a success ||| لم تنجح الزيارة إلى {0}
+{} לא מוכנה לחתום ||| {0} is not ready to sign ||| {0} غير مستعدة للتوقيع
+נחתם הסכם שיתוף פעולה עם {} ||| A cooperation agreement was signed with {0} ||| وُقّع اتفاق تعاون مع {0}
+הסכם שיתוף פעולה עם {} ||| A cooperation agreement with {0} ||| اتفاق تعاون مع {0}
+נחתם הסכם עם {} ||| An agreement was signed with {0} ||| وُقّع اتفاق مع {0}
+המשא ומתן עם {} נתקע ||| The negotiations with {0} are stuck ||| تعثرت المفاوضات مع {0}
+שר החוץ נגד {}: הצהרה חריפה ||| The foreign minister against {0}: a sharp statement ||| وزير الخارجية ضد {0}: بيان حاد
+הצהרה חריפה נגד {} ||| A sharp statement against {0} ||| بيان حاد ضد {0}
+שיחת נזיפה עם שגריר {} ||| A reprimand talk with the ambassador of {0} ||| محادثة توبيخ مع سفير {0}
+מונה שגריר ב{} ||| An ambassador was appointed to {0} ||| عُيّن سفير في {0}
+השגריר בישמעאל ב{} הוחזר לייעוץ ||| Ishmael's ambassador in {0} was recalled for consultations ||| استُدعي سفير إسماعيل في {0} للتشاور
+השגריר ב{} הוחזר ||| The ambassador in {0} was recalled ||| استُدعي السفير في {0}
+↑ +{} מאז התור הקודם ||| ↑ +{0} since the previous turn ||| ↑ +{0} منذ الدور السابق
+↓ {} מאז התור הקודם ||| ↓ {0} since the previous turn ||| ↓ {0} منذ الدور السابق
+המדינה שנבחרה: {}. לחץ על כרטיס מדינה למעלה כדי לבחור אחרת. ||| The selected country: {0}. Click a country card above to choose another. ||| البلد المختار: {0}. انقر على بطاقة بلد في الأعلى لاختيار بلد آخر.

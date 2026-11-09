@@ -1386,3 +1386,49 @@ describe('step 1: leaving the coalition, the leadership race, returning after be
     expect(s.politicians[s.player.politicianId].expertise.security).toBe(65);
   });
 });
+
+describe('step 2: the foreign minister\'s office', () => {
+  it('the foreign minister and the PM can use the diplomatic moves; other ministers cannot', async () => {
+    const { FOREIGN_LIST, foreignValue, hasPact } = await import('./foreign');
+    const { isForeignMinister } = await import('./roles');
+    expect(FOREIGN_LIST.length).toBe(14);
+    const fmS = createGame(cfg('minister', { ministryId: 'foreign' }));
+    expect(isForeignMinister(fmS)).toBe(true);
+    const other = createGame(cfg('minister', { ministryId: 'transport' }));
+    const pm = createGame(cfg('pm'));
+    for (const id of ['fm_visit', 'fm_agreement', 'fm_statement', 'fm_summon']) {
+      expect(checkAction(fmS, id, { country: 'usa' }), id).toBeNull();
+      expect(checkAction(pm, id, { country: 'usa' }), id).toBeNull();
+      expect(checkAction(other, id, { country: 'usa' }), id).not.toBeNull();
+    }
+    expect(checkAction(fmS, 'fm_visit', {})).not.toBeNull();
+    expect(checkAction(fmS, 'fm_un_coalition', {})).toBeNull();
+    // a visit changes the relation, a statement lowers it, the agreement is recorded once
+    const s = createGame(cfg('pm'));
+    s.player.politicalCapital = 100;
+    const before = foreignValue(s, 'germany');
+    const r = performAction(s, 'fm_statement', { country: 'germany' });
+    expect(foreignValue(r.state, 'germany')).toBeLessThan(before);
+    const t = createGame(cfg('pm'));
+    t.player.politicalCapital = 100;
+    let g = t;
+    for (let i = 0; i < 10 && !hasPact(g, 'usa'); i++) { g.turn += 3; g.player.politicalCapital = 100; g = performAction(g, 'fm_agreement', { country: 'usa' }).state; }
+    expect(hasPact(g, 'usa')).toBe(true);
+    expect(checkAction(g, 'fm_agreement', { country: 'usa' })).not.toBeNull();
+    // ambassador: appoint, then recall
+    g.turn += 3; g.player.politicalCapital = 100;
+    g = performAction(g, 'fm_ambassador', { country: 'egypt', mode: 'appoint' }).state;
+    expect(checkAction(g, 'fm_ambassador', { country: 'egypt', mode: 'appoint' })).not.toBeNull();
+    expect(checkAction(g, 'fm_ambassador', { country: 'egypt', mode: 'recall' })).toBeNull(); // there is an ambassador to recall now
+  });
+  it('a sharp move by the foreign minister is usually approved, and a refusal costs nothing', () => {
+    let refused = 0;
+    for (let seed = 1; seed <= 40; seed++) {
+      const s = createGame({ ...cfg('minister', { ministryId: 'foreign' }), seed });
+      s.government.caretaker = false; s.player.politicalCapital = 100;
+      const r = performAction(s, 'fm_statement', { country: 'russia' });
+      if ((r.reaction?.title ?? '').includes('לא אישר')) { refused += 1; expect(r.state.player.politicalCapital).toBe(100); }
+    }
+    expect(refused).toBeLessThan(20);
+  });
+});

@@ -17,6 +17,8 @@ export interface RoleCapabilities {
 }
 
 export const isPartyLeader = (s: GameState) => s.parties[s.player.partyId]?.leaderId === s.player.politicianId;
+/** The player holds the foreign ministry (alone or merged). */
+export const isForeignMinister = (s: GameState) => s.player.role === 'minister' && s.government.ministries.some((m) => m.ministerId === s.player.politicianId && [m.id, ...(m.origins ?? [])].includes('foreign'));
 export const isPM = (s: GameState) => s.government.pmId === s.player.politicianId;
 export const inCoalition = (s: GameState) => s.government.coalition.includes(s.player.partyId);
 /** Turns left until election day (calendar-based: 4-month turns, 2-week turns in the campaign). */

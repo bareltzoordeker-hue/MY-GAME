@@ -132,6 +132,7 @@ export function executeOperation(s: GameState, op: OperationDef, frontId: FrontI
 /** Once per turn: enemies rebuild, ceasefires hold or break, incidents happen, units recover. */
 export function worldTick(s: GameState, months: number): void {
   const w = world(s);
+  w.relPrev = { ...w.relations, ...w.channels, usa: w.relations.usa };
   const vol = DIFFICULTIES[s.difficulty].volatility;
   for (const f of FRONTS) {
     const st = w.fronts[f.id];

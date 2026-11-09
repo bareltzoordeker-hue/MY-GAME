@@ -8,6 +8,7 @@ import { MinistryScreen } from './screens/Ministry';
 import { NewsScreen, ProjectsScreen, CrisesScreen, AdvisorScreen, CareerScreen, SaveScreen, DebugPanel } from './screens/Other';
 import { BriefingModal, ConfirmModal, ExplainModal, GameOverScreen, MeetingModal, ReactionModal } from './components/Modals';
 import { CoalitionModal, CoalitionOffersModal } from './screens/Coalition';
+import { ForeignOfficeScreen } from './screens/ForeignOffice';
 import { useLang } from './useLang';
 import { setCustomNames } from '../shared/i18n/contentTranslator';
 import { SpeechModal } from './components/SpeechModal';
@@ -56,7 +57,7 @@ export default function App() {
     dashboard: <Dashboard />, state: <StateScreen />, economy: <EconomyScreen />, budget: <BudgetScreen />, population: <PopulationScreen />,
     parliament: <ParliamentScreen />, government: <GovernmentScreen />, party: <PartyScreen />, ministry: <MinistryScreen />, news: <NewsScreen />,
     polls: <PollsScreen />, projects: <ProjectsScreen />, laws: <LawsScreen />, crises: <CrisesScreen />, map: <MapScreen />, advisor: <AdvisorScreen />,
-    career: <CareerScreen />, save: <SaveScreen />, relations: <RelationsScreen />, security: <SecurityScreen />, chat: <ChatScreen />, promises: <PromisesScreen />,
+    career: <CareerScreen />, save: <SaveScreen />, relations: <RelationsScreen />, security: <SecurityScreen />, chat: <ChatScreen />, promises: <PromisesScreen />, foreign: <ForeignOfficeScreen />,
   } as const;
 
   return (

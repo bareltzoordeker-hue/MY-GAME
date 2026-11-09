@@ -38,8 +38,9 @@ import { cancelProject, startProject } from './projects';
 import { makePromise } from './promises';
 import { allyHurt } from './alliances';
 import { mergeParties, partyRelation, shiftPartyRelation } from './relations';
+import { FOREIGN_BY_ID, changeAmbassador, hasAmbassador, hasPact, signAgreement, statement, summonAmbassador, unCoalition, visitCountry, type ForeignResult } from './foreign';
 import { RACE_MOVES, raceMove, raceMoveBlocked, startRace, type RaceMove } from './leadership';
-import { getCapabilities, isPM, isPartyLeader, lawAllowed, isSpeaker, playerMinistry } from './roles';
+import { getCapabilities, isForeignMinister, isPM, isPartyLeader, lawAllowed, isSpeaker, playerMinistry } from './roles';
 
 export type Params = Record<string, string | number>;
 export type ActionCategory = 'economy' | 'government' | 'parliament' | 'ministry' | 'media' | 'party' | 'campaign' | 'career' | 'projects';
@@ -1376,7 +1377,7 @@ def({
 function pmSecurityApproval(s: GameState, hawkish: number): RunResult | null {
   if (isPM(s)) return null;
   const pm = s.politicians[s.government.pmId];
-  const defense = securityRole(s) === 'defense';
+  const defense = securityRole(s) === 'defense' || isForeignMinister(s);
   const power = s.politicians[s.player.politicianId]?.power ?? 50;
   const p = clamp((defense ? 0.72 : 0.35) + (pm.loyalty - 50) / 150 + pm.ideology.security * hawkish * 0.2 + (power - 50) / 400, defense ? 0.5 : 0.25, 0.95);
   if (rand(s) < p) return null;
@@ -1771,6 +1772,32 @@ def({
 });
 
 
+// ===== FOREIGN MINISTER =====
+const foreignOnly = (s: GameState) => (isPM(s) || isForeignMinister(s) ? null : 'רק שר החוץ וראש הממשלה');
+const fm = (
+  id: string, title: string, icon: string, capital: number, cooldown: number, description: string,
+  approval: (p: Params) => number, check: ((s: GameState, p: Params) => string | null) | null, act: (s: GameState, p: Params) => ForeignResult, needsCountry = true,
+) => def({
+  id, title, icon, category: 'government', level: 'medium', capital, cooldown, description,
+  unavailable: (s, p) => foreignOnly(s) ?? (needsCountry && !FOREIGN_BY_ID[str(p, 'country')] ? 'בחר מדינה' : null) ?? (check ? check(s, p) : null),
+  run: (s, p) => {
+    const h = approval(p);
+    if (h !== 0) { const rej = pmSecurityApproval(s, h); if (rej) return refundIfRejected(s, id, p, rej)!; }
+    const r = act(s, p);
+    return { title: r.title, status: r.ok ? 'approved' : 'rejected', quip: r.text };
+  },
+});
+const warmWithContested = (p: Params) => (['qatar', 'pa'].includes(str(p, 'country')) ? -1 : 0);
+fm('fm_visit', 'ביקור רשמי', '✈️', 4, 1, 'ביקור של שר החוץ במדינה. משפר את היחסים אם הוא מצליח; לפעמים תקרית פרוטוקולית מקלקלת.', warmWithContested, null, (s, p) => visitCountry(s, str(p, 'country')));
+fm('fm_agreement', 'הסכם שיתוף פעולה', '🤝', 6, 2, 'הסכם בתחומי סחר, תעופה ומדע. דורש יחסים טובים (35+), משפר אותם משמעותית ופותח הזדמנויות לסחר.', warmWithContested,
+  (s, p) => (hasPact(s, str(p, 'country')) ? 'כבר נחתם הסכם עם המדינה הזו' : null), (s, p) => signAgreement(s, str(p, 'country')));
+fm('fm_statement', 'הצהרה חריפה', '📢', 2, 1, 'הצהרה פומבית נגד מדינה. מוצאת חן בעיני הימין בבית, אבל פוגעת ביחסים איתה.', () => 1, null, (s, p) => statement(s, str(p, 'country')));
+fm('fm_summon', 'שיחת נזיפה עם שגריר', '☎️', 2, 1, 'זימון השגריר לשיחה חריפה. מסר מתון יותר מהצהרה, עם סיכון קטן לבומרנג.', () => 1, null, (s, p) => summonAmbassador(s, str(p, 'country')));
+fm('fm_ambassador', 'מינוי או החזרת שגריר', '🏛️', 3, 2, 'מינוי שגריר משפר את היחסים; החזרת שגריר היא צעד חריף שפוגע בהם קשות.', (p) => (str(p, 'mode') === 'recall' ? 1 : 0),
+  (s, p) => (str(p, 'mode') !== 'appoint' && str(p, 'mode') !== 'recall' ? 'בחר מינוי או החזרה' : str(p, 'mode') === 'appoint' && hasAmbassador(s, str(p, 'country')) ? 'כבר יש שגריר במדינה הזו' : str(p, 'mode') === 'recall' && !hasAmbassador(s, str(p, 'country')) ? 'אין שגריר להחזיר' : null),
+  (s, p) => changeAmbassador(s, str(p, 'country'), str(p, 'mode') === 'recall' ? 'recall' : 'appoint'));
+fm('fm_un_coalition', 'קואליציה באו״ם', '🌐', 7, 3, 'גיוס מדינות ידידותיות להצבעה באו״ם. הסיכוי תלוי ביחסים עם ארה״ב, אירופה ובריטניה.', () => 0, null, (s) => unCoalition(s), false);
+
 export const ACTIONS: Record<string, ActionDef> = Object.fromEntries(A.map((a) => [a.id, a]));
 
 export function actionCapital(s: GameState, id: string, p: Params): number {
@@ -1784,7 +1811,7 @@ export function cooldownLeft(s: GameState, id: string, p: Params = {}): number {
   return Math.max(0, (s.player.actionCooldowns[key] ?? 0) - s.turn);
 }
 // per ministry or per bill: voting on (or pushing) one bill doesn't block the others in the same turn
-const cooldownKey = (id: string, p: Params) => (p.ministryId ? `${id}_${p.ministryId}` : p.billId ? `${id}_${p.billId}` : p.opId ? `${id}_${p.opId}` : id);
+const cooldownKey = (id: string, p: Params) => (p.country ? `${id}_${p.country}_${p.mode ?? ''}` : p.ministryId ? `${id}_${p.ministryId}` : p.billId ? `${id}_${p.billId}` : p.opId ? `${id}_${p.opId}` : id);
 
 export function checkAction(s: GameState, id: string, p: Params = {}): string | null {
   const a = ACTIONS[id];
