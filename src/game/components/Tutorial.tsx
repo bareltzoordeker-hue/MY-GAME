@@ -330,6 +330,8 @@ export function Tutorial() {
   const [, force] = useState(0);
   const [rect, setRect] = useState<Rect | null>(null);
   const [stuck, setStuck] = useState(false);
+  // a dialog the tutorial did not open (the campaign dialog, for example) covers the target: wait until it is closed
+  const [paused, setPaused] = useState(false);
   const base = useRef({ turn: 0, msgs: 0 });
   const started = useRef(false);
   const missSince = useRef<number | null>(null);
@@ -392,6 +394,9 @@ export function Tutorial() {
       let el = st.target?.() ?? null;
       if (el && !visible(el)) el = null;
       if (!el && st.fallback) { const fb = st.fallback(); if (fb && visible(fb)) el = fb; }
+      const blocked = !!el && !!document.querySelector('.backdrop') && !el.closest('.backdrop');
+      setPaused((p) => (p === blocked ? p : blocked));
+      if (blocked) { setRect(null); return; }
       if (!el && st.optional && st.target) {
         missSince.current ??= Date.now();
         if (Date.now() - missSince.current > 700) { missSince.current = null; if (step < steps.length - 1) setStep(step + 1); return; }
@@ -419,7 +424,7 @@ export function Tutorial() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [active, step, st.id]);
 
-  if (!active) return null;
+  if (!active || paused) return null;
   const L = (m: T) => m[lang] ?? m.he;
   const reading = !st.until;
   const last = step >= steps.length - 1;
