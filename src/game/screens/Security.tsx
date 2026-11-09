@@ -5,13 +5,14 @@ import { CBM, COUNTRIES, canUseInternalSecurity, securityRole, world, type CbmKi
 import { INTERNAL_OPTIONS } from '../../data/internalSecurity';
 import type { GameState } from '../../types/game';
 import { ActionButton, Empty, Meter, ScreenHeader, Section } from '../components/ui';
+import { OperationPlanner } from '../components/OperationPlanner';
 
 const STATUS: Record<string, { t: string; c: string }> = {
   quiet: { t: 'שקט', c: 'chip-good' }, tension: { t: 'מתיחות', c: 'chip-warn' }, fighting: { t: 'לחימה', c: 'chip-bad' }, ceasefire: { t: 'הפסקת אש', c: 'chip' },
 };
 const threatWord = (v: number) => (v >= 70 ? 'גבוהה מאוד' : v >= 50 ? 'גבוהה' : v >= 30 ? 'בינונית' : 'נמוכה');
 
-function FrontCard({ s, id }: { s: GameState; id: FrontId }) {
+function FrontCard({ s, id, onPlan }: { s: GameState; id: FrontId; onPlan: (opId: string, front: FrontId) => void }) {
   const def = FRONTS.find((f) => f.id === id)!;
   const st = world(s).fronts[id];
   const ops = OPERATIONS.filter((o) => o.fronts.includes(id));
@@ -28,8 +29,7 @@ function FrontCard({ s, id }: { s: GameState; id: FrontId }) {
       <div className="flex items-center gap-2 text-xs"><span className="w-20">רמת איום: {threatWord(st.threat)}</span><div className="flex-1"><Meter value={st.threat} invert /></div><b className="num">{st.threat.toFixed(0)}</b></div>
       <div className="flex gap-1.5 flex-wrap items-center">
         <select aria-label={`סוג מבצע ב${def.name}`} value={op} onChange={(e) => setOp(e.target.value)} className="flex-1 min-w-0">{ops.map((o) => <option key={o.id} value={o.id}>{o.icon} {o.name}</option>)}</select>
-        <ActionButton id="security_operation" params={{ opId: op, front: id }} className="btn btn-sm btn-danger"
-          confirm={sel && sel.risk >= 0.2 ? `${sel.name}: ${sel.desc} צפויים נפגעים. לאשר?` : undefined}>לתכנן</ActionButton>
+        <button className="btn btn-sm btn-danger" disabled={!op || (s.flags[`op_${id}`] ?? -1) >= s.turn} data-tip={(s.flags[`op_${id}`] ?? -1) >= s.turn ? 'כבר בוצע מבצע בחזית הזו בתור הנוכחי' : 'פתיחת חמ״ל התכנון: מטרה, כוחות, שעה וקבינט'} onClick={() => onPlan(op, id)}>לתכנן</button>
       </div>
       {sel && <div className="text-[11px] muted">{sel.desc} · סיכון לכוחות: {sel.risk >= 0.5 ? 'גבוה' : sel.risk >= 0.15 ? 'בינוני' : 'נמוך'} · עלות ₪{sel.cost}B{sel.reservists ? ' · גיוס מילואים' : ''}{sel.needsCabinet ? ' · דורש אישור קבינט' : ''}</div>}
       {(st.status === 'fighting' || st.threat >= 45) && ['gaza', 'lebanon', 'yemen', 'judea_samaria'].includes(id) && (
@@ -47,14 +47,16 @@ export function SecurityScreen() {
   const w = world(s);
   const role = securityRole(s);
   const [cbm, setCbm] = useState<CbmKind>('permits');
+  const [planning, setPlanning] = useState<{ opId: string; front: FrontId } | null>(null);
   // only the people who run security open this screen: the PM, the defense minister and the national-security minister
   if (!role) return <Empty icon="🔒" text="מסך הביטחון פתוח לראש הממשלה, לשר הביטחון ולשר לביטחון לאומי." />;
   const military = role === 'pm' || role === 'defense';
   return (
     <div className="space-y-4">
+      {planning && military && <OperationPlanner s={s} opId={planning.opId} front={planning.front} onClose={() => setPlanning(null)} />}
       <ScreenHeader title="ביטחון ומדיניות" sub={military ? 'המסלול הצבאי, המסלול המדיני וביטחון הפנים. מבצעים גדולים ומהלכים מדיניים משמעותיים דורשים אישור הקבינט.' : 'ביטחון הפנים: משטרה, שב״כ ושב״ס. החזיתות מוצגות לעיון בלבד.'} />
       <Section title="חזיתות" icon="🧭">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{FRONTS.map((f) => <FrontCard key={f.id} s={s} id={f.id} />)}</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{FRONTS.map((f) => <FrontCard key={f.id} s={s} id={f.id} onPlan={(o, fr) => setPlanning({ opId: o, front: fr })} />)}</div>
       </Section>
       {canUseInternalSecurity(s) && (
         <Section title="ביטחון פנים" icon="🚓">

@@ -8,7 +8,7 @@ import type { GroupId } from '../types/game';
 export type FrontId = 'gaza' | 'lebanon' | 'iran' | 'yemen' | 'judea_samaria' | 'syria';
 export type UnitId =
   | 'golani' | 'givati' | 'paratroopers' | 'nahal' | 'kfir' | 'armor' | 'commando' | 'matkal' | 'shayetet' | 'shaldag'
-  | 'air_force' | 'navy' | 'u8200' | 'cyber' | 'air_defense' | 'home_front' | 'border_police';
+  | 'air_force' | 'navy' | 'u8200' | 'cyber' | 'air_defense' | 'home_front' | 'border_police' | 'engineering' | 'artillery' | 'shin_bet';
 export type ChannelId = 'usa' | 'egypt' | 'qatar' | 'jordan' | 'uae' | 'saudi' | 'pa';
 
 export interface FrontDef { id: FrontId; name: string; icon: string; enemy: string; threat: number; desc: string; rocketRange: boolean }
@@ -22,7 +22,7 @@ export const FRONTS: FrontDef[] = [
 ];
 export const FRONT_BY_ID = Object.fromEntries(FRONTS.map((f) => [f.id, f])) as Record<FrontId, FrontDef>;
 
-export interface UnitDef { id: UnitId; name: string; icon: string; kind: 'infantry' | 'armor' | 'special' | 'air' | 'navy' | 'intel' | 'defense' | 'police'; desc: string }
+export interface UnitDef { id: UnitId; name: string; icon: string; kind: 'infantry' | 'armor' | 'special' | 'air' | 'navy' | 'intel' | 'defense' | 'police' | 'engineering' | 'artillery'; desc: string }
 export const UNITS: UnitDef[] = [
   { id: 'golani', name: 'חטיבת גולני', icon: '🟤', kind: 'infantry', desc: 'חטיבת חי״ר סדירה. לחימה קרקעית ופשיטות.' },
   { id: 'givati', name: 'חטיבת גבעתי', icon: '🟣', kind: 'infantry', desc: 'חטיבת חי״ר סדירה. ניסיון רב בלחימה ברצועה.' },
@@ -41,6 +41,9 @@ export const UNITS: UnitDef[] = [
   { id: 'air_defense', name: 'מערך ההגנה האווירית', icon: '🛰️', kind: 'defense', desc: 'כיפת ברזל, קלע דוד, חץ ו"אור איתן". מקטין נזק מרקטות וטילים.' },
   { id: 'home_front', name: 'פיקוד העורף', icon: '🏠', kind: 'defense', desc: 'התגוננות אזרחית, מיגון והתרעה.' },
   { id: 'border_police', name: 'משמר הגבול', icon: '🚓', kind: 'police', desc: 'כוח משטרתי-צבאי ביהודה ושומרון ובערים.' },
+  { id: 'engineering', name: 'חיל ההנדסה הקרבית', icon: '🧱', kind: 'engineering', desc: 'חבלה, פריצה ופינוי מטענים ומנהרות. מקטין נפגעים במבצעים קרקעיים.' },
+  { id: 'artillery', name: 'חיל התותחנים', icon: '💥', kind: 'artillery', desc: 'אש ארטילרית ושיגור טילים מדויקים לחיפוי כוחות.' },
+  { id: 'shin_bet', name: 'השב״כ', icon: '🕵️', kind: 'intel', desc: 'מודיעין אנושי: חוליות טרור, מפקדים וצירי הברחה.' },
 ];
 export const UNIT_BY_ID = Object.fromEntries(UNITS.map((u) => [u.id, u])) as Record<UnitId, UnitDef>;
 

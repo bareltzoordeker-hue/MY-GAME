@@ -40,6 +40,7 @@ import { allyHurt } from './alliances';
 import { mergeParties, partyRelation, shiftPartyRelation } from './relations';
 import { SECTORS, TRADE_BASE, exportDrive, industryAid, tariff, tradeDeal, tradeState, type TradeResult } from './trade';
 import { FOREIGN_BY_ID, foreignValue, changeAmbassador, hasAmbassador, hasPact, signAgreement, statement, summonAmbassador, unCoalition, visitCountry, type ForeignResult } from './foreign';
+import { evaluatePlan, planCabinetVote, planFromParams } from './strikePlan';
 import { RACE_MOVES, raceMove, raceMoveBlocked, startRace, type RaceMove } from './leadership';
 import { getCapabilities, isEconomyMinister, isForeignMinister, isPM, isPartyLeader, lawAllowed, isSpeaker, playerMinistry } from './roles';
 
@@ -1428,22 +1429,28 @@ def({
     if (!op) return 'בחר סוג מבצע';
     if (!op.fronts.includes(front)) return 'המבצע לא מתאים לחזית הזו';
     if ((s.flags[`op_${front}`] ?? -1) >= s.turn) return 'כבר בוצע מבצע בחזית הזו בתור הנוכחי';
+    const plan = planFromParams(p);
+    if (plan) { const ev = evaluatePlan(s, plan); if (!ev.ok) return ev.issues[0]; }
     return null;
   },
   run: (s, p) => {
     const op = OPERATION_BY_ID[str(p, 'opId')];
     const front = str(p, 'front') as FrontId;
+    const plan = planFromParams(p);
     const rej = securityRole(s) === 'defense' && !op.needsCabinet ? null : pmSecurityApproval(s, 1);
     if (rej) return refundIfRejected(s, 'security_operation', p, rej)!;
     let lines: ReactionLine[] = [];
     if (op.needsCabinet) {
-      const v = cabinetVote(s, 1, op.risk);
+      // the prime minister decides: the cabinet only gives its opinion. Anyone else needs the cabinet's majority.
+      const v = plan ? planCabinetVote(s, plan) : cabinetVote(s, 1, op.risk);
       lines = v.lines;
-      if (!v.passed) return refundIfRejected(s, 'security_operation', p, { status: 'rejected', title: `הקבינט דחה את המבצע (${v.yes}-${v.no})`, subtitle: `${op.name} – ${FRONT_BY_ID[front].name}. ההון הפוליטי חוזר אליך`, people: lines })!;
+      if (!v.passed && !isPM(s)) return refundIfRejected(s, 'security_operation', p, { status: 'rejected', title: `הקבינט דחה את המבצע (${v.yes}-${v.no})`, subtitle: `${op.name} – ${FRONT_BY_ID[front].name}. ההון הפוליטי חוזר אליך`, people: lines })!;
     }
     s.flags[`op_${front}`] = s.turn;
-    const o = executeOperation(s, op, front);
-    return { status: o.success ? 'approved' : 'rejected', title: o.headline, subtitle: op.needsCabinet ? 'באישור הקבינט המדיני-ביטחוני' : undefined, quip: o.text, people: [...o.lines, ...lines].slice(0, 6) };
+    const ev = plan ? evaluatePlan(s, plan) : null;
+    const o = executeOperation(s, op, front, 0, ev?.ok ? ev.mods : undefined);
+    const sub = plan && ev?.target ? `${ev.target.name} · ${UNIT_BY_ID[plan.lead].name}` : op.needsCabinet ? 'באישור הקבינט המדיני-ביטחוני' : undefined;
+    return { status: o.success ? 'approved' : 'rejected', title: o.headline, subtitle: sub, quip: o.text, people: [...o.lines, ...lines].slice(0, 6) };
   },
 });
 
@@ -1473,7 +1480,7 @@ def({
     if (kind === 'transfer' || kind === 'cbm' || hardline) {
       const v = cabinetVote(s, hardline ? 1 : -1, kind === 'cbm' ? 0.3 : 1);
       lines = v.lines;
-      if (!v.passed) { delete s.flags[`dip_${kind}`]; return refundIfRejected(s, 'diplomacy', p, { status: 'rejected', title: `הקבינט דחה את המהלך (${v.yes}-${v.no})`, subtitle: 'ההון הפוליטי חוזר אליך', people: lines })!; }
+      if (!v.passed && !isPM(s)) { delete s.flags[`dip_${kind}`]; return refundIfRejected(s, 'diplomacy', p, { status: 'rejected', title: `הקבינט דחה את המהלך (${v.yes}-${v.no})`, subtitle: 'ההון הפוליטי חוזר אליך', people: lines })!; }
     }
     const o = kind === 'channel_secret' || kind === 'channel_open' ? openChannel(s, str(p, 'channel') as ChannelId, kind === 'channel_open')
       : kind === 'ceasefire' ? mediatedCeasefire(s, str(p, 'front') as FrontId, str(p, 'channel') as ChannelId)

@@ -36,7 +36,12 @@ export function initWorld(): WorldState {
   };
 }
 
-export const world = (s: GameState): WorldState => (s.world ??= initWorld());
+/** The world state; units added in later versions are filled in for older saves. */
+export const world = (s: GameState): WorldState => {
+  const w = (s.world ??= initWorld());
+  for (const u of UNITS) if (!w.units[u.id]) w.units[u.id] = { readiness: 75 };
+  return w;
+};
 
 /** Can the player decide on security matters? (PM, or the defense minister with the PM's approval) */
 /** Who may open the security screen: the PM, the defense minister, and the national-security (internal security) minister. */
@@ -93,26 +98,30 @@ export function operationChance(s: GameState, op: OperationDef, frontId: FrontId
   return clamp(0.42 + ready / 220 + intel / 500 - w.fronts[frontId].threat / 400 - (DIFFICULTIES[s.difficulty].volatility - 1) * 0.1 + bonus, 0.12, 0.92);
 }
 
-export function executeOperation(s: GameState, op: OperationDef, frontId: FrontId, bonus = 0): OpOutcome {
+/** What a plan changes in an operation: the chance, the effect, the casualties on both sides, the international price and the wear on each unit. */
+export interface OpMods { chance?: number; cutMult?: number; casMult?: number; civMult?: number; intlMult?: number; drains?: Partial<Record<UnitId, number>> }
+
+export function executeOperation(s: GameState, op: OperationDef, frontId: FrontId, bonus = 0, mods?: OpMods): OpOutcome {
   const w = world(s);
   const front = w.fronts[frontId];
   const fdef = FRONT_BY_ID[frontId];
-  const pSuccess = operationChance(s, op, frontId, bonus);
+  const pSuccess = mods?.chance ?? operationChance(s, op, frontId, bonus);
   const success = rand(s) < pSuccess;
-  const cut = success ? op.threatCut : Math.round(op.threatCut / 3);
+  const cut = Math.round((success ? op.threatCut : Math.round(op.threatCut / 3)) * (mods?.cutMult ?? 1));
   front.threat = clamp(front.threat - cut);
   front.status = op.id === 'wide_ground' || op.id === 'air_campaign' || op.id === 'iran_strike' ? 'fighting' : front.status === 'ceasefire' ? 'tension' : front.status;
-  for (const u of op.units) w.units[u].readiness = clamp(w.units[u].readiness - (op.turns > 1 ? 22 : 10));
+  if (mods?.drains) for (const [u, d] of Object.entries(mods.drains)) w.units[u as UnitId].readiness = clamp(w.units[u as UnitId].readiness - (d ?? 0));
+  else for (const u of op.units) w.units[u].readiness = clamp(w.units[u].readiness - (op.turns > 1 ? 22 : 10));
   // casualties: soldiers by risk; civilians from retaliation, reduced by air defense
-  const fallen = op.risk > 0 ? Math.max(0, Math.round(rand(s) * op.risk * 20 * (success ? 0.8 : 1.6))) : 0;
+  const fallen = op.risk > 0 ? Math.max(0, Math.round(rand(s) * op.risk * 20 * (success ? 0.8 : 1.6) * (mods?.casMult ?? 1))) : 0;
   const retaliation = fdef.rocketRange && ['air_campaign', 'wide_ground', 'iran_strike', 'targeted_strike'].includes(op.id) && chance(s, op.id === 'targeted_strike' ? 0.3 : 0.8);
-  const civilians = retaliation ? Math.max(0, Math.round(rand(s) * (op.id === 'iran_strike' ? 14 : 6) * (1.4 - w.units.air_defense.readiness / 100))) : 0;
+  const civilians = retaliation ? Math.max(0, Math.round(rand(s) * (op.id === 'iran_strike' ? 14 : 6) * (1.4 - w.units.air_defense.readiness / 100) * (mods?.civMult ?? 1))) : 0;
   w.casualties.soldiers += fallen;
   w.casualties.civilians += civilians;
   // international reaction
   const usaCoord = (w.channels.usa ?? 0) >= 60;
-  for (const c of ['eu', 'uk', 'un', 'china', 'russia']) w.relations[c] = clamp(w.relations[c] - op.intlCost * (c === 'un' ? 1.2 : 0.8));
-  w.relations.usa = clamp(w.relations.usa - (usaCoord ? op.intlCost * 0.2 : op.intlCost * 0.6));
+  for (const c of ['eu', 'uk', 'un', 'china', 'russia']) w.relations[c] = clamp(w.relations[c] - op.intlCost * (mods?.intlMult ?? 1) * (c === 'un' ? 1.2 : 0.8));
+  w.relations.usa = clamp(w.relations.usa - (usaCoord ? op.intlCost * 0.2 : op.intlCost * 0.6) * (mods?.intlMult ?? 1));
   // home politics and economy
   applyEffects(s, {
     oneOffCost: op.cost, economy: op.reservists ? { growth: -0.4, unemployment: 0.1 } : retaliation ? { growth: -0.1 } : undefined,

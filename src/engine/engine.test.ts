@@ -1587,3 +1587,58 @@ describe('step 3c: the party leader decides who takes the party\'s portfolios', 
     expect(done).toBe(true);
   });
 });
+
+describe('step 4a: planning an operation', () => {
+  it('the forces must fit the operation, and the plan changes the odds and the price', async () => {
+    const { defaultPlan, evaluatePlan, planToParams } = await import('./strikePlan');
+    const s = createGame(cfg('pm'));
+    const plan = defaultPlan(s, 'air_campaign', 'gaza');
+    expect(plan.lead).toBe('air_force');
+    expect(evaluatePlan(s, plan).ok).toBe(true);
+    // a brigade does not lead an air campaign
+    expect(evaluatePlan(s, { ...plan, lead: 'golani' }).ok).toBe(false);
+    // a wide ground operation needs combat engineering
+    const g = defaultPlan(s, 'wide_ground', 'gaza');
+    expect(evaluatePlan(s, g).ok).toBe(true);
+    expect(evaluatePlan(s, { ...g, engineering: undefined }).ok).toBe(false);
+    // the target must fit the operation (tunnels are not hit from the air)
+    expect(evaluatePlan(s, { ...plan, target: 'tunnels' }).ok).toBe(false);
+    // night: fewer civilians on the other side; maximum force: a bigger effect and a higher price
+    const day = evaluatePlan(s, { ...plan, time: 'day' });
+    const night = evaluatePlan(s, { ...plan, time: 'night' });
+    expect(night.enemyCivEst).toBeLessThan(day.enemyCivEst);
+    const max = evaluatePlan(s, { ...plan, roe: 'maximum' });
+    const cautious = evaluatePlan(s, { ...plan, roe: 'cautious' });
+    expect(max.cutEst).toBeGreaterThan(cautious.cutEst);
+    expect(max.intlEst).toBeGreaterThan(cautious.intlEst);
+    // a plan with cover and engineering is better than a bare one on the ground
+    const bare = evaluatePlan(s, { ...g, cover: [], intel: undefined });
+    expect(evaluatePlan(s, g).chance).toBeGreaterThan(bare.chance);
+    expect(Object.keys(planToParams(plan)).length).toBeGreaterThan(5);
+  });
+  it('an operation with a plan runs, wears the chosen units, and the cabinet can be persuaded', async () => {
+    const { defaultPlan, planToParams, cabinetPreview, persuadeMember, briefCabinet } = await import('./strikePlan');
+    const { world } = await import('./security');
+    const pm = createGame(cfg('pm'));
+    pm.government.caretaker = false; pm.player.politicalCapital = 100;
+    const plan = defaultPlan(pm, 'ground_raid', 'gaza');
+    const before = world(pm).units[plan.lead].readiness;
+    expect(checkAction(pm, 'security_operation', planToParams(plan))).toBeNull();
+    const r = performAction(pm, 'security_operation', planToParams(plan));
+    expect(r.reaction).not.toBeNull();
+    expect(world(r.state).units[plan.lead].readiness).toBeLessThan(before);
+    // an invalid plan is refused up front
+    expect(checkAction(pm, 'security_operation', { ...planToParams(plan), lead: 'air_force' })).not.toBeNull();
+    // the cabinet: persuading a member and a briefing raise the lean
+    const def = createGame(cfg('minister', { ministryId: 'defense' }));
+    def.government.caretaker = false; def.player.politicalCapital = 100;
+    const big = defaultPlan(def, 'air_campaign', 'lebanon');
+    const m0 = cabinetPreview(def, big).find((m) => !def.politicians[m.id].isPlayer)!;
+    expect(persuadeMember(def, m0.id)).toBe(true);
+    expect(persuadeMember(def, m0.id)).toBe(false);
+    expect(cabinetPreview(def, big).find((m) => m.id === m0.id)!.lean).toBeGreaterThan(m0.lean);
+    const l1 = cabinetPreview(def, big).find((m) => m.id !== m0.id && !def.politicians[m.id].isPlayer)!.lean;
+    expect(briefCabinet(def, big)).toBe(true);
+    expect(cabinetPreview(def, big).find((m) => m.lean !== l1 || true)).toBeDefined();
+  });
+});

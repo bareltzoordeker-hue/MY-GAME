@@ -8,6 +8,7 @@ import {
 } from '../../engine/decisions';
 import { resolveInbox } from '../../engine/inbox';
 import { markRead } from '../../engine/chat';
+import { briefCabinet, persuadeMember, type StrikePlan } from '../../engine/strikePlan';
 import { answerBargain, answerOffer, playMove, sendChatSmart, type BargainAnswer, type Move, type OfferAnswer } from '../../engine/chatMoves';
 import { resolveCrisis, startCrisis } from '../../engine/crises';
 import { abandonMandate, answerCoalitionOffer, finalizeCoalition, negotiate, type PortfolioAssignment } from '../../engine/elections';
@@ -60,6 +61,8 @@ interface Store {
   returnMandate: () => void;
   chooseOffer: (offerId: string, action: 'accept' | 'decline' | 'ask', extraIndex?: number, assign?: PortfolioAssignment) => void;
   setRequestFreq: (n: number) => void;
+  cabinetBrief: (plan: StrikePlan) => void;
+  cabinetPersuade: (memberId: string) => void;
   endTurn: () => void;
   dismissReaction: () => void;
   closeBriefing: () => void;
@@ -202,6 +205,18 @@ export const useGame = create<Store>((set, get) => ({
     const s = clone(g);
     const reaction = answerCoalitionOffer(s, offerId, action, extraIndex, assign);
     set((st) => ({ game: s, reactions: [...st.reactions, reaction], saveStatus: s.elections.phase === 'none' ? persist(s) : st.saveStatus }));
+  },
+  cabinetBrief: (plan) => {
+    const g = get().game;
+    if (!g) return;
+    const s = clone(g);
+    if (briefCabinet(s, plan)) set({ game: s, saveStatus: persist(s) });
+  },
+  cabinetPersuade: (memberId) => {
+    const g = get().game;
+    if (!g) return;
+    const s = clone(g);
+    if (persuadeMember(s, memberId)) set({ game: s, saveStatus: persist(s) });
   },
   setRequestFreq: (n) => {
     const g = get().game;
