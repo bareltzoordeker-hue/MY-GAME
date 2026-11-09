@@ -87,7 +87,7 @@ export function cabinetVote(s: GameState, hawkish: number, weight = 0.5): { yes:
 
 const unitReadiness = (s: GameState, units: UnitId[]) => units.reduce((a, u) => a + world(s).units[u].readiness, 0) / Math.max(1, units.length);
 
-export interface OpOutcome { success: boolean; fallen: number; civilians: number; text: string; headline: string; lines: ReactionLine[] }
+export interface OpOutcome { success: boolean; fallen: number; civilians: number; cut: number; text: string; headline: string; lines: ReactionLine[] }
 
 /** Runs an approved operation now and returns what happened. */
 /** The chance that an operation succeeds; bonus: the proposing minister's skill. */
@@ -141,7 +141,7 @@ export function executeOperation(s: GameState, op: OperationDef, frontId: FrontI
   addNews(s, fallen > 0 ? `${headline}; ${fallen} לוחמים נפלו` : headline, success ? 'neutral' : 'bad', op.icon);
   logEvent(s, op.icon, `${opName}: ${success ? 'הצלחה' : 'הצלחה חלקית'}${fallen ? `, ${fallen} חללים` : ''}${civilians ? `, ${civilians} אזרחים נהרגו` : ''}`, 3, success ? 'good' : 'bad', 'security');
   s.career.memorable.push(`${opName} (${success ? 'הצלחה' : 'הצלחה חלקית'})`);
-  return { success, fallen, civilians, text: parts.join(' '), headline, lines };
+  return { success, fallen, civilians, cut, text: parts.join(' '), headline, lines };
 }
 
 /** Once per turn: enemies rebuild, ceasefires hold or break, incidents happen, units recover. */

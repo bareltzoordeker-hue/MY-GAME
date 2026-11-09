@@ -304,7 +304,27 @@ export interface ChatMsg {
   proactive?: boolean;
 }
 
+/** What happened in a planned operation: the phases, who was hurt, what was hit, and what it will cost later. */
+export interface AfterAction {
+  turn: number;
+  opIcon: string;
+  title: string;
+  front: string;
+  success: boolean;
+  phases: { icon: string; text: string; ok: boolean }[];
+  unitCasualties: { unit: string; fallen: number }[];
+  targetName: string;
+  targetHitPct: number;
+  enemyCivilians: number;
+  homeCivilians: number;
+  threatCut: number;
+  intelFailure: boolean;
+  longTerm: string[];
+}
+
 export interface WorldState {
+  /** the report on the last planned operation */
+  lastReport?: AfterAction;
   fronts: Record<string, { threat: number; status: 'quiet' | 'tension' | 'fighting' | 'ceasefire'; ceasefireUntil?: number; incidents: number }>;
   units: Record<string, { readiness: number }>;
   channels: Record<string, number>;

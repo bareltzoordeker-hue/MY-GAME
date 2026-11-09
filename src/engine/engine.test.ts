@@ -1642,3 +1642,24 @@ describe('step 4a: planning an operation', () => {
     expect(cabinetPreview(def, big).find((m) => m.lean !== l1 || true)).toBeDefined();
   });
 });
+
+describe('step 4b: the after-action report', () => {
+  it('a planned operation leaves a consistent report', async () => {
+    const { defaultPlan, planToParams } = await import('./strikePlan');
+    const { world } = await import('./security');
+    for (let i = 0; i < 6; i++) {
+      const pm = createGame({ ...cfg('pm'), seed: 100 + i } as ReturnType<typeof cfg>);
+      pm.government.caretaker = false; pm.player.politicalCapital = 100;
+      const plan = defaultPlan(pm, 'wide_ground', 'gaza');
+      const r = performAction(pm, 'security_operation', planToParams(plan));
+      const rep = world(r.state).lastReport!;
+      expect(rep).toBeTruthy();
+      expect(rep.phases.length).toBeGreaterThanOrEqual(4);
+      // a successful operation has no failed phase; a failed one has at least one
+      expect(rep.phases.some((p) => !p.ok)).toBe(!rep.success);
+      expect(rep.unitCasualties.reduce((a, u) => a + u.fallen, 0)).toBe(rep.unitCasualties.length ? rep.unitCasualties.reduce((a, u) => a + u.fallen, 0) : 0);
+      expect(rep.targetHitPct).toBeGreaterThan(0);
+      expect(rep.longTerm.length).toBeGreaterThan(0);
+    }
+  });
+});

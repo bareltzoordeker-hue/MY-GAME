@@ -3,10 +3,10 @@
 // a brigade does not lead an air campaign.
 import { FRONT_TARGETS, OP_PLAN, ROE, TIMES, type PlanRole, type RoeId, type TargetDef, type TimeId } from '../data/strikePlan';
 import { DIFFICULTIES } from '../data/world';
-import { OPERATION_BY_ID, UNIT_BY_ID, type FrontId, type UnitId } from '../data/security';
-import type { GameState, Politician } from '../types/game';
+import { FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type FrontId, type UnitId } from '../data/security';
+import type { AfterAction, GameState, Politician } from '../types/game';
 import { clamp } from '../utils';
-import { cabinetMembers, type OpMods, world } from './security';
+import { cabinetMembers, type OpMods, type OpOutcome, world } from './security';
 import { rand } from './rng';
 
 export interface StrikePlan { opId: string; front: FrontId; target: string; lead: UnitId; cover: UnitId[]; intel?: UnitId; engineering?: UnitId; support?: UnitId; time: TimeId; roe: RoeId }
@@ -172,4 +172,45 @@ export function planCabinetVote(s: GameState, plan: StrikePlan): { yes: number; 
     lines.push({ icon: ok ? '👍' : '👎', label: m.name, text: ok ? m.text.replace(/^מתנגד|^מתלבט/, 'תומך') : m.text.replace(/^תומך|^מתלבט/, 'מתנגד'), tone: ok ? 'good' : 'bad' });
   }
   return { yes, no, passed: yes > no, lines: lines.slice(0, 6) };
+}
+
+// ------------------------------------------------------------ the after-action report
+/** Builds the phases and the report on a planned operation that has just been carried out. The phases agree with the overall result:
+ *  a failed operation breaks down at one phase. */
+export function buildAfterAction(s: GameState, plan: StrikePlan, ev: PlanEval, o: OpOutcome): AfterAction {
+  const op = OPERATION_BY_ID[plan.opId];
+  const t = ev.target!;
+  const cover = [...new Set(plan.cover)].filter((u) => u !== plan.lead);
+  const intelUnit = plan.intel ?? 'u8200';
+  const stages: { icon: string; ok: string; bad: string }[] = [
+    { icon: '📡', ok: `${UNIT_BY_ID[intelUnit].name}: המידע על היעד (${t.name}) אומת.`, bad: `${UNIT_BY_ID[intelUnit].name}: המידע על היעד (${t.name}) התברר כחלקי.` },
+    { icon: '🚀', ok: `${UNIT_BY_ID[plan.lead].name}: פתיחה כמתוכנן בשעת ${TIMES[plan.time].label}.`, bad: `${UNIT_BY_ID[plan.lead].name}: התנגדות בלתי צפויה בפתיחה.` },
+  ];
+  for (const u of cover) stages.push({ icon: '🛡️', ok: `${UNIT_BY_ID[u].name}: חיפוי לכוח המוביל.`, bad: `${UNIT_BY_ID[u].name}: החיפוי לא הספיק ברגע הקריטי.` });
+  if (plan.engineering) stages.push({ icon: '🧱', ok: `${UNIT_BY_ID[plan.engineering].name}: פינוי מטענים ופריצת הדרך.`, bad: `${UNIT_BY_ID[plan.engineering].name}: עומס מטענים שלא היה ידוע מראש.` });
+  stages.push({ icon: '🏁', ok: 'הכוחות סיימו את המשימה וחזרו בשלום.', bad: 'המבצע הופסק לפני שהושלם.' });
+  const failAt = o.success ? -1 : Math.min(stages.length - 1, Math.floor(rand(s) * (stages.length - 1)));
+  const phases = stages.map((st, i) => ({ icon: st.icon, text: i === failAt || (!o.success && i === stages.length - 1) ? st.bad : st.ok, ok: !(i === failAt || (!o.success && i === stages.length - 1)) }));
+  // who was hurt: the leading force carries most of it
+  const unitCasualties: { unit: string; fallen: number }[] = [];
+  if (o.fallen > 0) {
+    const share = plan.engineering ? 0.2 : 0;
+    const eng = Math.round(o.fallen * share);
+    const cov = cover.length ? Math.round(o.fallen * 0.2) : 0;
+    unitCasualties.push({ unit: plan.lead, fallen: o.fallen - eng - cov });
+    if (cov) unitCasualties.push({ unit: cover[0], fallen: cov });
+    if (eng) unitCasualties.push({ unit: plan.engineering!, fallen: eng });
+  }
+  const intelFailure = !o.success && (failAt === 0 || t.intel < 65);
+  const enemyCivilians = Math.round(ev.enemyCivEst * (o.success ? 0.8 : 1.3) * (intelFailure ? 1.5 : 1));
+  const targetHitPct = o.success ? Math.min(100, 70 + Math.round(rand(s) * 30)) : 20 + Math.round(rand(s) * 35);
+  const drain = ev.mods.drains?.[plan.lead] ?? 0;
+  const longTerm: string[] = [];
+  if (enemyCivilians >= 10) longTerm.push('תמונות מהשטח עלו ברשתות; צפוי לחץ בינלאומי ובקשות לחקירה.');
+  if (o.success && o.cut >= 10) longTerm.push('צפויה תקופה של רגיעה יחסית בחזית.');
+  if (o.fallen >= 3) longTerm.push('משפחות הנופלים ידרשו תחקיר ותשובות.');
+  if (intelFailure) longTerm.push('ייפתח תחקיר מודיעיני על הכשל.');
+  if (drain >= 20) longTerm.push(`${UNIT_BY_ID[plan.lead].name}: נדרשים כמה חודשי התאוששות.`);
+  if (!longTerm.length) longTerm.push('אין השלכות ארוכות טווח מיוחדות.');
+  return { turn: s.turn, opIcon: op.icon, title: `${op.name} – ${FRONT_BY_ID[plan.front].name}`, front: plan.front, success: o.success, phases, unitCasualties, targetName: t.name, targetHitPct, enemyCivilians, homeCivilians: o.civilians, threatCut: o.cut, intelFailure, longTerm };
 }

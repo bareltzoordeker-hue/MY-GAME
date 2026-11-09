@@ -30,7 +30,7 @@ import { TOPIC_BY_ID, VENUES, deliverSpeech, type Tone, type Venue } from './spe
 import { CHANNEL_BY_ID, FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type ChannelId, type FrontId, type UnitId } from '../data/security';
 import { decisionReactions } from './reactions';
 import { INTERNAL_BY_ID } from '../data/internalSecurity';
-import { canUseInternalSecurity, cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, takeBackArea, unitTraining, type CbmKind } from './security';
+import { canUseInternalSecurity, cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, takeBackArea, unitTraining, world, type CbmKind } from './security';
 import { assignMinister, createMinistry, getMinistry, mergeMinistries, partyLeavesCoalition, removeMinistry } from './government';
 import { ideologyDistance, partyStance, proposeBill, repealLaw, voteBudget } from './parliament';
 import { coalitionSeats, computeShares, seatsFromShares } from './polls';
@@ -40,7 +40,7 @@ import { allyHurt } from './alliances';
 import { mergeParties, partyRelation, shiftPartyRelation } from './relations';
 import { SECTORS, TRADE_BASE, exportDrive, industryAid, tariff, tradeDeal, tradeState, type TradeResult } from './trade';
 import { FOREIGN_BY_ID, foreignValue, changeAmbassador, hasAmbassador, hasPact, signAgreement, statement, summonAmbassador, unCoalition, visitCountry, type ForeignResult } from './foreign';
-import { evaluatePlan, planCabinetVote, planFromParams } from './strikePlan';
+import { buildAfterAction, evaluatePlan, planCabinetVote, planFromParams } from './strikePlan';
 import { RACE_MOVES, raceMove, raceMoveBlocked, startRace, type RaceMove } from './leadership';
 import { getCapabilities, isEconomyMinister, isForeignMinister, isPM, isPartyLeader, lawAllowed, isSpeaker, playerMinistry } from './roles';
 
@@ -1449,8 +1449,10 @@ def({
     s.flags[`op_${front}`] = s.turn;
     const ev = plan ? evaluatePlan(s, plan) : null;
     const o = executeOperation(s, op, front, 0, ev?.ok ? ev.mods : undefined);
+    const report = plan && ev?.ok ? buildAfterAction(s, plan, ev, o) : null;
+    if (report) world(s).lastReport = report;
     const sub = plan && ev?.target ? `${ev.target.name} · ${UNIT_BY_ID[plan.lead].name}` : op.needsCabinet ? 'באישור הקבינט המדיני-ביטחוני' : undefined;
-    return { status: o.success ? 'approved' : 'rejected', title: o.headline, subtitle: sub, quip: o.text, people: [...o.lines, ...lines].slice(0, 6) };
+    return { status: o.success ? 'approved' : 'rejected', title: o.headline, subtitle: sub, quip: o.text, people: [...o.lines, ...(report ? [{ icon: '📋', label: 'דוח אחרי פעולה', text: `${report.targetName}: נפגע ${report.targetHitPct}%. הדוח המלא במסך הביטחון.`, tone: 'neutral' as const }] : []), ...lines].slice(0, 6) };
   },
 });
 

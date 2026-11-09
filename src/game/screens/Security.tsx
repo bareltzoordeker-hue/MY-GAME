@@ -6,6 +6,7 @@ import { INTERNAL_OPTIONS } from '../../data/internalSecurity';
 import type { GameState } from '../../types/game';
 import { ActionButton, Empty, Meter, ScreenHeader, Section } from '../components/ui';
 import { OperationPlanner } from '../components/OperationPlanner';
+import { AfterActionCard } from '../components/AfterActionCard';
 
 const STATUS: Record<string, { t: string; c: string }> = {
   quiet: { t: 'שקט', c: 'chip-good' }, tension: { t: 'מתיחות', c: 'chip-warn' }, fighting: { t: 'לחימה', c: 'chip-bad' }, ceasefire: { t: 'הפסקת אש', c: 'chip' },
@@ -55,6 +56,7 @@ export function SecurityScreen() {
     <div className="space-y-4">
       {planning && military && <OperationPlanner s={s} opId={planning.opId} front={planning.front} onClose={() => setPlanning(null)} />}
       <ScreenHeader title="ביטחון ומדיניות" sub={military ? 'המסלול הצבאי, המסלול המדיני וביטחון הפנים. מבצעים גדולים ומהלכים מדיניים משמעותיים דורשים אישור הקבינט.' : 'ביטחון הפנים: משטרה, שב״כ ושב״ס. החזיתות מוצגות לעיון בלבד.'} />
+      {military && world(s).lastReport && <AfterActionCard r={world(s).lastReport!} />}
       <Section title="חזיתות" icon="🧭">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{FRONTS.map((f) => <FrontCard key={f.id} s={s} id={f.id} onPlan={(o, fr) => setPlanning({ opId: o, front: fr })} />)}</div>
       </Section>
