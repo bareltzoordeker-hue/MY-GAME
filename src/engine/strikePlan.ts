@@ -1,13 +1,14 @@
 // Operation planning: choose the target, the leading and covering forces, the hour and the rules of engagement; see the odds and the
 // price; take it to the security cabinet (persuade its members) and carry it out. The forces must fit the operation:
 // a brigade does not lead an air campaign.
-import { FRONT_TARGETS, OP_PLAN, ROE, TIMES, type PlanRole, type RoeId, type TargetDef, type TimeId } from '../data/strikePlan';
+import { FRONT_TARGETS, OP_PLAN, PRECISION_USE, ROE, TIMES, type PlanRole, type RoeId, type TargetDef, type TimeId } from '../data/strikePlan';
 import { DIFFICULTIES } from '../data/world';
 import { FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type FrontId, type UnitId } from '../data/security';
 import type { AfterAction, GameState, Politician } from '../types/game';
 import { clamp } from '../utils';
-import { cabinetMembers, type OpMods, type OpOutcome, world } from './security';
-import { rand } from './rng';
+import { cabinetMembers, intelFreshOf, setIntelFresh, stockOf, type OpMods, type OpOutcome, world } from './security';
+import { addNews, applyEffects, logEvent } from './effects';
+import { chance as roll, rand } from './rng';
 
 export interface StrikePlan { opId: string; front: FrontId; target: string; lead: UnitId; cover: UnitId[]; intel?: UnitId; engineering?: UnitId; support?: UnitId; time: TimeId; roe: RoeId }
 
@@ -86,12 +87,21 @@ export function evaluatePlan(s: GameState, plan: StrikePlan): PlanEval {
   const otherAvg = avg([plan.intel, plan.engineering, plan.support].filter((u): u is UnitId => !!u).map((u) => readiness(s, u))) || lead;
   const ready = 0.55 * lead + 0.25 * coverAvg + 0.2 * otherAvg;
   const intelQ = plan.intel ? readiness(s, plan.intel) : world(s).units.u8200.readiness;
-  const bonus = coverUnits.length * 0.025 + (plan.engineering && GROUND_OPS.includes(plan.opId) ? 0.04 : 0) + (t.intel - 60) / 500 + (plan.intel ? 0.03 : 0)
+  const stk = stockOf(s);
+  const useP = PRECISION_USE[plan.opId] ?? 0;
+  const lowPrecision = useP > 0 && stk.precision < useP * 1.2;
+  const retaliates = (AIR_OPS.includes(plan.opId) || plan.opId === 'wide_ground') && !!FRONT_BY_ID[plan.front].rocketRange;
+  const lowInterceptors = retaliates && stk.interceptors < 30;
+  const fresh = intelFreshOf(s, plan.front);
+  if (lowPrecision) warnings.push('מלאי התחמושת המדויקת נמוך: הסיכוי נפגע ויש יותר סיכון לאזרחים.');
+  if (lowInterceptors) warnings.push('מלאי היירוטים נמוך: צפוי נזק רב יותר בעורף.');
+  if (fresh < 50) warnings.push(`המודיעין על החזית ישן (רעננות ${Math.round(fresh)}). כדאי לרענן אותו לפני המבצע.`);
+  const bonus = (lowPrecision ? -0.12 : 0) - (fresh < 50 ? (50 - fresh) / 400 : 0) + coverUnits.length * 0.025 + (plan.engineering && GROUND_OPS.includes(plan.opId) ? 0.04 : 0) + (t.intel - 60) / 500 + (plan.intel ? 0.03 : 0)
     + time.surprise + (AIR_OPS.includes(plan.opId) ? time.air : 0) + roe.success;
   const chance = clamp(0.42 + ready / 220 + intelQ / 500 - world(s).fronts[plan.front].threat / 400 - (DIFFICULTIES[s.difficulty].volatility - 1) * 0.1 + bonus, 0.12, 0.92);
   const casMult = time.own * (plan.engineering && GROUND_OPS.includes(plan.opId) ? 0.75 : 1) * (1 - 0.06 * coverUnits.length);
-  const civMult = plan.support ? 0.7 : 1;
-  const intlMult = roe.intl * (1 + t.collateral * time.civ * roe.civ * 0.4);
+  const civMult = (plan.support ? 0.7 : 1) * (lowPrecision ? 1.25 : 1) * (lowInterceptors ? 1.4 : 1);
+  const intlMult = roe.intl * (1 + t.collateral * time.civ * roe.civ * 0.4) * (isHasbara(s, plan) ? 0.8 : 1);
   const cutMult = t.value * roe.effect;
   const drains: Partial<Record<UnitId, number>> = {};
   const add = (u: UnitId, d: number) => { drains[u] = (drains[u] ?? 0) + d; };
@@ -114,6 +124,15 @@ export interface CabinetMember { id: string; name: string; title: string; lean: 
 
 const briefKey = (p: StrikePlan) => `brief_${p.opId}_${p.front}`;
 const persuadeKey = (id: string) => `persuade_${id}`;
+const hasbaraKey = (p: StrikePlan) => `hasbara_${p.opId}_${p.front}`;
+export const isHasbara = (s: GameState, p: StrikePlan) => (s.flags[hasbaraKey(p)] ?? -1) >= s.turn;
+/** Prepared public diplomacy for the operation (2 capital): the international price falls by a fifth. */
+export function planHasbara(s: GameState, plan: StrikePlan): boolean {
+  if (isHasbara(s, plan) || s.player.politicalCapital < 2) return false;
+  s.player.politicalCapital -= 2;
+  s.flags[hasbaraKey(plan)] = s.turn;
+  return true;
+}
 export const isBriefed = (s: GameState, p: StrikePlan) => (s.flags[briefKey(p)] ?? -1) >= s.turn;
 export const isPersuaded = (s: GameState, id: string) => (s.flags[persuadeKey(id)] ?? -1) >= s.turn;
 
@@ -211,6 +230,20 @@ export function buildAfterAction(s: GameState, plan: StrikePlan, ev: PlanEval, o
   if (o.fallen >= 3) longTerm.push('משפחות הנופלים ידרשו תחקיר ותשובות.');
   if (intelFailure) longTerm.push('ייפתח תחקיר מודיעיני על הכשל.');
   if (drain >= 20) longTerm.push(`${UNIT_BY_ID[plan.lead].name}: נדרשים כמה חודשי התאוששות.`);
+  // what the operation costs in stock, in fresh intelligence and in the enemy's answer
+  const stk = stockOf(s);
+  stk.precision = clamp(stk.precision - (PRECISION_USE[plan.opId] ?? 0));
+  if (FRONT_BY_ID[plan.front].rocketRange && (AIR_OPS.includes(plan.opId) || plan.opId === 'wide_ground')) stk.interceptors = clamp(stk.interceptors - (plan.opId === 'iran_strike' ? 25 : 10));
+  setIntelFresh(s, plan.front, intelFreshOf(s, plan.front) + (plan.intel ? 10 : 0) - (intelFailure ? 15 : 0));
+  if (enemyCivilians >= 10 || plan.roe === 'maximum') { s.flags[`retal_${plan.front}`] = s.turn + 2; longTerm.push('האויב צפוי להגיב: סיכוי גבוה יותר לירי ולאירועים בחזית בשני התורות הקרובים.'); }
+  if (!o.success && roll(s, 0.3)) {
+    const air = AIR_OPS.includes(plan.opId);
+    const text = air ? 'כלי טיס אבד במהלך המבצע; הצוות חולץ.' : 'לוחם נפל בשבי במהלך המבצע; ממשלת ישמעאל פועלת לשחררו.';
+    applyEffects(s, { groups: air ? {} : { families: -4, right: -2 }, stability: air ? -2 : -3, playerPopularity: air ? -1 : -2 });
+    addNews(s, text, 'bad', air ? '✈️' : '🪖');
+    logEvent(s, air ? '✈️' : '🪖', text, 3, 'bad', 'security');
+    longTerm.push(text);
+  }
   if (!longTerm.length) longTerm.push('אין השלכות ארוכות טווח מיוחדות.');
   return { turn: s.turn, opIcon: op.icon, title: `${op.name} – ${FRONT_BY_ID[plan.front].name}`, front: plan.front, success: o.success, phases, unitCasualties, targetName: t.name, targetHitPct, enemyCivilians, homeCivilians: o.civilians, threatCut: o.cut, intelFailure, longTerm };
 }
@@ -245,7 +278,7 @@ export function deleteSavedPlan(s: GameState, id: string): boolean {
 type ReportRow = { label: string; value: string; tone?: 'good' | 'bad' | 'warn' };
 
 /** How sure the intelligence picture is: the quality of the information on the target and the readiness of the unit that gathers it. */
-export const intelConfidence = (s: GameState, plan: StrikePlan, t: TargetDef) => Math.round(0.6 * t.intel + 0.4 * readiness(s, plan.intel ?? 'u8200'));
+export const intelConfidence = (s: GameState, plan: StrikePlan, t: TargetDef) => Math.round(0.5 * t.intel + 0.3 * readiness(s, plan.intel ?? 'u8200') + 0.2 * intelFreshOf(s, plan.front));
 
 /** The plan the defense minister would bring: the best-prepared forces and the most valuable target. skill: his expertise bonus on the odds. */
 export function proposeStrikePlan(s: GameState, opId: string, front: FrontId, hawkLean: number, skill: number): { plan: StrikePlan; ev: PlanEval } | null {
@@ -287,4 +320,19 @@ export function proposalReport(s: GameState, plan: StrikePlan, ev: PlanEval): Re
   if (OPERATION_BY_ID[plan.opId].needsCabinet) rows.push({ label: 'עמדת הקבינט', value: `${yes} מתוך ${members.length} תומכים`, tone: yes > members.length / 2 ? 'good' : 'warn' });
   for (const w of ev.warnings) rows.push({ label: 'אזהרה', value: w, tone: 'warn' });
   return rows;
+}
+
+/** The chief of staff's advice on the plan. */
+export function chiefAdvice(s: GameState, plan: StrikePlan, ev: PlanEval): string[] {
+  if (!ev.ok) return [];
+  const out: string[] = [];
+  const stk = stockOf(s);
+  const useP = PRECISION_USE[plan.opId] ?? 0;
+  if (intelFreshOf(s, plan.front) < 50) out.push('המודיעין על החזית ישן. כדאי לרענן אותו לפני המבצע.');
+  if (useP > 0 && stk.precision < useP * 1.2) out.push('מלאי התחמושת המדויקת נמוך. כדאי לצמצם את המבצע או לדחות אותו.');
+  if (FRONT_BY_ID[plan.front].rocketRange && (AIR_OPS.includes(plan.opId) || plan.opId === 'wide_ground') && stk.interceptors < 30) out.push('מלאי היירוטים נמוך. צפוי נזק רב יותר בעורף.');
+  if (ev.chance < 0.5) out.push('סיכוי ההצלחה נמוך. כדאי לחזק את הכוחות או לדחות.');
+  if (ev.enemyCivEst >= 12 && plan.roe !== 'cautious') out.push('הפגיעה באזרחים צפויה גבוהה. שעה שקטה יותר או כללי פתיחה באש זהירים יקטינו אותה.');
+  if (!out.length) out.push('אין לי הסתייגויות. התוכנית מאוזנת.');
+  return out;
 }

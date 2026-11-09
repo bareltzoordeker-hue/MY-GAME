@@ -870,3 +870,7 @@
 {}: "אחכה להחלטתך." התוכנית ממתינה במסך הביטחון. ||| {0}: "I will wait for your decision." The plan is waiting on the security screen. ||| {0}: "سأنتظر قرارك." الخطة بانتظارك في شاشة الأمن.
 
 🧠 היועץ ממליץ: "{}" – {} ||| 🧠 The advisor recommends: "{0}" – {1} ||| 🧠 المستشار يوصي: "{0}" – {1}
+
+המודיעין על החזית ישן (רעננות {}). כדאי לרענן אותו לפני המבצע. ||| The intelligence on the front is old (freshness {0}). It is worth refreshing it before the operation. ||| المعلومات الاستخباراتية عن الجبهة قديمة (الحداثة {0}). يُفضل تحديثها قبل العملية.
+🔎 ביטחון מודיעיני: {} ||| 🔎 Intelligence confidence: {0} ||| 🔎 الثقة الاستخباراتية: {0}
+{}: רעננות {} ||| {0}: freshness {1} ||| {0}: الحداثة {1}

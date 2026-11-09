@@ -1723,3 +1723,46 @@ describe('step 4d: the defense minister brings a strike proposal with a report',
     expect(found).toBe(2);
   });
 });
+
+describe('step 4e: stocks, fading intelligence, advice and hasbara', () => {
+  it('operations use up stock, low stock and old intelligence hurt the odds, and refreshing helps', async () => {
+    const { defaultPlan, evaluatePlan, planToParams, chiefAdvice, planHasbara, isHasbara } = await import('./strikePlan');
+    const { world, stockOf, intelFreshOf, setIntelFresh, worldTick } = await import('./security');
+    const pm = createGame(cfg('pm'));
+    pm.government.caretaker = false; pm.player.politicalCapital = 100;
+    const plan = defaultPlan(pm, 'air_campaign', 'gaza');
+    const base = evaluatePlan(pm, plan);
+    // low precision stock: a lower chance, more civilians at home, and a warning
+    stockOf(pm).precision = 5;
+    const low = evaluatePlan(pm, plan);
+    expect(low.chance).toBeLessThan(base.chance);
+    expect(low.warnings.length).toBeGreaterThan(base.warnings.length);
+    expect(chiefAdvice(pm, plan, low).join(' ')).toContain('התחמושת');
+    stockOf(pm).precision = 80;
+    // old intelligence lowers the odds; a refresh raises it
+    setIntelFresh(pm, 'gaza', 10);
+    const old = evaluatePlan(pm, plan);
+    expect(old.chance).toBeLessThan(base.chance);
+    const r = performAction(pm, 'refresh_intel', { front: 'gaza' });
+    expect(intelFreshOf(r.state, 'gaza')).toBeGreaterThanOrEqual(40);
+    expect(checkAction(r.state, 'refresh_intel', { front: 'gaza' })).not.toBeNull();
+    // intelligence fades by itself, and the stock refills
+    const t = createGame(cfg('pm'));
+    const f0 = intelFreshOf(t, 'gaza');
+    stockOf(t).precision = 10;
+    worldTick(t, 4);
+    expect(intelFreshOf(t, 'gaza')).toBeLessThan(f0);
+    expect(stockOf(t).precision).toBeGreaterThan(10);
+    // carrying out the plan uses stock and leaves a report
+    const before = stockOf(pm).precision;
+    const run = performAction(pm, 'security_operation', planToParams(plan));
+    expect(stockOf(run.state).precision).toBeLessThan(before);
+    expect(world(run.state).lastReport).toBeTruthy();
+    // hasbara lowers the international price, once
+    const a = evaluatePlan(pm, plan).intlEst;
+    expect(planHasbara(pm, plan)).toBe(true);
+    expect(planHasbara(pm, plan)).toBe(false);
+    expect(isHasbara(pm, plan)).toBe(true);
+    expect(evaluatePlan(pm, plan).intlEst).toBeLessThan(a);
+  });
+});

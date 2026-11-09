@@ -36,6 +36,12 @@ export function initWorld(): WorldState {
   };
 }
 
+/** Stocks of munitions and interceptors: they fill up with the defense budget and run down in operations and under fire. */
+export const stockOf = (s: GameState): { precision: number; interceptors: number } => (world(s).stock ??= { precision: 80, interceptors: 80 });
+/** How fresh the intelligence on a front is. */
+export const intelFreshOf = (s: GameState, front: string): number => (world(s).intelFresh ??= {})[front] ?? 70;
+export const setIntelFresh = (s: GameState, front: string, v: number): void => { (world(s).intelFresh ??= {})[front] = clamp(v); };
+
 /** The world state; units added in later versions are filled in for older saves. */
 export const world = (s: GameState): WorldState => {
   const w = (s.world ??= initWorld());
@@ -156,11 +162,12 @@ export function worldTick(s: GameState, months: number): void {
     if (st.status === 'fighting' && chance(s, 0.5)) st.status = 'tension';
     if (st.status === 'ceasefire' && (st.ceasefireUntil ?? Infinity) < s.turn) st.status = 'tension';
     // incidents: a rocket barrage, a drone, a terror attack
-    const pIncident = clamp((st.threat - 25) / 120, 0, 0.5) * Math.min(1, months / 4) * (st.status === 'ceasefire' ? 0.4 : 1);
+    const pIncident = clamp((st.threat - 25) / 120, 0, 0.5) * Math.min(1, months / 4) * (st.status === 'ceasefire' ? 0.4 : 1) * ((s.flags[`retal_${f.id}`] ?? -1) >= s.turn ? 1.8 : 1);
     if (chance(s, pIncident)) {
       st.incidents += 1;
       const civ = f.rocketRange ? Math.max(0, Math.round(rand(s) * 3 * (1.3 - w.units.air_defense.readiness / 100))) : Math.max(0, randInt(s, 0, 2));
       w.casualties.civilians += civ;
+      if (f.rocketRange) stockOf(s).interceptors = clamp(stockOf(s).interceptors - 2);
       const what = f.rocketRange ? (f.id === 'iran' || f.id === 'yemen' ? 'שיגור טילים' : 'ירי רקטות') : 'פיגוע';
       const text = civ > 0 ? `${what} מ${f.name}: ${civ} הרוגים` : `${what} מ${f.name}; ${f.rocketRange ? 'רוב השיגורים יורטו' : 'אין נפגעים'}`;
       addNews(s, text, 'bad', f.icon);
@@ -169,6 +176,12 @@ export function worldTick(s: GameState, months: number): void {
       if (st.status === 'ceasefire' && civ > 0) st.status = 'tension';
     }
   }
+  // stocks refill with the defense budget; intelligence fades
+  const fund = clamp(s.budget.allocations.defense / Math.max(0.1, s.budget.needs.defense), 0.5, 1.5);
+  const stk = stockOf(s);
+  stk.precision = clamp(stk.precision + 4 * months / 4 * fund);
+  stk.interceptors = clamp(stk.interceptors + 5 * months / 4 * fund);
+  for (const f of FRONTS) setIntelFresh(s, f.id, intelFreshOf(s, f.id) - 6 * months / 4);
   for (const u of UNITS) w.units[u.id].readiness = clamp(w.units[u.id].readiness + 4 * months / 4 + (s.budget.allocations.defense / s.budget.needs.defense - 1) * 10);
   // channels and relations drift back slowly
   for (const c of CHANNELS) w.channels[c.id] = clamp(w.channels[c.id] + (c.id === 'usa' ? 0.4 : -0.6) * months / 4);

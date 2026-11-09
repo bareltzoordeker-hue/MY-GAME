@@ -326,6 +326,10 @@ export interface WorldState {
   /** the report on the last planned operation */
   lastReport?: AfterAction;
   /** plans saved to carry out later (the plan is a StrikePlan from engine/strikePlan) */
+  /** the stock of precision munitions and of interceptors (0-100) */
+  stock?: { precision: number; interceptors: number };
+  /** how fresh the intelligence on each front is (0-100): it fades with time */
+  intelFresh?: Record<string, number>;
   savedPlans?: { id: string; name: string; turn: number; plan: Record<string, string> }[];
   fronts: Record<string, { threat: number; status: 'quiet' | 'tension' | 'fighting' | 'ceasefire'; ceasefireUntil?: number; incidents: number }>;
   units: Record<string, { readiness: number }>;

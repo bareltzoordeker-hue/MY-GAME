@@ -1041,3 +1041,30 @@ A ומעלה: מצוין. BBB: גבולי. מתחת לזה: מסוכן.	A and ab
 לשמור לתכנון	Save for planning	حفظ للتخطيط
 ההצעה נשמרה בתוכניות	The proposal was saved to the plans	تم حفظ الاقتراح في الخطط
 אי אפשר לשמור את ההצעה	The proposal cannot be saved	لا يمكن حفظ الاقتراح
+
+מלאי התחמושת המדויקת נמוך: הסיכוי נפגע ויש יותר סיכון לאזרחים.	The precision munitions stock is low: the chance suffers and there is more risk to civilians.	مخزون الذخيرة الدقيقة منخفض: يتضرر الاحتمال ويزداد الخطر على المدنيين.
+מלאי היירוטים נמוך: צפוי נזק רב יותר בעורף.	The interceptor stock is low: expect more damage on the home front.	مخزون الاعتراضات منخفض: يُتوقع ضرر أكبر في الجبهة الداخلية.
+האויב צפוי להגיב: סיכוי גבוה יותר לירי ולאירועים בחזית בשני התורות הקרובים.	The enemy is expected to respond: a higher chance of fire and incidents on the front over the next two turns.	يُتوقع أن يرد العدو: احتمال أكبر لإطلاق النار وللأحداث على الجبهة في الدورين القادمين.
+כלי טיס אבד במהלך המבצע; הצוות חולץ.	An aircraft was lost during the operation; the crew was rescued.	فُقدت طائرة خلال العملية؛ وتم إنقاذ الطاقم.
+לוחם נפל בשבי במהלך המבצע; ממשלת ישמעאל פועלת לשחררו.	A fighter was taken captive during the operation; the Ishmael government is working to free him.	وقع مقاتل في الأسر خلال العملية؛ وحكومة إسماعيل تعمل على تحريره.
+המודיעין על החזית ישן. כדאי לרענן אותו לפני המבצע.	The intelligence on the front is old. It is worth refreshing it before the operation.	المعلومات الاستخباراتية عن الجبهة قديمة. يُفضل تحديثها قبل العملية.
+מלאי התחמושת המדויקת נמוך. כדאי לצמצם את המבצע או לדחות אותו.	The precision munitions stock is low. It is worth scaling down the operation or postponing it.	مخزون الذخيرة الدقيقة منخفض. يُفضل تقليص العملية أو تأجيلها.
+מלאי היירוטים נמוך. צפוי נזק רב יותר בעורף.	The interceptor stock is low. Expect more damage on the home front.	مخزون الاعتراضات منخفض. يُتوقع ضرر أكبر في الجبهة الداخلية.
+סיכוי ההצלחה נמוך. כדאי לחזק את הכוחות או לדחות.	The chance of success is low. It is worth strengthening the forces or postponing.	احتمال النجاح منخفض. يُفضل تعزيز القوات أو التأجيل.
+הפגיעה באזרחים צפויה גבוהה. שעה שקטה יותר או כללי פתיחה באש זהירים יקטינו אותה.	The harm to civilians is expected to be high. A quieter hour or cautious rules of engagement would reduce it.	يُتوقع أن يكون المساس بالمدنيين كبيرًا. ساعة أهدأ أو قواعد اشتباك حذرة ستقلله.
+אין לי הסתייגויות. התוכנית מאוזנת.	I have no reservations. The plan is balanced.	ليست لدي تحفظات. الخطة متوازنة.
+מלאים ומודיעין	Stocks and intelligence	المخزون والاستخبارات
+תחמושת מדויקת למבצעים. מתמלאת עם התקציב הביטחוני ומתרוקנת בתקיפות. מלאי נמוך מפחית את סיכויי ההצלחה.	Precision munitions for operations. It fills up with the defense budget and runs down in strikes. A low stock lowers the chances of success.	ذخيرة دقيقة للعمليات. تمتلئ بالميزانية الأمنية وتفرغ بالضربات. المخزون المنخفض يقلل فرص النجاح.
+יירוטים של מערך ההגנה האווירית. מתרוקנים בירי לעבר העורף. מלאי נמוך מגדיל את הנזק לאזרחים.	Interceptors of the air defense array. They run down under fire at the home front. A low stock increases the harm to civilians.	اعتراضات منظومة الدفاع الجوي. تفرغ عند إطلاق النار نحو الجبهة الداخلية. المخزون المنخفض يزيد الضرر على المدنيين.
+🎯 תחמושת מדויקת	🎯 Precision munitions	🎯 ذخيرة دقيقة
+🛰️ יירוטים	🛰️ Interceptors	🛰️ اعتراضات
+רעננות המודיעין לפי חזית	Intelligence freshness by front	حداثة المعلومات الاستخباراتية حسب الجبهة
+📡 לרענן	📡 Refresh	📡 تحديث
+🎖️ המלצת הרמטכ״ל	🎖️ The chief of staff's advice	🎖️ توصية رئيس الأركان
+הסברה מסודרת מול הקהילה הבינלאומית (2 הון): המחיר הבינלאומי יורד בחמישית	Organized public diplomacy toward the international community (2 capital): the international price falls by a fifth	حملة توضيح منظمة أمام المجتمع الدولي (2 رصيد): ينخفض الثمن الدولي بمقدار الخُمس
+✔ ההסברה הוכנה	✔ Public diplomacy prepared	✔ تم إعداد حملة التوضيح
+📣 הכנת הסברה (2 הון)	📣 Prepare public diplomacy (2 capital)	📣 إعداد حملة توضيح (2 رصيد)
+ריענון מודיעין בחזית	Refresh intelligence on a front	تحديث المعلومات الاستخباراتية على جبهة
+איסוף מודיעין עדכני על חזית: רעננות המודיעין +30 (₪0.1 מיליארד). המודיעין נשחק עם הזמן.	Gathering up-to-date intelligence on a front: intelligence freshness +30 (₪0.1 billion). Intelligence fades over time.	جمع معلومات استخباراتية حديثة عن جبهة: حداثة المعلومات +30 (₪0.1 مليار). تتقادم المعلومات مع الوقت.
+המודיעין עודכן	The intelligence was updated	تم تحديث المعلومات الاستخباراتية
+המודיעין בחזית הזו כבר עודכן בתור הנוכחי	The intelligence on this front was already updated this turn	تم تحديث المعلومات على هذه الجبهة في هذا الدور

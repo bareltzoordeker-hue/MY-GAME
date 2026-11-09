@@ -6,6 +6,7 @@ import { INTERNAL_OPTIONS } from '../../data/internalSecurity';
 import type { GameState } from '../../types/game';
 import { ActionButton, Empty, Meter, ScreenHeader, Section } from '../components/ui';
 import { OperationPlanner } from '../components/OperationPlanner';
+import { ReadinessCard } from '../components/ReadinessCard';
 import { SavedPlans } from '../components/SavedPlans';
 import type { StrikePlan } from '../../engine/strikePlan';
 import { AfterActionCard } from '../components/AfterActionCard';
@@ -60,6 +61,7 @@ export function SecurityScreen() {
       <ScreenHeader title="ביטחון ומדיניות" sub={military ? 'המסלול הצבאי, המסלול המדיני וביטחון הפנים. מבצעים גדולים ומהלכים מדיניים משמעותיים דורשים אישור הקבינט.' : 'ביטחון הפנים: משטרה, שב״כ ושב״ס. החזיתות מוצגות לעיון בלבד.'} />
       {military && world(s).lastReport && <AfterActionCard r={world(s).lastReport!} />}
       {military && <SavedPlans s={s} onEdit={(p) => setPlanning({ opId: p.opId, front: p.front, initial: p })} />}
+      {military && <ReadinessCard s={s} />}
       <Section title="חזיתות" icon="🧭">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{FRONTS.map((f) => <FrontCard key={f.id} s={s} id={f.id} onPlan={(o, fr) => setPlanning({ opId: o, front: fr })} />)}</div>
       </Section>

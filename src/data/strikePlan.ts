@@ -86,3 +86,6 @@ export const ROE: Record<RoeId, { label: string; effect: number; civ: number; in
   balanced: { label: 'מאוזנת', effect: 1, civ: 1, intl: 1, success: 0, hint: 'ברירת המחדל.' },
   maximum: { label: 'עוצמה מירבית', effect: 1.2, civ: 1.5, intl: 1.4, success: 0.02, hint: 'פגיעה גדולה יותר באויב, במחיר אזרחי ובינלאומי גבוה.' },
 };
+
+/** Precision munitions an operation uses up (out of a stock of 100). */
+export const PRECISION_USE: Record<string, number> = { targeted_strike: 6, air_campaign: 25, iran_strike: 35, wide_ground: 10, ground_raid: 4, special_op: 3 };

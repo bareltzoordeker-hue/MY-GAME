@@ -30,7 +30,7 @@ import { TOPIC_BY_ID, VENUES, deliverSpeech, type Tone, type Venue } from './spe
 import { CHANNEL_BY_ID, FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type ChannelId, type FrontId, type UnitId } from '../data/security';
 import { decisionReactions } from './reactions';
 import { INTERNAL_BY_ID } from '../data/internalSecurity';
-import { canUseInternalSecurity, cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, takeBackArea, unitTraining, world, type CbmKind } from './security';
+import { canUseInternalSecurity, cabinetVote, confidenceMeasure, executeOperation, mediatedCeasefire, normalization, openChannel, securityRole, transferArea, takeBackArea, unitTraining, world, intelFreshOf, setIntelFresh, type CbmKind } from './security';
 import { assignMinister, createMinistry, getMinistry, mergeMinistries, partyLeavesCoalition, removeMinistry } from './government';
 import { ideologyDistance, partyStance, proposeBill, repealLaw, voteBudget } from './parliament';
 import { coalitionSeats, computeShares, seatsFromShares } from './polls';
@@ -1508,6 +1508,24 @@ def({
     applyDecision(s, { oneOffCost: 0.3 });
     const o = unitTraining(s, str(p, 'unitId') as UnitId);
     return { title: o.title, subtitle: o.text };
+  },
+});
+
+def({
+  id: 'refresh_intel', title: 'ריענון מודיעין בחזית', icon: '📡', category: 'government', level: 'simple', capital: 1,
+  description: 'איסוף מודיעין עדכני על חזית: רעננות המודיעין +30 (₪0.1 מיליארד). המודיעין נשחק עם הזמן.',
+  unavailable: (s, p) => {
+    const role = securityRole(s);
+    if (role !== 'pm' && role !== 'defense') return 'רק ראש הממשלה ושר הביטחון';
+    if (!FRONT_BY_ID[str(p, 'front') as FrontId]) return 'בחר חזית';
+    return (s.flags[`intel_${str(p, 'front')}`] ?? -1) >= s.turn ? 'המודיעין בחזית הזו כבר עודכן בתור הנוכחי' : null;
+  },
+  run: (s, p) => {
+    const front = str(p, 'front');
+    s.flags[`intel_${front}`] = s.turn;
+    applyDecision(s, { oneOffCost: 0.1 });
+    setIntelFresh(s, front, intelFreshOf(s, front) + 30);
+    return { title: 'המודיעין עודכן', subtitle: `${FRONT_BY_ID[front as FrontId].name}: רעננות ${Math.round(intelFreshOf(s, front))}` };
   },
 });
 

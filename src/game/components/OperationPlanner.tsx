@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useGame } from '../store/gameStore';
 import { OP_PLAN, ROE, ROLE_HINT, ROLE_LABEL, TIMES, type PlanRole, type RoeId, type TimeId } from '../../data/strikePlan';
 import { FRONT_BY_ID, OPERATION_BY_ID, UNIT_BY_ID, type FrontId, type UnitId } from '../../data/security';
-import { allowedUnits, cabinetPreview, defaultPlan, evaluatePlan, isBriefed, planToParams, targetsFor, type StrikePlan } from '../../engine/strikePlan';
+import { allowedUnits, cabinetPreview, chiefAdvice, defaultPlan, evaluatePlan, intelConfidence, isBriefed, isHasbara, planToParams, targetsFor, type StrikePlan } from '../../engine/strikePlan';
 import { world } from '../../engine/security';
 import { isPM } from '../../engine/roles';
 import type { GameState } from '../../types/game';
@@ -18,6 +18,7 @@ export function OperationPlanner({ s, opId, front, initial, onClose }: { s: Game
   const brief = useGame((x) => x.cabinetBrief);
   const persuade = useGame((x) => x.cabinetPersuade);
   const savePlan = useGame((x) => x.saveStrikePlan);
+  const hasbara = useGame((x) => x.planHasbara);
   const [savedKey, setSavedKey] = useState('');
   const op = OPERATION_BY_ID[opId];
   const fdef = FRONT_BY_ID[front];
@@ -113,10 +114,18 @@ export function OperationPlanner({ s, opId, front, initial, onClose }: { s: Game
                     <div>{`🌍 מחיר בינלאומי: ${ev.intlEst.toFixed(1)}`}</div>
                     <div>{`💰 עלות: ₪${op.cost}B`}</div>
                   </div>
+                  <div className="text-sm mt-2">{`🔎 ביטחון מודיעיני: ${intelConfidence(s, plan, ev.target!)}`}</div>
                   {ev.warnings.length > 0 && <ul className="text-xs warn mt-2 space-y-0.5">{ev.warnings.map((w, k) => <li key={k}>{`⚠️ ${w}`}</li>)}</ul>}
                 </>
               )}
             </div>
+            {ev.ok && (
+              <div className="inset">
+                <div className="text-sm font-bold mb-1">{'🎖️ המלצת הרמטכ״ל'}</div>
+                <ul className="text-sm space-y-0.5">{chiefAdvice(s, plan, ev).map((a, i) => <li key={i}>{a}</li>)}</ul>
+                <div className="mt-2"><button className="btn btn-sm btn-blue" disabled={isHasbara(s, plan)} onClick={() => hasbara(plan)} data-tip="הסברה מסודרת מול הקהילה הבינלאומית (2 הון): המחיר הבינלאומי יורד בחמישית">{isHasbara(s, plan) ? '✔ ההסברה הוכנה' : '📣 הכנת הסברה (2 הון)'}</button></div>
+              </div>
+            )}
             {op.needsCabinet && ev.ok && (
               <div className="inset">
                 <div className="flex items-center justify-between gap-2 mb-1">
