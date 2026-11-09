@@ -8,7 +8,7 @@ import {
 } from '../../engine/decisions';
 import { resolveInbox } from '../../engine/inbox';
 import { markRead } from '../../engine/chat';
-import { briefCabinet, persuadeMember, type StrikePlan } from '../../engine/strikePlan';
+import { briefCabinet, deleteSavedPlan, persuadeMember, savePlan, type StrikePlan } from '../../engine/strikePlan';
 import { answerBargain, answerOffer, playMove, sendChatSmart, type BargainAnswer, type Move, type OfferAnswer } from '../../engine/chatMoves';
 import { resolveCrisis, startCrisis } from '../../engine/crises';
 import { abandonMandate, answerCoalitionOffer, finalizeCoalition, negotiate, type PortfolioAssignment } from '../../engine/elections';
@@ -63,6 +63,8 @@ interface Store {
   setRequestFreq: (n: number) => void;
   cabinetBrief: (plan: StrikePlan) => void;
   cabinetPersuade: (memberId: string) => void;
+  saveStrikePlan: (plan: StrikePlan) => boolean;
+  deleteStrikePlan: (id: string) => void;
   endTurn: () => void;
   dismissReaction: () => void;
   closeBriefing: () => void;
@@ -211,6 +213,20 @@ export const useGame = create<Store>((set, get) => ({
     if (!g) return;
     const s = clone(g);
     if (briefCabinet(s, plan)) set({ game: s, saveStatus: persist(s) });
+  },
+  saveStrikePlan: (plan) => {
+    const g = get().game;
+    if (!g) return false;
+    const s = clone(g);
+    if (!savePlan(s, plan)) return false;
+    set({ game: s, saveStatus: persist(s) });
+    return true;
+  },
+  deleteStrikePlan: (id) => {
+    const g = get().game;
+    if (!g) return;
+    const s = clone(g);
+    if (deleteSavedPlan(s, id)) set({ game: s, saveStatus: persist(s) });
   },
   cabinetPersuade: (memberId) => {
     const g = get().game;

@@ -1663,3 +1663,32 @@ describe('step 4b: the after-action report', () => {
     }
   });
 });
+
+describe('step 4c: saved plans', () => {
+  it('a plan can be saved without running, listed, carried out later and deleted', async () => {
+    const { defaultPlan, planToParams, savePlan, listSavedPlans, deleteSavedPlan, MAX_SAVED_PLANS } = await import('./strikePlan');
+    const { world } = await import('./security');
+    const pm = createGame(cfg('pm'));
+    pm.government.caretaker = false; pm.player.politicalCapital = 100;
+    const plan = defaultPlan(pm, 'targeted_strike', 'gaza');
+    const casBefore = world(pm).casualties.soldiers;
+    expect(savePlan(pm, plan)).toBe(true);
+    expect(listSavedPlans(pm)).toHaveLength(1);
+    // saving carries nothing out and costs nothing
+    expect(world(pm).lastReport).toBeUndefined();
+    expect(world(pm).casualties.soldiers).toBe(casBefore);
+    expect(pm.player.politicalCapital).toBe(100);
+    // an invalid plan is not saved
+    expect(savePlan(pm, { ...plan, lead: 'golani' })).toBe(false);
+    // later: carry out the saved plan
+    const saved = listSavedPlans(pm)[0];
+    expect(checkAction(pm, 'security_operation', planToParams(saved.plan))).toBeNull();
+    const r = performAction(pm, 'security_operation', planToParams(saved.plan));
+    expect(world(r.state).lastReport).toBeTruthy();
+    // the list is capped, and deleting works
+    for (let i = 0; i < MAX_SAVED_PLANS + 2; i++) savePlan(pm, plan);
+    expect(listSavedPlans(pm).length).toBe(MAX_SAVED_PLANS);
+    expect(deleteSavedPlan(pm, listSavedPlans(pm)[0].id)).toBe(true);
+    expect(listSavedPlans(pm).length).toBe(MAX_SAVED_PLANS - 1);
+  });
+});

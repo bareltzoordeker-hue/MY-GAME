@@ -325,6 +325,8 @@ export interface AfterAction {
 export interface WorldState {
   /** the report on the last planned operation */
   lastReport?: AfterAction;
+  /** plans saved to carry out later (the plan is a StrikePlan from engine/strikePlan) */
+  savedPlans?: { id: string; name: string; turn: number; plan: Record<string, string> }[];
   fronts: Record<string, { threat: number; status: 'quiet' | 'tension' | 'fighting' | 'ceasefire'; ceasefireUntil?: number; incidents: number }>;
   units: Record<string, { readiness: number }>;
   channels: Record<string, number>;

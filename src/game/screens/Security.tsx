@@ -6,6 +6,8 @@ import { INTERNAL_OPTIONS } from '../../data/internalSecurity';
 import type { GameState } from '../../types/game';
 import { ActionButton, Empty, Meter, ScreenHeader, Section } from '../components/ui';
 import { OperationPlanner } from '../components/OperationPlanner';
+import { SavedPlans } from '../components/SavedPlans';
+import type { StrikePlan } from '../../engine/strikePlan';
 import { AfterActionCard } from '../components/AfterActionCard';
 
 const STATUS: Record<string, { t: string; c: string }> = {
@@ -48,15 +50,16 @@ export function SecurityScreen() {
   const w = world(s);
   const role = securityRole(s);
   const [cbm, setCbm] = useState<CbmKind>('permits');
-  const [planning, setPlanning] = useState<{ opId: string; front: FrontId } | null>(null);
+  const [planning, setPlanning] = useState<{ opId: string; front: FrontId; initial?: StrikePlan } | null>(null);
   // only the people who run security open this screen: the PM, the defense minister and the national-security minister
   if (!role) return <Empty icon="🔒" text="מסך הביטחון פתוח לראש הממשלה, לשר הביטחון ולשר לביטחון לאומי." />;
   const military = role === 'pm' || role === 'defense';
   return (
     <div className="space-y-4">
-      {planning && military && <OperationPlanner s={s} opId={planning.opId} front={planning.front} onClose={() => setPlanning(null)} />}
+      {planning && military && <OperationPlanner key={planning.initial ? 'saved' : 'new'} s={s} opId={planning.opId} front={planning.front} initial={planning.initial} onClose={() => setPlanning(null)} />}
       <ScreenHeader title="ביטחון ומדיניות" sub={military ? 'המסלול הצבאי, המסלול המדיני וביטחון הפנים. מבצעים גדולים ומהלכים מדיניים משמעותיים דורשים אישור הקבינט.' : 'ביטחון הפנים: משטרה, שב״כ ושב״ס. החזיתות מוצגות לעיון בלבד.'} />
       {military && world(s).lastReport && <AfterActionCard r={world(s).lastReport!} />}
+      {military && <SavedPlans s={s} onEdit={(p) => setPlanning({ opId: p.opId, front: p.front, initial: p })} />}
       <Section title="חזיתות" icon="🧭">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{FRONTS.map((f) => <FrontCard key={f.id} s={s} id={f.id} onPlan={(o, fr) => setPlanning({ opId: o, front: fr })} />)}</div>
       </Section>

@@ -214,3 +214,29 @@ export function buildAfterAction(s: GameState, plan: StrikePlan, ev: PlanEval, o
   if (!longTerm.length) longTerm.push('אין השלכות ארוכות טווח מיוחדות.');
   return { turn: s.turn, opIcon: op.icon, title: `${op.name} – ${FRONT_BY_ID[plan.front].name}`, front: plan.front, success: o.success, phases, unitCasualties, targetName: t.name, targetHitPct, enemyCivilians, homeCivilians: o.civilians, threatCut: o.cut, intelFailure, longTerm };
 }
+
+// ------------------------------------------------------------ saved plans: prepared now, carried out later
+export const MAX_SAVED_PLANS = 8;
+export interface SavedPlan { id: string; name: string; turn: number; plan: StrikePlan }
+
+export function listSavedPlans(s: GameState): SavedPlan[] {
+  return (world(s).savedPlans ?? []).map((x) => ({ id: x.id, name: x.name, turn: x.turn, plan: planFromParams(x.plan)! })).filter((x) => x.plan && OPERATION_BY_ID[x.plan.opId]);
+}
+
+/** Saves the plan without carrying it out. No cost. Returns false when the plan is not valid or the list is full. */
+export function savePlan(s: GameState, plan: StrikePlan): boolean {
+  const w = world(s);
+  w.savedPlans ??= [];
+  if (w.savedPlans.length >= MAX_SAVED_PLANS || !evaluatePlan(s, plan).ok) return false;
+  const op = OPERATION_BY_ID[plan.opId];
+  const t = FRONT_TARGETS[plan.front].find((x) => x.id === plan.target);
+  w.savedPlans.push({ id: `plan_${s.turn}_${w.savedPlans.length}_${Math.floor(rand(s) * 1e6)}`, name: `${op.name} – ${FRONT_BY_ID[plan.front].name}${t ? `: ${t.name}` : ''}`, turn: s.turn, plan: planToParams(plan) });
+  return true;
+}
+
+export function deleteSavedPlan(s: GameState, id: string): boolean {
+  const w = world(s);
+  const n = w.savedPlans?.length ?? 0;
+  w.savedPlans = (w.savedPlans ?? []).filter((x) => x.id !== id);
+  return w.savedPlans.length < n;
+}

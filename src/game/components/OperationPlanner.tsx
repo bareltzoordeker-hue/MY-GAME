@@ -13,14 +13,18 @@ import { Meter } from './ui';
 const STANCE_CHIP: Record<string, string> = { support: 'chip-good', undecided: 'chip-warn', oppose: 'chip-bad' };
 const STANCE_LABEL: Record<string, string> = { support: 'תומך', undecided: 'מתלבט', oppose: 'מתנגד' };
 
-export function OperationPlanner({ s, opId, front, onClose }: { s: GameState; opId: string; front: FrontId; onClose: () => void }) {
+export function OperationPlanner({ s, opId, front, initial, onClose }: { s: GameState; opId: string; front: FrontId; initial?: StrikePlan; onClose: () => void }) {
   const act = useGame((x) => x.act);
   const brief = useGame((x) => x.cabinetBrief);
   const persuade = useGame((x) => x.cabinetPersuade);
+  const savePlan = useGame((x) => x.saveStrikePlan);
+  const [savedKey, setSavedKey] = useState('');
   const op = OPERATION_BY_ID[opId];
   const fdef = FRONT_BY_ID[front];
   const spec = OP_PLAN[opId];
-  const [plan, setPlan] = useState<StrikePlan>(() => defaultPlan(s, opId, front));
+  const [plan, setPlan] = useState<StrikePlan>(() => initial ?? defaultPlan(s, opId, front));
+  const planKey = JSON.stringify(planToParams(plan));
+  const saved = savedKey === planKey;
   const ev = evaluatePlan(s, plan);
   const members = ev.ok ? cabinetPreview(s, plan) : [];
   const pm = isPM(s);
@@ -135,7 +139,10 @@ export function OperationPlanner({ s, opId, front, onClose }: { s: GameState; op
           </div>
         </div>
         <div className="p-4 pt-0 flex justify-between gap-2 flex-wrap">
-          <button className="btn btn-sm" onClick={onClose}>ביטול</button>
+          <div className="flex gap-2">
+            <button className="btn btn-sm" onClick={onClose}>ביטול</button>
+            <button className="btn btn-sm btn-blue" disabled={!ev.ok || saved} data-tip="שומר את התוכנית ברשימה בלי לבצע אותה, כדי לבצע אותה בהמשך" onClick={() => { if (savePlan(plan)) setSavedKey(planKey); }}>{saved ? '✔ התוכנית נשמרה' : '💾 לשמור תוכנית'}</button>
+          </div>
           <button className="btn btn-danger" disabled={!ev.ok} onClick={() => { act('security_operation', planToParams(plan)); onClose(); }}>{pm ? '🎖️ להורות על ביצוע' : '🎖️ להגיש לאישור ולבצע'}</button>
         </div>
       </div>
