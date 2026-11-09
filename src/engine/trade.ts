@@ -66,13 +66,13 @@ export function tradeGrowthEffect(s: GameState): number {
 
 export interface TradeResult { ok: boolean; title: string; text: string }
 const name = (id: string) => FOREIGN_BY_ID[id]?.name ?? id;
-const skill = (s: GameState) => ((s.politicians[s.player.politicianId].expertise.economy ?? 20) - 20) / 300;
+const skill = (s: GameState, exp?: number) => ((exp ?? s.politicians[s.player.politicianId].expertise.economy ?? 20) - 20) / 300;
 
-export function tradeDeal(s: GameState, id: string): TradeResult {
+export function tradeDeal(s: GameState, id: string, exp?: number): TradeResult {
   const t = tradeState(s);
   const v = foreignValue(s, id);
   if (v < 35 && !hasPact(s, id)) return { ok: false, title: `${name(id)} לא מוכנה להסכם סחר`, text: 'היחסים לא מספיק טובים. כדאי לחזק אותם קודם, למשל בהסכם שיתוף פעולה של שר החוץ.' };
-  const p = clamp(0.4 + (v - 35) / 120 + (hasPact(s, id) ? 0.2 : 0) + skill(s), 0.15, 0.9);
+  const p = clamp(0.4 + (v - 35) / 120 + (hasPact(s, id) ? 0.2 : 0) + skill(s, exp), 0.15, 0.9);
   if (rand(s) < p) {
     t.deals.push(id);
     shiftForeign(s, id, 3);

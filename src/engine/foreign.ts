@@ -30,14 +30,14 @@ export function shiftForeign(s: GameState, id: string, d: number): void {
 
 const scaled = (g: Partial<Record<GroupId, number>>, k: number): Partial<Record<GroupId, number>> => Object.fromEntries(Object.entries(g).map(([id, v]) => [id, Math.round((v ?? 0) * k * 10) / 10])) as Partial<Record<GroupId, number>>;
 const pol = (s: GameState) => s.politicians[s.player.politicianId];
-const skill = (s: GameState) => ((pol(s).expertise.foreign ?? 20) - 20) / 300;
+const skill = (s: GameState, exp?: number) => ((exp ?? pol(s).expertise.foreign ?? 20) - 20) / 300;
 
 export interface ForeignResult { ok: boolean; title: string; text: string }
 
-export function visitCountry(s: GameState, id: string): ForeignResult {
+export function visitCountry(s: GameState, id: string, exp?: number): ForeignResult {
   const c = FOREIGN_BY_ID[id];
   const v = foreignValue(s, id);
-  const p = clamp(0.55 + (v - 40) / 150 + skill(s), 0.2, 0.9);
+  const p = clamp(0.55 + (v - 40) / 150 + skill(s, exp), 0.2, 0.9);
   if (isContested(id) && ['qatar', 'pa'].includes(id)) applyEffects(s, { groups: scaled(DOVE_GROUPS, 0.25) });
   if (rand(s) < p) {
     const gain = Math.round((5 + rand(s) * 4) * 10) / 10;
@@ -52,11 +52,11 @@ export function visitCountry(s: GameState, id: string): ForeignResult {
 
 export const hasPact = (s: GameState, id: string) => (world(s).pacts ?? []).includes(id);
 
-export function signAgreement(s: GameState, id: string): ForeignResult {
+export function signAgreement(s: GameState, id: string, exp?: number): ForeignResult {
   const c = FOREIGN_BY_ID[id];
   const v = foreignValue(s, id);
   if (v < 35) return { ok: false, title: `${c.name} לא מוכנה לחתום`, text: 'היחסים לא מספיק טובים. כדאי לבקר שם או לחזק קשרים קודם.' };
-  const p = clamp(0.45 + (v - 35) / 120 + skill(s), 0.2, 0.85);
+  const p = clamp(0.45 + (v - 35) / 120 + skill(s, exp), 0.2, 0.85);
   if (rand(s) < p) {
     shiftForeign(s, id, 8);
     const w = world(s);

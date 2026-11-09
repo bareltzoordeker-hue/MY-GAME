@@ -12,6 +12,7 @@ import type { Briefing, GameState } from '../types/game';
 import { clamp, clone, debtPct, deficitPct } from '../utils';
 import { newFiscalYear, processBudgetDeadline, simulateAIGovernment } from './aiGovernment';
 import { resolveLeadershipRace } from './leadership';
+import { generateMinisterRequests } from './ministerRequests';
 import { processCommitments } from './coalitionDeals';
 import { advisorTips } from './advisor';
 import { driftRelations } from './relations';
@@ -102,6 +103,7 @@ export function advanceTurn(s0: GameState): GameState {
     generateInitiatives(s);
     if (!s.government.caretaker) simulateAIGovernment(s);
     resolveLeadershipRace(s);
+    generateMinisterRequests(s);
   }
   if (events >= 2) generateCrises(s);
   if (isPM(s) && !s.government.caretaker) {

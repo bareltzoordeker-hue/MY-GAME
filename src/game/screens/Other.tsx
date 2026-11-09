@@ -229,6 +229,7 @@ export function SaveScreen() {
   const s = useGame((x) => x.game)!;
   const quit = useGame((x) => x.quitToMenu);
   const status = useGame((x) => x.saveStatus);
+  const setReqFreq = useGame((x) => x.setRequestFreq);
   const [msg, setMsg] = useState('');
   const exportSave = () => {
     const blob = new Blob([serialize(s)], { type: 'application/json' });
@@ -270,6 +271,12 @@ export function SaveScreen() {
           {LANGS.map((l) => <button key={l.id} lang={l.id} data-tip={l.id === 'he' ? 'ממשק ותוכן בעברית' : l.id === 'en' ? 'Interface and content in English' : 'الواجهة والمحتوى بالعربية'} className={`btn btn-sm ${getLang() === l.id ? 'btn-blue' : ''}`} aria-pressed={getLang() === l.id} onClick={() => setLang(l.id)}>{l.name}</button>)}
         </div>
         <p className="text-xs muted">{t('set.languageNote')}</p>
+        {s.player.role === 'pm' && (
+          <div className="flex flex-wrap items-center gap-2 pt-2 border-t" style={{ borderColor: 'var(--line)' }}>
+            <span className="text-sm flex-1">📨 תדירות בקשות השרים לאישור</span>
+            {[['מעטות', 0], ['רגילה', 1], ['רבות', 2]].map(([l, n]) => <button key={n} className={`btn btn-sm ${(s.flags.reqFreq ?? 1) === n ? 'btn-blue' : ''}`} aria-pressed={(s.flags.reqFreq ?? 1) === n} onClick={() => setReqFreq(n as number)}>{l}</button>)}
+          </div>
+        )}
       </div>
       <div className="card flex items-center justify-between gap-2">
         <span className="text-sm">🎓 מדריך המשחק</span>

@@ -10,6 +10,7 @@ import { assignMinister, getMinistry, partyLeavesCoalition } from './government'
 import { proposeBill } from './parliament';
 import { resolveRotation } from './coalitionDeals';
 import { mergeParties } from './relations';
+import { resolveMinisterRequest } from './ministerRequests';
 
 const R = (title: string, status: Reaction['status'], quip?: string, people: Reaction['people'] = []): Reaction => ({ title, status, stats: [], groups: [], people, quip });
 
@@ -31,6 +32,7 @@ export function resolveInbox(s0: GameState, itemId: string, optionId: string): A
 }
 
 function handle(s: GameState, it: InboxItem, opt: string): Reaction | null {
+  if (it.kind.startsWith('mreq_')) return resolveMinisterRequest(s, it, opt);
   const from = it.fromId ? s.politicians[it.fromId] : undefined;
   const name = from?.name ?? '';
   const cat = it.payload.category as BudgetCategory | undefined;

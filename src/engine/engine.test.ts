@@ -1478,3 +1478,54 @@ describe('step 3: the economy minister\'s office and foreign trade', () => {
     expect(tradeState(d).deals).toContain('usa');
   });
 });
+
+describe('step 3b: ministers come to the prime minister with requests', () => {
+  it('ministers ask for approval, the PM approves or declines, and every kind of request resolves cleanly', async () => {
+    const { generateMinisterRequests } = await import('./ministerRequests');
+    const { resolveInbox } = await import('./inbox');
+    let s = createGame(cfg('pm'));
+    s.government.caretaker = false;
+    s.flags.reqFreq = 2;
+    const kinds = new Set<string>();
+    for (let i = 0; i < 60; i++) {
+      s.turn += 1;
+      s.player.politicalCapital = 100;
+      generateMinisterRequests(s);
+      for (const it of s.inbox.filter((x) => x.kind.startsWith('mreq_'))) {
+        kinds.add(it.kind);
+        const r = resolveInbox(s, it.id, i % 5 === 0 ? 'decline' : 'approve');
+        expect(r.reaction, it.kind).not.toBeNull();
+        s = r.state;
+      }
+    }
+    expect(kinds.size).toBeGreaterThanOrEqual(4);
+    assertSane(s);
+  });
+  it('requests only come to a PM, and declining costs a little loyalty', async () => {
+    const { generateMinisterRequests } = await import('./ministerRequests');
+    const { resolveInbox } = await import('./inbox');
+    const m = createGame(cfg('minister', { ministryId: 'transport' }));
+    m.government.caretaker = false; m.flags.reqFreq = 2;
+    for (let i = 0; i < 10; i++) { m.turn += 1; generateMinisterRequests(m); }
+    expect(m.inbox.some((x) => x.kind.startsWith('mreq_'))).toBe(false);
+    let s = createGame(cfg('pm'));
+    s.government.caretaker = false; s.flags.reqFreq = 2;
+    for (let i = 0; i < 20 && !s.inbox.some((x) => x.kind.startsWith('mreq_')); i++) { s.turn += 1; generateMinisterRequests(s); }
+    const it = s.inbox.find((x) => x.kind.startsWith('mreq_'))!;
+    const before = s.politicians[it.fromId!].loyalty;
+    s = resolveInbox(s, it.id, 'decline').state;
+    expect(s.politicians[it.fromId!].loyalty).toBeLessThan(before);
+  });
+  it('a skilled foreign minister improves relations a little each turn, a weak one worsens them', async () => {
+    const { ministerSkillEffects } = await import('./ministerRequests');
+    const { foreignValue } = await import('./foreign');
+    for (const [exp, dir] of [[95, 1], [5, -1]] as const) {
+      const s = createGame(cfg('pm'));
+      const fm = s.politicians[s.government.ministries.find((m) => m.id === 'foreign')!.ministerId!];
+      fm.expertise.foreign = exp;
+      const before = foreignValue(s, 'germany');
+      for (let i = 0; i < 4; i++) ministerSkillEffects(s);
+      expect(Math.sign(foreignValue(s, 'germany') - before)).toBe(dir);
+    }
+  });
+});

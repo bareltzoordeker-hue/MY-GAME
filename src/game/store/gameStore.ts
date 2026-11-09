@@ -59,6 +59,7 @@ interface Store {
   formCoalition: () => void;
   returnMandate: () => void;
   chooseOffer: (offerId: string, action: 'accept' | 'decline' | 'ask', extraIndex?: number) => void;
+  setRequestFreq: (n: number) => void;
   endTurn: () => void;
   dismissReaction: () => void;
   closeBriefing: () => void;
@@ -201,6 +202,13 @@ export const useGame = create<Store>((set, get) => ({
     const s = clone(g);
     const reaction = answerCoalitionOffer(s, offerId, action, extraIndex);
     set((st) => ({ game: s, reactions: [...st.reactions, reaction], saveStatus: s.elections.phase === 'none' ? persist(s) : st.saveStatus }));
+  },
+  setRequestFreq: (n) => {
+    const g = get().game;
+    if (!g) return;
+    const s = clone(g);
+    s.flags.reqFreq = n;
+    set({ game: s, saveStatus: persist(s) });
   },
   returnMandate: () => {
     const g = get().game;

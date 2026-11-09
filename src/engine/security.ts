@@ -85,13 +85,19 @@ const unitReadiness = (s: GameState, units: UnitId[]) => units.reduce((a, u) => 
 export interface OpOutcome { success: boolean; fallen: number; civilians: number; text: string; headline: string; lines: ReactionLine[] }
 
 /** Runs an approved operation now and returns what happened. */
-export function executeOperation(s: GameState, op: OperationDef, frontId: FrontId): OpOutcome {
+/** The chance that an operation succeeds; bonus: the proposing minister's skill. */
+export function operationChance(s: GameState, op: OperationDef, frontId: FrontId, bonus = 0): number {
+  const w = world(s);
+  const ready = unitReadiness(s, op.units);
+  const intel = w.units.u8200.readiness;
+  return clamp(0.42 + ready / 220 + intel / 500 - w.fronts[frontId].threat / 400 - (DIFFICULTIES[s.difficulty].volatility - 1) * 0.1 + bonus, 0.12, 0.92);
+}
+
+export function executeOperation(s: GameState, op: OperationDef, frontId: FrontId, bonus = 0): OpOutcome {
   const w = world(s);
   const front = w.fronts[frontId];
   const fdef = FRONT_BY_ID[frontId];
-  const ready = unitReadiness(s, op.units);
-  const intel = w.units.u8200.readiness;
-  const pSuccess = clamp(0.42 + ready / 220 + intel / 500 - front.threat / 400 - (DIFFICULTIES[s.difficulty].volatility - 1) * 0.1, 0.12, 0.92);
+  const pSuccess = operationChance(s, op, frontId, bonus);
   const success = rand(s) < pSuccess;
   const cut = success ? op.threatCut : Math.round(op.threatCut / 3);
   front.threat = clamp(front.threat - cut);
