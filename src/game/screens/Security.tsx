@@ -7,6 +7,7 @@ import type { GameState } from '../../types/game';
 import { ActionButton, Empty, Meter, ScreenHeader, Section } from '../components/ui';
 import { OperationPlanner } from '../components/OperationPlanner';
 import { ReadinessCard } from '../components/ReadinessCard';
+import { MinistryFilter, matchesQuery } from '../components/MinistryFilter';
 import { SavedPlans } from '../components/SavedPlans';
 import type { StrikePlan } from '../../engine/strikePlan';
 import { AfterActionCard } from '../components/AfterActionCard';
@@ -51,6 +52,7 @@ export function SecurityScreen() {
   const w = world(s);
   const role = securityRole(s);
   const [cbm, setCbm] = useState<CbmKind>('permits');
+  const [q, setQ] = useState('');
   const [planning, setPlanning] = useState<{ opId: string; front: FrontId; initial?: StrikePlan } | null>(null);
   // only the people who run security open this screen: the PM, the defense minister and the national-security minister
   if (!role) return <Empty icon="🔒" text="מסך הביטחון פתוח לראש הממשלה, לשר הביטחון ולשר לביטחון לאומי." />;
@@ -62,14 +64,15 @@ export function SecurityScreen() {
       {military && world(s).lastReport && <AfterActionCard r={world(s).lastReport!} />}
       {military && <SavedPlans s={s} onEdit={(p) => setPlanning({ opId: p.opId, front: p.front, initial: p })} />}
       {military && <ReadinessCard s={s} />}
+      <MinistryFilter ministries={[]} allowAll={false} query={q} onQuery={setQ} placeholder="חיפוש חזית, כוח או פעולה…" />
       <Section title="חזיתות" icon="🧭">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{FRONTS.map((f) => <FrontCard key={f.id} s={s} id={f.id} onPlan={(o, fr) => setPlanning({ opId: o, front: fr })} />)}</div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">{FRONTS.filter((f) => matchesQuery(q, f.name, f.enemy, f.desc)).map((f) => <FrontCard key={f.id} s={s} id={f.id} onPlan={(o, fr) => setPlanning({ opId: o, front: fr })} />)}</div>
       </Section>
       {canUseInternalSecurity(s) && (
         <Section title="ביטחון פנים" icon="🚓">
           <p className="text-sm muted mb-2">פעולות המשטרה, השב״כ והשב״ס בתוך המדינה. הצלחתן תלויה במימון המשטרה וביעילות המשרד לביטחון לאומי. פתוח לראש הממשלה ולשר לביטחון לאומי.</p>
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-2">
-            {INTERNAL_OPTIONS.filter((o) => !o.op).map((o) => (
+            {INTERNAL_OPTIONS.filter((o) => !o.op && matchesQuery(q, o.title, o.desc)).map((o) => (
               <div key={o.id} className="inset flex flex-col gap-1">
                 <b className="text-sm">{o.icon} {o.title}</b>
                 <span className="text-xs muted">{o.desc}</span>
@@ -84,7 +87,7 @@ export function SecurityScreen() {
         <Section title="מבצעים משטרתיים וביטחוניים" icon="🚨">
           <p className="text-sm muted mb-2">פשיטות, מעצרים רחבים וסיכולים בתוך המדינה. הם חזקים יותר ממדיניות רגילה, אבל מסוכנים: כשמבצע נכשל, הציבור והתקשורת מגיבים בחריפות. הצלחתם תלויה במימון המשטרה וביעילות המשרד לביטחון לאומי.</p>
           <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-2">
-            {INTERNAL_OPTIONS.filter((o) => o.op).map((o) => (
+            {INTERNAL_OPTIONS.filter((o) => o.op && matchesQuery(q, o.title, o.desc)).map((o) => (
               <div key={o.id} className="inset flex flex-col gap-1">
                 <b className="text-sm">{o.icon} {o.title}</b>
                 <span className="text-xs muted">{o.desc}</span>
@@ -98,7 +101,7 @@ export function SecurityScreen() {
       {military && <div className="grid lg:grid-cols-2 gap-4">
         <Section title="הכוחות" icon="🪖">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-            {UNITS.map((u) => (
+            {UNITS.filter((u) => matchesQuery(q, u.name, u.desc)).map((u) => (
               <div key={u.id} className="inset">
                 <div className="flex items-center justify-between gap-1"><b className="text-sm">{u.icon} {u.name}</b><ActionButton id="unit_training" params={{ unitId: u.id }} className="btn btn-sm">אימון</ActionButton></div>
                 <div className="text-[11px] muted">{u.desc}</div>

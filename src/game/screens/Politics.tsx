@@ -16,6 +16,7 @@ import type { GameState, Ideology, Politician } from '../../types/game';
 import { Caricature } from '../../shared/components/Caricature';
 import { AlliancesSection } from './Alliances';
 import { SpeakerPanel } from '../components/SpeakerPanel';
+import { MinistryFilter, matchesQuery } from '../components/MinistryFilter';
 import { DEMAND_ICON } from './Coalition';
 import { CampaignPanel } from './Campaign';
 import { dayNumber, spanText } from '../../engine/calendar';
@@ -239,7 +240,7 @@ export function LawsScreen() {
   const shown = (tab === 'active' ? LAWS.filter((l) => s.activeLaws.includes(l.id)) : LAWS.filter((l) => !s.activeLaws.includes(l.id) && lawAllowed(s, l)))
     .filter((l) => !minF || (l.ministries ? l.ministries.some((id) => minOrigins(minF).includes(id)) : false))
     .filter((l) => !kind || l.level === kind)
-    .filter((l) => !q.trim() || l.title.includes(q.trim()) || l.description.includes(q.trim()));
+    .filter((l) => matchesQuery(q, l.title, l.description));
   // the advisor can point at any law: put that one first, even past the filters and the page limit
   const focusKey = useGame((x) => x.focusKey);
   const focusLaw = focusKey?.startsWith('propose_law:') ? LAW_BY_ID[focusKey.split(':')[1]] : undefined;
@@ -247,18 +248,13 @@ export function LawsScreen() {
   return (
     <div className="space-y-4">
       <ScreenHeader title="חוקים ורפורמות" sub={s.player.role === 'pm' ? 'חוק עובר טרומית → ועדה → קריאה שלישית. גדולים דורשים ישיבת ממשלה.' : s.player.role === 'minister' ? 'כשר אתה מגיש רק חוקים בתחום המשרד שלך. ראש הממשלה מחליט אם זו הצעה ממשלתית.' : 'כחבר כנסטון אתה מגיש הצעות חוק פרטיות. בלי תמיכת הקואליציה הן נופלות בטרומית.'} right={<Tabs value={tab} onChange={setTab} items={[{ id: 'catalog', label: 'הצעות אפשריות' }, { id: 'active', label: `בתוקף (${s.activeLaws.length})` }]} />} />
+      <MinistryFilter ministries={s.government.ministries} value={minF} onChange={(v) => { setMinF(v); setLimit(60); }} query={q} onQuery={(v) => { setQ(v); setLimit(60); }} placeholder="חיפוש חוק או רפורמה…" count={shown.length} />
       <div className="flex flex-wrap gap-2 items-center">
-        <select aria-label="סינון לפי משרד" value={minF} onChange={(e) => { setMinF(e.target.value); setLimit(60); }} className="select-ministry text-sm">
-          <option value="">כל המשרדים</option>
-          {s.government.ministries.map((m) => <option key={m.id} value={m.id}>{m.icon} {m.name}</option>)}
-        </select>
         <select aria-label="סוג" value={kind} onChange={(e) => setKind(e.target.value as typeof kind)} className="text-sm">
           <option value="">חוקים ורפורמות</option>
           <option value="medium">חוקים</option>
           <option value="major">רפורמות</option>
         </select>
-        <input type="search" aria-label="חיפוש חוק" placeholder="חיפוש…" value={q} onChange={(e) => { setQ(e.target.value); setLimit(60); }} className="flex-1" style={{ minWidth: 140 }} />
-        <span className="text-xs muted">{`${shown.length} תוצאות`}</span>
       </div>
       <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-3">
         {shown.slice(0, limit).map((l) => {

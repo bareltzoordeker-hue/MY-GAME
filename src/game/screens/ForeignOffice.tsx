@@ -5,11 +5,13 @@ import { FOREIGN_LIST, foreignValue, hasAmbassador, hasPact, isContested } from 
 import { world } from '../../engine/security';
 import { isForeignMinister } from '../../engine/roles';
 import { ActionButton, Empty, Explain, Meter, ScreenHeader, Section } from '../components/ui';
+import { MinistryFilter, matchesQuery } from '../components/MinistryFilter';
 
 export function ForeignOfficeScreen() {
   const s = useGame((x) => x.game)!;
   const w = world(s);
   const [country, setCountry] = useState('usa');
+  const [q, setQ] = useState('');
   const prev = w.relPrev ?? {};
   const params = { country };
   if (s.player.role !== 'pm' && !isForeignMinister(s)) return <Empty icon="🌍" text="מסך שר החוץ פתוח לשר החוץ ולראש הממשלה." />;
@@ -17,9 +19,10 @@ export function ForeignOfficeScreen() {
   return (
     <div className="space-y-4">
       <ScreenHeader title="לשכת שר החוץ" sub="יחסי החוץ של ישמעאל והפעולות הדיפלומטיות. מהלכים חריפים דורשים את אישור ראש הממשלה." />
+      <MinistryFilter ministries={[]} allowAll={false} query={q} onQuery={setQ} placeholder="חיפוש מדינה…" count={FOREIGN_LIST.filter((c) => matchesQuery(q, c.name)).length} />
       <Section title="יחסי חוץ" icon="🌍" right={<Explain k="relation" />}>
         <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-2">
-          {FOREIGN_LIST.map((c) => {
+          {FOREIGN_LIST.filter((c) => matchesQuery(q, c.name)).map((c) => {
             const v = foreignValue(s, c.id);
             const d = c.id in prev ? v - prev[c.id] : 0;
             return (

@@ -19,6 +19,8 @@ import { DecideButton } from '../components/Overlay';
 import { RacePanel } from '../components/RacePanel';
 import { Caricature, ADVISOR_SPEC } from '../../shared/components/Caricature';
 import { ActionButton, Empty, Explain, Meter, ScreenHeader, Section, Tabs } from '../components/ui';
+import { MinistryFilter, matchesQuery } from '../components/MinistryFilter';
+import { ministryActionSpecs } from '../../engine/decisions';
 
 /** Every ministry's field is a place to build a name; a few fields share an expertise domain (national security and justice share law and enforcement). */
 const WORK_AREAS: { id: string; icon: string; label: string; domain: Domain }[] = MINISTRIES.map((m) => ({
@@ -58,7 +60,10 @@ export function ProjectsScreen() {
   const choices = s.player.role === 'pm' ? s.government.ministries : held;
   const [minF, setMinF] = useState<string>(s.player.role === 'minister' && myMin ? myMin.id : '');
   const inMin = (d: { ministry: string }) => !minF || ((s.government.ministries.find((x) => x.id === minF)?.origins ?? [minF]).includes(d.ministry));
-  const avail = PROJECTS.filter((d) => !s.projects.some((p) => p.defId === d.id && p.status !== 'cancelled') && mine(d) && inMin(d));
+  const [q, setQ] = useState('');
+  const avail = PROJECTS.filter((d) => !s.projects.some((p) => p.defId === d.id && p.status !== 'cancelled') && mine(d) && inMin(d) && matchesQuery(q, d.name, d.note, REGION_BY_ID[d.region].name));
+  const selMin = minF ? s.government.ministries.find((x) => x.id === minF) : undefined;
+  const acts = selMin && choices.some((x) => x.id === selMin.id) ? ministryActionSpecs(selMin, s).filter((a) => matchesQuery(q, a.title, a.desc)) : [];
   return (
     <div className="space-y-4">
       <ScreenHeader title="פרויקטים לאומיים" sub={`הוצאה שנתית על פרויקטים: ₪${s.budget.projectSpending.toFixed(1)}B. עיכובים תלויים בביורוקרטיה וביעילות המשרד.`} />
@@ -73,12 +78,8 @@ export function ProjectsScreen() {
         ))}</div>}
       </Section>
       {!caps.canStartProjects && <div className="card text-sm">🏗️ פרויקטים לאומיים משיקים ראש הממשלה והשרים, כל אחד בתחום המשרד שלו. כחבר כנסטון אתה יכול לדרוש פרויקט לאזור שלך בתקשורת, או לבקר אזור מוזנח (מסך הקריירה).</div>}
-      {caps.canStartProjects && <Section title="אפשר להשיק" icon="🏗️" right={choices.length > 1 || s.player.role === 'pm' ? (
-        <select aria-label="בחירת משרד לפרויקטים" className="select-ministry text-sm" value={minF} onChange={(e) => setMinF(e.target.value)}>
-          {s.player.role === 'pm' && <option value="">כל המשרדים</option>}
-          {choices.map((x) => <option key={x.id} value={x.id}>{x.icon} {x.name}</option>)}
-        </select>
-      ) : undefined}>
+      {caps.canStartProjects && <MinistryFilter ministries={choices} value={minF} onChange={setMinF} query={q} onQuery={setQ} allowAll={s.player.role === 'pm'} placeholder="חיפוש פרויקט או פעולה…" count={avail.length + acts.length} />}
+      {caps.canStartProjects && <Section title="אפשר להשיק" icon="🏗️">
         <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-2">{avail.map((d) => (
           <div key={d.id} className="inset flex flex-col gap-1">
             <b className="text-sm">{d.icon} {d.name}</b>
@@ -88,6 +89,19 @@ export function ProjectsScreen() {
           </div>
         ))}{!avail.length && <div className="text-sm muted">אין פרויקטים פתוחים בתחום שלך.</div>}</div>
       </Section>}
+      {caps.canStartProjects && selMin && (
+        <Section title={`פעולות ${selMin.name}`} icon="⚡">
+          {!acts.length ? <div className="text-sm muted">אין פעולות שמתאימות לחיפוש.</div> : (
+            <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-2">{acts.map((a) => (
+              <div key={a.id} className="inset flex flex-col gap-1">
+                <b className="text-sm">{`${a.icon} ${a.title}`}</b>
+                <span className="text-xs muted flex-1">{a.desc}</span>
+                <ActionButton id="ministry_action" params={{ ministryId: selMin.id, actionId: a.id }} className="btn btn-sm btn-blue">בצע</ActionButton>
+              </div>
+            ))}</div>
+          )}
+        </Section>
+      )}
       {done.length > 0 && <Section title="הושלמו" icon="🎀"><ul className="text-sm space-y-1">{done.map((p) => <li key={p.id}>✅ {p.name}</li>)}</ul></Section>}
     </div>
   );

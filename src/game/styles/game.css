@@ -314,3 +314,15 @@ html[dir=ltr] :is(p, li, h1, h2, h3, figcaption, .bubble, .text-sm, .text-xs, .h
 
 /* the phone drawer: two columns of compact links so all screens fit without a long scroll */
 @media (max-width: 1023px) { .nav-grid .side-link { padding: 8px 6px; font-size: 12.5px; } .nav-grid .side-link > span:first-child { width: 1.1rem; } }
+
+/* the shared ministry filter: chips + search */
+.minfilter { display: flex; flex-direction: column; gap: 8px; padding: 10px; background: #fff; border: 1px solid var(--line); border-radius: 14px; box-shadow: 0 1px 0 var(--line); }
+.minfilter-search { display: flex; align-items: center; gap: 8px; }
+.minfilter-search input { flex: 1; min-width: 0; font-size: 15px; padding: 9px 12px; border-radius: 10px; }
+.minfilter-chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; -webkit-overflow-scrolling: touch; scrollbar-width: thin; }
+@media (min-width: 900px) { .minfilter-chips { flex-wrap: wrap; overflow-x: visible; } }
+.minchip { flex: 0 0 auto; white-space: nowrap; font-size: 13px; font-weight: 700; padding: 6px 12px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card, #fff); color: var(--ink, #111); cursor: pointer; transition: transform .08s, background .12s; }
+.minchip:hover { transform: translateY(-1px); border-color: var(--violet); }
+.minchip[aria-pressed="true"] { background: linear-gradient(180deg, #3463b3, var(--violet)); color: #fff; border-color: var(--violet-d); box-shadow: 0 2px 0 var(--violet-d); }
+.minchip-all { border-color: var(--gold, #d9a520); }
+.minchip:focus-visible { outline: 3px solid var(--blue, #2563eb); outline-offset: 2px; }

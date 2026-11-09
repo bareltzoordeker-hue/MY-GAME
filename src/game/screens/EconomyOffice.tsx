@@ -5,6 +5,7 @@ import { growthDrivers } from '../../engine/economy';
 import { isEconomyMinister } from '../../engine/roles';
 import { SECTORS, computeTrade, tradeState } from '../../engine/trade';
 import { ActionButton, Empty, Explain, Meter, ScreenHeader, Section } from '../components/ui';
+import { MinistryFilter, matchesQuery } from '../components/MinistryFilter';
 
 const fmt = (n: number) => n.toLocaleString('en-US', { maximumFractionDigits: 0 });
 const fix = (n: number, d = 1) => n.toFixed(d);
@@ -12,6 +13,7 @@ const fix = (n: number, d = 1) => n.toFixed(d);
 export function EconomyOfficeScreen() {
   const s = useGame((x) => x.game)!;
   const [country, setCountry] = useState('usa');
+  const [q, setQ] = useState('');
   const [sector, setSector] = useState('tech');
   if (s.player.role !== 'pm' && !isEconomyMinister(s)) return <Empty icon="📈" text="מסך שר הכלכלה פתוח לשר הכלכלה ולראש הממשלה." />;
   const e = s.economy;
@@ -40,12 +42,13 @@ export function EconomyOfficeScreen() {
         <div className="card card-tight"><div className="label">השותפה הגדולה ביותר</div><div className="text-xl font-black">{biggest.name}</div><div className="text-[11px] muted">{`₪${fmt(biggest.exports)}B ייצוא, ${fix((biggest.exports / t.totalExports) * 100, 0)}% מכלל הייצוא`}</div></div>
       </div>
       {risky.length > 0 && <div className="card text-sm" role="note">{`⚠️ תלות מסוכנת: ${risky.map((r) => r.name).join(', ')}. הן שותפות גדולות ליצוא, והיחסים איתן נמוכים.`}</div>}
+      <MinistryFilter ministries={[]} allowAll={false} query={q} onQuery={setQ} placeholder="חיפוש מדינה…" count={t.rows.filter((r) => matchesQuery(q, r.name)).length} />
       <Section title="סחר לפי מדינה" icon="🌐">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead><tr className="text-xs muted"><th className="text-right p-1">מדינה</th><th className="p-1"><span className="inline-flex items-center gap-1">יחסים<Explain k="relation" /></span></th><th className="p-1"><span className="inline-flex items-center gap-1">ייצוא<Explain k="exports" /></span></th><th className="p-1"><span className="inline-flex items-center gap-1">ייבוא<Explain k="imports" /></span></th><th className="p-1"><span className="inline-flex items-center gap-1">מאזן<Explain k="tradeBalance" /></span></th><th className="p-1"></th></tr></thead>
             <tbody>
-              {t.rows.map((r) => (
+              {t.rows.filter((r) => matchesQuery(q, r.name)).map((r) => (
                 <tr key={r.id} onClick={() => setCountry(r.id)} className="cursor-pointer" style={r.id === country ? { background: 'rgba(212,168,60,.15)' } : undefined}>
                   <td className="p-1 font-bold"><button type="button" aria-pressed={r.id === country} onClick={() => setCountry(r.id)} className="text-right">{r.name}</button></td>
                   <td className="p-1 w-28"><div className="flex items-center gap-1"><div className="flex-1"><Meter value={r.rel} /></div><span className="num text-xs">{fix(r.rel, 0)}</span></div></td>
