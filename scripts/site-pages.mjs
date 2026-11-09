@@ -77,7 +77,7 @@ if (cmd === 'extract') {
       for (const a of doc.querySelectorAll('a[href]')) {
         const h = a.getAttribute('href');
         if (h.startsWith('/game/')) a.setAttribute('href', h.includes('?') ? h : `/game/?lang=${lang}`);
-        else if (/^\/(how-to-play|about|privacy|terms|contact|accessibility)?\/?(#.*)?$/.test(h) && !h.startsWith('/game')) a.setAttribute('href', `/${lang}${h === '/' ? '/' : h}`);
+        else if (/^\/(how-to-play|articles|about|privacy|terms|contact|accessibility)?\/?(#.*)?$/.test(h) && !h.startsWith('/game')) a.setAttribute('href', `/${lang}${h === '/' ? '/' : h}`);
       }
       const loc = doc.querySelector('meta[property="og:locale"]'); if (loc) loc.setAttribute('content', lang === 'en' ? 'en_US' : 'ar_AR');
       const rel = f === 'index.html' ? '' : f.replace(/index\.html$/, '');

@@ -11,7 +11,7 @@ import { readFileSync } from 'node:fs';
 //   pages/game/index.html         → /game/        the game (React app, src/game)
 //   pages/how-to-play/index.html  → /how-to-play/
 //   pages/{privacy,terms,about,contact}/index.html
-const PAGES = ['game', 'how-to-play', 'privacy', 'terms', 'about', 'contact', 'accessibility'];
+const PAGES = ['game', 'how-to-play', 'privacy', 'terms', 'about', 'contact', 'accessibility', 'articles', 'articles/coalition', 'articles/legislation', 'articles/security-cabinet', 'articles/threshold', 'articles/political-capital', 'articles/survival-guide', 'articles/state-budget', 'articles/areas-abc'];
 // The same static pages in English and Arabic, generated from the Hebrew ones by scripts/site-pages.mjs.
 const LANG_PAGES = ['en', 'ar'].flatMap((l) => [`${l}`, ...PAGES.filter((p) => p !== 'game').map((p) => `${l}/${p}`)]);
 const r = (p: string) => resolve(__dirname, p);
